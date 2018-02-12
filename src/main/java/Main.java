@@ -10,9 +10,9 @@ import javax.persistence.metamodel.EntityType;
 import java.io.File;
 
 public class Main {
-    private static final SessionFactory ourSessionFactory;
+    private static SessionFactory ourSessionFactory = null;
 
-    static {
+    private static void createConnection() {
         try {
             Configuration configuration = new Configuration();
             configuration.configure(new File("src/main/java/hibernate.cfg.xml"));
@@ -24,7 +24,15 @@ public class Main {
     }
 
     private static Session getSession() throws HibernateException {
-        return ourSessionFactory.openSession();
+        if (ourSessionFactory == null) {
+            createConnection();
+            if (ourSessionFactory == null) {
+                throw new HibernateException("Could not create session factory");
+            }
+            return ourSessionFactory.openSession();
+        } else {
+            return ourSessionFactory.openSession();
+        }
     }
 
     public static void main(final String[] args) {
