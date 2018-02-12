@@ -17,6 +17,8 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationConstants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -49,16 +51,7 @@ public class Logging {
      * Checks folders for Log4j, creates them, if needed.
      */
     private void checkFolders() {
-
-        File infoLogFolder = new File(LOG_FOLDER + File.separator + "INFO");
-        File warnLogFolder = new File(LOG_FOLDER + File.separator + "WARN");
-        File debugLogFolder = new File(LOG_FOLDER + File.separator + "DEBUG");
-
         fixLoggingFolder(LOG_FOLDER);
-        fixLoggingFolder(infoLogFolder);
-        fixLoggingFolder(warnLogFolder);
-        fixLoggingFolder(debugLogFolder);
-
     }
 
     private void fixLoggingFolder(File infoLogFolder) {
@@ -77,6 +70,13 @@ public class Logging {
     private void startLogging() {
         System.setProperty(ApplicationConstants.getAppLogPropertyKey(), ApplicationConstants.getLogFolder());
         System.out.println("Logging starts at: " + LOG_FOLDER);
+        Logger log = LogManager.getLogger(getCurrentClassName());
+        log.trace("Logging started at: " + LOG_FOLDER);
+        log.debug("Logging started at: " + LOG_FOLDER);
+        log.info("Logging started at: " + LOG_FOLDER);
+        log.warn("Logging started at: " + LOG_FOLDER);
+        log.error("Logging started at: " + LOG_FOLDER);
+        log.fatal("Logging started at: " + LOG_FOLDER);
     }
 
 }

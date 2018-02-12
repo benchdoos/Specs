@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <File name="Trace" fileName="${sys:com.mmz.specs:log.folder}/trace.log" immediateFlush="true" append="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+                           header="${java:runtime} - ${java:vm} - ${java:os}"/>
+        </File>
+        <File name="Debug" fileName="${sys:com.mmz.specs:log.folder}/debug.log" immediateFlush="true" append="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+                           header="${java:runtime} - ${java:vm} - ${java:os}"/>
+        </File>
+        <File name="Important" fileName="${sys:com.mmz.specs:log.folder}/application.log" immediateFlush="true"
+              append="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+                           header="${java:runtime} - ${java:vm} - ${java:os}"/>
+        </File>
+
+    </Appenders>
+    <Loggers>
+        <Logger name="com.mmz.specs" level="trace" additivity="true"/>
+
+        <Root level="error">
+            <AppenderRef ref="Console"/>
+            <appender-ref ref="Trace" level="trace"/>
+            <appender-ref ref="Debug" level="debug"/>
+            <appender-ref ref="Important" level="info"/>
+        </Root>
+    </Loggers>
+</Configuration>
