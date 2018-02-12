@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.driver_class">org.firebirdsql.jdbc.FBDriver</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.FirebirdDialect</property>
+        <property name="connection.url">
+            jdbc:firebirdsql:localhost/3050:F:/Developer/Java/specs/db/MMZ_SPECS.GDB
+        </property>
+        <property name="hibernate.connection.CharSet">RUSSIAN_CHARSET</property>
+        <property name="hibernate.connection.characterEncoding">utf8</property>
+        <property name="hibernate.connection.username">sysdba</property>
+        <property name="hibernate.connection.password">m@sT3rK3~Y</property>
+
+        <!--<property name="connection.url">
+            jdbc:firebirdsql:localhost/3050:F:/Developer/Java/specs/db/MMZ_SPECS.GDB?sql_dialect=3
+        </property>-->
+
+
+        <mapping resource="hibernate/HibernateMapping.xml"/>
+
+        <mapping class="com.mmz.specs.dao.entity.DetailEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.DetailListEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.DetailTitlesEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.MaterialEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.MaterialListEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.NoticeEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.TechProcessEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.UsersEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.UserTypeEntity"/>
+        <mapping class="com.mmz.specs.dao.entity.ConstantsEntity"/>
+
+
+        <!-- DB schema will be updated if needed -->
+        <!-- <property name="hbm2ddl.auto">update</property> -->
+    </session-factory>
+</hibernate-configuration>

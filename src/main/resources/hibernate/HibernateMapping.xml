@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.mmz.specs.dao.entity.DetailEntity" table="DETAIL" schema="">
+        <id name="id" column="ID"/>
+        <property name="index" column="`INDEX`"/>
+        <property name="unit" column="UNIT"/>
+        <property name="finishedWeigth" column="FINISHED_WEIGTH"/>
+        <property name="workpieceWeight" column="WORKPIECE_WEIGHT"/>
+        <property name="imagePath" column="IMAGE_PATH"/>
+        <property name="active" column="IS_ACTIVE"/>
+    </class>
+    <class name="com.mmz.specs.dao.entity.DetailListEntity" table="DETAIL_LIST" schema="">
+        <id name="id" column="ID"/>
+        <property name="quantity" column="QUANTITY"/>
+        <property name="interchangeableNode" column="IS_INTERCHANGEABLE_NODE"/>
+        <property name="active" column="IS_ACTIVE"/>
+        <many-to-one name="detailByParentDetailId" class="com.mmz.specs.dao.entity.DetailEntity">
+            <column name="PARENT_DETAIL_ID"/>
+        </many-to-one>
+        <many-to-one name="detailByChildDetailId" class="com.mmz.specs.dao.entity.DetailEntity">
+            <column name="CHILD_DETAIL_ID"/>
+        </many-to-one>
+    </class>
+    <class name="com.mmz.specs.dao.entity.DetailTitlesEntity" table="DETAIL_TITLES" schema="">
+        <id name="id" column="ID"/>
+        <property name="title" column="TITLE"/>
+        <property name="active" column="IS_ACTIVE"/>
+    </class>
+    <class name="com.mmz.specs.dao.entity.MaterialEntity" table="MATERIAL" schema="">
+        <id name="id" column="ID"/>
+        <property name="shortMark" column="SHORT_MARK"/>
+        <property name="shortProfile" column="SHORT_PROFILE"/>
+        <property name="longMark" column="LONG_MARK"/>
+        <property name="longProfile" column="LONG_PROFILE"/>
+        <property name="active" column="IS_ACTIVE"/>
+    </class>
+    <class name="com.mmz.specs.dao.entity.MaterialListEntity" table="MATERIAL_LIST" schema="">
+        <id name="id" column="ID"/>
+        <property name="active" column="IS_ACTIVE"/>
+        <many-to-one name="detailByDetailId" class="com.mmz.specs.dao.entity.DetailEntity">
+            <column name="DETAIL_ID"/>
+        </many-to-one>
+        <many-to-one name="materialByMaterialId" class="com.mmz.specs.dao.entity.MaterialEntity">
+            <column name="MATERIAL_ID"/>
+        </many-to-one>
+    </class>
+    <class name="com.mmz.specs.dao.entity.NoticeEntity" table="NOTICE" schema="">
+        <id name="id" column="ID"/>
+        <property name="number" column="NUMBER"/>
+        <property name="date" column="`DATE`"/>
+        <property name="description" column="DESCRIPTION"/>
+        <many-to-one name="usersByProvidedByUserId" class="com.mmz.specs.dao.entity.UsersEntity">
+            <column name="PROVIDED_BY_USER_ID" not-null="true"/>
+        </many-to-one>
+    </class>
+    <class name="com.mmz.specs.dao.entity.TechProcessEntity" table="TECH_PROCESS" schema="">
+        <id name="id" column="ID"/>
+        <property name="process" column="PROCESS"/>
+    </class>
+    <class name="com.mmz.specs.dao.entity.UsersEntity" table="`USERS`" schema="">
+        <id name="id" column="ID"/>
+        <property name="username" column="USERNAME"/>
+        <property name="password" column="PASSWORD"/>
+        <property name="name" column="NAME"/>
+        <property name="lastname" column="LASTNAME"/>
+        <property name="surname" column="SURNAME"/>
+        <property name="isAdmin" column="`ADMIN`"/>
+        <property name="editor" column="`EDITOR`"/>
+        <property name="active" column="IS_ACTIVE"/>
+    </class>
+    <class name="com.mmz.specs.dao.entity.UserTypeEntity" table="USER_TYPE" schema="">
+        <id name="id" column="ID"/>
+        <property name="name" column="NAME"/>
+        <property name="active" column="IS_ACTIVE"/>
+    </class>
+    <class name="com.mmz.specs.dao.entity.ConstantsEntity" table="`constants`" schema="">
+        <id name="id" column="ID"/>
+        <property name="key" column="KEY"/>
+        <property name="value" column="`VALUE`"/>
+    </class>
+
+</hibernate-mapping>
