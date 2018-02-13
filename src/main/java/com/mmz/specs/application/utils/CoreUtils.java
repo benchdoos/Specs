@@ -3,13 +3,15 @@ package com.mmz.specs.application.utils;
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
 import com.mmz.specs.application.core.server.Server;
 import com.mmz.specs.application.core.server.ServerStartException;
-import com.mmz.specs.application.gui.server.ServerMainWindow;
+import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
+import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ModeManager;
-import com.mmz.specs.application.managers.SettingsManager;
+import com.mmz.specs.application.managers.ServerSettingsManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class CoreUtils {
@@ -25,9 +27,9 @@ public class CoreUtils {
                     break;
                 case ApplicationArgumentsConstants.SERVER:
                     log.debug("Argument is for " + ModeManager.MODE.SERVER);
-                    SettingsManager settingsManager = SettingsManager.getInstance();
-                    ServerMainWindow serverMainWindow = new ServerMainWindow();
-                    serverMainWindow.setVisible(true);
+
+                    loadServerSettings();
+
                     try {
                         Server server = new Server();
                     } catch (ServerStartException e) {
@@ -44,6 +46,24 @@ public class CoreUtils {
             log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
             ModeManager.setCurrentMode(ModeManager.MODE.CLIENT);
         }
+    }
+
+    private static void loadServerSettings() {
+        ServerSettingsManager settingsManager = ServerSettingsManager.getInstance();
+        try {
+            settingsManager.setServerSettings(CommonSettingsManager.getServerSettingsFilePath());
+            try {
+                settingsManager.loadSettingsFile();
+            } catch (IOException e) {
+                log.warn("Could not load settings file at: " + CommonSettingsManager.getServerSettingsFilePath(),e);
+            }
+        } catch (Exception e) {
+            log.warn("Could not set new server settings",e);
+            ServerConfigurationWindow serverConfigurationWindow = new ServerConfigurationWindow();
+            serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenterLocationPoint(serverConfigurationWindow));
+            serverConfigurationWindow.setVisible(true);
+        }
+
     }
 
     /**

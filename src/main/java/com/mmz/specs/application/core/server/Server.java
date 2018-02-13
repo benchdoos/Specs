@@ -1,7 +1,7 @@
 package com.mmz.specs.application.core.server;
 
 import com.mmz.specs.application.core.ApplicationConstants;
-import com.mmz.specs.application.managers.SettingsManager;
+import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,9 +95,9 @@ public class Server {
     }
 
     private void prepareServerSettings() {
-        dbConnectionUrl = SettingsManager.getInstance().getServerDbConnectionUrl();
-        connectionUsername = SettingsManager.getInstance().getServerDbUsername();
-        connectionPassword = SettingsManager.getInstance().getServerDbPassword();
+        dbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
+        connectionUsername = ServerSettingsManager.getInstance().getServerDbUsername();
+        connectionPassword = ServerSettingsManager.getInstance().getServerDbPassword();
     }
 
     private void prepareServer() throws ServerStartException {
@@ -112,10 +112,10 @@ public class Server {
     }
 
     private void checkConnectionSettings() throws ServerStartException {
-        checkConnectionProperty(SettingsManager.getInstance().getServerDbConnectionUrl(), "Could not find DB Connection URL. Set correct value at settings file: ");
+        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbConnectionUrl(), "Could not find DB Connection URL. Set correct value at settings file: ");
 
-        checkConnectionProperty(SettingsManager.getInstance().getServerDbUsername(), "Could not find DB Username. Set correct value at settings file: ");
+        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbUsername(), "Could not find DB Username. Set correct value at settings file: ");
 
-        checkConnectionProperty(SettingsManager.getInstance().getServerDbPassword(), "Could not find DB Password. Set correct value at settings file: ");
+        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbPassword(), "Could not find DB Password. Set correct value at settings file: ");
     }
 }
