@@ -17,7 +17,7 @@ public class ServerSettingsManager {
     private static final Properties SERVER_SETTINGS = new Properties();
     private static ServerSettingsManager settingsManager = new ServerSettingsManager();
 
-    Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private String connectionFileLocation;
 
@@ -81,7 +81,7 @@ public class ServerSettingsManager {
     private void updateSettingsFile() throws IOException {
         log.info("Updating / saving settings file: " + connectionFileLocation);
         SERVER_SETTINGS.storeToXML(new FileOutputStream(connectionFileLocation),
-                ApplicationConstants.INTERNAL_FULL_NAME + " settings file");
+                ApplicationConstants.INTERNAL_FULL_NAME + " settings file", ApplicationConstants.DEFAULT_FILE_ENCODING);
         log.info("Settings file successfully updated: " + connectionFileLocation);
     }
 
