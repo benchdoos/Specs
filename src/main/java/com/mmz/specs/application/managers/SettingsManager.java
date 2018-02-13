@@ -1,8 +1,7 @@
 package com.mmz.specs.application.managers;
 
 import com.mmz.specs.application.core.ApplicationConstants;
-import com.mmz.specs.application.core.HibernateConstants;
-import com.mmz.specs.application.core.server.ServerStartException;
+import com.mmz.specs.application.core.server.HibernateConstants;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
