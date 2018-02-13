@@ -26,7 +26,7 @@ import java.io.File;
  * Created by Eugene Zrazhevsky on 30.10.2016.
  */
 public class Logging {
-    private static final File LOG_FOLDER = new File(ApplicationConstants.getLogFolder());
+    private static final File LOG_FOLDER = new File(ApplicationConstants.LOG_FOLDER);
 
     public Logging() {
         checkFolders();
@@ -68,7 +68,7 @@ public class Logging {
      * Warning! Run this before any log implementation.
      */
     private void startLogging() {
-        System.setProperty(ApplicationConstants.getAppLogPropertyKey(), ApplicationConstants.getLogFolder());
+        System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER);
         System.out.println("Logging starts at: " + LOG_FOLDER);
         Logger log = LogManager.getLogger(getCurrentClassName());
         log.trace("Logging started at: " + LOG_FOLDER);
