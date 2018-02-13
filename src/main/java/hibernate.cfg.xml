@@ -6,13 +6,13 @@
     <session-factory>
         <property name="connection.driver_class">org.firebirdsql.jdbc.FBDriver</property>
         <property name="hibernate.dialect">org.hibernate.dialect.FirebirdDialect</property>
-        <property name="connection.url">
+       <!-- <property name="connection.url">
             jdbc:firebirdsql:localhost/3050:F:/Developer/Java/specs/db/MMZ_SPECS.GDB?encoding=UTF8
-        </property>
+        </property>-->
         <property name="hibernate.connection.CharSet">RUSSIAN_CHARSET</property>
         <property name="hibernate.connection.characterEncoding">UTF-8</property>
-        <property name="hibernate.connection.username">sysdba</property>
-        <property name="hibernate.connection.password">m@sT3rK3~Y</property>
+        <!--<property name="hibernate.connection.username">sysdba</property>
+        <property name="hibernate.connection.password">m@sT3rK3~Y</property>-->
 
         <!--<property name="connection.url">
             jdbc:firebirdsql:localhost/3050:F:/Developer/Java/specs/db/MMZ_SPECS.GDB?sql_dialect=3
