@@ -12,13 +12,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import java.io.File;
 
 public class Server {
-    static String dbConnectionUrl;
-    static String connectionUsername;
-    static String connectionPassword;
+    private static String dbConnectionUrl;
+    private static String connectionUsername;
+    private static String connectionPassword;
     private static SessionFactory ourSessionFactory = null;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
@@ -102,7 +103,12 @@ public class Server {
     private void prepareServer() throws ServerStartException {
         log.info("Starting server connection");
         checkConnectionSettings();
-        createDaoSession();
+        try {
+            createDaoSession();
+        } catch (PersistenceException e) {
+            log.error("Could not establish hibernate connection to server",e);
+            throw new ServerStartException();
+        }
     }
 
     private void checkConnectionSettings() throws ServerStartException {
