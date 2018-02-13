@@ -9,5 +9,6 @@ public class ApplicationConstants {
     public static final String APP_LOG_PROPERTY_KEY = "com.mmz.specs:log.folder";
 
     public static final String SETTINGS_FILE_PATH = new File(LOG_FOLDER).getParent() + File.separator + "settings.xml";
+    public static final String DEFAULT_FILE_ENCODING = "UTF-8";
 
 }

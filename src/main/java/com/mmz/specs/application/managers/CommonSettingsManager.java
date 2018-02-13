@@ -22,6 +22,8 @@ public class CommonSettingsManager {
     public static void setServerSettingsFilePath(String path) throws IOException {
         Properties properties = new Properties();
         properties.setProperty(ServerConstants.SERVER_SETTINGS_FILE_LOCATION_KEY, path);
-        properties.storeToXML(new FileOutputStream(ApplicationConstants.SETTINGS_FILE_PATH), ApplicationConstants.INTERNAL_FULL_NAME + " settings file locations", "UTF-8");
+        properties.storeToXML(new FileOutputStream(ApplicationConstants.SETTINGS_FILE_PATH),
+                ApplicationConstants.INTERNAL_FULL_NAME + " settings file locations",
+                ApplicationConstants.DEFAULT_FILE_ENCODING);
     }
 }
