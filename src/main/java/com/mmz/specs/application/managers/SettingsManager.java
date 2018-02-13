@@ -54,7 +54,7 @@ public class SettingsManager {
                 log.warn("Could not create empty settings file: " + SETTINGS_FILE_PATH, e);
             }
         } catch (IOException e) {
-            log.warn("Could not load settings file:");// TODO and here???
+            log.warn("Could not load settings file:" + SETTINGS_FILE_PATH);// TODO and here???
         }
     }
 
