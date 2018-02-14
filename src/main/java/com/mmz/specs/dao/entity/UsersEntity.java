@@ -78,11 +78,11 @@ public class UsersEntity {
 
     @Basic
     @Column(name = "ADMIN")
-    public boolean isIsAdmin() {
+    public boolean isAdmin() {
         return admin;
     }
 
-    public void setIsAdmin(boolean admin) {
+    public void setAdmin(boolean admin) {
         this.admin = admin;
     }
 
