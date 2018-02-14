@@ -47,7 +47,7 @@ public class CoreUtils {
             }
         } else {
             log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
-            ModeManager.setCurrentMode(ModeManager.MODE.CLIENT);
+            ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
         }
     }
 
