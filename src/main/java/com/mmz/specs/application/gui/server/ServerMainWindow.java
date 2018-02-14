@@ -25,9 +25,8 @@ public class ServerMainWindow extends JFrame {
     private JButton buttonForceUserDisconnect;
     private JButton buttonPower;
     private JButton buttonAdminLock;
-    private JButton buttonUserInfo;
     private JTextPane logTextPane;
-    private JPanel userControlPanel;
+    private JPanel controlPanel;
     private JPanel logPanel;
     private JList userList;
     private JButton refreshPasswordButton;
@@ -40,14 +39,17 @@ public class ServerMainWindow extends JFrame {
     private JCheckBox isActiveCheckBox;
     private JComboBox userTypeComboBox;
     private JButton saveButton;
-    private JTabbedPane userListControlPanel;
+    private JTabbedPane controlPane;
     private JButton addUserButton;
-    private JButton removeUserButton;
+    private JPanel usersControlPanel;
+    private JButton buttonUserInfo;
+    private JButton перезапуститьButton;
+    private JButton открытьПапкуСЛогамиButton;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long onlineSeconds = 0;
 
-    private JPanel onlyAdminTabsList[] = new JPanel[]{userControlPanel};
+    private JPanel onlyAdminTabsList[] = new JPanel[]{controlPanel};
 
 
     public ServerMainWindow() {
@@ -226,8 +228,6 @@ public class ServerMainWindow extends JFrame {
     private void setUnlocked(boolean isUnlocked) {
         ServerMainWindow.isUnlocked = isUnlocked;
 
-        buttonPower.setEnabled(isUnlocked);
-        buttonForceUserDisconnect.setEnabled(isUnlocked);
         if (isUnlocked) {
             buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
         } else {
