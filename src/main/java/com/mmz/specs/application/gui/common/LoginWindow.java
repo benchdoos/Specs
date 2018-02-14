@@ -13,7 +13,7 @@ public class LoginWindow extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField loginTextField;
-    private JTextField passwordTextField;
+    private JPasswordField passwordField;
     private UsersEntity user = new UsersEntity();
 
     public LoginWindow(Window parent) {
@@ -44,13 +44,11 @@ public class LoginWindow extends JDialog {
         });
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         pack();
+        setMinimumSize(getSize());
+        setResizable(false);
         setLocation(FrameUtils.getFrameOnParentCenterLocationPoint(parent, this));
     }
 
@@ -64,7 +62,7 @@ public class LoginWindow extends JDialog {
         // add your code here
         UsersEntity result = new UsersEntity();
         result.setUsername(loginTextField.getText());
-        result.setPassword(SecurityManager.encryptPassword(passwordTextField.getText()));
+        result.setPassword(SecurityManager.encryptPassword(new String (passwordField.getPassword())));
         //TODO check with db... load... get full user... and only then return back
         result.setAdmin(true);
         user = result;
