@@ -1,9 +1,9 @@
 package com.mmz.specs.application.gui.common;
 
+import com.mmz.specs.application.core.security.SecurityManager;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.entity.UsersEntity;
 
-import javax.imageio.IIOImage;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -56,7 +56,7 @@ public class LoginWindow extends JDialog {
     public UsersEntity getAuthorizedUser() {
         UsersEntity result = new UsersEntity();
         result.setUsername(loginTextField.getText());
-        result.setPassword(passwordTextField.getText());
+        result.setPassword(SecurityManager.encryptPassword(passwordTextField.getText()));
         //TODO check with db... load... get full user... and only then return back
         result.setAdmin(true);
         return result;
@@ -64,6 +64,7 @@ public class LoginWindow extends JDialog {
 
     private void onOK() {
         // add your code here
+
         dispose();
     }
 
