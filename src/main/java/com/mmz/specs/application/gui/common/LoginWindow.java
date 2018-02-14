@@ -14,6 +14,7 @@ public class LoginWindow extends JDialog {
     private JButton buttonCancel;
     private JTextField loginTextField;
     private JTextField passwordTextField;
+    private UsersEntity user = new UsersEntity();
 
     public LoginWindow(Window parent) {
         setContentPane(contentPane);
@@ -54,17 +55,19 @@ public class LoginWindow extends JDialog {
     }
 
     public UsersEntity getAuthorizedUser() {
+        setVisible(true);
+
+        return user;
+    }
+
+    private void onOK() {
+        // add your code here
         UsersEntity result = new UsersEntity();
         result.setUsername(loginTextField.getText());
         result.setPassword(SecurityManager.encryptPassword(passwordTextField.getText()));
         //TODO check with db... load... get full user... and only then return back
         result.setAdmin(true);
-        return result;
-    }
-
-    private void onOK() {
-        // add your code here
-
+        user = result;
         dispose();
     }
 

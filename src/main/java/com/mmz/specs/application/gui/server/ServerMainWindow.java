@@ -193,7 +193,6 @@ public class ServerMainWindow extends JFrame {
             setUnlocked(false);
         } else {
             LoginWindow loginWindow = new LoginWindow(this);
-            loginWindow.setVisible(true);
             UsersEntity user = loginWindow.getAuthorizedUser();
             if (user != null) { // TODO !=null and admin...
                 System.out.println("Hello, " + user.getUsername() + ", " + "p:" + user.getPassword());
