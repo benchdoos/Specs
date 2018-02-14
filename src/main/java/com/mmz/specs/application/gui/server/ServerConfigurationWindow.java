@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
@@ -29,12 +30,11 @@ public class ServerConfigurationWindow extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         setTitle("Конфигурация файла настроек сервера");
-
-
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/interfaces/usb.png")));
         initGui();
 
         // call onCancel() when cross is clicked
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
@@ -128,6 +128,7 @@ public class ServerConfigurationWindow extends JDialog {
 
     private void onCancel() {
         // add your code here if necessary
+        System.exit(0); //TODO Fix this was set to prevent server start without settings file
         dispose();
     }
 }
