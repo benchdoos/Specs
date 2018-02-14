@@ -43,41 +43,25 @@ public class PasswordChangeWindow extends JDialog {
         initKeyboardActions();
 
         pack();
+        setMinimumSize(getSize());
         setLocation(FrameUtils.getFrameOnCenterLocationPoint(this));
 
     }
 
     private void initKeyboardActions() {
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void initGui() {
         usernameLabel.setText(user.getUsername());
 
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener(e -> onOK());
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonCancel.addActionListener(e -> onCancel());
 
-        generatePasswordButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onGeneratePassword();
-            }
-        });
+        generatePasswordButton.addActionListener(e -> onGeneratePassword());
 
         passwordField1.getDocument().addDocumentListener(new DocumentListener() {
             @Override
