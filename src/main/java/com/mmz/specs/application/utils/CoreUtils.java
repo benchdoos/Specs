@@ -1,8 +1,6 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.application.core.server.Server;
-import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
@@ -67,6 +65,7 @@ public class CoreUtils {
             ServerConfigurationWindow serverConfigurationWindow = new ServerConfigurationWindow();
             serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenterLocationPoint(serverConfigurationWindow));
             serverConfigurationWindow.setVisible(true);
+            loadServerSettings();//TODO check this properly
         }
 
     }

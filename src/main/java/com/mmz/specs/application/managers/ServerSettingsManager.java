@@ -2,6 +2,7 @@ package com.mmz.specs.application.managers;
 
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.HibernateConstants;
+import com.mmz.specs.application.core.server.ServerException;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,11 +31,11 @@ public class ServerSettingsManager {
         return settingsManager;
     }
 
-    public void setServerSettings(String serverSettingsFileLocation) {
+    public void setServerSettings(String serverSettingsFileLocation) throws ServerException {
         if (serverSettingsFileLocation == null) {
-            throw new IllegalArgumentException("Server settings path can not be null");
+            throw new ServerException(new IllegalArgumentException("Server settings path can not be null"));
         } else if (serverSettingsFileLocation.isEmpty()) {
-            throw new IllegalArgumentException("Server settings path can not be empty");
+            throw new ServerException(new IllegalArgumentException("Server settings path can not be empty"));
         }
         settingsManager.connectionFileLocation = serverSettingsFileLocation;
     }
