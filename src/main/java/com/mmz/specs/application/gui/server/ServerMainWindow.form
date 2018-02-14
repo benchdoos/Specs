@@ -397,7 +397,7 @@
                                   </component>
                                   <component id="4c055" class="javax.swing.JLabel">
                                     <constraints>
-                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                      <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                     <properties>
                                       <text value="Управление сервером:"/>
@@ -657,6 +657,7 @@
                                   <icon value="img/gui/edit/add.png"/>
                                   <margin top="2" left="2" bottom="2" right="2"/>
                                   <text value=""/>
+                                  <toolTipText value="Добавить пользователя"/>
                                 </properties>
                               </component>
                             </children>
