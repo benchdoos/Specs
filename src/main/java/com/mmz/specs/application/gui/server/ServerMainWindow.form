@@ -365,7 +365,7 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="93625" class="javax.swing.JList" binding="list1" default-binding="true">
+                              <component id="93625" class="javax.swing.JList" binding="userList">
                                 <constraints/>
                                 <properties/>
                               </component>
@@ -421,7 +421,7 @@
                                 </constraints>
                                 <properties/>
                               </component>
-                              <component id="e0323" class="javax.swing.JButton" binding="сброситьButton" default-binding="true">
+                              <component id="e0323" class="javax.swing.JButton" binding="refreshPasswordButton" default-binding="true">
                                 <constraints>
                                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                 </constraints>

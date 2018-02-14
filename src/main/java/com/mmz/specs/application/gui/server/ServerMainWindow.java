@@ -1,6 +1,7 @@
 package com.mmz.specs.application.gui.server;
 
 import com.mmz.specs.application.gui.common.LoginWindow;
+import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.dao.entity.UsersEntity;
 
 import javax.swing.*;
@@ -28,8 +29,8 @@ public class ServerMainWindow extends JFrame {
     private JTextPane logTextPane;
     private JPanel userControlPanel;
     private JPanel logPanel;
-    private JList list1;
-    private JButton сброситьButton;
+    private JList userList;
+    private JButton refreshPasswordButton;
     private JTextField nameTextField;
     private JTextField lastnameTextField;
     private JTextField surnameTextField;
@@ -159,42 +160,67 @@ public class ServerMainWindow extends JFrame {
         onlineUserList.setModel(listModel);
 
         buttonForceUserDisconnect.addActionListener(e -> {
-            if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
-                listModel.remove(onlineUserList.getSelectedIndex());
-                if (listModel.getSize() > 0) {
-                    onlineUserList.setSelectedIndex(0);
-                }
-            }
+            onForceUserDisconnect(listModel);
         });
 
         buttonAdminLock.addActionListener(e -> {
-            if (ServerMainWindow.isUnlocked) {
-                setUnlocked(false);
-            } else {
-                LoginWindow loginWindow = new LoginWindow(this);
-                loginWindow.setVisible(true);
-                UsersEntity user = loginWindow.getAuthorizedUser();
-                if (user != null) { // TODO !=null and admin...
-                    System.out.println("Hello, " + user.getUsername() + ", " + "p:" + user.getPassword());
-                    if (user.isAdmin()) {
-                        System.out.println("Hello admin");
-                        setUnlocked(user.isAdmin());
-                    }
-                }
-            }
+            onButtonAdminLock();
         });
 
         serverOnlineCountLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
-                if (serverOnlineCountLabelCounterShow) {
-                    serverOnlineCountLabel.setText(getServerOnlineString());
-                } else {
-                    serverOnlineCountLabel.setText(serverStartDate.toString());
-                }
+                onServerOnlineCountLabel();
             }
         });
+
+        refreshPasswordButton.addActionListener(e -> {
+            onRefreshPasswordButton();
+        });
+    }
+
+    private void onForceUserDisconnect(DefaultListModel listModel) {
+        if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
+            listModel.remove(onlineUserList.getSelectedIndex());
+            if (listModel.getSize() > 0) {
+                onlineUserList.setSelectedIndex(0);
+            }
+        }
+    }
+
+    private void onButtonAdminLock() {
+        if (ServerMainWindow.isUnlocked) {
+            setUnlocked(false);
+        } else {
+            LoginWindow loginWindow = new LoginWindow(this);
+            loginWindow.setVisible(true);
+            UsersEntity user = loginWindow.getAuthorizedUser();
+            if (user != null) { // TODO !=null and admin...
+                System.out.println("Hello, " + user.getUsername() + ", " + "p:" + user.getPassword());
+                if (user.isAdmin()) {
+                    System.out.println("Hello admin");
+                    setUnlocked(user.isAdmin());
+                }
+            }
+        }
+    }
+
+    private void onRefreshPasswordButton() {
+        //TODO get user from list
+        UsersEntity user = new UsersEntity();
+        user.setUsername("user");
+        user.setPassword("somePath");
+        PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(user);
+        passwordChangeWindow.setVisible(true);
+    }
+
+    private void onServerOnlineCountLabel() {
+        serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
+        if (serverOnlineCountLabelCounterShow) {
+            serverOnlineCountLabel.setText(getServerOnlineString());
+        } else {
+            serverOnlineCountLabel.setText(serverStartDate.toString());
+        }
     }
 
 
@@ -215,7 +241,7 @@ public class ServerMainWindow extends JFrame {
 
     private void setTabsEnabled(boolean enabled) {
         for (JPanel tab : onlyAdminTabsList) {
-            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(tab),enabled);
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(tab), enabled);
         }
     }
 
