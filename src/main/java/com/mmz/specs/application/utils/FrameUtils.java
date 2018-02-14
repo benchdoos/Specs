@@ -92,4 +92,16 @@ public class FrameUtils {
         int height = (int) ((Toolkit.getDefaultToolkit().getScreenSize().height / (double) 2) - (size.getHeight() / (double) 2));
         return new Point(width, height);
     }
+
+    /**
+     * Returns the location of point of child, when it should be on center of the parent window.
+     * @return Point of <code>Window</code> that is moved to center of the parent.
+     * @see java.awt.Component#getLocation
+     * */
+    public static Point getFrameOnParentCenterLocationPoint(Window parent, Window child) { //TODO fix this
+
+        int width = (int) (parent.getLocation().getX() + (child.getSize().getWidth() / (double) 2));
+        int height = (int) (parent.getLocation().getY() + (child.getSize().getHeight() / (double) 2));
+        return new Point(width, height);
+    }
 }
