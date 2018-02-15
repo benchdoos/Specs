@@ -16,11 +16,15 @@
 
 package com.mmz.specs.application.utils;
 
+import com.mmz.specs.application.core.ApplicationArgumentsConstants;
 import com.mmz.specs.application.core.ApplicationConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+
+import static com.mmz.specs.application.core.ApplicationConstants.LOG_PREFIX_CLIENT;
+import static com.mmz.specs.application.core.ApplicationConstants.LOG_PREFIX_SERVER;
 
 /**
  * Created by Eugene Zrazhevsky on 30.10.2016.
@@ -28,9 +32,22 @@ import java.io.File;
 public class Logging {
     private static final File LOG_FOLDER = new File(ApplicationConstants.LOG_FOLDER);
 
-    public Logging() {
+    public Logging(String[] args) {
         checkFolders();
-        startLogging();
+        startLogging(manageArguments(args));
+    }
+
+    private String manageArguments(String[] args) {
+        if (args.length > 0) {
+            switch (args[0]) {
+                case ApplicationArgumentsConstants.SERVER:
+                    return LOG_PREFIX_SERVER;
+                case ApplicationArgumentsConstants.CLIENT:
+                    return LOG_PREFIX_CLIENT;
+                    default:
+                        return LOG_PREFIX_CLIENT;
+            }
+        } else return LOG_PREFIX_CLIENT;
     }
 
     /**
@@ -67,8 +84,8 @@ public class Logging {
      * Creates a property for Log4j
      * Warning! Run this before any log implementation.
      */
-    private void startLogging() {
-        System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER);
+    private void startLogging(String prefix) {
+        System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER + prefix );
         System.out.println("Logging starts at: " + LOG_FOLDER);
         Logger log = LogManager.getLogger(getCurrentClassName());
         log.trace("Logging started at: " + LOG_FOLDER);

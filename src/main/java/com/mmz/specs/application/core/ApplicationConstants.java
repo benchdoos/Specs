@@ -11,4 +11,6 @@ public class ApplicationConstants {
     public static final String SETTINGS_FILE_PATH = new File(LOG_FOLDER).getParent() + File.separator + "settings.xml";
     public static final String DEFAULT_FILE_ENCODING = "UTF-8";
 
+    public static final String LOG_PREFIX_SERVER = File.separator + "server_";
+    public static final String LOG_PREFIX_CLIENT = File.separator + "client_";
 }
