@@ -63,7 +63,8 @@ public class CoreUtils {
         } catch (Exception e) {
             log.warn("Could not set new server settings",e);
             ServerConfigurationWindow serverConfigurationWindow = new ServerConfigurationWindow();
-            serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenterLocationPoint(serverConfigurationWindow));
+            serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, serverConfigurationWindow));
+
             serverConfigurationWindow.setVisible(true);
             loadServerSettings();//TODO check this properly
         }

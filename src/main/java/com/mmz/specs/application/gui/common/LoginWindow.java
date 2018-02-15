@@ -1,7 +1,6 @@
 package com.mmz.specs.application.gui.common;
 
 import com.mmz.specs.application.core.security.SecurityManager;
-import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.entity.UsersEntity;
 
 import javax.swing.*;
@@ -16,7 +15,7 @@ public class LoginWindow extends JDialog {
     private JPasswordField passwordField;
     private UsersEntity user = new UsersEntity();
 
-    public LoginWindow(Window parent) {
+    public LoginWindow() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -49,7 +48,6 @@ public class LoginWindow extends JDialog {
         pack();
         setMinimumSize(getSize());
         setResizable(false);
-        setLocation(FrameUtils.getFrameOnParentCenterLocationPoint(parent, this));
     }
 
     public UsersEntity getAuthorizedUser() {

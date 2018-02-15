@@ -82,7 +82,7 @@ public class ServerMainWindow extends JFrame {
         pack();
         setMinimumSize(getSize());
 
-        setLocation(FrameUtils.getFrameOnCenterLocationPoint(this));
+        setLocation(FrameUtils.getFrameOnCenter(null, this));
 
         setUnlocked(false);
 
@@ -232,7 +232,8 @@ public class ServerMainWindow extends JFrame {
         if (ServerMainWindow.isUnlocked) {
             setUnlocked(false);
         } else {
-            LoginWindow loginWindow = new LoginWindow(this);
+            LoginWindow loginWindow = new LoginWindow();
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, this));
             UsersEntity user = loginWindow.getAuthorizedUser();
             if (user != null) { // TODO !=null and admin...
                 System.out.println("Hello, " + user.getUsername() + ", " + "p:" + user.getPassword());
@@ -250,6 +251,7 @@ public class ServerMainWindow extends JFrame {
         user.setUsername("user");
         user.setPassword("somePath");
         PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(user);
+        passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
         passwordChangeWindow.setVisible(true);
     }
 

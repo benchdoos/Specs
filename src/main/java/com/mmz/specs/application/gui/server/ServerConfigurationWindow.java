@@ -49,6 +49,7 @@ public class ServerConfigurationWindow extends JDialog {
         initKeyboardActions();
 
         pack();
+
     }
 
     private void initKeyboardActions() {
