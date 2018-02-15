@@ -15,7 +15,6 @@ public class ServerMainWindow extends JFrame {
     Thread onlineUsersThread;
     Thread threadCounterThread;
     Thread serverOnlineCounterThread;
-    long onlineSeconds = 0;
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -94,9 +93,9 @@ public class ServerMainWindow extends JFrame {
 
         serverOnlineCounterThread = new Thread(new Runnable() {
             Timer timer = new Timer(1000, e -> {
-                onlineSeconds++;
+                long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() - serverStartDate.getTime();
                 if (serverOnlineCountLabelCounterShow) {
-                    String text = getServerOnlineString();
+                    String text = getServerOnlineString(onlineNanoSeconds);
                     System.out.println(text);
                     serverOnlineCountLabel.setText(text);
                 } else {
@@ -134,11 +133,13 @@ public class ServerMainWindow extends JFrame {
         onlineUsersThread.start();
     }
 
-    String getServerOnlineString() {
-        long seconds = onlineSeconds % 60;
-        long minutes = (onlineSeconds / 60) % 60;
-        long hours = (onlineSeconds / 60 / 60) % 24;
-        long days = (onlineSeconds / 60 / 60 / 24);
+    String getServerOnlineString(long difference) {
+        difference = difference / 1000;
+        long seconds = difference % 60;
+        long minutes = (difference / 60) % 60;
+        long hours = (difference / 60 / 60) % 24;
+        long days = (difference / 60 / 60 / 24);
+        System.out.println("sec>" + difference);
         return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
     }
 
@@ -217,7 +218,7 @@ public class ServerMainWindow extends JFrame {
     private void onServerOnlineCountLabel() {
         serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
         if (serverOnlineCountLabelCounterShow) {
-            serverOnlineCountLabel.setText(getServerOnlineString());
+            serverOnlineCountLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() - serverStartDate.getTime()));
         } else {
             serverOnlineCountLabel.setText(serverStartDate.toString());
         }
