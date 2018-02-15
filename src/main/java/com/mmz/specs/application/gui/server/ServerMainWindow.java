@@ -15,6 +15,7 @@ public class ServerMainWindow extends JFrame {
     Thread onlineUsersThread;
     Thread threadCounterThread;
     Thread serverOnlineCounterThread;
+    long onlineSeconds = 0;
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -34,7 +35,7 @@ public class ServerMainWindow extends JFrame {
     private JTextField lastnameTextField;
     private JTextField surnameTextField;
     private JTextField usernameTextField;
-    private JCheckBox isAditorCheckBox;
+    private JCheckBox isEditorCheckBox;
     private JCheckBox isAdminCheckBox;
     private JCheckBox isActiveCheckBox;
     private JComboBox userTypeComboBox;
@@ -43,12 +44,10 @@ public class ServerMainWindow extends JFrame {
     private JButton addUserButton;
     private JPanel usersControlPanel;
     private JButton buttonUserInfo;
-    private JButton перезапуститьButton;
-    private JButton открытьПапкуСЛогамиButton;
+    private JButton restartServerButton;
+    private JButton openLogFolderButton;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
-    private long onlineSeconds = 0;
-
     private JPanel onlyAdminTabsList[] = new JPanel[]{controlPanel};
 
 
@@ -135,11 +134,11 @@ public class ServerMainWindow extends JFrame {
         onlineUsersThread.start();
     }
 
-    private String getServerOnlineString() {
+    String getServerOnlineString() {
         long seconds = onlineSeconds % 60;
-        long minutes = onlineSeconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
+        long minutes = (onlineSeconds / 60) % 60;
+        long hours = (onlineSeconds / 60 / 60) % 24;
+        long days = (onlineSeconds / 60 / 60 / 24);
         return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
     }
 

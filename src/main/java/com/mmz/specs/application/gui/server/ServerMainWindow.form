@@ -342,7 +342,7 @@
                                 <properties/>
                                 <border type="none"/>
                                 <children>
-                                  <component id="c48a8" class="javax.swing.JButton" binding="открытьПапкуСЛогамиButton" default-binding="true">
+                                  <component id="c48a8" class="javax.swing.JButton" binding="openLogFolderButton" default-binding="true">
                                     <constraints>
                                       <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                     </constraints>
@@ -385,7 +385,7 @@
                                       <toolTipText value="Выключить сервер"/>
                                     </properties>
                                   </component>
-                                  <component id="28985" class="javax.swing.JButton" binding="перезапуститьButton" default-binding="true">
+                                  <component id="28985" class="javax.swing.JButton" binding="restartServerButton" default-binding="true">
                                     <constraints>
                                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                     </constraints>
@@ -572,7 +572,7 @@
                                 </constraints>
                                 <properties/>
                               </component>
-                              <component id="4a12" class="javax.swing.JCheckBox" binding="isAditorCheckBox">
+                              <component id="4a12" class="javax.swing.JCheckBox" binding="isEditorCheckBox">
                                 <constraints>
                                   <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                                 </constraints>
