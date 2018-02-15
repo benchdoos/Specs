@@ -35,6 +35,12 @@ public class ServerConfigurationWindow extends JDialog {
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowStateListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
@@ -128,6 +134,7 @@ public class ServerConfigurationWindow extends JDialog {
 
     private void onCancel() {
         // add your code here if necessary
+        log.info("Shutting application down, user canceled configuration file selection");
         System.exit(0); //TODO Fix this was set to prevent server start without settings file
         dispose();
     }
