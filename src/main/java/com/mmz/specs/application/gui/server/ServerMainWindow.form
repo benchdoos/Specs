@@ -35,6 +35,7 @@
                   <opaque value="false"/>
                   <selected value="false"/>
                   <text value=""/>
+                  <toolTipText value="Разблокировать / заблокировать интерфейс (CTRL+L)"/>
                 </properties>
               </component>
             </children>
