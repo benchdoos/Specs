@@ -15,7 +15,7 @@ public class ServerMainWindowTest {
         assertEquals(expected, serverMainWindow.getServerOnlineString(difference));
 
 
-        difference = 30 * 24 * 60 * 60 + 20 * 60 * 60 + 3 * 60 + 10; // 30 дней, 20 часов, 3 минуты, 10 сек
+        difference = 2664190; // 30 дней, 20 часов, 3 минуты, 10 сек
         System.out.println(">>"+difference);
         expected = "30д. 20ч. 3м. 10с.";
         assertEquals(expected, serverMainWindow.getServerOnlineString(difference));
