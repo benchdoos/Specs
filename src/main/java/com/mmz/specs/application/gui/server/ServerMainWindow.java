@@ -47,6 +47,7 @@ public class ServerMainWindow extends JFrame {
     private JButton openLogFolderButton;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
+    private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
     private JPanel onlyAdminTabsList[] = new JPanel[]{controlPanel};
 
 
@@ -93,7 +94,7 @@ public class ServerMainWindow extends JFrame {
 
         serverOnlineCounterThread = new Thread(new Runnable() {
             Timer timer = new Timer(1000, e -> {
-                long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() - serverStartDate.getTime();
+                long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() / 1000 - serverStartDate.getTime();
                 if (serverOnlineCountLabelCounterShow) {
                     String text = getServerOnlineString(onlineNanoSeconds);
                     System.out.println(text);
@@ -133,14 +134,16 @@ public class ServerMainWindow extends JFrame {
         onlineUsersThread.start();
     }
 
-    String getServerOnlineString(long difference) {
-        difference = difference / 1000;
-        long seconds = difference % 60;
-        long minutes = (difference / 60) % 60;
-        long hours = (difference / 60 / 60) % 24;
-        long days = (difference / 60 / 60 / 24);
-        System.out.println("sec>" + difference);
-        return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
+    String getServerOnlineString(long differenceInSeconds) {
+        if (differenceInSeconds >= 0) {
+            long seconds = differenceInSeconds % 60;
+            long minutes = (differenceInSeconds / 60) % 60;
+            long hours = (differenceInSeconds / 60 / 60) % 24;
+            long days = (differenceInSeconds / 60 / 60 / 24);
+            return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
+        } else {
+            return "> 24855д.";
+        }
     }
 
     private void initKeyboardActions() {
@@ -218,7 +221,7 @@ public class ServerMainWindow extends JFrame {
     private void onServerOnlineCountLabel() {
         serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
         if (serverOnlineCountLabelCounterShow) {
-            serverOnlineCountLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() - serverStartDate.getTime()));
+            serverOnlineCountLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() / 1000 - serverStartDate.getTime()));
         } else {
             serverOnlineCountLabel.setText(serverStartDate.toString());
         }
