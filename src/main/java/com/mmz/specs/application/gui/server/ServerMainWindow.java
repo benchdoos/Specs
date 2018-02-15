@@ -4,15 +4,22 @@ import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.entity.UsersEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
 public class ServerMainWindow extends JFrame {
+    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private static boolean isUnlocked = false;
     Thread onlineUsersThread;
     Thread threadCounterThread;
@@ -190,6 +197,18 @@ public class ServerMainWindow extends JFrame {
         refreshPasswordButton.addActionListener(e -> {
             onRefreshPasswordButton();
         });
+
+        openLogFolderButton.addActionListener(e -> {
+            onOpenLogFolder();
+        });
+    }
+
+    private void onOpenLogFolder() {
+        try {
+            Desktop.getDesktop().open(new File(ApplicationConstants.LOG_FOLDER));
+        } catch (IOException e1) {
+            log.warn("Could not open log folder:" + ApplicationConstants.LOG_FOLDER, e1);
+        }
     }
 
 
