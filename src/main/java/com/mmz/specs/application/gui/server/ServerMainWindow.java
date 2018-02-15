@@ -2,6 +2,7 @@ package com.mmz.specs.application.gui.server;
 
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.entity.UsersEntity;
 
 import javax.swing.*;
@@ -45,6 +46,8 @@ public class ServerMainWindow extends JFrame {
     private JButton buttonUserInfo;
     private JButton restartServerButton;
     private JButton openLogFolderButton;
+    private JLabel userIdLabel;
+    private JLabel onlineUsersCount2;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -70,6 +73,8 @@ public class ServerMainWindow extends JFrame {
         pack();
         setMinimumSize(getSize());
 
+        setLocation(FrameUtils.getFrameOnCenterLocationPoint(this));
+
         setUnlocked(false);
 
         initThreads();
@@ -94,7 +99,7 @@ public class ServerMainWindow extends JFrame {
 
         serverOnlineCounterThread = new Thread(new Runnable() {
             Timer timer = new Timer(1000, e -> {
-                long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() / 1000 - serverStartDate.getTime();
+                long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds;
                 if (serverOnlineCountLabelCounterShow) {
                     String text = getServerOnlineString(onlineNanoSeconds);
                     System.out.println(text);
@@ -119,6 +124,7 @@ public class ServerMainWindow extends JFrame {
         onlineUsersThread = new Thread(new Runnable() {
             Timer timer = new Timer(1000, e -> {
                 onlineUsersCount.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
+                onlineUsersCount2.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
                 if (Thread.currentThread().isInterrupted()) {
                     ((Timer) e.getSource()).stop();
                 }
@@ -159,8 +165,8 @@ public class ServerMainWindow extends JFrame {
         //test
         DefaultListModel listModel = new DefaultListModel<>();
 
-        for (int i = 0; i < 20; i++) {
-            listModel.addElement("User:" + i);
+        for (int i = 0; i < 100; i++) {
+            listModel.addElement("User: " + i);
         }
         onlineUserList.setModel(listModel);
 
@@ -184,11 +190,18 @@ public class ServerMainWindow extends JFrame {
         });
     }
 
+
+
     private void onForceUserDisconnect(DefaultListModel listModel) {
         if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
-            listModel.remove(onlineUserList.getSelectedIndex());
-            if (listModel.getSize() > 0) {
-                onlineUserList.setSelectedIndex(0);
+            int selectedIndex = onlineUserList.getSelectedIndex();
+            listModel.remove(selectedIndex);
+            if (listModel.getSize() > selectedIndex) {
+                onlineUserList.setSelectedIndex(selectedIndex);
+            } else {
+                if (listModel.getSize() > 0 && listModel.getSize() > selectedIndex - 1) {
+                    onlineUserList.setSelectedIndex(selectedIndex - 1);
+                }
             }
         }
     }
@@ -221,7 +234,7 @@ public class ServerMainWindow extends JFrame {
     private void onServerOnlineCountLabel() {
         serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
         if (serverOnlineCountLabelCounterShow) {
-            serverOnlineCountLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() / 1000 - serverStartDate.getTime()));
+            serverOnlineCountLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds));
         } else {
             serverOnlineCountLabel.setText(serverStartDate.toString());
         }
