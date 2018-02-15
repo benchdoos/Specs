@@ -4,6 +4,8 @@ import java.io.File;
 
 public class ApplicationConstants {
     public static final String INTERNAL_FULL_NAME = "com.mmz.specs";
+    public static final String APPLICATION_NAME = "MMZ - Спецификации";
+    public static final String APPLICATION_NAME_POSTFIX_SERVER = " - Сервер";
     public static final String LOG_FOLDER = System
             .getProperty("java.io.tmpdir") + File.separator + INTERNAL_FULL_NAME + File.separator + "Logs";
     public static final String APP_LOG_PROPERTY_KEY = "com.mmz.specs:log.folder";

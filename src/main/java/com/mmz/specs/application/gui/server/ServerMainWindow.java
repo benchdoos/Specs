@@ -1,5 +1,6 @@
 package com.mmz.specs.application.gui.server;
 
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -56,6 +57,7 @@ public class ServerMainWindow extends JFrame {
 
     public ServerMainWindow() {
         setContentPane(contentPane);
+        setTitle(ApplicationConstants.APPLICATION_NAME + ApplicationConstants.APPLICATION_NAME_POSTFIX_SERVER);
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/application/logo.png")));
 
         initGui();
@@ -189,7 +191,6 @@ public class ServerMainWindow extends JFrame {
             onRefreshPasswordButton();
         });
     }
-
 
 
     private void onForceUserDisconnect(DefaultListModel listModel) {
