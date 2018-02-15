@@ -68,9 +68,9 @@ public class ServerMainWindow extends JFrame {
     private JLabel userIdLabel;
     private JLabel onlineUsersCount2;
     private JButton saveConfigurationToButton;
-    private JTextField textField1;
-    private JTextField textField2;
-    private JTextField textField3;
+    private JTextField connectionUrlTextField;
+    private JTextField connectionLoginTextField;
+    private JPasswordField connectionPasswordTextField;
     private JLabel osInfoLabel;
     private JLabel usedMemoryInfoLabel;
     private JLabel processorInfoLabel;
