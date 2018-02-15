@@ -5,32 +5,43 @@ import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.dao.entity.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.Sensors;
+import oshi.software.os.NetworkParams;
+import oshi.software.os.OperatingSystem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 public class ServerMainWindow extends JFrame {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final SystemInfo SYSTEM_INFO = new SystemInfo();
+    private static final OperatingSystem OPERATING_SYSTEM = SYSTEM_INFO.getOperatingSystem();
 
+    private static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
+    private static final int MEGABYTE = 1024 * 1024;
+
+    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
-    Thread onlineUsersThread;
-    Thread threadCounterThread;
-    Thread serverOnlineCounterThread;
+    Thread monitorUiUpdateThread;
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
     private JList onlineUserList;
-    private JLabel onlineUsersCount;
+    private JLabel onlineUsersCountLabel;
     private JLabel threadsCount;
-    private JLabel serverOnlineCountLabel;
+    private JLabel serverOnlineTimeLabel;
     private JButton buttonForceUserDisconnect;
     private JButton buttonPower;
     private JButton buttonAdminLock;
@@ -56,6 +67,19 @@ public class ServerMainWindow extends JFrame {
     private JButton openLogFolderButton;
     private JLabel userIdLabel;
     private JLabel onlineUsersCount2;
+    private JButton saveConfigurationToButton;
+    private JTextField textField1;
+    private JTextField textField2;
+    private JTextField textField3;
+    private JLabel osInfoLabel;
+    private JLabel usedMemoryInfoLabel;
+    private JLabel processorInfoLabel;
+    private JLabel temperatureInfoLabel;
+    private JLabel networkNameInfoLabel;
+    private JLabel ipAdressInfoLabel;
+    private JLabel totalMemoryInfoLabel;
+    private JLabel serverConnectionPortInfoLabel;
+    private JLabel jvmInfoLabel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -92,52 +116,61 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void initThreads() {
-        threadCounterThread = new Thread(new Runnable() {
+        monitorUiUpdateThread = new Thread(new Runnable() {
+
             Timer timer = new Timer(1000, e -> {
-                threadsCount.setText(Thread.activeCount() + "");
+                updateOnlineUsersCount(e);
+                updateServerOnlineTimeLabel();
+                updateActiveThreadCounterLabel();
+                updateUsedMemoryInfoLabel();
+                updateTemperatureInfoLabel();
             });
 
-            @Override
-            public void run() {
-                if (!timer.isRunning()) {
-                    timer.start();
-                }
-            }
-        });
-        threadCounterThread.start();
+            private void updateTemperatureInfoLabel() {
+                final String DEGREE = "\u00b0";
+                Sensors sensors = HARDWARE_ABSTRACTION_LAYER.getSensors();
+                double cpuTemperature = sensors.getCpuTemperature();
+                double cpuVoltage = sensors.getCpuVoltage();
+                int[] fanSpeeds = sensors.getFanSpeeds();
 
-        serverOnlineCounterThread = new Thread(new Runnable() {
-            Timer timer = new Timer(1000, e -> {
+                temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE + " VOL: " + cpuVoltage
+                        + " FAN-SPEED: " + Arrays.toString(fanSpeeds));
+            }
+
+            private void updateUsedMemoryInfoLabel() {
+                Runtime runtime = Runtime.getRuntime();
+
+
+                long runtimeTotalMemory = runtime.totalMemory() / MEGABYTE;
+                long runtimeUsedMemory = runtimeTotalMemory - (runtime.freeMemory() / MEGABYTE);
+
+                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
+
+                usedMemoryInfoLabel.setText(memoryInfo);
+            }
+
+            private void updateActiveThreadCounterLabel() {
+                threadsCount.setText(Thread.activeCount() + "");
+            }
+
+            private void updateServerOnlineTimeLabel() {
                 long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds;
                 if (serverOnlineCountLabelCounterShow) {
                     String text = getServerOnlineString(onlineNanoSeconds);
                     System.out.println(text);
-                    serverOnlineCountLabel.setText(text);
+                    serverOnlineTimeLabel.setText(text);
                 } else {
-                    serverOnlineCountLabel.setText(serverStartDate.toString());
-                }
-                if (serverOnlineCounterThread.isInterrupted()) {
-                    ((Timer) e.getSource()).stop();
-                }
-            });
-
-            @Override
-            public void run() {
-                if (!timer.isRunning()) {
-                    timer.start();
+                    serverOnlineTimeLabel.setText(serverStartDate.toString());
                 }
             }
-        });
-        serverOnlineCounterThread.start();
 
-        onlineUsersThread = new Thread(new Runnable() {
-            Timer timer = new Timer(1000, e -> {
-                onlineUsersCount.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
+            private void updateOnlineUsersCount(ActionEvent e) {
+                onlineUsersCountLabel.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
                 onlineUsersCount2.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
                 if (Thread.currentThread().isInterrupted()) {
                     ((Timer) e.getSource()).stop();
                 }
-            });
+            }
 
             @Override
             public void run() {
@@ -146,7 +179,30 @@ public class ServerMainWindow extends JFrame {
                 }
             }
         });
-        onlineUsersThread.start();
+        monitorUiUpdateThread.start();
+    }
+
+    private void updateTotalMemoryLabel() {
+        Runtime runtime = Runtime.getRuntime();
+
+        long totalMemory = HARDWARE_ABSTRACTION_LAYER.getMemory().getTotal() / MEGABYTE;
+
+        long runtimeMaxMemory = runtime.maxMemory() / MEGABYTE;
+        totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + totalMemory + " МБ.");
+    }
+
+    private void updateNetworkInfoPanel() {
+        NetworkParams networkParams = OPERATING_SYSTEM.getNetworkParams();
+        networkNameInfoLabel.setText(networkParams.getHostName());
+        ipAdressInfoLabel.setText(networkParams.getIpv4DefaultGateway() + " / " + networkParams.getIpv6DefaultGateway());
+
+    }
+
+    private void updateProcessorInfoLabel() {
+        CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
+        long logicalProcessorCount = processor.getLogicalProcessorCount();
+        long physicalProcessorCount = processor.getPhysicalProcessorCount();
+        processorInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ")");
     }
 
     String getServerOnlineString(long differenceInSeconds) {
@@ -172,7 +228,19 @@ public class ServerMainWindow extends JFrame {
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
+    private void updateSystemInfoLabel() {
+        String osInfo = OPERATING_SYSTEM.getManufacturer() + " " + OPERATING_SYSTEM.getFamily()
+                + " " + OPERATING_SYSTEM.getVersion() + " x" + SystemUtils.getRealSystemArch();
+        osInfoLabel.setText(osInfo);
+    }
+
     private void initGui() {
+        updateSystemInfoLabel();
+        updateProcessorInfoLabel();
+        updateNetworkInfoPanel();
+        updateTotalMemoryLabel();
+        updateJvmInfoLabel();
+
         //test
         DefaultListModel listModel = new DefaultListModel<>();
 
@@ -189,7 +257,7 @@ public class ServerMainWindow extends JFrame {
             onButtonAdminLock();
         });
 
-        serverOnlineCountLabel.addMouseListener(new MouseAdapter() {
+        serverOnlineTimeLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 onServerOnlineCountLabel();
@@ -203,6 +271,11 @@ public class ServerMainWindow extends JFrame {
         openLogFolderButton.addActionListener(e -> {
             onOpenLogFolder();
         });
+    }
+
+    private void updateJvmInfoLabel() {
+        jvmInfoLabel.setText(System.getProperty("java.specification.version")
+                + "(" + System.getProperty("java.version") + ")");
     }
 
     private void onOpenLogFolder() {
@@ -258,9 +331,9 @@ public class ServerMainWindow extends JFrame {
     private void onServerOnlineCountLabel() {
         serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
         if (serverOnlineCountLabelCounterShow) {
-            serverOnlineCountLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds));
+            serverOnlineTimeLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds));
         } else {
-            serverOnlineCountLabel.setText(serverStartDate.toString());
+            serverOnlineTimeLabel.setText(serverStartDate.toString());
         }
     }
 
@@ -295,9 +368,7 @@ public class ServerMainWindow extends JFrame {
 
     @Override
     public void dispose() {
-        onlineUsersThread.interrupt();
-        serverOnlineCounterThread.interrupt();
-        threadCounterThread.interrupt();
+        monitorUiUpdateThread.interrupt();
         super.dispose();
     }
 }
