@@ -33,7 +33,7 @@ public class ServerMainWindow extends JFrame {
 
     private static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
     private static final int MEGABYTE = 1024 * 1024;
-
+    private static final int MONITORING_TIMER_DELAY = 1000;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
     private static long previousProcessTime = -1;
@@ -141,7 +141,7 @@ public class ServerMainWindow extends JFrame {
     private void initThreads() {
         monitorUiUpdateThread = new Thread(new Runnable() {
 
-            Timer timer = new Timer(1000, e -> {
+            Timer timer = new Timer(MONITORING_TIMER_DELAY, e -> {
                 updateOnlineUsersCount(e);
                 updateServerOnlineTimeLabel();
                 updateActiveThreadCounterLabel();
