@@ -135,6 +135,12 @@ public class ServerMainWindow extends JFrame {
                     temperatureInfoLabel.setForeground(Color.BLACK);
                 }
 
+                if (getCpuTemperature() > 95.0d) {
+                    temperatureInfoLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/warning.png")));
+                } else {
+                    temperatureInfoLabel.setIcon(null);
+                }
+
                 temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE + " VOL: " + getCpuVoltage()
                         + " FAN-SPEED: " + Arrays.toString(getCpuFanSpeeds()));
             }
