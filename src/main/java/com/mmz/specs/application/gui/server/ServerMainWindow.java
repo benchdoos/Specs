@@ -3,40 +3,32 @@ package com.mmz.specs.application.gui.server;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.dao.entity.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
-import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.Sensors;
 import oshi.software.os.NetworkParams;
-import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
-public class ServerMainWindow extends JFrame {
-    private static final SystemInfo SYSTEM_INFO = new SystemInfo();
-    private static final OperatingSystem OPERATING_SYSTEM = SYSTEM_INFO.getOperatingSystem();
+import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
-    private static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
-    private static final int MEGABYTE = 1024 * 1024;
+public class ServerMainWindow extends JFrame {
+
     private static final int MONITORING_TIMER_DELAY = 1000;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
-    private static long previousProcessTime = -1;
     Thread monitorUiUpdateThread;
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
@@ -121,23 +113,6 @@ public class ServerMainWindow extends JFrame {
 
     }
 
-    public static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        long factor = (long) Math.pow(10, places);
-        value = value * factor;
-        long tmp = Math.round(value);
-        return (double) tmp / factor;
-    }
-
-    public static double getProcessCpuLoad() {
-        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        double result = operatingSystemMXBean.getSystemCpuLoad();
-
-        // returns a percentage value with 6 decimal point precision
-        return ((int) (result * 1000) / 10.000000);
-    }
-
     private void initThreads() {
         monitorUiUpdateThread = new Thread(new Runnable() {
 
@@ -147,35 +122,35 @@ public class ServerMainWindow extends JFrame {
                 updateActiveThreadCounterLabel();
                 updateProcessorInfoLabel();
                 updateUsedProcessCpuInfoLabel();
-                updateUsedMemoryInfoLabel();
+                updateUsedJvmMemoryInfoLabel();
                 updateTemperatureInfoLabel();
             });
 
             private void updateTemperatureInfoLabel() {
                 final String DEGREE = "\u00b0";
-                Sensors sensors = HARDWARE_ABSTRACTION_LAYER.getSensors();
-                double cpuTemperature = sensors.getCpuTemperature();
-                double cpuVoltage = sensors.getCpuVoltage();
-                int[] fanSpeeds = sensors.getFanSpeeds();
 
-                temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE + " VOL: " + cpuVoltage
-                        + " FAN-SPEED: " + Arrays.toString(fanSpeeds));
+                if (getCpuTemperature() > 90.0d) {
+                    temperatureInfoLabel.setForeground(Color.RED);
+                } else {
+                    temperatureInfoLabel.setForeground(Color.BLACK);
+                }
+
+                temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE + " VOL: " + getCpuVoltage()
+                        + " FAN-SPEED: " + Arrays.toString(getCpuFanSpeeds()));
             }
 
-            private void updateUsedMemoryInfoLabel() {
-                Runtime runtime = Runtime.getRuntime();
-
-
-                long runtimeTotalMemory = runtime.totalMemory() / MEGABYTE;
-                long runtimeUsedMemory = runtimeTotalMemory - (runtime.freeMemory() / MEGABYTE);
-
-                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
-
+            private void updateUsedJvmMemoryInfoLabel() {
+                String memoryInfo = "JVM: " + getRuntimeUsedMemory() + " / " + getRuntimeTotalMemory() + " МБ. ";
+                if (getRuntimeUsedMemory() > (getRuntimeMaxMemory() - 0.2 * getRuntimeMaxMemory())) {
+                    usedProcessMemoryInfoLabel.setForeground(Color.RED);
+                } else {
+                    usedProcessMemoryInfoLabel.setForeground(Color.BLACK);
+                }
                 usedProcessMemoryInfoLabel.setText(memoryInfo);
             }
 
             private void updateActiveThreadCounterLabel() {
-                threadsCount.setText(Thread.activeCount() + "");
+                threadsCount.setText(getApplicationCurrentThreads() + "");
             }
 
             private void updateServerOnlineTimeLabel() {
@@ -208,19 +183,16 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void updateTotalMemoryLabel() {
-        Runtime runtime = Runtime.getRuntime();
-
-        long totalMemory = HARDWARE_ABSTRACTION_LAYER.getMemory().getTotal() / MEGABYTE;
-
-        long runtimeMaxMemory = runtime.maxMemory() / MEGABYTE;
-        totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + totalMemory + " МБ.");
+        long runtimeTotalMemory = getSystemTotalMemory();
+        long runtimeMaxMemory = getRuntimeMaxMemory();
+        totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + runtimeTotalMemory + " МБ.");
     }
+
 
     private void updateNetworkInfoPanel() {
         NetworkParams networkParams = OPERATING_SYSTEM.getNetworkParams();
         networkNameInfoLabel.setText(networkParams.getHostName());
         ipAdressInfoLabel.setText(networkParams.getIpv4DefaultGateway() + " / " + networkParams.getIpv6DefaultGateway());
-
     }
 
     private void updateProcessorInfoLabel() {
@@ -228,38 +200,29 @@ public class ServerMainWindow extends JFrame {
         long logicalProcessorCount = processor.getLogicalProcessorCount();
         long physicalProcessorCount = processor.getPhysicalProcessorCount();
         double cpuLoad = getProcessCpuLoad();
-        String cpuLoadString = round(cpuLoad, 1) + "%";
-
+        String cpuLoadString = CommonUtils.round(cpuLoad, 1) + "%";
+        if (cpuLoad >= 60.0d) {
+            processorInfoLabel.setForeground(Color.RED);
+        } else {
+            processorInfoLabel.setForeground(Color.BLACK);
+        }
         processorInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ") " + cpuLoadString);
     }
 
     private void updateUsedProcessCpuInfoLabel() {
-        CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
-        int cpuNumber = processor.getLogicalProcessorCount();
-        int pid = OPERATING_SYSTEM.getProcessId();
-        OSProcess process = OPERATING_SYSTEM.getProcess(pid);
-        String processInfo = "0%";
-        long currentTime = 0;
-
-        if (process != null) {
-            // CPU
-            currentTime = process.getKernelTime() + process.getUserTime();
-
-            if (previousProcessTime != -1) {
-                // If we have both a previous and a current time
-                // we can calculate the CPU usage
-                long timeDifference = currentTime - previousProcessTime;
-                double cpu = (100d * (timeDifference / ((double) 1000))) / cpuNumber;
-                cpu = round(cpu, 1);
-                processInfo = cpu + "%";
-            }
-
-            previousProcessTime = currentTime;
+        final double cpuUsageByApplication = getCpuUsageByApplication();
+        String processInfo = cpuUsageByApplication + "%";
+        if (cpuUsageByApplication >= 60.0d) {
+            usedProcessCpuInfoLabel.setForeground(Color.RED);
+        } else {
+            usedProcessCpuInfoLabel.setForeground(Color.BLACK);
         }
         usedProcessCpuInfoLabel.setText(processInfo);
+
     }
 
     String getServerOnlineString(long differenceInSeconds) {
+        final String MAXIMUM_SUPPORTED_ALIFE_TIME = "> 24855д.";
         if (differenceInSeconds >= 0) {
             long seconds = differenceInSeconds % 60;
             long minutes = (differenceInSeconds / 60) % 60;
@@ -267,7 +230,7 @@ public class ServerMainWindow extends JFrame {
             long days = (differenceInSeconds / 60 / 60 / 24);
             return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
         } else {
-            return "> 24855д.";
+            return MAXIMUM_SUPPORTED_ALIFE_TIME;
         }
     }
 
