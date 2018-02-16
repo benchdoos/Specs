@@ -67,7 +67,7 @@
         <property name="name" column="NAME"/>
         <property name="lastname" column="LASTNAME"/>
         <property name="surname" column="SURNAME"/>
-        <property name="isAdmin" column="`ADMIN`"/>
+        <property name="admin" column="`ADMIN`"/>
         <property name="editor" column="`EDITOR`"/>
         <property name="active" column="IS_ACTIVE"/>
     </class>
