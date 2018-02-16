@@ -14,6 +14,7 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.Sensors;
 import oshi.software.os.NetworkParams;
+import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
 import javax.swing.*;
@@ -21,6 +22,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,6 +36,7 @@ public class ServerMainWindow extends JFrame {
 
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
+    private static long previousProcessTime = -1;
     Thread monitorUiUpdateThread;
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
@@ -72,7 +75,7 @@ public class ServerMainWindow extends JFrame {
     private JTextField connectionLoginTextField;
     private JPasswordField connectionPasswordTextField;
     private JLabel osInfoLabel;
-    private JLabel usedMemoryInfoLabel;
+    private JLabel usedProcessMemoryInfoLabel;
     private JLabel processorInfoLabel;
     private JLabel temperatureInfoLabel;
     private JLabel networkNameInfoLabel;
@@ -80,6 +83,9 @@ public class ServerMainWindow extends JFrame {
     private JLabel totalMemoryInfoLabel;
     private JLabel serverConnectionPortInfoLabel;
     private JLabel jvmInfoLabel;
+    private JTable constantsTable;
+    private JButton updateServerConstantsButton;
+    private JLabel usedProcessCpuInfoLabel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -115,6 +121,23 @@ public class ServerMainWindow extends JFrame {
 
     }
 
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
+    public static double getProcessCpuLoad() {
+        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        double result = operatingSystemMXBean.getSystemCpuLoad();
+
+        // returns a percentage value with 6 decimal point precision
+        return ((int) (result * 1000) / 10.000000);
+    }
+
     private void initThreads() {
         monitorUiUpdateThread = new Thread(new Runnable() {
 
@@ -122,6 +145,8 @@ public class ServerMainWindow extends JFrame {
                 updateOnlineUsersCount(e);
                 updateServerOnlineTimeLabel();
                 updateActiveThreadCounterLabel();
+                updateProcessorInfoLabel();
+                updateUsedProcessCpuInfoLabel();
                 updateUsedMemoryInfoLabel();
                 updateTemperatureInfoLabel();
             });
@@ -146,7 +171,7 @@ public class ServerMainWindow extends JFrame {
 
                 String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
 
-                usedMemoryInfoLabel.setText(memoryInfo);
+                usedProcessMemoryInfoLabel.setText(memoryInfo);
             }
 
             private void updateActiveThreadCounterLabel() {
@@ -202,7 +227,36 @@ public class ServerMainWindow extends JFrame {
         CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
         long logicalProcessorCount = processor.getLogicalProcessorCount();
         long physicalProcessorCount = processor.getPhysicalProcessorCount();
-        processorInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ")");
+        double cpuLoad = getProcessCpuLoad();
+        String cpuLoadString = round(cpuLoad, 1) + "%";
+
+        processorInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ") " + cpuLoadString);
+    }
+
+    private void updateUsedProcessCpuInfoLabel() {
+        CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
+        int cpuNumber = processor.getLogicalProcessorCount();
+        int pid = OPERATING_SYSTEM.getProcessId();
+        OSProcess process = OPERATING_SYSTEM.getProcess(pid);
+        String processInfo = "0%";
+        long currentTime = 0;
+
+        if (process != null) {
+            // CPU
+            currentTime = process.getKernelTime() + process.getUserTime();
+
+            if (previousProcessTime != -1) {
+                // If we have both a previous and a current time
+                // we can calculate the CPU usage
+                long timeDifference = currentTime - previousProcessTime;
+                double cpu = (100d * (timeDifference / ((double) 1000))) / cpuNumber;
+                cpu = round(cpu, 1);
+                processInfo = cpu + "%";
+            }
+
+            previousProcessTime = currentTime;
+        }
+        usedProcessCpuInfoLabel.setText(processInfo);
     }
 
     String getServerOnlineString(long differenceInSeconds) {
@@ -236,7 +290,6 @@ public class ServerMainWindow extends JFrame {
 
     private void initGui() {
         updateSystemInfoLabel();
-        updateProcessorInfoLabel();
         updateNetworkInfoPanel();
         updateTotalMemoryLabel();
         updateJvmInfoLabel();
