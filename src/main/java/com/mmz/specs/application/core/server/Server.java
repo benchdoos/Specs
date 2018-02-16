@@ -3,6 +3,7 @@ package com.mmz.specs.application.core.server;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.dao.HibernateConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -40,12 +41,12 @@ public class Server {
         try {
             Configuration configuration = new Configuration();
             configuration.configure(new File("src/main/java/hibernate.cfg.xml"));
-            /*configuration.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, "jdbc:firebirdsql:localhost/3050:F:/Developer/Java/specs/db/MMZ_SPECS.GDB?encoding=UTF8");
-            configuration.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, "sysdba");
-            configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, "m@sT3rK3~Y");*/
-            configuration.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, dbConnectionUrl);
+            /*configuration.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, dbConnectionUrl);
             configuration.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, connectionUsername);
-            configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, connectionPassword);
+            configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, connectionPassword);*/
+            configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbConnectionUrl);
+            configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, connectionUsername);
+            configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, connectionPassword);
             log.info("Creating Hibernate connection at: " + dbConnectionUrl
                     + " username: " + connectionUsername + " password length: " + connectionPassword.length());
             ourSessionFactory = configuration.buildSessionFactory();

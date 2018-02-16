@@ -1,6 +1,8 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
+import com.mmz.specs.application.core.server.Server;
+import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
@@ -33,12 +35,12 @@ public class CoreUtils {
                     serverMainWindow.setVisible(true);
 
 
-                    /*try {
+                    try {
                         Server server = new Server();
                     } catch (ServerStartException e) {
                         log.warn("Could not start server in background", e);
 
-                    }*/
+                    }
                     break;
                 default:
                     log.debug("Unknown argument: " + firstArgument);

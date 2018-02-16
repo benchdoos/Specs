@@ -76,7 +76,7 @@
         <property name="name" column="NAME"/>
         <property name="active" column="IS_ACTIVE"/>
     </class>
-    <class name="com.mmz.specs.dao.entity.ConstantsEntity" table="`constants`" schema="">
+    <class name="com.mmz.specs.dao.entity.ConstantsEntity" table="`CONSTANTS`" schema="">
         <id name="id" column="ID"/>
         <property name="key" column="KEY"/>
         <property name="value" column="`VALUE`"/>

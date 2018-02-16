@@ -3,7 +3,7 @@ package com.mmz.specs.dao.entity;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "constants")
+@Table(name = "CONSTANTS")
 public class ConstantsEntity {
     private int id;
     private String key;
