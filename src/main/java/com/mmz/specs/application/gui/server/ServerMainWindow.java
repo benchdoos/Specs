@@ -92,10 +92,13 @@ public class ServerMainWindow extends JFrame {
     private JButton updateServerConstantsButton;
     private JLabel usedProcessCpuInfoLabel;
     private JPanel graphicsPanel;
+    private JLabel voltageInfoLabel;
+    private JLabel fanSpeedInfoLabel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
     private JPanel onlyAdminTabsList[] = new JPanel[]{controlPanel};
+
 
     public ServerMainWindow() {
         setContentPane(contentPane);
@@ -130,7 +133,6 @@ public class ServerMainWindow extends JFrame {
         monitorUiUpdateThread = new Thread(new Runnable() {
             private long counter = 0;
             Timer timer = new Timer(MONITORING_TIMER_DELAY, e -> {
-
                 updateOnlineUsersCount(e);
                 updateServerOnlineTimeLabel();
                 updateActiveThreadCounterLabel();
@@ -146,6 +148,8 @@ public class ServerMainWindow extends JFrame {
                 }
                 caretPosition++;
 
+                updateVoltageInfoLabel();
+                updateFanSpeedInfoLabel();
             });
 
             private void updateTemperatureInfoLabel() {
@@ -166,6 +170,15 @@ public class ServerMainWindow extends JFrame {
 
                 temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE + " VOL: " + getCpuVoltage()
                         + " FAN-SPEED: " + Arrays.toString(getCpuFanSpeeds()));
+                temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE);
+            }
+
+            private void updateFanSpeedInfoLabel() {
+                fanSpeedInfoLabel.setText(Arrays.toString(getCpuFanSpeeds()));
+            }
+
+            private void updateVoltageInfoLabel() {
+                voltageInfoLabel.setText(getCpuVoltage() + "");
             }
 
             private void updateUsedJvmMemoryInfoLabel() {
@@ -220,6 +233,7 @@ public class ServerMainWindow extends JFrame {
         long runtimeMaxMemory = getRuntimeMaxMemory();
         totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + runtimeTotalMemory + " МБ.");
     }
+
 
     private void updateNetworkInfoPanel() {
         NetworkParams networkParams = OPERATING_SYSTEM.getNetworkParams();
@@ -403,6 +417,7 @@ public class ServerMainWindow extends JFrame {
             serverOnlineTimeLabel.setText(serverStartDate.toString());
         }
     }
+
 
     private void setUnlocked(boolean isUnlocked) {
         ServerMainWindow.isUnlocked = isUnlocked;
