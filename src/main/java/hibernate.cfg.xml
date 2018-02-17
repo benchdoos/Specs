@@ -16,16 +16,16 @@
 
 
         <mapping resource="hibernate/HibernateMapping.xml"/>
-        <mapping class="com.mmz.specs.dao.entity.DetailEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.DetailListEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.DetailTitlesEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.MaterialEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.MaterialListEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.NoticeEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.TechProcessEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.UsersEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.UserTypeEntity"/>
-        <mapping class="com.mmz.specs.dao.entity.ConstantsEntity"/>
+        <mapping class="com.mmz.specs.domain.DetailEntity"/>
+        <mapping class="com.mmz.specs.domain.DetailListEntity"/>
+        <mapping class="com.mmz.specs.domain.DetailTitlesEntity"/>
+        <mapping class="com.mmz.specs.domain.MaterialEntity"/>
+        <mapping class="com.mmz.specs.domain.MaterialListEntity"/>
+        <mapping class="com.mmz.specs.domain.NoticeEntity"/>
+        <mapping class="com.mmz.specs.domain.TechProcessEntity"/>
+        <mapping class="com.mmz.specs.domain.UsersEntity"/>
+        <mapping class="com.mmz.specs.domain.UserTypeEntity"/>
+        <mapping class="com.mmz.specs.domain.ConstantsEntity"/>
 
 
         <!-- DB schema will be updated if needed -->

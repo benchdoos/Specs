@@ -1,4 +1,4 @@
-package com.mmz.specs.dao.entity;
+package com.mmz.specs.domain;
 
 import javax.persistence.*;
 

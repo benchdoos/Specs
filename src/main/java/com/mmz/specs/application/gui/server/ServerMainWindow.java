@@ -7,7 +7,7 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SystemUtils;
-import com.mmz.specs.dao.entity.UsersEntity;
+import com.mmz.specs.domain.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.knowm.xchart.XChartPanel;
