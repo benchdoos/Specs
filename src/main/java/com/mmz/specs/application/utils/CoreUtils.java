@@ -1,7 +1,7 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.application.core.server.Server;
+import com.mmz.specs.dao.ServerConnectionPool;
 import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
@@ -36,7 +36,7 @@ public class CoreUtils {
 
 
                     try {
-                        Server server = new Server();
+                        ServerConnectionPool serverConnectionPool = new ServerConnectionPool();
                     } catch (ServerStartException e) {
                         log.warn("Could not start server in background", e);
 

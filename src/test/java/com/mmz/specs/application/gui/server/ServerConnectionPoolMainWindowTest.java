@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class ServerMainWindowTest {
+public class ServerConnectionPoolMainWindowTest {
 
 
     @Test

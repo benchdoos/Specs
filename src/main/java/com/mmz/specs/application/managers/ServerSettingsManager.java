@@ -33,9 +33,9 @@ public class ServerSettingsManager {
 
     public void setServerSettings(String serverSettingsFileLocation) throws ServerException {
         if (serverSettingsFileLocation == null) {
-            throw new ServerException(new IllegalArgumentException("Server settings path can not be null"));
+            throw new ServerException(new IllegalArgumentException("ServerConnectionPool settings path can not be null"));
         } else if (serverSettingsFileLocation.isEmpty()) {
-            throw new ServerException(new IllegalArgumentException("Server settings path can not be empty"));
+            throw new ServerException(new IllegalArgumentException("ServerConnectionPool settings path can not be empty"));
         }
         settingsManager.connectionFileLocation = serverSettingsFileLocation;
     }

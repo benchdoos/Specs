@@ -1,9 +1,9 @@
-package com.mmz.specs.application.core.server;
+package com.mmz.specs.dao;
 
 import com.mmz.specs.application.core.ApplicationConstants;
+import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.dao.HibernateConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -17,20 +17,20 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import java.io.File;
 
-public class Server {
+public class ServerConnectionPool {
     private static String dbConnectionUrl;
     private static String connectionUsername;
     private static String connectionPassword;
     private static SessionFactory ourSessionFactory = null;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    public Server() throws ServerStartException {
+    public ServerConnectionPool() throws ServerStartException {
         prepareServerSettings();
         prepareServer();
     }
 
-    public Server(String connectionUrl, String username, String password) throws ServerStartException {
-        log.info("Forcing Server settings");
+    public ServerConnectionPool(String connectionUrl, String username, String password) throws ServerStartException {
+        log.info("Forcing ServerConnectionPool settings");
         dbConnectionUrl = connectionUrl;
         connectionUsername = username;
         connectionPassword = password;
@@ -69,15 +69,19 @@ public class Server {
 
     private static void createDaoSession() {
         try (Session session = getSession()) {
-            System.out.println("querying all the managed entities...");
-            final Metamodel metamodel = session.getSessionFactory().getMetamodel();
-            for (EntityType<?> entityType : metamodel.getEntities()) {
-                final String entityName = entityType.getName();
-                final Query query = session.createQuery("from " + entityName);
-                System.out.println("executing: " + query.getQueryString());
-                for (Object o : query.list()) {
-                    System.out.println("  " + o);
-                }
+            testConnection(session);
+        }
+    }
+
+    private static void testConnection(Session session) {
+        System.out.println("querying all the managed entities...");
+        final Metamodel metamodel = session.getSessionFactory().getMetamodel();
+        for (EntityType<?> entityType : metamodel.getEntities()) {
+            final String entityName = entityType.getName();
+            final Query query = session.createQuery("from " + entityName);
+            System.out.println("executing: " + query.getQueryString());
+            for (Object o : query.list()) {
+                System.out.println("  " + o);
             }
         }
     }
