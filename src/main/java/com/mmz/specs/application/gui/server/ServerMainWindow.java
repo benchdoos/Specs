@@ -10,6 +10,12 @@ import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.dao.entity.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.style.Styler;
+import org.knowm.xchart.style.markers.SeriesMarkers;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.NetworkParams;
 
@@ -18,6 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,15 +32,21 @@ import java.util.Date;
 import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMainWindow extends JFrame {
-
     private static final int MONITORING_TIMER_DELAY = 1000;
+    private static final int GRAPHICS_LENGTH = 60;
+    private static int caretPosition = 0;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
-    Thread monitorUiUpdateThread;
+    private final String DEGREE = "\u00b0";
+    private Thread monitorUiUpdateThread;
+    private ArrayList<Double> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Double> cpuValues = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Double> cpuServerValues = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Double> cpuTemperatureValue = new ArrayList<>(GRAPHICS_LENGTH);
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
-    private JList onlineUserList;
+    private JList<Object> onlineUserList;
     private JLabel onlineUsersCountLabel;
     private JLabel threadsCount;
     private JLabel serverOnlineTimeLabel;
@@ -78,11 +91,11 @@ public class ServerMainWindow extends JFrame {
     private JTable constantsTable;
     private JButton updateServerConstantsButton;
     private JLabel usedProcessCpuInfoLabel;
+    private JPanel graphicsPanel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
     private JPanel onlyAdminTabsList[] = new JPanel[]{controlPanel};
-
 
     public ServerMainWindow() {
         setContentPane(contentPane);
@@ -115,8 +128,9 @@ public class ServerMainWindow extends JFrame {
 
     private void initThreads() {
         monitorUiUpdateThread = new Thread(new Runnable() {
-
+            private long counter = 0;
             Timer timer = new Timer(MONITORING_TIMER_DELAY, e -> {
+
                 updateOnlineUsersCount(e);
                 updateServerOnlineTimeLabel();
                 updateActiveThreadCounterLabel();
@@ -124,10 +138,17 @@ public class ServerMainWindow extends JFrame {
                 updateUsedProcessCpuInfoLabel();
                 updateUsedJvmMemoryInfoLabel();
                 updateTemperatureInfoLabel();
+                if (counter % 30 == 0) {
+                    createGraphics();
+                    counter++;
+                } else if (counter >= Long.MAX_VALUE - 1000) {
+                    counter = 0;
+                }
+                caretPosition++;
+
             });
 
             private void updateTemperatureInfoLabel() {
-                final String DEGREE = "\u00b0";
 
                 if (getCpuTemperature() > 90.0d) {
                     temperatureInfoLabel.setForeground(Color.RED);
@@ -141,12 +162,18 @@ public class ServerMainWindow extends JFrame {
                     temperatureInfoLabel.setIcon(null);
                 }
 
+                cpuTemperatureValue = updateGraphicValue(cpuTemperatureValue, getCpuTemperature());
+
                 temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE + " VOL: " + getCpuVoltage()
                         + " FAN-SPEED: " + Arrays.toString(getCpuFanSpeeds()));
             }
 
             private void updateUsedJvmMemoryInfoLabel() {
                 String memoryInfo = "JVM: " + getRuntimeUsedMemory() + " / " + getRuntimeTotalMemory() + " МБ. ";
+                double usedMemory = CommonUtils.round(getRuntimeUsedMemory() / (double) getRuntimeMaxMemory() * 100, 2);
+
+                memoryValues = updateGraphicValue(memoryValues, usedMemory);
+
                 if (getRuntimeUsedMemory() > (getRuntimeMaxMemory() - 0.2 * getRuntimeMaxMemory())) {
                     usedProcessMemoryInfoLabel.setForeground(Color.RED);
                 } else {
@@ -194,7 +221,6 @@ public class ServerMainWindow extends JFrame {
         totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + runtimeTotalMemory + " МБ.");
     }
 
-
     private void updateNetworkInfoPanel() {
         NetworkParams networkParams = OPERATING_SYSTEM.getNetworkParams();
         networkNameInfoLabel.setText(networkParams.getHostName());
@@ -207,6 +233,9 @@ public class ServerMainWindow extends JFrame {
         long physicalProcessorCount = processor.getPhysicalProcessorCount();
         double cpuLoad = getProcessCpuLoad();
         String cpuLoadString = CommonUtils.round(cpuLoad, 1) + "%";
+
+        cpuValues = updateGraphicValue(cpuValues, getProcessCpuLoad());
+
         if (cpuLoad >= 60.0d) {
             processorInfoLabel.setForeground(Color.RED);
         } else {
@@ -218,6 +247,10 @@ public class ServerMainWindow extends JFrame {
     private void updateUsedProcessCpuInfoLabel() {
         final double cpuUsageByApplication = getCpuUsageByApplication();
         String processInfo = cpuUsageByApplication + "%";
+
+        updateGraphicValue(cpuServerValues, getCpuUsageByApplication());
+
+
         if (cpuUsageByApplication >= 60.0d) {
             usedProcessCpuInfoLabel.setForeground(Color.RED);
         } else {
@@ -264,7 +297,7 @@ public class ServerMainWindow extends JFrame {
         updateJvmInfoLabel();
 
         //test
-        DefaultListModel listModel = new DefaultListModel<>();
+        DefaultListModel<Object> listModel = new DefaultListModel<>();
 
         for (int i = 0; i < 100; i++) {
             listModel.addElement("User: " + i);
@@ -295,6 +328,19 @@ public class ServerMainWindow extends JFrame {
         });
     }
 
+    private void createGraphics() {
+        long t1 = System.nanoTime();
+        XYChart chart = getChart(graphicsPanel.getWidth(), graphicsPanel.getHeight());
+        XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
+        if (graphicsPanel.getComponents().length > 0) {
+            graphicsPanel.removeAll();
+        }
+
+        graphicsPanel.add(graphXChartPanel);
+        long t2 = System.nanoTime();
+        System.out.println("--> " + (t2 - t1) / 1000);
+    }
+
     private void updateJvmInfoLabel() {
         jvmInfoLabel.setText(System.getProperty("java.specification.version")
                 + "(" + System.getProperty("java.version") + ")");
@@ -308,8 +354,7 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-
-    private void onForceUserDisconnect(DefaultListModel listModel) {
+    private void onForceUserDisconnect(DefaultListModel<Object> listModel) {
         if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
             int selectedIndex = onlineUserList.getSelectedIndex();
             listModel.remove(selectedIndex);
@@ -359,7 +404,6 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-
     private void setUnlocked(boolean isUnlocked) {
         ServerMainWindow.isUnlocked = isUnlocked;
 
@@ -388,9 +432,73 @@ public class ServerMainWindow extends JFrame {
 
     }
 
+    public XYChart getChart(int width, int height) {
+
+        // Create Chart
+        XYChart chart = new XYChartBuilder().width(width).height(height).yAxisTitle("Нагрузка (%)").theme(Styler.ChartTheme.Matlab).build();
+
+        // Customize Chart
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
+        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
+        chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+        chart.getStyler().setYAxisDecimalPattern("###.##");
+        chart.getStyler().setPlotMargin(0);
+        chart.getStyler().setPlotContentSize(1);
+        chart.getStyler().setLegendSeriesLineLength(1);
+
+        // Series
+        // @formatter:off
+
+        ArrayList<Double> xAges = getGraphicXAges();
+
+        ArrayList<Double> memoryData = this.memoryValues;
+
+        ArrayList<Double> cpuData = this.cpuValues;
+
+        ArrayList<Double> cpuServerData = this.cpuServerValues;
+
+        ArrayList<Double> cpuTemperatureData = this.cpuTemperatureValue;
+        // @formatter:on
+
+        System.out.println("sizes: " + xAges.size() + ' ' + memoryData.size() + ' ' + cpuData.size());
+
+
+        XYSeries memory = chart.addSeries("ОЗУ", xAges, memoryData);
+        memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
+        memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN);
+
+
+        chart.addSeries("ЦП (" + DEGREE + "C)", xAges, cpuTemperatureData).setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
+        chart.addSeries("ЦП (все)", xAges, cpuData).setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
+        chart.addSeries("ЦП (сервер)", xAges, cpuServerData).setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
+
+
+        return chart;
+    }
+
+    private ArrayList<Double> getGraphicXAges() {
+        ArrayList<Double> result = new ArrayList<>(GRAPHICS_LENGTH);
+        for (int i = 0; i < GRAPHICS_LENGTH; i++) {
+            result.add((double) i);
+        }
+        return result;
+    }
+
     @Override
     public void dispose() {
         monitorUiUpdateThread.interrupt();
         super.dispose();
+    }
+
+
+    private ArrayList<Double> updateGraphicValue(ArrayList<Double> oldValues, double newValue) {
+        if (caretPosition >= oldValues.size()) caretPosition = 0;
+        if (oldValues.size() != GRAPHICS_LENGTH) {
+            for (int i = 0; i < GRAPHICS_LENGTH; i++) {
+                oldValues.add(0d);
+            }
+        }
+        oldValues.set(caretPosition, newValue);
+        return oldValues;
     }
 }

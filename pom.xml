@@ -125,6 +125,14 @@
             <version>2.7.7</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.knowm.xchart/xchart -->
+        <dependency>
+            <groupId>org.knowm.xchart</groupId>
+            <artifactId>xchart</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
+
     </dependencies>
 
 
