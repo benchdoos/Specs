@@ -78,6 +78,8 @@ public class ServerMainWindow extends JFrame {
     private JTable constantsTable;
     private JButton updateServerConstantsButton;
     private JLabel usedProcessCpuInfoLabel;
+    private JLabel voltageInfoLabel;
+    private JLabel fanSpeedInfoLabel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -124,6 +126,8 @@ public class ServerMainWindow extends JFrame {
                 updateUsedProcessCpuInfoLabel();
                 updateUsedJvmMemoryInfoLabel();
                 updateTemperatureInfoLabel();
+                updateVoltageInfoLabel();
+                updateFanSpeedInfoLabel();
             });
 
             private void updateTemperatureInfoLabel() {
@@ -141,12 +145,19 @@ public class ServerMainWindow extends JFrame {
                     temperatureInfoLabel.setIcon(null);
                 }
 
-                temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE + " VOL: " + getCpuVoltage()
-                        + " FAN-SPEED: " + Arrays.toString(getCpuFanSpeeds()));
+                temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE);
+            }
+
+            private void updateFanSpeedInfoLabel() {
+                fanSpeedInfoLabel.setText(Arrays.toString(getCpuFanSpeeds()));
+            }
+
+            private void updateVoltageInfoLabel() {
+                voltageInfoLabel.setText(getCpuVoltage() + "");
             }
 
             private void updateUsedJvmMemoryInfoLabel() {
-                String memoryInfo = "JVM: " + getRuntimeUsedMemory() + " / " + getRuntimeTotalMemory() + " МБ. ";
+                String memoryInfo = getRuntimeUsedMemory() + " / " + getRuntimeTotalMemory() + " МБ. ";
                 if (getRuntimeUsedMemory() > (getRuntimeMaxMemory() - 0.2 * getRuntimeMaxMemory())) {
                     usedProcessMemoryInfoLabel.setForeground(Color.RED);
                 } else {
