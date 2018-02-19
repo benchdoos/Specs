@@ -1,5 +1,6 @@
 package com.mmz.specs.application.utils;
 
+import com.sun.management.OperatingSystemMXBean;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -17,14 +18,19 @@ public class SystemMonitoringInfoUtils {
     private static final int MEGABYTE = 1024 * 1024;
     private static final Sensors SENSORS = HARDWARE_ABSTRACTION_LAYER.getSensors();
     private static final CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
+    private static final int PROCESS_ID = OPERATING_SYSTEM.getProcessId();
+    private static final OSProcess process = OPERATING_SYSTEM.getProcess(PROCESS_ID);
+    private static final int LOGICAL_PROCESSOR_COUNT = processor.getLogicalProcessorCount();
     private static long previousProcessTime = -1;
+    private static long HARDWARE_TOTAL_RAM_MEMORY = HARDWARE_ABSTRACTION_LAYER.getMemory().getTotal();
+
 
     public static double getProcessCpuLoad() {
-        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         double result = operatingSystemMXBean.getSystemCpuLoad();
 
         // returns a percentage value with 6 decimal point precision
-        return ((int) (result * 1000) / 10.000000);
+        return ((int) (result * 1000) / 10.00);
     }
 
     public static int getApplicationCurrentThreads() {
@@ -32,8 +38,7 @@ public class SystemMonitoringInfoUtils {
     }
 
     public static long getSystemTotalMemory() {
-        long result = HARDWARE_ABSTRACTION_LAYER.getMemory().getTotal();
-        return result / MEGABYTE;
+        return HARDWARE_TOTAL_RAM_MEMORY / MEGABYTE;
     }
 
     public static long getRuntimeMaxMemory() {
@@ -68,12 +73,7 @@ public class SystemMonitoringInfoUtils {
     }
 
     public static double getCpuUsageByApplication() {
-        int cpuNumber = processor.getLogicalProcessorCount();
-        int pid = OPERATING_SYSTEM.getProcessId();
-        OSProcess process = OPERATING_SYSTEM.getProcess(pid);
-        String processInfo = "0%";
         long currentTime = 0;
-
         double cpu = 0.0;
         if (process != null) {
             // CPU
@@ -83,12 +83,13 @@ public class SystemMonitoringInfoUtils {
                 // If we have both a previous and a current time
                 // we can calculate the CPU usage
                 long timeDifference = currentTime - previousProcessTime;
-                cpu = (100d * (timeDifference / ((double) 1000))) / cpuNumber;
+                cpu = timeDifference / LOGICAL_PROCESSOR_COUNT;
                 cpu = CommonUtils.round(cpu, 1);
             }
 
             previousProcessTime = currentTime;
         }
+
         return cpu;
     }
 }

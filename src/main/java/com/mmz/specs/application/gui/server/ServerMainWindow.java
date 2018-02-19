@@ -38,7 +38,7 @@ public class ServerMainWindow extends JFrame {
     private static int caretPosition = 0;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
-    Timer monitorUiUpdateTimer;
+    private Timer monitorUiUpdateTimer;
     private final String DEGREE = "\u00b0";
     private Thread monitorUiUpdateThread;
     private ArrayList<Double> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
@@ -132,39 +132,53 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void initThreads() {
-        monitorUiUpdateThread = new Thread(new Runnable() {
-            private long counter = 0;
-            Timer timer = new Timer(MONITORING_TIMER_DELAY, e -> {
-                updateOnlineUsersCount(e);
-                updateServerOnlineTimeLabel();
-                updateActiveThreadCounterLabel();
-                updateProcessorInfoLabel();
-                updateUsedProcessCpuInfoLabel();
-                updateUsedJvmMemoryInfoLabel();
-                updateTemperatureInfoLabel();
-                if (counter % 30 == 0) {
-                    createGraphics();
-                    counter++;
-                } else if (counter >= Long.MAX_VALUE - 1000) {
-                    counter = 0;
-                }
-                caretPosition++;
-
-                updateVoltageInfoLabel();
-                updateFanSpeedInfoLabel();
-            });
-
         monitorUiUpdateTimer = new Timer(MONITORING_TIMER_DELAY, new ActionListener() {
+            long counter = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                long t0 = System.nanoTime();
+                updateOnlineUsersCount(e);
+                long t1 = System.nanoTime();
+                updateServerOnlineTimeLabel();
+                long t2 = System.nanoTime();
+                updateActiveThreadCounterLabel();
+                long t3 = System.nanoTime();
+                updateProcessorInfoLabel();
+                long t4 = System.nanoTime();
+                updateUsedProcessCpuInfoLabel();
+                long t5 = System.nanoTime();
+                updateUsedJvmMemoryInfoLabel();
+                long t6 = System.nanoTime();
+
+                if (counter % 10 == 0) {
+                    updateTemperatureInfoLabel();
+                    updateVoltageInfoLabel();
+                    updateFanSpeedInfoLabel();
+                }
+
+                System.out.println(">>> updateOnlineUsersCount:" + getTime(t0, t1) + " updateServerOnlineTimeLabel:" + getTime(t1, t2)
+                        + " updateActiveThreadCounterLabel:" + getTime(t2, t3) + " updateProcessorInfoLabel:" + getTime(t3, t4)
+                        + " updateUsedProcessCpuInfoLabel:" + getTime(t4, t5) + " updateUsedJvmMemoryInfoLabel:" + getTime(t5, t6));
+                counter++;
+            }
+
+            private long getTime(long t1, long t2) {
+                return (t2 - t1) / 1000;
+            }
+
             private void updateTemperatureInfoLabel() {
                 final String DEGREE = "\u00b0";
 
-                if (getCpuTemperature() > 90.0d) {
+                final double cpuTemperature = getCpuTemperature();
+
+                if (cpuTemperature > 90.0d) {
                     temperatureInfoLabel.setForeground(Color.RED);
                 } else {
                     temperatureInfoLabel.setForeground(Color.BLACK);
                 }
 
-                if (getCpuTemperature() > 95.0d) {
+                if (cpuTemperature > 95.0d) {
                     temperatureInfoLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/warning.png")));
                 } else {
                     temperatureInfoLabel.setIcon(null);
@@ -172,9 +186,7 @@ public class ServerMainWindow extends JFrame {
 
                 cpuTemperatureValue = updateGraphicValue(cpuTemperatureValue, getCpuTemperature());
 
-                temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE + " VOL: " + getCpuVoltage()
-                        + " FAN-SPEED: " + Arrays.toString(getCpuFanSpeeds()));
-                temperatureInfoLabel.setText("ЦП: " + getCpuTemperature() + " C" + DEGREE);
+                temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE);
             }
 
             private void updateFanSpeedInfoLabel() {
@@ -182,7 +194,7 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateVoltageInfoLabel() {
-                voltageInfoLabel.setText(getCpuVoltage() + "");
+                voltageInfoLabel.setText(Double.toString(getCpuVoltage()));
             }
 
             private void updateUsedJvmMemoryInfoLabel() {
@@ -220,19 +232,6 @@ public class ServerMainWindow extends JFrame {
                 if (Thread.currentThread().isInterrupted()) {
                     ((Timer) e.getSource()).stop();
                 }
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateOnlineUsersCount(e);
-                updateServerOnlineTimeLabel();
-                updateActiveThreadCounterLabel();
-                updateProcessorInfoLabel();
-                updateUsedProcessCpuInfoLabel();
-                updateUsedJvmMemoryInfoLabel();
-                updateTemperatureInfoLabel();
-                updateVoltageInfoLabel();
-                updateFanSpeedInfoLabel();
             }
         });
         if (!monitorUiUpdateTimer.isRunning()) {
