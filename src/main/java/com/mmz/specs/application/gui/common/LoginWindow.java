@@ -1,7 +1,7 @@
 package com.mmz.specs.application.gui.common;
 
 import com.mmz.specs.application.core.security.SecurityManager;
-import com.mmz.specs.domain.UsersEntity;
+import com.mmz.specs.model.UsersEntity;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package com.mmz.specs.dao;
+package com.mmz.specs.connection;
 
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerStartException;

@@ -1,4 +1,4 @@
-package com.mmz.specs.domain;
+package com.mmz.specs.model;
 
 import javax.persistence.*;
 import java.sql.Date;

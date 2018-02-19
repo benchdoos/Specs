@@ -1,7 +1,7 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.dao.ServerConnectionPool;
+import com.mmz.specs.connection.ServerConnectionPool;
 import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;

@@ -1,4 +1,4 @@
-package com.mmz.specs.dao;
+package com.mmz.specs.connection;
 
 public class HibernateConstants {
     public static final String DB_CONNECTION_URL_KEY = "hibernate.connection.url";
