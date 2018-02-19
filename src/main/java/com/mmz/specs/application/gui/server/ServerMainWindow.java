@@ -38,8 +38,8 @@ public class ServerMainWindow extends JFrame {
     private static int caretPosition = 0;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
-    private Timer monitorUiUpdateTimer;
     private final String DEGREE = "\u00b0";
+    private Timer monitorUiUpdateTimer;
     private Thread monitorUiUpdateThread;
     private ArrayList<Double> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
     private ArrayList<Double> cpuValues = new ArrayList<>(GRAPHICS_LENGTH);
@@ -133,34 +133,22 @@ public class ServerMainWindow extends JFrame {
 
     private void initThreads() {
         monitorUiUpdateTimer = new Timer(MONITORING_TIMER_DELAY, new ActionListener() {
-            long counter = 0;
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                long t0 = System.nanoTime();
-                updateOnlineUsersCount(e);
-                long t1 = System.nanoTime();
+                updateOnlineUsersCount();
                 updateServerOnlineTimeLabel();
-                long t2 = System.nanoTime();
                 updateActiveThreadCounterLabel();
-                long t3 = System.nanoTime();
                 updateProcessorInfoLabel();
-                long t4 = System.nanoTime();
                 updateUsedProcessCpuInfoLabel();
-                long t5 = System.nanoTime();
                 updateUsedJvmMemoryInfoLabel();
-                long t6 = System.nanoTime();
 
-                if (counter % 10 == 0) {
-                    updateTemperatureInfoLabel();
-                    updateVoltageInfoLabel();
-                    updateFanSpeedInfoLabel();
-                }
+                updateTemperatureInfoLabel();
+                updateVoltageInfoLabel();
+                updateFanSpeedInfoLabel();
+                createGraphics();
 
-                System.out.println(">>> updateOnlineUsersCount:" + getTime(t0, t1) + " updateServerOnlineTimeLabel:" + getTime(t1, t2)
-                        + " updateActiveThreadCounterLabel:" + getTime(t2, t3) + " updateProcessorInfoLabel:" + getTime(t3, t4)
-                        + " updateUsedProcessCpuInfoLabel:" + getTime(t4, t5) + " updateUsedJvmMemoryInfoLabel:" + getTime(t5, t6));
-                counter++;
+                caretPosition++;
             }
 
             private long getTime(long t1, long t2) {
@@ -168,8 +156,6 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateTemperatureInfoLabel() {
-                final String DEGREE = "\u00b0";
-
                 final double cpuTemperature = getCpuTemperature();
 
                 if (cpuTemperature > 90.0d) {
@@ -198,12 +184,15 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateUsedJvmMemoryInfoLabel() {
-                String memoryInfo = "JVM: " + getRuntimeUsedMemory() + " / " + getRuntimeTotalMemory() + " МБ. ";
-                double usedMemory = CommonUtils.round(getRuntimeUsedMemory() / (double) getRuntimeMaxMemory() * 100, 2);
+                final long runtimeUsedMemory = getRuntimeUsedMemory();
+                final long runtimeMaxMemory = getRuntimeMaxMemory();
+                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + getRuntimeTotalMemory() + " МБ. ";
+
+                double usedMemory = CommonUtils.round(runtimeUsedMemory / (double) runtimeMaxMemory * 100, 2);
 
                 memoryValues = updateGraphicValue(memoryValues, usedMemory);
 
-                if (getRuntimeUsedMemory() > (getRuntimeMaxMemory() - 0.2 * getRuntimeMaxMemory())) {
+                if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
                     usedProcessMemoryInfoLabel.setForeground(Color.RED);
                 } else {
                     usedProcessMemoryInfoLabel.setForeground(Color.BLACK);
@@ -226,12 +215,9 @@ public class ServerMainWindow extends JFrame {
                 }
             }
 
-            private void updateOnlineUsersCount(ActionEvent e) {
+            private void updateOnlineUsersCount() {
                 onlineUsersCountLabel.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
                 onlineUsersCount2.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
-                if (Thread.currentThread().isInterrupted()) {
-                    ((Timer) e.getSource()).stop();
-                }
             }
         });
         if (!monitorUiUpdateTimer.isRunning()) {
@@ -324,7 +310,7 @@ public class ServerMainWindow extends JFrame {
         //test
         DefaultListModel<Object> listModel = new DefaultListModel<>();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10 * 1000; i++) {
             listModel.addElement("User: " + i);
         }
         onlineUserList.setModel(listModel);
