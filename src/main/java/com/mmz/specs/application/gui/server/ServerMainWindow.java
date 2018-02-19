@@ -32,11 +32,13 @@ import java.util.Date;
 import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMainWindow extends JFrame {
+
     private static final int MONITORING_TIMER_DELAY = 1000;
     private static final int GRAPHICS_LENGTH = 60;
     private static int caretPosition = 0;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
+    Timer monitorUiUpdateTimer;
     private final String DEGREE = "\u00b0";
     private Thread monitorUiUpdateThread;
     private ArrayList<Double> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
@@ -152,7 +154,9 @@ public class ServerMainWindow extends JFrame {
                 updateFanSpeedInfoLabel();
             });
 
+        monitorUiUpdateTimer = new Timer(MONITORING_TIMER_DELAY, new ActionListener() {
             private void updateTemperatureInfoLabel() {
+                final String DEGREE = "\u00b0";
 
                 if (getCpuTemperature() > 90.0d) {
                     temperatureInfoLabel.setForeground(Color.RED);
@@ -219,13 +223,21 @@ public class ServerMainWindow extends JFrame {
             }
 
             @Override
-            public void run() {
-                if (!timer.isRunning()) {
-                    timer.start();
-                }
+            public void actionPerformed(ActionEvent e) {
+                updateOnlineUsersCount(e);
+                updateServerOnlineTimeLabel();
+                updateActiveThreadCounterLabel();
+                updateProcessorInfoLabel();
+                updateUsedProcessCpuInfoLabel();
+                updateUsedJvmMemoryInfoLabel();
+                updateTemperatureInfoLabel();
+                updateVoltageInfoLabel();
+                updateFanSpeedInfoLabel();
             }
         });
-        monitorUiUpdateThread.start();
+        if (!monitorUiUpdateTimer.isRunning()) {
+            monitorUiUpdateTimer.start();
+        }
     }
 
     private void updateTotalMemoryLabel() {
@@ -501,7 +513,9 @@ public class ServerMainWindow extends JFrame {
 
     @Override
     public void dispose() {
-        monitorUiUpdateThread.interrupt();
+        if (monitorUiUpdateTimer.isRunning()) {
+            monitorUiUpdateTimer.stop();
+        }
         super.dispose();
     }
 
