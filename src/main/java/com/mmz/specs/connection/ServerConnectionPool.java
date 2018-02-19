@@ -40,7 +40,7 @@ public class ServerConnectionPool {
     private static void createConnection() {
         try {
             Configuration configuration = new Configuration();
-            configuration.configure(new File("src/main/java/hibernate.cfg.xml"));
+            configuration.configure(new File("src/main/resources/hibernate/hibernate.cfg.xml"));
             /*configuration.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, dbConnectionUrl);
             configuration.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, connectionUsername);
             configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, connectionPassword);*/

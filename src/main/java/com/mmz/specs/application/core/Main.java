@@ -1,3 +1,5 @@
+package com.mmz.specs.application.core;
+
 import com.mmz.specs.application.utils.CoreUtils;
 import com.mmz.specs.application.utils.Logging;
 
