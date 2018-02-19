@@ -39,6 +39,7 @@ public class ServerMainWindow extends JFrame {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
     private final String DEGREE = "\u00b0";
+    DefaultListModel<Object> usersListModel = new DefaultListModel<>();
     private Timer monitorUiUpdateTimer;
     private Thread monitorUiUpdateThread;
     private ArrayList<Double> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
@@ -69,9 +70,9 @@ public class ServerMainWindow extends JFrame {
     private JCheckBox isActiveCheckBox;
     private JComboBox userTypeComboBox;
     private JButton saveButton;
-    private JTabbedPane controlPane;
+    private JTabbedPane adminPane;
     private JButton addUserButton;
-    private JPanel usersControlPanel;
+    private JPanel adminUsersPanel;
     private JButton buttonUserInfo;
     private JButton restartServerButton;
     private JButton openLogFolderButton;
@@ -83,7 +84,7 @@ public class ServerMainWindow extends JFrame {
     private JPasswordField connectionPasswordTextField;
     private JLabel osInfoLabel;
     private JLabel usedProcessMemoryInfoLabel;
-    private JLabel processorInfoLabel;
+    private JLabel usedCpuBySystemInfoLabel;
     private JLabel temperatureInfoLabel;
     private JLabel networkNameInfoLabel;
     private JLabel ipAdressInfoLabel;
@@ -92,10 +93,13 @@ public class ServerMainWindow extends JFrame {
     private JLabel jvmInfoLabel;
     private JTable constantsTable;
     private JButton updateServerConstantsButton;
-    private JLabel usedProcessCpuInfoLabel;
+    private JLabel usedCpuByApplicationInfoLabel;
     private JPanel graphicsPanel;
     private JLabel voltageInfoLabel;
     private JLabel fanSpeedInfoLabel;
+    private JPanel adminServerPanel;
+    private JPanel adminSettingsPanel;
+    private JPanel adminConstantsPanel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -110,12 +114,7 @@ public class ServerMainWindow extends JFrame {
         initGui();
 
         // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                dispose();
-            }
-        });
+
 
         initKeyboardActions();
 
@@ -159,15 +158,12 @@ public class ServerMainWindow extends JFrame {
                 final double cpuTemperature = getCpuTemperature();
 
                 if (cpuTemperature > 90.0d) {
-                    temperatureInfoLabel.setForeground(Color.RED);
-                } else {
-                    temperatureInfoLabel.setForeground(Color.BLACK);
-                }
 
-                if (cpuTemperature > 95.0d) {
-                    temperatureInfoLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/warning.png")));
+                    setWarningMode(temperatureInfoLabel,true);
+
                 } else {
-                    temperatureInfoLabel.setIcon(null);
+                    setWarningMode(temperatureInfoLabel,false);
+
                 }
 
                 cpuTemperatureValue = updateGraphicValue(cpuTemperatureValue, getCpuTemperature());
@@ -193,9 +189,9 @@ public class ServerMainWindow extends JFrame {
                 memoryValues = updateGraphicValue(memoryValues, usedMemory);
 
                 if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
-                    usedProcessMemoryInfoLabel.setForeground(Color.RED);
+                    setWarningMode(usedProcessMemoryInfoLabel,true);
                 } else {
-                    usedProcessMemoryInfoLabel.setForeground(Color.BLACK);
+                    setWarningMode(usedProcessMemoryInfoLabel,false);
                 }
                 usedProcessMemoryInfoLabel.setText(memoryInfo);
             }
@@ -248,31 +244,43 @@ public class ServerMainWindow extends JFrame {
         cpuValues = updateGraphicValue(cpuValues, getProcessCpuLoad());
 
         if (cpuLoad >= 60.0d) {
-            processorInfoLabel.setForeground(Color.RED);
+            setWarningMode(usedCpuBySystemInfoLabel, true);
         } else {
-            processorInfoLabel.setForeground(Color.BLACK);
+            setWarningMode(usedCpuBySystemInfoLabel, false);
         }
-        processorInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ") " + cpuLoadString);
+        usedCpuBySystemInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ") " + cpuLoadString);
     }
 
     private void updateUsedProcessCpuInfoLabel() {
         final double cpuUsageByApplication = getCpuUsageByApplication();
         String processInfo = cpuUsageByApplication + "%";
 
-        updateGraphicValue(cpuServerValues, getCpuUsageByApplication());
+        updateGraphicValue(cpuServerValues, cpuUsageByApplication);
 
 
         if (cpuUsageByApplication >= 60.0d) {
-            usedProcessCpuInfoLabel.setForeground(Color.RED);
+            setWarningMode(usedCpuByApplicationInfoLabel,true);
+
         } else {
-            usedProcessCpuInfoLabel.setForeground(Color.BLACK);
+            setWarningMode(usedCpuByApplicationInfoLabel,false);
+
         }
-        usedProcessCpuInfoLabel.setText(processInfo);
+        usedCpuByApplicationInfoLabel.setText(processInfo);
 
     }
 
+    private void setWarningMode(JLabel label, boolean value) {
+        if (value) {
+            label.setForeground(Color.RED);
+            label.setIcon(new ImageIcon(getClass().getResource("/img/gui/warning12.png")));
+        } else {
+            label.setForeground(Color.BLACK);
+            label.setIcon(null);
+        }
+    }
+
     String getServerOnlineString(long differenceInSeconds) {
-        final String MAXIMUM_SUPPORTED_ALIFE_TIME = "> 24855д.";
+        final String MAXIMUM_SUPPORTED_LIFE_TIME = "> 24855д.";
         if (differenceInSeconds >= 0) {
             long seconds = differenceInSeconds % 60;
             long minutes = (differenceInSeconds / 60) % 60;
@@ -280,11 +288,19 @@ public class ServerMainWindow extends JFrame {
             long days = (differenceInSeconds / 60 / 60 / 24);
             return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
         } else {
-            return MAXIMUM_SUPPORTED_ALIFE_TIME;
+            return MAXIMUM_SUPPORTED_LIFE_TIME;
         }
     }
 
     private void initKeyboardActions() {
+
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> dispose(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
@@ -292,6 +308,10 @@ public class ServerMainWindow extends JFrame {
 
         contentPane.registerKeyboardAction(e -> onButtonAdminLock(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        adminServerPanel.registerKeyboardAction(e -> onForceUserDisconnect(usersListModel),
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
@@ -308,15 +328,14 @@ public class ServerMainWindow extends JFrame {
         updateJvmInfoLabel();
 
         //test
-        DefaultListModel<Object> listModel = new DefaultListModel<>();
 
         for (int i = 0; i < 10 * 1000; i++) {
-            listModel.addElement("User: " + i);
+            usersListModel.addElement("User: " + i);
         }
-        onlineUserList.setModel(listModel);
+        onlineUserList.setModel(usersListModel);
 
         buttonForceUserDisconnect.addActionListener(e -> {
-            onForceUserDisconnect(listModel);
+            onForceUserDisconnect(usersListModel);
         });
 
         buttonAdminLock.addActionListener(e -> {
@@ -340,16 +359,16 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void createGraphics() {
-        long t1 = System.nanoTime();
-        XYChart chart = getChart(graphicsPanel.getWidth(), graphicsPanel.getHeight());
+        final int width = graphicsPanel.getWidth();
+        final int height = 210; // need to be hardcoded or it will rise
+
+        System.out.println("hm: " + width + "x" + height);
+        XYChart chart = getChart(width, height);
         XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
         if (graphicsPanel.getComponents().length > 0) {
             graphicsPanel.removeAll();
         }
-
         graphicsPanel.add(graphXChartPanel);
-        long t2 = System.nanoTime();
-        System.out.println("--> " + (t2 - t1) / 1000);
     }
 
     private void updateJvmInfoLabel() {
@@ -444,13 +463,14 @@ public class ServerMainWindow extends JFrame {
 
     }
 
-    public XYChart getChart(int width, int height) {
+    private XYChart getChart(int width, int height) {
 
         // Create Chart
         XYChart chart = new XYChartBuilder().width(width).height(height).yAxisTitle("Нагрузка (%)").theme(Styler.ChartTheme.Matlab).build();
 
         // Customize Chart
-        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
+        chart.getStyler().setLegendSeriesLineLength(1);
         chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
         chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
         chart.getStyler().setYAxisDecimalPattern("###.##");
@@ -475,14 +495,14 @@ public class ServerMainWindow extends JFrame {
         System.out.println("sizes: " + xAges.size() + ' ' + memoryData.size() + ' ' + cpuData.size());
 
 
-        XYSeries memory = chart.addSeries("ОЗУ", xAges, memoryData);
-        memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
+        XYSeries memory = chart.addSeries("% ОЗУ", xAges, memoryData);
+        /*memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);*/
         memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN);
 
 
-        chart.addSeries("ЦП (" + DEGREE + "C)", xAges, cpuTemperatureData).setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
-        chart.addSeries("ЦП (все)", xAges, cpuData).setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
-        chart.addSeries("ЦП (сервер)", xAges, cpuServerData).setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
+        chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData).setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
+        chart.addSeries("% ЦП (система)", xAges, cpuData).setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
+        chart.addSeries("% ЦП (сервер)", xAges, cpuServerData).setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
 
 
         return chart;

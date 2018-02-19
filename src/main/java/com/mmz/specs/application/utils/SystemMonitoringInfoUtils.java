@@ -19,7 +19,7 @@ public class SystemMonitoringInfoUtils {
     private static final Sensors SENSORS = HARDWARE_ABSTRACTION_LAYER.getSensors();
     private static final CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
     private static final int PROCESS_ID = OPERATING_SYSTEM.getProcessId();
-    private static final OSProcess process = OPERATING_SYSTEM.getProcess(PROCESS_ID);
+    private static final OSProcess PROCESS = OPERATING_SYSTEM.getProcess(PROCESS_ID);
     private static final int LOGICAL_PROCESSOR_COUNT = processor.getLogicalProcessorCount();
     private static long previousProcessTime = -1;
     private static long HARDWARE_TOTAL_RAM_MEMORY = HARDWARE_ABSTRACTION_LAYER.getMemory().getTotal();
@@ -73,23 +73,10 @@ public class SystemMonitoringInfoUtils {
     }
 
     public static double getCpuUsageByApplication() {
-        long currentTime = 0;
-        double cpu = 0.0;
-        if (process != null) {
-            // CPU
-            currentTime = process.getKernelTime() + process.getUserTime();
+        OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        double result = operatingSystemMXBean.getProcessCpuLoad();
 
-            if (previousProcessTime != -1) {
-                // If we have both a previous and a current time
-                // we can calculate the CPU usage
-                long timeDifference = currentTime - previousProcessTime;
-                cpu = timeDifference / LOGICAL_PROCESSOR_COUNT;
-                cpu = CommonUtils.round(cpu, 1);
-            }
-
-            previousProcessTime = currentTime;
-        }
-
-        return cpu;
+        // returns a percentage value with 2 decimal point precision
+        return ((int) (result * 1000) / 10.00);
     }
 }
