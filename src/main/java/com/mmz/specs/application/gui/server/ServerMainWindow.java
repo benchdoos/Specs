@@ -30,7 +30,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -100,8 +99,6 @@ public class ServerMainWindow extends JFrame {
     private JButton updateServerConstantsButton;
     private JLabel usedCpuByApplicationInfoLabel;
     private JPanel graphicsPanel;
-    private JLabel voltageInfoLabel;
-    private JLabel fanSpeedInfoLabel;
     private JPanel adminServerPanel;
     private JPanel adminSettingsPanel;
     private JPanel adminConstantsPanel;
@@ -148,15 +145,9 @@ public class ServerMainWindow extends JFrame {
                 updateUsedJvmMemoryInfoLabel();
 
                 updateTemperatureInfoLabel();
-                updateVoltageInfoLabel();
-                updateFanSpeedInfoLabel();
                 createGraphics();
 
                 caretPosition++;
-            }
-
-            private long getTime(long t1, long t2) {
-                return (t2 - t1) / 1000;
             }
 
             private void updateTemperatureInfoLabel() {
@@ -176,13 +167,6 @@ public class ServerMainWindow extends JFrame {
                 temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE);
             }
 
-            private void updateFanSpeedInfoLabel() {
-                fanSpeedInfoLabel.setText(Arrays.toString(getCpuFanSpeeds()));
-            }
-
-            private void updateVoltageInfoLabel() {
-                voltageInfoLabel.setText(Double.toString(getCpuVoltage()));
-            }
 
             private void updateUsedJvmMemoryInfoLabel() {
                 final long runtimeUsedMemory = getRuntimeUsedMemory();
@@ -217,8 +201,8 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateOnlineUsersCount() {
-                onlineUsersCountLabel.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
-                onlineUsersCount2.setText(onlineUserList.getModel().getSize() + "");// TODO make manager mby???? or something to update everything
+                onlineUsersCountLabel.setText(onlineUserList.getModel().getSize() + "");
+                onlineUsersCount2.setText(onlineUserList.getModel().getSize() + "");
             }
         });
         if (!monitorUiUpdateTimer.isRunning()) {
@@ -331,6 +315,7 @@ public class ServerMainWindow extends JFrame {
         updateNetworkInfoPanel();
         updateTotalMemoryLabel();
         updateJvmInfoLabel();
+
         updateAdminSettingsPanel();
 
         //test
