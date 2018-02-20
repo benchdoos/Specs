@@ -42,10 +42,10 @@ public class ServerMainWindow extends JFrame {
     DefaultListModel<Object> usersListModel = new DefaultListModel<>();
     private Timer monitorUiUpdateTimer;
     private Thread monitorUiUpdateThread;
-    private ArrayList<Double> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
-    private ArrayList<Double> cpuValues = new ArrayList<>(GRAPHICS_LENGTH);
-    private ArrayList<Double> cpuServerValues = new ArrayList<>(GRAPHICS_LENGTH);
-    private ArrayList<Double> cpuTemperatureValue = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Float> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Float> cpuValues = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Float> cpuServerValues = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(GRAPHICS_LENGTH);
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -74,11 +74,11 @@ public class ServerMainWindow extends JFrame {
     private JButton addUserButton;
     private JPanel adminUsersPanel;
     private JButton buttonUserInfo;
-    private JButton restartServerButton;
+    private JButton перезапуститьButton;
     private JButton openLogFolderButton;
     private JLabel userIdLabel;
     private JLabel onlineUsersCount2;
-    private JButton saveConfigurationToButton;
+    private JButton saveSettingsToButton;
     private JTextField connectionUrlTextField;
     private JTextField connectionLoginTextField;
     private JPasswordField connectionPasswordTextField;
@@ -159,10 +159,10 @@ public class ServerMainWindow extends JFrame {
 
                 if (cpuTemperature > 90.0d) {
 
-                    setWarningMode(temperatureInfoLabel,true);
+                    setWarningMode(temperatureInfoLabel, true);
 
                 } else {
-                    setWarningMode(temperatureInfoLabel,false);
+                    setWarningMode(temperatureInfoLabel, false);
 
                 }
 
@@ -189,9 +189,9 @@ public class ServerMainWindow extends JFrame {
                 memoryValues = updateGraphicValue(memoryValues, usedMemory);
 
                 if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
-                    setWarningMode(usedProcessMemoryInfoLabel,true);
+                    setWarningMode(usedProcessMemoryInfoLabel, true);
                 } else {
-                    setWarningMode(usedProcessMemoryInfoLabel,false);
+                    setWarningMode(usedProcessMemoryInfoLabel, false);
                 }
                 usedProcessMemoryInfoLabel.setText(memoryInfo);
             }
@@ -255,14 +255,14 @@ public class ServerMainWindow extends JFrame {
         final double cpuUsageByApplication = getCpuUsageByApplication();
         String processInfo = cpuUsageByApplication + "%";
 
-        updateGraphicValue(cpuServerValues, cpuUsageByApplication);
+        cpuServerValues = updateGraphicValue(cpuServerValues, cpuUsageByApplication);
 
 
         if (cpuUsageByApplication >= 60.0d) {
-            setWarningMode(usedCpuByApplicationInfoLabel,true);
+            setWarningMode(usedCpuByApplicationInfoLabel, true);
 
         } else {
-            setWarningMode(usedCpuByApplicationInfoLabel,false);
+            setWarningMode(usedCpuByApplicationInfoLabel, false);
 
         }
         usedCpuByApplicationInfoLabel.setText(processInfo);
@@ -362,7 +362,6 @@ public class ServerMainWindow extends JFrame {
         final int width = graphicsPanel.getWidth();
         final int height = 210; // need to be hardcoded or it will rise
 
-        System.out.println("hm: " + width + "x" + height);
         XYChart chart = getChart(width, height);
         XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
         if (graphicsPanel.getComponents().length > 0) {
@@ -464,54 +463,66 @@ public class ServerMainWindow extends JFrame {
     }
 
     private XYChart getChart(int width, int height) {
+        final Color BACKGROUND_COLOR = new Color(242, 242, 242);
 
         // Create Chart
         XYChart chart = new XYChartBuilder().width(width).height(height).yAxisTitle("Нагрузка (%)").theme(Styler.ChartTheme.Matlab).build();
 
+        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
         // Customize Chart
         chart.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
-        chart.getStyler().setLegendSeriesLineLength(1);
-        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
+        chart.getStyler().setLegendSeriesLineLength(12);
+        chart.getStyler().setLegendPadding(5);
+        chart.getStyler().setLegendBorderColor(new Color(1f, 0f, 0f, 0f));
+
         chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
         chart.getStyler().setYAxisDecimalPattern("###.##");
+
         chart.getStyler().setPlotMargin(0);
         chart.getStyler().setPlotContentSize(1);
-        chart.getStyler().setLegendSeriesLineLength(1);
+
+
+        chart.getStyler().setChartBackgroundColor(BACKGROUND_COLOR);
+        chart.getStyler().setLegendBackgroundColor(BACKGROUND_COLOR);
+        chart.getStyler().setPlotBackgroundColor(BACKGROUND_COLOR);
 
         // Series
         // @formatter:off
 
-        ArrayList<Double> xAges = getGraphicXAges();
+        ArrayList<Float> xAges = getGraphicXAges();
 
-        ArrayList<Double> memoryData = this.memoryValues;
+        ArrayList<Float> memoryData = this.memoryValues;
 
-        ArrayList<Double> cpuData = this.cpuValues;
+        ArrayList<Float> cpuData = this.cpuValues;
 
-        ArrayList<Double> cpuServerData = this.cpuServerValues;
+        ArrayList<Float> cpuServerData = this.cpuServerValues;
 
-        ArrayList<Double> cpuTemperatureData = this.cpuTemperatureValue;
+        ArrayList<Float> cpuTemperatureData = this.cpuTemperatureValue;
         // @formatter:on
 
-        System.out.println("sizes: " + xAges.size() + ' ' + memoryData.size() + ' ' + cpuData.size());
-
-
         XYSeries memory = chart.addSeries("% ОЗУ", xAges, memoryData);
-        /*memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);*/
         memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN);
 
+        XYSeries cpuServer = chart.addSeries("% ЦП (сервер)", xAges, cpuServerData);
+        cpuServer.setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
 
-        chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData).setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
-        chart.addSeries("% ЦП (система)", xAges, cpuData).setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
-        chart.addSeries("% ЦП (сервер)", xAges, cpuServerData).setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
+
+        XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
+        temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
+        temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        XYSeries cpuSystem = chart.addSeries("% ЦП (система)", xAges, cpuData);
+        cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
+        cpuSystem.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 
         return chart;
     }
 
-    private ArrayList<Double> getGraphicXAges() {
-        ArrayList<Double> result = new ArrayList<>(GRAPHICS_LENGTH);
+    private ArrayList<Float> getGraphicXAges() {
+        ArrayList<Float> result = new ArrayList<>(GRAPHICS_LENGTH);
         for (int i = 0; i < GRAPHICS_LENGTH; i++) {
-            result.add((double) i);
+            result.add((float) i);
         }
         return result;
     }
@@ -525,14 +536,21 @@ public class ServerMainWindow extends JFrame {
     }
 
 
-    private ArrayList<Double> updateGraphicValue(ArrayList<Double> oldValues, double newValue) {
-        if (caretPosition >= oldValues.size()) caretPosition = 0;
+    private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
         if (oldValues.size() != GRAPHICS_LENGTH) {
             for (int i = 0; i < GRAPHICS_LENGTH; i++) {
-                oldValues.add(0d);
+                oldValues.add(0f);
             }
         }
-        oldValues.set(caretPosition, newValue);
-        return oldValues;
+
+        ArrayList<Float> result = new ArrayList<>(GRAPHICS_LENGTH);
+
+        if (oldValues.size() == GRAPHICS_LENGTH) {
+            for (int i = 1; i < oldValues.size(); i++) {
+                result.add(oldValues.get(i));
+            }
+            result.add((float) newValue);
+        }
+        return result;
     }
 }
