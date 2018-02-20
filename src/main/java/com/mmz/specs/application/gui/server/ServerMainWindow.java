@@ -1,8 +1,11 @@
 package com.mmz.specs.application.gui.server;
 
 import com.mmz.specs.application.core.ApplicationConstants;
+import com.mmz.specs.application.core.server.ServerException;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
+import com.mmz.specs.application.managers.CommonSettingsManager;
+import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -20,6 +23,8 @@ import oshi.hardware.CentralProcessor;
 import oshi.software.os.NetworkParams;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -81,7 +86,7 @@ public class ServerMainWindow extends JFrame {
     private JButton saveSettingsToButton;
     private JTextField connectionUrlTextField;
     private JTextField connectionLoginTextField;
-    private JPasswordField connectionPasswordTextField;
+    private JPasswordField connectionPasswordField;
     private JLabel osInfoLabel;
     private JLabel usedProcessMemoryInfoLabel;
     private JLabel usedCpuBySystemInfoLabel;
@@ -326,6 +331,7 @@ public class ServerMainWindow extends JFrame {
         updateNetworkInfoPanel();
         updateTotalMemoryLabel();
         updateJvmInfoLabel();
+        updateAdminSettingsPanel();
 
         //test
 
@@ -356,6 +362,49 @@ public class ServerMainWindow extends JFrame {
         openLogFolderButton.addActionListener(e -> {
             onOpenLogFolder();
         });
+    }
+
+    private void updateAdminSettingsPanel() {
+        connectionUrlTextField.setText(ServerSettingsManager.getInstance().getServerDbConnectionUrl());
+        connectionLoginTextField.setText(ServerSettingsManager.getInstance().getServerDbUsername());
+        connectionPasswordField.setText(ServerSettingsManager.getInstance().getServerDbPassword());
+        saveSettingsToButton.addActionListener(e -> {
+            onSaveSettingsToButton();
+        });
+    }
+
+    private void onSaveSettingsToButton() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Сохранить файл конфигурации (.xml)");
+        chooser.setFileSelectionMode(JFileChooser.SAVE_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        chooser.setCurrentDirectory(new File(ApplicationConstants.USER_HOME_LOCATION));
+
+
+        FileFilter fileFilter = new FileNameExtensionFilter("Файл конфигурации", "xml");
+        chooser.setFileFilter(fileFilter);
+        int returnValue = chooser.showDialog(this, "OK");
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            if (chooser.getSelectedFile().isDirectory()) {
+                final String fileName = chooser.getSelectedFile() + File.separator + "server_configuration.xml";
+                try {
+                    ServerSettingsManager.getInstance().setServerSettings(fileName);
+                    ServerSettingsManager.getInstance().setServerDbConnectionUrl(connectionUrlTextField.getText());
+                    ServerSettingsManager.getInstance().setServerDbUsername(connectionLoginTextField.getText());
+                    ServerSettingsManager.getInstance().setServerDbPassword(new String(connectionPasswordField.getPassword()));
+                    CommonSettingsManager.setServerSettingsFilePath(fileName);
+
+                    JOptionPane.showMessageDialog(this,
+                            "Файл успешно сохранен:\n" + fileName,
+                            "Успех", JOptionPane.INFORMATION_MESSAGE);
+                } catch (ServerException | IOException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Невозможно сохранить файл:\n" + e.getLocalizedMessage(),
+                            "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        }
     }
 
     private void createGraphics() {

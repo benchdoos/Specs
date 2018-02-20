@@ -1,9 +1,9 @@
 package com.mmz.specs.application.managers;
 
 import com.mmz.specs.application.core.ApplicationConstants;
-import com.mmz.specs.connection.HibernateConstants;
 import com.mmz.specs.application.core.server.ServerException;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.HibernateConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,12 +44,27 @@ public class ServerSettingsManager {
         return SERVER_SETTINGS.getProperty(HibernateConstants.DB_CONNECTION_URL_KEY);
     }
 
+    public void setServerDbConnectionUrl(String url) throws IOException {
+        SERVER_SETTINGS.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, url);
+        updateSettingsFile();
+    }
+
     public String getServerDbUsername() {
         return SERVER_SETTINGS.getProperty(HibernateConstants.CONNECTION_USERNAME_KEY);
     }
 
+    public void setServerDbUsername(String username) throws IOException {
+        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, username);
+        updateSettingsFile();
+    }
+
     public String getServerDbPassword() {
         return SERVER_SETTINGS.getProperty(HibernateConstants.CONNECTION_PASSWORD_KEY);
+    }
+
+    public void setServerDbPassword(String password) throws IOException {
+        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, password);
+        updateSettingsFile();
     }
 
     public void loadSettingsFile() throws IOException {
