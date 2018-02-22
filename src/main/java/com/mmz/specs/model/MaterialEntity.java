@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 
 @Entity
@@ -98,5 +100,17 @@ public class MaterialEntity {
         result = 31 * result + (longProfile != null ? longProfile.hashCode() : 0);
         result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("shortMark", shortMark)
+                .append("shortProfile", shortProfile)
+                .append("longMark", longMark)
+                .append("longProfile", longProfile)
+                .append("isActive", isActive)
+                .toString();
     }
 }

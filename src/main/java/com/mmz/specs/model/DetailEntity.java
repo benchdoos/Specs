@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 
 @Entity
@@ -124,5 +126,19 @@ public class DetailEntity {
 
     public void setTechProcessByTechProcessId(TechProcessEntity techProcessByTechProcessId) {
         this.techProcessByTechProcessId = techProcessByTechProcessId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("index", index)
+                .append("unit", unit)
+                .append("finishedWeigth", finishedWeigth)
+                .append("workpieceWeight", workpieceWeight)
+                .append("imagePath", imagePath)
+                .append("isActive", isActive)
+                .append("techProcessByTechProcessId", techProcessByTechProcessId)
+                .toString();
     }
 }

@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 
 @Entity
@@ -46,5 +48,13 @@ public class TechProcessEntity {
         int result = id;
         result = 31 * result + (process != null ? process.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("process", process)
+                .toString();
     }
 }

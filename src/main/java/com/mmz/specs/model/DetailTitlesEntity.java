@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 
 @Entity
@@ -59,5 +61,14 @@ public class DetailTitlesEntity {
         result = 31 * result + (title != null ? title.hashCode() : 0);
         result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("title", title)
+                .append("isActive", isActive)
+                .toString();
     }
 }

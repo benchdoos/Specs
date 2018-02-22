@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 
 @Entity
@@ -148,5 +150,21 @@ public class UsersEntity {
 
     public void setUserTypeByUserTypeId(UserTypeEntity userTypeByUserTypeId) {
         this.userTypeByUserTypeId = userTypeByUserTypeId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("username", username)
+                .append("password", password)
+                .append("name", name)
+                .append("lastname", lastname)
+                .append("surname", surname)
+                .append("admin", admin)
+                .append("editor", editor)
+                .append("isActive", isActive)
+                .append("userTypeByUserTypeId", userTypeByUserTypeId)
+                .toString();
     }
 }

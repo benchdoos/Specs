@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -84,5 +86,16 @@ public class NoticeEntity {
 
     public void setUsersByProvidedByUserId(UsersEntity usersByProvidedByUserId) {
         this.usersByProvidedByUserId = usersByProvidedByUserId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("number", number)
+                .append("date", date)
+                .append("description", description)
+                .append("usersByProvidedByUserId", usersByProvidedByUserId)
+                .toString();
     }
 }

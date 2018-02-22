@@ -1,5 +1,7 @@
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 
 @Entity
@@ -90,5 +92,17 @@ public class DetailListEntity {
 
     public void setDetailByChildDetailId(DetailEntity detailByChildDetailId) {
         this.detailByChildDetailId = detailByChildDetailId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("quantity", quantity)
+                .append("isInterchangeableNode", isInterchangeableNode)
+                .append("isActive", isActive)
+                .append("detailByParentDetailId", detailByParentDetailId)
+                .append("detailByChildDetailId", detailByChildDetailId)
+                .toString();
     }
 }
