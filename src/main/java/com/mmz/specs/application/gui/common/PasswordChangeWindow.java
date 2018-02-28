@@ -17,7 +17,7 @@ import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 public class PasswordChangeWindow extends JDialog {
-    UsersEntity user;
+    private UsersEntity user;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -94,12 +94,16 @@ public class PasswordChangeWindow extends JDialog {
         generatedTextField.setText(newPassword);
     }
 
+    public UsersEntity getUserWithNewPassword() {
+        return user;
+    }
+
     private void onOK() {
         // add your code here
         if (passwordField1.getPassword().length >= SecurityManager.MINIMUM_PASSWORD_LENGTH) {
             if (Arrays.equals(passwordField1.getPassword(), passwordField2.getPassword())) {
                 if (SecurityManager.isPasswordStrong(new String(passwordField1.getPassword()))) {
-                    //TODO save password for user to db
+                    user.setPassword(SecurityManager.encryptPassword(Arrays.toString(passwordField1.getPassword())));
                     dispose();
                 } else {
                     showPasswordInstallationErrorMessage("Слишком простой пароль!\n" +
