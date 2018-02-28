@@ -33,7 +33,6 @@ public class Logging {
     private static final File LOG_FOLDER = new File(ApplicationConstants.LOG_FOLDER);
 
     public Logging(String[] args) {
-        checkFolders();
         startLogging(manageArguments(args));
     }
 
@@ -65,35 +64,14 @@ public class Logging {
     }
 
     /**
-     * Checks folders for Log4j, creates them, if needed.
-     */
-    private void checkFolders() {
-        fixLoggingFolder(LOG_FOLDER);
-    }
-
-    private void fixLoggingFolder(File infoLogFolder) {
-        if (!infoLogFolder.exists()) {
-            boolean success = infoLogFolder.mkdirs();
-            if (!success) {
-                System.err.println("Could not create file: " + infoLogFolder.getAbsolutePath());
-            }
-        }
-    }
-
-    /**
      * Creates a property for Log4j
      * Warning! Run this before any log implementation.
      */
     private void startLogging(String prefix) {
         System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER + prefix );
-        System.out.println("Logging starts at: " + LOG_FOLDER);
+        System.out.println("Logging starting at: " + LOG_FOLDER);
         Logger log = LogManager.getLogger(getCurrentClassName());
-        log.trace("Logging started at: " + LOG_FOLDER);
-        log.debug("Logging started at: " + LOG_FOLDER);
         log.info("Logging started at: " + LOG_FOLDER);
-        log.warn("Logging started at: " + LOG_FOLDER);
-        log.error("Logging started at: " + LOG_FOLDER);
-        log.fatal("Logging started at: " + LOG_FOLDER);
     }
 
 }

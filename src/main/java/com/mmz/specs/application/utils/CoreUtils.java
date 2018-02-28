@@ -1,13 +1,13 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.connection.ServerConnectionPool;
 import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ModeManager;
 import com.mmz.specs.application.managers.ServerSettingsManager;
+import com.mmz.specs.connection.ServerConnectionPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,16 +31,18 @@ public class CoreUtils {
 
                     loadServerSettings();
 
+                    try {
+                        new ServerConnectionPool();
+                    } catch (ServerStartException e) {
+                        log.warn("Could not start server in background", e);
+                        JOptionPane.showMessageDialog(null,
+                                "Не удалось установить подключение к БД\n" + e.getLocalizedMessage(),
+                                "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
+                    }
+
                     ServerMainWindow serverMainWindow = new ServerMainWindow();
                     serverMainWindow.setVisible(true);
 
-
-                    try {
-                        ServerConnectionPool serverConnectionPool = new ServerConnectionPool();
-                    } catch (ServerStartException e) {
-                        log.warn("Could not start server in background", e);
-
-                    }
                     break;
                 default:
                     log.debug("Unknown argument: " + firstArgument);
@@ -54,16 +56,17 @@ public class CoreUtils {
     }
 
     private static void loadServerSettings() {
+        log.info("Loading server settings");
         ServerSettingsManager settingsManager = ServerSettingsManager.getInstance();
         try {
             settingsManager.setServerSettings(CommonSettingsManager.getServerSettingsFilePath());
             try {
                 settingsManager.loadSettingsFile();
             } catch (IOException e) {
-                log.warn("Could not load settings file at: " + CommonSettingsManager.getServerSettingsFilePath(),e);
+                log.warn("Could not load settings file at: " + CommonSettingsManager.getServerSettingsFilePath(), e);
             }
         } catch (Exception e) {
-            log.warn("Could not set new server settings",e);
+            log.warn("Could not set new server settings", e);
             ServerConfigurationWindow serverConfigurationWindow = new ServerConfigurationWindow();
             serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, serverConfigurationWindow));
 
@@ -80,13 +83,16 @@ public class CoreUtils {
      */
     public static void enableLookAndFeel() {
         try {
+            log.debug("Trying to enable LookAndFeel");
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            log.info("Successfully enabled LookAndFeel");
         } catch (Exception e) {
             log.warn("Unable to enable LookAndFeel", e);
         }
     }
 
     public static void localizeFileChooser() { //add some more or choose system fileChooser
+        log.debug("Localizing FileChooser");
         UIManager.put("FileChooser.openButtonText", "Открыть");
         UIManager.put("FileChooser.cancelButtonText", "Отмена");
         UIManager.put("FileChooser.lookInLabelText", "Смотреть в");

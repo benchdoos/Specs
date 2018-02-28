@@ -41,9 +41,6 @@ public class ServerConnectionPool {
         try {
             Configuration configuration = new Configuration();
             configuration.configure(new File("src/main/resources/hibernate/hibernate.cfg.xml"));
-            /*configuration.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, dbConnectionUrl);
-            configuration.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, connectionUsername);
-            configuration.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, connectionPassword);*/
             configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbConnectionUrl);
             configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, connectionUsername);
             configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, connectionPassword);
@@ -55,7 +52,7 @@ public class ServerConnectionPool {
         }
     }
 
-    private static Session getSession() throws HibernateException {
+    public static Session getSession() throws HibernateException {
         if (ourSessionFactory == null) {
             createConnection();
             if (ourSessionFactory == null) {
@@ -81,7 +78,7 @@ public class ServerConnectionPool {
             final Query query = session.createQuery("from " + entityName);
             System.out.println("executing: " + query.getQueryString());
             for (Object o : query.list()) {
-                System.out.println("  " + o);
+                System.out.println("  " + o.toString());
             }
         }
     }

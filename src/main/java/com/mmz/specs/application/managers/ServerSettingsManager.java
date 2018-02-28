@@ -104,5 +104,7 @@ public class ServerSettingsManager {
     private void loadSettings() throws IOException {
         log.info("Trying to load settings file: " + connectionFileLocation);
         SERVER_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));
+        log.info("Settings file successfully loaded: " + connectionFileLocation);
+
     }
 }

@@ -2,12 +2,10 @@ package com.mmz.specs.service;
 
 import com.mmz.specs.dao.ConstantsDao;
 import com.mmz.specs.model.ConstantsEntity;
-import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
 
-@Service
 public class ConstantServiceImpl implements ConstantsService {
     private ConstantsDao constantsDao;
 
