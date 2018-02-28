@@ -85,7 +85,7 @@ public class ServerMainWindow extends JFrame {
     private JCheckBox isAdminCheckBox;
     private JCheckBox isActiveCheckBox;
     private JComboBox<UserTypeEntity> userTypeComboBox;
-    private JButton saveButton;
+    private JButton saveUserButton;
     private JTabbedPane adminPane;
     private JButton addUserButton;
     private JPanel adminUsersPanel;
@@ -116,6 +116,7 @@ public class ServerMainWindow extends JFrame {
     private JPanel adminConstantsPanel;
     private JButton constantsRefreshButton;
     private JButton updateUserListButton;
+    private JPanel currentUserPanel;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -332,6 +333,7 @@ public class ServerMainWindow extends JFrame {
         updateAdminSettingsPanel();
         updateAdminConstantsPanel();
         updateAdminRegisteredUsersPanel();
+        clearCurrentUserPanel();
 
         //test
 
@@ -369,13 +371,54 @@ public class ServerMainWindow extends JFrame {
         });
 
         userList.addListSelectionListener(e -> {
-            UsersEntity usersEntity = userList.getModel().getElementAt(userList.getSelectedIndex());
-            updateCurrentSelectedUserInformation(usersEntity);
+            final int selectedIndex = userList.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                UsersEntity usersEntity = userList.getModel().getElementAt(selectedIndex);
+                updateCurrentSelectedUserInformation(usersEntity);
+            } else {
+                clearCurrentUserPanel();
+            }
         });
 
     }
 
     private void updateCurrentSelectedUserInformation(UsersEntity usersEntity) {
+        if (usersEntity != null) {
+            updateCurrentUserPanel(usersEntity);
+        } else {
+            clearCurrentUserPanel();
+        }
+    }
+
+    private void clearCurrentUserPanel() {
+        userIdLabel.setText("");
+
+        for (Component component : currentUserPanel.getComponents()) {
+            if (component instanceof JTextField) {
+                JTextField label = (JTextField) component;
+                label.setText("");
+                component.setEnabled(false);
+            }
+            if (component instanceof JCheckBox) {
+                JCheckBox checkBox = (JCheckBox) component;
+                checkBox.setSelected(false);
+                component.setEnabled(false);
+            }
+
+            if (component instanceof JButton) {
+                component.setEnabled(false);
+            }
+        }
+        userTypeComboBox.setModel(new DefaultComboBoxModel<>());
+        userTypeComboBox.setEnabled(false);
+    }
+
+    private void updateCurrentUserPanel(UsersEntity usersEntity) {
+        for (Component component : currentUserPanel.getComponents()) {
+            component.setEnabled(true);
+        }
+
+
         userIdLabel.setText(Integer.toString(usersEntity.getId()));
         usernameTextField.setText(usersEntity.getUsername());
         nameTextField.setText(usersEntity.getName());
@@ -385,6 +428,7 @@ public class ServerMainWindow extends JFrame {
         isAdminCheckBox.setSelected(usersEntity.isAdmin());
         isActiveCheckBox.setSelected(usersEntity.isActive());
         updateCurrentSelectedUserTypeList(usersEntity);
+        saveUserButton.setEnabled(true);
     }
 
     private void updateCurrentSelectedUserTypeList(UsersEntity usersEntity) {
@@ -433,6 +477,11 @@ public class ServerMainWindow extends JFrame {
         constantsRefreshButton.addActionListener(e -> updateAdminConstantsPanel());
 
         updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
+
+        updateUserListButton.addActionListener(e -> {
+            clearCurrentUserPanel();
+            updateAdminRegisteredUsersPanel();
+        });
 
     }
 
@@ -1003,86 +1052,87 @@ public class ServerMainWindow extends JFrame {
         scrollPane3.setViewportView(userList);
         final Spacer spacer17 = new Spacer();
         adminUsersPanel.add(spacer17, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final JPanel panel13 = new JPanel();
-        panel13.setLayout(new GridLayoutManager(10, 4, new Insets(0, 0, 0, 0), -1, -1));
-        adminUsersPanel.add(panel13, new GridConstraints(2, 2, 4, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        panel13.setBorder(BorderFactory.createTitledBorder("Пользователь"));
+        currentUserPanel = new JPanel();
+        currentUserPanel.setLayout(new GridLayoutManager(10, 4, new Insets(0, 0, 0, 0), -1, -1));
+        adminUsersPanel.add(currentUserPanel, new GridConstraints(2, 2, 4, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        currentUserPanel.setBorder(BorderFactory.createTitledBorder("Пользователь"));
         final JLabel label15 = new JLabel();
         label15.setText("Имя пользователя:");
         label15.setToolTipText("Имя пользователя");
-        panel13.add(label15, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label15, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer18 = new Spacer();
-        panel13.add(spacer18, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        currentUserPanel.add(spacer18, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label16 = new JLabel();
         label16.setText("Пароль:");
-        panel13.add(label16, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label16, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label17 = new JLabel();
         label17.setText("Имя:");
-        panel13.add(label17, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label17, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         nameTextField = new JTextField();
         nameTextField.setToolTipText("Имя пользователя");
-        panel13.add(nameTextField, new GridConstraints(3, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        currentUserPanel.add(nameTextField, new GridConstraints(3, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         refreshPasswordButton = new JButton();
         refreshPasswordButton.setText("Сбросить");
-        refreshPasswordButton.setToolTipText("Сбросить пароль");
-        panel13.add(refreshPasswordButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        refreshPasswordButton.setToolTipText("Сбросить пароль пользователя");
+        currentUserPanel.add(refreshPasswordButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label18 = new JLabel();
         label18.setText("Отчество:");
-        panel13.add(label18, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label18, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         patronymicTextField = new JTextField();
         patronymicTextField.setToolTipText("Отчество пользователя");
-        panel13.add(patronymicTextField, new GridConstraints(4, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        currentUserPanel.add(patronymicTextField, new GridConstraints(4, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label19 = new JLabel();
         label19.setText("Фамилия:");
-        panel13.add(label19, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label19, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         surnameTextField = new JTextField();
         surnameTextField.setToolTipText("Фамилия пользователя");
-        panel13.add(surnameTextField, new GridConstraints(5, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        currentUserPanel.add(surnameTextField, new GridConstraints(5, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label20 = new JLabel();
         label20.setText("ID:");
-        panel13.add(label20, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label20, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         userIdLabel = new JLabel();
         userIdLabel.setText("id");
-        panel13.add(userIdLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(userIdLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer19 = new Spacer();
-        panel13.add(spacer19, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        currentUserPanel.add(spacer19, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         usernameTextField = new JTextField();
         usernameTextField.setText("");
         usernameTextField.setToolTipText("Имя пользователя в системе (login)");
-        panel13.add(usernameTextField, new GridConstraints(1, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        currentUserPanel.add(usernameTextField, new GridConstraints(1, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         isEditorCheckBox = new JCheckBox();
         isEditorCheckBox.setHorizontalTextPosition(10);
         isEditorCheckBox.setText("Редактор:");
         isEditorCheckBox.setMnemonic('Р');
         isEditorCheckBox.setDisplayedMnemonicIndex(0);
         isEditorCheckBox.setToolTipText("Редактор может вносить изменения в базе, за исключенем администрирования пользователей и сервера");
-        panel13.add(isEditorCheckBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(isEditorCheckBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isAdminCheckBox = new JCheckBox();
         isAdminCheckBox.setHorizontalTextPosition(10);
         isAdminCheckBox.setText("Администратор:");
         isAdminCheckBox.setMnemonic('Д');
         isAdminCheckBox.setDisplayedMnemonicIndex(1);
         isAdminCheckBox.setToolTipText("Администратор имеет самые большие полномочия");
-        panel13.add(isAdminCheckBox, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(isAdminCheckBox, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveCheckBox = new JCheckBox();
         isActiveCheckBox.setHorizontalTextPosition(10);
         isActiveCheckBox.setText("Действующий");
         isActiveCheckBox.setMnemonic('Ю');
         isActiveCheckBox.setDisplayedMnemonicIndex(7);
         isActiveCheckBox.setToolTipText("Пользователь активный или нет (вместо удаления, для архивирования)");
-        panel13.add(isActiveCheckBox, new GridConstraints(7, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(isActiveCheckBox, new GridConstraints(7, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         userTypeComboBox = new JComboBox();
-        final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
-        userTypeComboBox.setModel(defaultComboBoxModel1);
-        panel13.add(userTypeComboBox, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        userTypeComboBox.setToolTipText("Тип пользователя");
+        currentUserPanel.add(userTypeComboBox, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label21 = new JLabel();
         label21.setText("Тип пользователя:");
-        panel13.add(label21, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        saveButton = new JButton();
-        saveButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/save.png")));
-        saveButton.setSelected(true);
-        saveButton.setText("Сохранить");
-        panel13.add(saveButton, new GridConstraints(8, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        currentUserPanel.add(label21, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        saveUserButton = new JButton();
+        saveUserButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/save.png")));
+        saveUserButton.setText("Сохранить");
+        saveUserButton.setMnemonic('С');
+        saveUserButton.setDisplayedMnemonicIndex(0);
+        saveUserButton.setToolTipText("Сохранить пользователя");
+        currentUserPanel.add(saveUserButton, new GridConstraints(8, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer20 = new Spacer();
         adminUsersPanel.add(spacer20, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer21 = new Spacer();
