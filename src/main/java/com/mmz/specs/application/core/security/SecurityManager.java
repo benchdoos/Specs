@@ -44,7 +44,9 @@ public class SecurityManager {
                     false, false, possibleCharacters, new SecureRandom());
             password = firstPart + "-" + secondPart;
         }
-        System.out.println("Generated password from " + count + "st time");
+        if (count > 2) {
+            log.warn("Generated password from " + count + "st time");
+        }
         return password;
     }
 
