@@ -15,9 +15,12 @@ import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.connection.ServerConnectionPool;
 import com.mmz.specs.dao.ConstantsDaoImpl;
+import com.mmz.specs.dao.UserTypeDaoImpl;
+import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
+import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
-import com.mmz.specs.service.ConstantServiceImpl;
+import com.mmz.specs.service.ConstantsServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -72,16 +75,16 @@ public class ServerMainWindow extends JFrame {
     private JTextPane logTextPane;
     private JPanel controlPanel;
     private JPanel logPanel;
-    private JList userList;
+    private JList<UsersEntity> userList;
     private JButton refreshPasswordButton;
     private JTextField nameTextField;
-    private JTextField lastnameTextField;
+    private JTextField patronymicTextField;
     private JTextField surnameTextField;
     private JTextField usernameTextField;
     private JCheckBox isEditorCheckBox;
     private JCheckBox isAdminCheckBox;
     private JCheckBox isActiveCheckBox;
-    private JComboBox userTypeComboBox;
+    private JComboBox<UserTypeEntity> userTypeComboBox;
     private JButton saveButton;
     private JTabbedPane adminPane;
     private JButton addUserButton;
@@ -112,6 +115,7 @@ public class ServerMainWindow extends JFrame {
     private JPanel adminSettingsPanel;
     private JPanel adminConstantsPanel;
     private JButton constantsRefreshButton;
+    private JButton updateUserListButton;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
@@ -326,7 +330,8 @@ public class ServerMainWindow extends JFrame {
         updateJvmInfoLabel();
 
         updateAdminSettingsPanel();
-        onUpdateAdminConstantsPanel();
+        updateAdminConstantsPanel();
+        updateAdminRegisteredUsersPanel();
 
         //test
 
@@ -336,6 +341,77 @@ public class ServerMainWindow extends JFrame {
         onlineUserList.setModel(usersListModel);
 
         initListeners();
+    }
+
+    private void updateAdminRegisteredUsersPanel() {
+        DefaultListModel<UsersEntity> model = new DefaultListModel<>();
+        UsersDaoImpl usersDao = new UsersDaoImpl();
+        usersDao.setSession(ServerConnectionPool.getSession());
+        /*UsersServiceImpl usersService = new UsersServiceImpl();
+        usersService.setUsersDao(usersDao);*/
+
+        List<UsersEntity> usersEntityList = usersDao.listUsers();
+        for (UsersEntity user : usersEntityList) {
+            model.addElement(user);
+        }
+        userList.setModel(model);
+        userList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof UsersEntity) {
+                    UsersEntity usersEntity = (UsersEntity) value;
+                    String username = usersEntity.getUsername();
+                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+
+        userList.addListSelectionListener(e -> {
+            UsersEntity usersEntity = userList.getModel().getElementAt(userList.getSelectedIndex());
+            updateCurrentSelectedUserInformation(usersEntity);
+        });
+
+    }
+
+    private void updateCurrentSelectedUserInformation(UsersEntity usersEntity) {
+        userIdLabel.setText(Integer.toString(usersEntity.getId()));
+        usernameTextField.setText(usersEntity.getUsername());
+        nameTextField.setText(usersEntity.getName());
+        patronymicTextField.setText(usersEntity.getPatronymic());
+        surnameTextField.setText(usersEntity.getSurname());
+        isEditorCheckBox.setSelected(usersEntity.isEditor());
+        isAdminCheckBox.setSelected(usersEntity.isAdmin());
+        isActiveCheckBox.setSelected(usersEntity.isActive());
+        updateCurrentSelectedUserTypeList(usersEntity);
+    }
+
+    private void updateCurrentSelectedUserTypeList(UsersEntity usersEntity) {
+        DefaultComboBoxModel<UserTypeEntity> model = new DefaultComboBoxModel<>();
+
+        UserTypeDaoImpl userTypeDao = new UserTypeDaoImpl();
+        userTypeDao.setSession(ServerConnectionPool.getSession());
+        List<UserTypeEntity> userTypeEntities = userTypeDao.listUserTypes();
+        for (UserTypeEntity entity : userTypeEntities) {
+            model.addElement(entity);
+        }
+
+        userTypeComboBox.setModel(model);
+        userTypeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof UserTypeEntity) {
+                    UserTypeEntity entity = (UserTypeEntity) value;
+                    String name = entity.getName();
+                    return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+
+        userTypeComboBox.setSelectedItem(usersEntity.getUserType());
     }
 
     private void initListeners() {
@@ -354,7 +430,7 @@ public class ServerMainWindow extends JFrame {
 
         openLogFolderButton.addActionListener(e -> onOpenLogFolder());
 
-        constantsRefreshButton.addActionListener(e -> onUpdateAdminConstantsPanel());
+        constantsRefreshButton.addActionListener(e -> updateAdminConstantsPanel());
 
         updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
 
@@ -372,10 +448,10 @@ public class ServerMainWindow extends JFrame {
             final String key = model.getValueAt(i, 0).toString();
             final String value = model.getValueAt(i, 1).toString();
 
-            ConstantServiceImpl impl = new ConstantServiceImpl();
-            impl.setConstantsDao(constantsDao);
+            /*ConstantsServiceImpl service = new ConstantsServiceImpl();
+            service.setConstantsDao(constantsDao);*/
 
-            ConstantsEntity entity = impl.getConstantByKey(key);
+            ConstantsEntity entity = constantsDao.getConstantByKey(key);
             if (entity != null) {
                 entity.setValue(value);
                 constantsDao.updateConstant(entity);
@@ -384,7 +460,7 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-    private void onUpdateAdminConstantsPanel() {
+    private void updateAdminConstantsPanel() {
         DefaultTableModel model = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -400,10 +476,10 @@ public class ServerMainWindow extends JFrame {
         ConstantsDaoImpl constantsDao = new ConstantsDaoImpl();
         constantsDao.setSession(session);
 
-        ConstantServiceImpl service = new ConstantServiceImpl();
+        ConstantsServiceImpl service = new ConstantsServiceImpl();
         service.setConstantsDao(constantsDao);
 
-        List<ConstantsEntity> list = constantsDao.listConstants();
+        List<ConstantsEntity> list = service.listConstants();
         for (ConstantsEntity entity : list) {
             String key = entity.getKey();
             String value = entity.getValue();
@@ -675,7 +751,7 @@ public class ServerMainWindow extends JFrame {
      */
     private void $$$setupUI$$$() {
         contentPane = new JPanel();
-        contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 5, 5, 5), -1, -1));
+        contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
@@ -898,7 +974,7 @@ public class ServerMainWindow extends JFrame {
         powerServerButton.setToolTipText("Выключить сервер");
         panel11.add(powerServerButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         restartServerButton = new JButton();
-        restartServerButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh.png")));
+        restartServerButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/reboot.png")));
         restartServerButton.setText("Перезапустить");
         restartServerButton.setToolTipText("Перезапустить сервер");
         panel11.add(restartServerButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -923,6 +999,7 @@ public class ServerMainWindow extends JFrame {
         final JScrollPane scrollPane3 = new JScrollPane();
         adminUsersPanel.add(scrollPane3, new GridConstraints(2, 0, 4, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(200, -1), new Dimension(200, -1), null, 0, false));
         userList = new JList();
+        userList.setSelectionMode(0);
         scrollPane3.setViewportView(userList);
         final Spacer spacer17 = new Spacer();
         adminUsersPanel.add(spacer17, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
@@ -952,9 +1029,9 @@ public class ServerMainWindow extends JFrame {
         final JLabel label18 = new JLabel();
         label18.setText("Отчество:");
         panel13.add(label18, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        lastnameTextField = new JTextField();
-        lastnameTextField.setToolTipText("Отчество пользователя");
-        panel13.add(lastnameTextField, new GridConstraints(4, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        patronymicTextField = new JTextField();
+        patronymicTextField.setToolTipText("Отчество пользователя");
+        panel13.add(patronymicTextField, new GridConstraints(4, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label19 = new JLabel();
         label19.setText("Фамилия:");
         panel13.add(label19, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -1019,6 +1096,11 @@ public class ServerMainWindow extends JFrame {
         addUserButton.setText("");
         addUserButton.setToolTipText("Добавить пользователя");
         toolBar2.add(addUserButton);
+        updateUserListButton = new JButton();
+        updateUserListButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
+        updateUserListButton.setText("");
+        updateUserListButton.setToolTipText("Обновить список");
+        toolBar2.add(updateUserListButton);
         adminSettingsPanel = new JPanel();
         adminSettingsPanel.setLayout(new GridLayoutManager(6, 4, new Insets(10, 10, 10, 10), -1, -1));
         adminPane.addTab("Настройки", adminSettingsPanel);
@@ -1070,7 +1152,7 @@ public class ServerMainWindow extends JFrame {
         label26.setToolTipText("Важная настройка системы. Будьте осторожны, применяя изменения.");
         adminConstantsPanel.add(label26, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         constantsRefreshButton = new JButton();
-        constantsRefreshButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh.png")));
+        constantsRefreshButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         constantsRefreshButton.setText("Обновить");
         constantsRefreshButton.setToolTipText("Обновить");
         adminConstantsPanel.add(constantsRefreshButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

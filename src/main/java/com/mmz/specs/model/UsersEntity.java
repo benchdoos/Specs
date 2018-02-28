@@ -11,12 +11,13 @@ public class UsersEntity {
     private String username;
     private String password;
     private String name;
-    private String lastname;
+    private String patronymic;
     private String surname;
     private boolean admin;
     private boolean editor;
-    private boolean isActive;
-    private UserTypeEntity userTypeByUserTypeId;
+    private boolean active;
+    private UserTypeEntity userType;
+
 
     @Id
     @Column(name = "ID")
@@ -59,13 +60,13 @@ public class UsersEntity {
     }
 
     @Basic
-    @Column(name = "LASTNAME")
-    public String getLastname() {
-        return lastname;
+    @Column(name = "PATRONYMIC")
+    public String getPatronymic() {
+        return patronymic;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setPatronymic(String lastname) {
+        this.patronymic = lastname;
     }
 
     @Basic
@@ -100,12 +101,12 @@ public class UsersEntity {
 
     @Basic
     @Column(name = "IS_ACTIVE")
-    public Boolean getActive() {
-        return isActive;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override
@@ -117,12 +118,12 @@ public class UsersEntity {
 
         if (id != that.id) return false;
         if (admin != that.admin) return false;
-        if (isActive != that.isActive) return false;
+        if (active != that.active) return false;
         if (editor != that.editor) return false;
         if (username != null ? !username.equals(that.username) : that.username != null) return false;
         if (password != null ? !password.equals(that.password) : that.password != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (lastname != null ? !lastname.equals(that.lastname) : that.lastname != null) return false;
+        if (patronymic != null ? !patronymic.equals(that.patronymic) : that.patronymic != null) return false;
         if (surname != null ? !surname.equals(that.surname) : that.surname != null) return false;
 
         return true;
@@ -134,22 +135,22 @@ public class UsersEntity {
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (lastname != null ? lastname.hashCode() : 0);
+        result = 31 * result + (patronymic != null ? patronymic.hashCode() : 0);
         result = 31 * result + (surname != null ? surname.hashCode() : 0);
         result = 31 * result + (admin ? 1 : 0);
         result = 31 * result + (editor ? 1 : 0);
-        result = 31 * result + (isActive ? 1 : 0);
+        result = 31 * result + (active ? 1 : 0);
         return result;
     }
 
     @ManyToOne
     @JoinColumn(name = "USER_TYPE_ID", referencedColumnName = "ID")
-    public UserTypeEntity getUserTypeByUserTypeId() {
-        return userTypeByUserTypeId;
+    public UserTypeEntity getUserType() {
+        return userType;
     }
 
-    public void setUserTypeByUserTypeId(UserTypeEntity userTypeByUserTypeId) {
-        this.userTypeByUserTypeId = userTypeByUserTypeId;
+    public void setUserType(UserTypeEntity userTypeEntity) {
+        this.userType = userTypeEntity;
     }
 
     @Override
@@ -159,12 +160,12 @@ public class UsersEntity {
                 .append("username", username)
                 .append("password", password)
                 .append("name", name)
-                .append("lastname", lastname)
+                .append("patronymic", patronymic)
                 .append("surname", surname)
                 .append("admin", admin)
                 .append("editor", editor)
-                .append("isActive", isActive)
-                .append("userTypeByUserTypeId", userTypeByUserTypeId)
+                .append("isActive", active)
+                .append("userType", userType)
                 .toString();
     }
 }

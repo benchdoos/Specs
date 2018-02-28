@@ -6,7 +6,7 @@ import com.mmz.specs.model.ConstantsEntity;
 import javax.transaction.Transactional;
 import java.util.List;
 
-public class ConstantServiceImpl implements ConstantsService {
+public class ConstantsServiceImpl implements ConstantsService {
     private ConstantsDao constantsDao;
 
     public void setConstantsDao(ConstantsDao constantsDao) {

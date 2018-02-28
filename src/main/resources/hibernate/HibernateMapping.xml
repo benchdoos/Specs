@@ -65,11 +65,14 @@
         <property name="username" column="USERNAME"/>
         <property name="password" column="PASSWORD"/>
         <property name="name" column="NAME"/>
-        <property name="lastname" column="LASTNAME"/>
+        <property name="patronymic" column="PATRONYMIC"/>
         <property name="surname" column="SURNAME"/>
         <property name="admin" column="`ADMIN`"/>
         <property name="editor" column="`EDITOR`"/>
-        <property name="active" column="IS_ACTIVE"/>
+        <property name="active" column="`IS_ACTIVE`"/>
+        <many-to-one name="userType" class="com.mmz.specs.model.UserTypeEntity">
+            <column name="USER_TYPE_ID"/>
+        </many-to-one>
     </class>
     <class name="com.mmz.specs.model.UserTypeEntity" table="USER_TYPE" schema="">
         <id name="id" column="ID"/>
