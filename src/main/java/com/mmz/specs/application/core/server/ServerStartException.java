@@ -1,7 +1,5 @@
 package com.mmz.specs.application.core.server;
 
-import com.mmz.specs.application.ApplicationException;
-
 public class ServerStartException extends ServerException {
     public ServerStartException() {
         super();

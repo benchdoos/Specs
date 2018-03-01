@@ -13,15 +13,13 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SystemUtils;
-import com.mmz.specs.connection.ServerConnectionPool;
-import com.mmz.specs.dao.UserTypeDaoImpl;
+import com.mmz.specs.application.utils.validation.UserTypeValidationException;
+import com.mmz.specs.application.utils.validation.UsernameValidationException;
+import com.mmz.specs.application.utils.validation.ValidationUtils;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
-import com.mmz.specs.service.ConstantsService;
-import com.mmz.specs.service.ConstantsServiceImpl;
-import com.mmz.specs.service.UsersService;
-import com.mmz.specs.service.UsersServiceImpl;
+import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.knowm.xchart.XChartPanel;
@@ -33,6 +31,7 @@ import org.knowm.xchart.style.markers.SeriesMarkers;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.NetworkParams;
 
+import javax.persistence.OptimisticLockException;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -339,7 +338,7 @@ public class ServerMainWindow extends JFrame {
         clearCurrentUserPanel();
 
 
-        updateCurrentSelectedUserTypeList();
+        updateUserTypeComboBox();
 
         //test
 
@@ -364,14 +363,20 @@ public class ServerMainWindow extends JFrame {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof UsersEntity) {
                     UsersEntity usersEntity = (UsersEntity) value;
-                    String username = "";
+                    String username = " ";
                     if (usersEntity.getUsername() != null) {
-                        username = usersEntity.getUsername();
+                        if (!usersEntity.getUsername().isEmpty()) {
+                            username = usersEntity.getUsername();
+                        }
                     }
                     Component listCellRendererComponent = super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
                     try {
-                        if (usersEntity.getId() == 0) {
-                            setForeground(Color.GREEN.darker());
+                        if (usersEntity.getId() < 0) {
+                            if (isSelected) {
+                                setForeground(Color.GREEN.brighter().brighter());
+                            } else {
+                                setForeground(Color.GREEN.darker().darker());
+                            }
                         }
                     } catch (NullPointerException e) {
                         /*NOP*/
@@ -423,7 +428,7 @@ public class ServerMainWindow extends JFrame {
                 component.setEnabled(false);
             }
         }
-        userTypeComboBox.setModel(new DefaultComboBoxModel<>());
+        userTypeComboBox.setSelectedItem(null);
         userTypeComboBox.setEnabled(false);
     }
 
@@ -431,7 +436,6 @@ public class ServerMainWindow extends JFrame {
         for (Component component : currentUserPanel.getComponents()) {
             component.setEnabled(true);
         }
-
 
         userIdLabel.setText(Integer.toString(usersEntity.getId()));
         usernameTextField.setText(usersEntity.getUsername());
@@ -442,15 +446,13 @@ public class ServerMainWindow extends JFrame {
         isAdminCheckBox.setSelected(usersEntity.isAdmin());
         isActiveCheckBox.setSelected(usersEntity.isActive());
         userTypeComboBox.setSelectedItem(usersEntity.getUserType());
-        saveUserButton.setEnabled(true);
     }
 
-    private void updateCurrentSelectedUserTypeList() {
+    private void updateUserTypeComboBox() {
         DefaultComboBoxModel<UserTypeEntity> model = new DefaultComboBoxModel<>();
 
-        UserTypeDaoImpl userTypeDao = new UserTypeDaoImpl();
-        userTypeDao.setSession(ServerConnectionPool.getSession());
-        List<UserTypeEntity> userTypeEntities = userTypeDao.listUserTypes();
+        UserTypeService userTypeService = new UserTypeServiceImpl();
+        List<UserTypeEntity> userTypeEntities = userTypeService.listUserTypes();
         for (UserTypeEntity entity : userTypeEntities) {
             model.addElement(entity);
         }
@@ -468,7 +470,6 @@ public class ServerMainWindow extends JFrame {
                 }
             }
         });
-
     }
 
     private void initListeners() {
@@ -493,6 +494,7 @@ public class ServerMainWindow extends JFrame {
         updateUserListButton.addActionListener(e -> {
             clearCurrentUserPanel();
             updateAdminRegisteredUsersPanel();
+            restoreTextFieldsColors();
         });
 
         addUserButton.addActionListener(e -> addNewUser());
@@ -502,11 +504,18 @@ public class ServerMainWindow extends JFrame {
 
     private void initUserInfoPanelListeners() {
 
-        DocumentListener listener = new DocumentListener() {
+        DocumentListener usernameTextFieldDocumentListener = new DocumentListener() {
             private void updateData() {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setUsername(usernameTextField.getText());
+                UsersEntity selectedValue = registeredUserList.getSelectedValue();
+                if (selectedValue != null) {
+                    selectedValue.setUsername(usernameTextField.getText());
                     registeredUserList.updateUI();
+                    try {
+                        ValidationUtils.validateUserName(selectedValue.getUsername());
+                        usernameTextField.setBackground(Color.WHITE);
+                    } catch (UsernameValidationException e) {
+                        usernameTextField.setBackground(Color.RED);
+                    }
                 }
             }
 
@@ -526,7 +535,7 @@ public class ServerMainWindow extends JFrame {
             }
         };
 
-        usernameTextField.getDocument().addDocumentListener(listener);
+        usernameTextField.getDocument().addDocumentListener(usernameTextFieldDocumentListener);
 
         refreshPasswordButton.addActionListener(e -> onRefreshPasswordButton(registeredUserList.getSelectedValue()));
 
@@ -600,7 +609,12 @@ public class ServerMainWindow extends JFrame {
             }
         });
 
-        userTypeComboBox.addActionListener(e -> registeredUserList.getSelectedValue().setUserType((UserTypeEntity) userTypeComboBox.getSelectedItem()));
+        userTypeComboBox.addActionListener(e -> {
+            Object selectedItem = userTypeComboBox.getSelectedItem();
+            if (selectedItem != null) {
+                registeredUserList.getSelectedValue().setUserType((UserTypeEntity) selectedItem);
+            }
+        });
 
         isEditorCheckBox.addChangeListener(e -> {
             if (registeredUserList.getSelectedValue() != null) {
@@ -619,16 +633,53 @@ public class ServerMainWindow extends JFrame {
         });
 
         saveUserButton.addActionListener(e -> {
-            UsersEntity entity = onSaveUserButton(registeredUserList.getSelectedValue());
-            clearCurrentUserPanel();
-            updateAdminRegisteredUsersPanel();
+            UsersEntity user = registeredUserList.getSelectedValue();
+            try {
+                if (ValidationUtils.validateUserEntity(user)) {
+                    restoreTextFieldsColors();
+                    try {
+                        onSaveUserButton(user);
+                        clearCurrentUserPanel();
+                        updateAdminRegisteredUsersPanel();
+                    } catch (OptimisticLockException e1) {
+                        JOptionPane.showMessageDialog(this,
+                                "Пользователь " + user.getUsername() + " уже существует",
+                                "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (UsernameValidationException e1) {
+                usernameTextField.setBackground(Color.red);
+                String message = "Имя пользователя должно:\n" +
+                        "быть больше 2 и меньше 20 символов\n" +
+                        "не должно:\n" +
+                        "начинаться с пробела";
+                JOptionPane.showMessageDialog(this, message,
+                        "Некорректное имя пользователя", JOptionPane.ERROR_MESSAGE);
+            } catch (UserTypeValidationException e1) {
+                JOptionPane.showMessageDialog(this, "Тип пользователя должен быть указан",
+                        "Некорректный тип пользователя", JOptionPane.ERROR_MESSAGE);
+            }
+
         });
+    }
+
+    private void restoreTextFieldsColors() {
+        usernameTextField.setBackground(Color.WHITE);
     }
 
     private UsersEntity onSaveUserButton(UsersEntity usersEntity) {
         UsersService usersService = new UsersServiceImpl();
         usersService.getUserDao().getSession().getTransaction().begin();
-        UsersEntity entity = usersService.getUserById(usersService.addUser(usersEntity));
+
+        System.out.println("Entity to save: " + usersEntity);
+
+        UsersEntity entity = usersService.getUserByUsername(usersEntity.getUsername());
+        if (entity != null) {
+            usersService.updateUser(usersEntity);
+        } else {
+            entity = usersService.getUserById(usersService.addUser(usersEntity));
+        }
+        //usersService.addUser(usersEntity);
         usersService.getUserDao().getSession().getTransaction().commit();
         return entity;
     }
@@ -639,11 +690,14 @@ public class ServerMainWindow extends JFrame {
             model.addElement(registeredUserList.getModel().getElementAt(i));
         }
         UsersEntity usersEntity = new UsersEntity();
+        usersEntity.setId(-1);
         usersEntity.setUsername("<new user>");
+        usersEntity.setUserType(new UserTypeServiceImpl().getUserTypeById(1));
         model.addElement(usersEntity);
-
         registeredUserList.setModel(model);
-        registeredUserList.setSelectedIndex(registeredUserList.getModel().getSize() - 1);
+        int index = registeredUserList.getModel().getSize() - 1;
+        System.out.println("index:> " + index);
+        registeredUserList.setSelectedIndex(index);
     }
 
     private void onSaveAdminConstantsPanel() {

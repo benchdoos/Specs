@@ -42,7 +42,7 @@ public class UsersDaoImpl implements UsersDao {
 
     @Override
     public void updateUser(UsersEntity usersEntity) {
-        session.update(usersEntity);
+        session.merge(usersEntity);
         log.info("User successfully updated. " + usersEntity);
     }
 
@@ -64,11 +64,10 @@ public class UsersDaoImpl implements UsersDao {
 
     @Override
     public UsersEntity getUserByUsername(String username) {
-        Query query = session.createQuery("from UsersEntity where UsersEntity.username =: name");
-        query.setParameter("name", username);
-        query.setFirstResult(0);
-        query.setMaxResults(1);
-        final UsersEntity entity = (UsersEntity) query.getSingleResult();
+        Query query = session.createQuery("from UsersEntity where username = :username");
+        query.setParameter("username", username);
+
+        final UsersEntity entity = (UsersEntity) query.uniqueResult();
         log.info("User successfully found by username: " + username + " " + entity);
         return entity;
     }

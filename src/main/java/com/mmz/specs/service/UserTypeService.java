@@ -1,13 +1,12 @@
-package com.mmz.specs.dao;
+package com.mmz.specs.service;
 
+import com.mmz.specs.dao.UserTypeDao;
 import com.mmz.specs.model.UserTypeEntity;
-import org.hibernate.Session;
 
 import java.util.List;
 
-public interface UserTypeDao {
-
-    public Session getSession();
+public interface UserTypeService {
+    public UserTypeDao getUserDao();
 
     public UserTypeEntity getUserTypeById(int id);
 
