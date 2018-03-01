@@ -14,16 +14,16 @@ import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.connection.ServerConnectionPool;
-import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.dao.UserTypeDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
+import com.mmz.specs.service.ConstantsService;
+import com.mmz.specs.service.ConstantsServiceImpl;
 import com.mmz.specs.service.UsersService;
 import com.mmz.specs.service.UsersServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -635,21 +635,19 @@ public class ServerMainWindow extends JFrame {
     private void onSaveAdminConstantsPanel() {
         DefaultTableModel model = (DefaultTableModel) constantsTable.getModel();
         for (int i = 0; i < model.getRowCount(); i++) {
-            Session session = ServerConnectionPool.getSession();
-            ConstantsDaoImpl constantsDao = new ConstantsDaoImpl();
-            constantsDao.setSession(session);
+            ConstantsService constantsService = new ConstantsServiceImpl();
 
-            session.beginTransaction();
+            constantsService.getSession().beginTransaction();
 
             final String key = model.getValueAt(i, 0).toString();
             final String value = model.getValueAt(i, 1).toString();
 
-            ConstantsEntity entity = constantsDao.getConstantByKey(key);
+            ConstantsEntity entity = constantsService.getConstantByKey(key);
             if (entity != null) {
                 entity.setValue(value);
-                constantsDao.updateConstant(entity);
+                constantsService.updateConstant(entity);
             }
-            session.getTransaction().commit();
+            constantsService.getSession().getTransaction().commit();
         }
     }
 
@@ -664,12 +662,8 @@ public class ServerMainWindow extends JFrame {
         model.addColumn("value");
 
 
-        Session session = ServerConnectionPool.getSession();
-
-        ConstantsDaoImpl constantsDao = new ConstantsDaoImpl();
-        constantsDao.setSession(session);
-
-        List<ConstantsEntity> list = constantsDao.listConstants();
+        ConstantsService constantsService = new ConstantsServiceImpl();
+        List<ConstantsEntity> list = constantsService.listConstants();
         for (ConstantsEntity entity : list) {
             String key = entity.getKey();
             String value = entity.getValue();

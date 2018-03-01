@@ -1,6 +1,7 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.ServerConnectionPool;
 import com.mmz.specs.model.ConstantsEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +15,19 @@ public class ConstantsDaoImpl implements ConstantsDao {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private Session session;
+
+    public ConstantsDaoImpl() {
+        session = ServerConnectionPool.getSession();
+    }
+
+    public ConstantsDaoImpl(Session session) {
+
+        this.session = session;
+    }
+
+    public Session getSession() {
+        return session;
+    }
 
     public void setSession(Session session) {
         this.session = session;

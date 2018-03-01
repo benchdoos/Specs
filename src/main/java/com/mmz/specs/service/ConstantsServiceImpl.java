@@ -1,7 +1,9 @@
 package com.mmz.specs.service;
 
 import com.mmz.specs.dao.ConstantsDao;
+import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
+import org.hibernate.Session;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -9,8 +11,20 @@ import java.util.List;
 public class ConstantsServiceImpl implements ConstantsService {
     private ConstantsDao constantsDao;
 
+    public ConstantsServiceImpl() {
+        constantsDao = new ConstantsDaoImpl();
+    }
+
+    public ConstantsServiceImpl(ConstantsDao constantsDao) {
+        this.constantsDao = constantsDao;
+    }
+
     public void setConstantsDao(ConstantsDao constantsDao) {
         this.constantsDao = constantsDao;
+    }
+
+    public Session getSession() {
+        return constantsDao.getSession();
     }
 
     @Override

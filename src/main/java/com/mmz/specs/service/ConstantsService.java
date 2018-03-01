@@ -1,10 +1,13 @@
 package com.mmz.specs.service;
 
 import com.mmz.specs.model.ConstantsEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
 public interface ConstantsService {
+    public Session getSession();
+
     public void addConstant(ConstantsEntity constantsEntity);
 
     public void updateConstant(ConstantsEntity constantsEntity);

@@ -1,10 +1,13 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.model.ConstantsEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
 public interface ConstantsDao {
+    public Session getSession();
+
     /**
      * Add new constant //if needed for future releases
      */
