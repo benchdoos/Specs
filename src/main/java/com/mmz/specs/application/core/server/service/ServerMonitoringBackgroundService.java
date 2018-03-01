@@ -117,7 +117,7 @@ public class ServerMonitoringBackgroundService {
     }
 
     public int getOnlineUsersCount() {
-        ServerMainBackgroundService backgroundService = ServerMainBackgroundService.getInstance();
+        ServerBackgroundService backgroundService = ServerBackgroundService.getInstance();
         return backgroundService.getOnlineUsersCount();
     }
 

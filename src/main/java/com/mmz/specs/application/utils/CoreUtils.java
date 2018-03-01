@@ -1,7 +1,7 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.application.core.server.service.ServerMainBackgroundService;
+import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
@@ -30,7 +30,7 @@ public class CoreUtils {
 
                     loadServerSettings();
 
-                    ServerMainBackgroundService service = ServerMainBackgroundService.getInstance();
+                    ServerBackgroundService service = ServerBackgroundService.getInstance();
 
                     ServerMainWindow serverMainWindow = new ServerMainWindow();
                     serverMainWindow.setVisible(true);

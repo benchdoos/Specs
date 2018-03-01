@@ -15,6 +15,12 @@
 
 package com.mmz.specs.application.gui.server;
 
+import com.mmz.specs.application.core.server.service.ServerBackgroundService;
+import com.mmz.specs.application.gui.common.LoginWindow;
+import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.model.UsersEntity;
+
+import javax.swing.*;
 import java.awt.*;
 
 public class ServerIcon extends TrayIcon {
@@ -32,17 +38,48 @@ public class ServerIcon extends TrayIcon {
 
     private void addMenu() {
         PopupMenu menu = new PopupMenu();
+
         MenuItem open = new MenuItem("Открыть");
         open.addActionListener(e -> onIconClick());
-
         menu.add(open);
 
+        MenuItem shutDown = new MenuItem("Выключить");
+        shutDown.addActionListener(e -> onShutDownClick());
+        menu.add(shutDown);
+
         setPopupMenu(menu);
+    }
+
+    private void onShutDownClick() {
+        LoginWindow loginWindow = new LoginWindow();
+        loginWindow.setLocation(FrameUtils.getFrameOnCenter(null, loginWindow));
+        loginWindow.setVisible(true);
+        UsersEntity user = loginWindow.getAuthorizedUser();
+
+        if (user != null) {
+            if (user.isActive() && user.isAdmin()) {
+                ServerBackgroundService backgroundService = ServerBackgroundService.getInstance();
+                backgroundService.stopServerMainBackgroundService();
+                removeIcon();
+            } else {
+                JOptionPane.showMessageDialog(null,
+                        "Пользователь должен быть активным и быть администратором сервера.",
+                        "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null,
+                    "Необходимо войти в систему, чтобы продолжить",
+                    "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void onIconClick() {
         ServerMainWindow serverMainWindow = new ServerMainWindow();
         serverMainWindow.setVisible(true);
+        removeIcon();
+    }
+
+    private void removeIcon() {
         SystemTray.getSystemTray().remove(this);
     }
 

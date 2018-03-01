@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerException;
-import com.mmz.specs.application.core.server.service.ServerMainBackgroundService;
+import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
 import com.mmz.specs.application.core.server.service.ServerMonitoringGraphics;
 import com.mmz.specs.application.gui.common.LoginWindow;
@@ -71,7 +71,7 @@ public class ServerMainWindow extends JFrame {
     private JPanel controlPanel;
     private JPanel logPanel;
     private JList<UsersEntity> registeredUserList;
-    private JButton refreshPasswordButton;
+    private JButton resetPasswordButton;
     private JTextField nameTextField;
     private JTextField patronymicTextField;
     private JTextField surnameTextField;
@@ -209,7 +209,7 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateOnlineUsersCount() {
-                int onlineUsersCount = ServerMainBackgroundService.getInstance().getOnlineUsersCount();
+                int onlineUsersCount = ServerBackgroundService.getInstance().getOnlineUsersCount();
                 onlineUsersCountLabel.setText(onlineUsersCount + "");
                 onlineUsersCount2.setText(onlineUsersCount + "");
             }
@@ -511,7 +511,7 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void onPowerServerButton() {
-        ServerMainBackgroundService.getInstance().stopServerMainBackgroundService();
+        ServerBackgroundService.getInstance().stopServerMainBackgroundService();
         if (monitorUiUpdateTimer.isRunning()) {
             monitorUiUpdateTimer.stop();
         }
@@ -553,7 +553,7 @@ public class ServerMainWindow extends JFrame {
 
         usernameTextField.getDocument().addDocumentListener(usernameTextFieldDocumentListener);
 
-        refreshPasswordButton.addActionListener(e -> onRefreshPasswordButton(registeredUserList.getSelectedValue()));
+        resetPasswordButton.addActionListener(e -> onResetPasswordButton(registeredUserList.getSelectedValue()));
 
         nameTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -881,86 +881,11 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-/*    private XYChart getChart(int width, int height) {
-        final Color BACKGROUND_COLOR = new Color(242, 242, 242);
-        Font defaultFont = new JLabel().getFont();
-
-        // Create Chart
-        XYChart chart = new XYChartBuilder().width(width).height(height).yAxisTitle("Нагрузка (%)").theme(Styler.ChartTheme.Matlab).build();
-
-        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
-        // Customize Chart
-        chart.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
-        chart.getStyler().setLegendSeriesLineLength(12);
-        chart.getStyler().setLegendPadding(5);
-        chart.getStyler().setLegendBorderColor(new Color(1f, 0f, 0f, 0f));
-
-        chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-        chart.getStyler().setYAxisDecimalPattern("###.##");
-
-        chart.getStyler().setPlotMargin(0);
-        chart.getStyler().setPlotContentSize(1);
-
-
-        chart.getStyler().setChartBackgroundColor(BACKGROUND_COLOR);
-        chart.getStyler().setLegendBackgroundColor(BACKGROUND_COLOR);
-        chart.getStyler().setPlotBackgroundColor(BACKGROUND_COLOR);
-
-        chart.getStyler().setLegendFont(defaultFont);
-        chart.getStyler().setBaseFont(defaultFont);
-        chart.getStyler().setAnnotationsFont(defaultFont);
-        chart.getStyler().setAxisTitleFont(defaultFont);
-        chart.getStyler().setChartTitleFont(defaultFont);
-        chart.getStyler().setAxisTickLabelsFont(defaultFont);
-
-        // Series
-        // @formatter:off
-
-        ArrayList<Float> xAges = getGraphicXAges();
-
-        ArrayList<Float> memoryData = this.memoryValues;
-
-        ArrayList<Float> cpuData = this.cpuValues;
-
-        ArrayList<Float> cpuServerData = this.cpuServerValues;
-
-        ArrayList<Float> cpuTemperatureData = this.cpuTemperatureValue;
-        // @formatter:on
-
-        XYSeries memory = chart.addSeries("% ОЗУ (cервер)", xAges, memoryData);
-        memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN);
-
-        XYSeries cpuServer = chart.addSeries("% ЦП (сервер)", xAges, cpuServerData);
-        cpuServer.setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
-        cpuServer.setLineStyle(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-
-        XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
-        temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
-        temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-        XYSeries cpuSystem = chart.addSeries("% ЦП (система)", xAges, cpuData);
-        cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
-        cpuSystem.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-
-        return chart;
-    }*/
-
-    /*private ArrayList<Float> getGraphicXAges() {
-        ArrayList<Float> result = new ArrayList<>(GRAPHICS_LENGTH);
-        for (int i = 0; i < GRAPHICS_LENGTH; i++) {
-            result.add((float) i);
-        }
-        return result;
-    }*/
-
-    private UsersEntity onRefreshPasswordButton(UsersEntity usersEntity) {
+    private UsersEntity onResetPasswordButton(UsersEntity usersEntity) {
         PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity);
         passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
         passwordChangeWindow.setVisible(true);
-        UsersEntity userWithNewPassword = passwordChangeWindow.getUserWithNewPassword();
-        return userWithNewPassword;
+        return passwordChangeWindow.getUserWithNewPassword();
     }
 
     private void onServerOnlineCountLabel() {
@@ -1303,13 +1228,13 @@ public class ServerMainWindow extends JFrame {
         nameTextField = new JTextField();
         nameTextField.setToolTipText("Имя пользователя");
         currentUserPanel.add(nameTextField, new GridConstraints(3, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        refreshPasswordButton = new JButton();
-        refreshPasswordButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/security-shield.png")));
-        refreshPasswordButton.setText("Сбросить");
-        refreshPasswordButton.setMnemonic('Б');
-        refreshPasswordButton.setDisplayedMnemonicIndex(1);
-        refreshPasswordButton.setToolTipText("Сбросить пароль пользователя");
-        currentUserPanel.add(refreshPasswordButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        resetPasswordButton = new JButton();
+        resetPasswordButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/security-shield.png")));
+        resetPasswordButton.setText("Сбросить");
+        resetPasswordButton.setMnemonic('Б');
+        resetPasswordButton.setDisplayedMnemonicIndex(1);
+        resetPasswordButton.setToolTipText("Сбросить пароль пользователя");
+        currentUserPanel.add(resetPasswordButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label18 = new JLabel();
         label18.setText("Отчество:");
         currentUserPanel.add(label18, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

@@ -23,14 +23,14 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 
-public class ServerMainBackgroundService {
+public class ServerBackgroundService {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    private static ServerMainBackgroundService ourInstance = new ServerMainBackgroundService();
+    private static ServerBackgroundService ourInstance = new ServerBackgroundService();
     private static ServerMonitoringBackgroundService monitoringBackgroundService;
     private int onlineUsersCount;
 
-    private ServerMainBackgroundService() {
+    private ServerBackgroundService() {
         startServerMainBackgroundService();
     }
 
@@ -53,7 +53,7 @@ public class ServerMainBackgroundService {
         //TODO stop this....
     }
 
-    public static ServerMainBackgroundService getInstance() {
+    public static ServerBackgroundService getInstance() {
         return ourInstance;
     }
 
