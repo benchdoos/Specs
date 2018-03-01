@@ -74,7 +74,6 @@ public class ServerMonitoringBackgroundService {
     public void stopMonitoring() {
         if (serverStateUpdateTimer.isRunning()) {
             serverStateUpdateTimer.stop();
-            System.out.println("stopped?");
         }
     }
 
@@ -88,7 +87,6 @@ public class ServerMonitoringBackgroundService {
             updateMemoryLoad();
             updateTemperature();
 
-            System.out.println("working...");
         };
     }
 

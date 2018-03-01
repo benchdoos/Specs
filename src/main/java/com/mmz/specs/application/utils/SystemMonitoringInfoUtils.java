@@ -25,6 +25,10 @@ public class SystemMonitoringInfoUtils {
     private static long HARDWARE_TOTAL_RAM_MEMORY = HARDWARE_ABSTRACTION_LAYER.getMemory().getTotal();
 
 
+    public static CentralProcessor getProcessor() {
+        return processor;
+    }
+
     public static double getProcessCpuLoad() {
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         double result = operatingSystemMXBean.getSystemCpuLoad();

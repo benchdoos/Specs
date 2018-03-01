@@ -12,10 +12,7 @@ import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ServerSettingsManager;
-import com.mmz.specs.application.utils.CommonUtils;
-import com.mmz.specs.application.utils.FrameUtils;
-import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.application.utils.SystemUtils;
+import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.validation.UserTypeValidationException;
 import com.mmz.specs.application.utils.validation.UsernameValidationException;
 import com.mmz.specs.application.utils.validation.ValidationUtils;
@@ -28,7 +25,6 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.exception.ConstraintViolationException;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
-import oshi.hardware.CentralProcessor;
 import oshi.software.os.NetworkParams;
 
 import javax.persistence.OptimisticLockException;
@@ -42,6 +38,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -54,8 +51,12 @@ public class ServerMainWindow extends JFrame {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
     private final String DEGREE = "\u00b0";
-    DefaultListModel<Object> usersListModel = new DefaultListModel<>();
+    private final long logicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getLogicalProcessorCount();
+    private final long physicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getPhysicalProcessorCount();
+    private final long runtimeMaxMemory = getRuntimeMaxMemory();
+    private long runtimeTotalMemory = getRuntimeTotalMemory();
 
+    private DefaultListModel<Object> usersListModel = new DefaultListModel<>();
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -162,7 +163,9 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateTemperatureInfoLabel() {
-                final double cpuTemperature = getCpuTemperature();
+                ArrayList<Float> cpuTemperatureValue = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValue();
+
+                final double cpuTemperature = cpuTemperatureValue.get(cpuTemperatureValue.size() - 1);
 
                 if (cpuTemperature > 90.0d) {
 
@@ -179,8 +182,8 @@ public class ServerMainWindow extends JFrame {
 
             private void updateUsedJvmMemoryInfoLabel() {
                 final long runtimeUsedMemory = getRuntimeUsedMemory();
-                final long runtimeMaxMemory = getRuntimeMaxMemory();
-                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + getRuntimeTotalMemory() + " МБ. ";
+
+                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
 
                 if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
                     setWarningMode(usedProcessMemoryInfoLabel, true);
@@ -191,7 +194,7 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateActiveThreadCounterLabel() {
-                threadsCount.setText(getApplicationCurrentThreads() + "");
+                threadsCount.setText(Integer.toString(getApplicationCurrentThreads()));
             }
 
             private void updateServerOnlineTimeLabel() {
@@ -229,12 +232,9 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void updateProcessorInfoLabel() {
-        CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
-        long logicalProcessorCount = processor.getLogicalProcessorCount();
-        long physicalProcessorCount = processor.getPhysicalProcessorCount();
-        double cpuLoad = getProcessCpuLoad();
+        ArrayList<Float> cpuLoadValues = ServerMonitoringBackgroundService.getInstance().getCpuLoadValues();
+        double cpuLoad = cpuLoadValues.get(cpuLoadValues.size() - 1);
         String cpuLoadString = CommonUtils.round(cpuLoad, 1) + "%";
-
 
         if (cpuLoad >= 60.0d) {
             setWarningMode(usedCpuBySystemInfoLabel, true);
@@ -245,9 +245,11 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void updateUsedProcessCpuInfoLabel() {
-        final double cpuUsageByApplication = getCpuUsageByApplication();
-        String processInfo = cpuUsageByApplication + "%";
+        ArrayList<Float> cpuLoadByServerValues = ServerMonitoringBackgroundService.getInstance().getCpuLoadByServerValues();
 
+        final double cpuUsageByApplication = cpuLoadByServerValues.get(cpuLoadByServerValues.size() - 1);
+
+        String processInfo = CommonUtils.round(cpuUsageByApplication, 1) + "%";
 
         if (cpuUsageByApplication >= 60.0d) {
             setWarningMode(usedCpuByApplicationInfoLabel, true);
@@ -879,43 +881,6 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-    private UsersEntity onRefreshPasswordButton(UsersEntity usersEntity) {
-        PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity);
-        passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
-        passwordChangeWindow.setVisible(true);
-        return passwordChangeWindow.getUserWithNewPassword();
-    }
-
-    private void onServerOnlineCountLabel() {
-        serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
-        if (serverOnlineCountLabelCounterShow) {
-            serverOnlineTimeLabel.setText(getServerOnlineString(ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds()));
-        } else {
-            serverOnlineTimeLabel.setText(serverStartDate.toString());
-        }
-    }
-
-    private void setUnlocked(boolean isUnlocked) {
-        ServerMainWindow.isUnlocked = isUnlocked;
-        initAdminAccessArray();
-
-        if (isUnlocked) {
-            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
-        } else {
-            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
-            loginedUserName.setText("");
-            selectCommonAvailableTab();
-        }
-        setTabsEnabled(isUnlocked);
-
-    }
-
-    private void setTabsEnabled(boolean enabled) {
-        for (JPanel tab : onlyAdminTabsList) {
-            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(tab), enabled);
-        }
-    }
-
 /*    private XYChart getChart(int width, int height) {
         final Color BACKGROUND_COLOR = new Color(242, 242, 242);
         Font defaultFont = new JLabel().getFont();
@@ -989,6 +954,44 @@ public class ServerMainWindow extends JFrame {
         }
         return result;
     }*/
+
+    private UsersEntity onRefreshPasswordButton(UsersEntity usersEntity) {
+        PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity);
+        passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
+        passwordChangeWindow.setVisible(true);
+        return passwordChangeWindow.getUserWithNewPassword();
+    }
+
+    private void onServerOnlineCountLabel() {
+        serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
+        if (serverOnlineCountLabelCounterShow) {
+            long serverOnlineTimeInSeconds = ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds();
+            serverOnlineTimeLabel.setText(getServerOnlineString(serverOnlineTimeInSeconds));
+        } else {
+            serverOnlineTimeLabel.setText(serverStartDate.toString());
+        }
+    }
+
+    private void setUnlocked(boolean isUnlocked) {
+        ServerMainWindow.isUnlocked = isUnlocked;
+        initAdminAccessArray();
+
+        if (isUnlocked) {
+            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
+        } else {
+            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
+            loginedUserName.setText("");
+            selectCommonAvailableTab();
+        }
+        setTabsEnabled(isUnlocked);
+
+    }
+
+    private void setTabsEnabled(boolean enabled) {
+        for (JPanel tab : onlyAdminTabsList) {
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(tab), enabled);
+        }
+    }
 
     private void selectCommonAvailableTab() {
         for (JPanel tab : onlyAdminTabsList) {
