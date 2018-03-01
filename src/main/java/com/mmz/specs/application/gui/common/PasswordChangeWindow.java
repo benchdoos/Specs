@@ -11,9 +11,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.Arrays;
 
 public class PasswordChangeWindow extends JDialog {
@@ -85,6 +83,26 @@ public class PasswordChangeWindow extends JDialog {
                 generatedTextField.setText("");
             }
         });
+
+        passwordField1.addFocusListener(getPasswordFieldListener(passwordField1));
+
+        passwordField2.addFocusListener(getPasswordFieldListener(passwordField2));
+    }
+
+    private FocusListener getPasswordFieldListener(JPasswordField passwordField) {
+        return new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                int position = passwordField.getPassword().length - 1;
+                if (position < 0) position = 0;
+                passwordField.setCaretPosition(position);
+            }
+        };
     }
 
     private void onGeneratePassword() {
