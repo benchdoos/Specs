@@ -959,7 +959,8 @@ public class ServerMainWindow extends JFrame {
         PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity);
         passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
         passwordChangeWindow.setVisible(true);
-        return passwordChangeWindow.getUserWithNewPassword();
+        UsersEntity userWithNewPassword = passwordChangeWindow.getUserWithNewPassword();
+        return userWithNewPassword;
     }
 
     private void onServerOnlineCountLabel() {

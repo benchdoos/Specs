@@ -75,8 +75,6 @@ public class ServerMonitoringGraphics {
 
         ArrayList<Float> cpuTemperatureData = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValue();
 
-        System.out.println(">>: " + xAges.size() + " " + memoryData.size() + " " + cpuData.size() );
-
         XYSeries memory = chart.addSeries("% ОЗУ (cервер)", xAges, memoryData);
         memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN);
 
