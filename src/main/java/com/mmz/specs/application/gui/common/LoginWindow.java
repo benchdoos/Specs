@@ -93,7 +93,10 @@ public class LoginWindow extends JDialog {
     private void onOK() {
         UsersService usersService = new UsersServiceImpl();
         try {
+            usersService.getUserDao().getSession().getTransaction().begin();
             UsersEntity usersEntity = usersService.getUserByUsername(loginTextField.getText());
+            usersService.getUserDao().getSession().getTransaction().commit();
+
             String password = Arrays.toString(passwordField.getPassword());
 
             if (usersEntity.getPassword().equals(SecurityManager.encryptPassword(password))) {
