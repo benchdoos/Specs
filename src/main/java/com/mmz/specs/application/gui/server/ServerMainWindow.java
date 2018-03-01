@@ -16,10 +16,11 @@ import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.connection.ServerConnectionPool;
 import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.dao.UserTypeDaoImpl;
-import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
+import com.mmz.specs.service.UsersService;
+import com.mmz.specs.service.UsersServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -349,12 +350,8 @@ public class ServerMainWindow extends JFrame {
 
     private void updateAdminRegisteredUsersPanel() {
         DefaultListModel<UsersEntity> model = new DefaultListModel<>();
-        UsersDaoImpl usersDao = new UsersDaoImpl();
-        usersDao.setSession(ServerConnectionPool.getSession());
-        /*UsersServiceImpl usersService = new UsersServiceImpl();
-        usersService.setUsersDao(usersDao);*/
-
-        List<UsersEntity> usersEntityList = usersDao.listUsers();
+        UsersService usersService = new UsersServiceImpl();
+        List<UsersEntity> usersEntityList = usersService.listUsers();
         for (UsersEntity user : usersEntityList) {
             model.addElement(user);
         }
@@ -618,6 +615,8 @@ public class ServerMainWindow extends JFrame {
                 registeredUserList.getSelectedValue().setActive(isActiveCheckBox.isSelected());
             }
         });
+
+        /*saveUserButton.addActionListener(e -> );*/
     }
 
     private void addNewUser() {

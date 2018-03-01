@@ -1,6 +1,7 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.ServerConnectionPool;
 import com.mmz.specs.model.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +14,14 @@ public class UsersDaoImpl implements UsersDao {
     private Session session;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
+
+    public UsersDaoImpl(){
+        session = ServerConnectionPool.getSession();
+    }
+
+    public UsersDaoImpl(Session session){
+        this.session = session;
+    }
 
     public void setSession(Session session) {
         this.session = session;

@@ -5,7 +5,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "USERS")
+@Table(name = "USERS",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"USERNAME"})})
 public class UsersEntity {
     private int id;
     private String username;

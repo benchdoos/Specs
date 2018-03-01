@@ -1,6 +1,7 @@
 package com.mmz.specs.service;
 
 import com.mmz.specs.dao.UsersDao;
+import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.UsersEntity;
 
 import javax.transaction.Transactional;
@@ -8,6 +9,14 @@ import java.util.List;
 
 public class UsersServiceImpl implements UsersService {
     private UsersDao usersDao;
+
+    public UsersServiceImpl() {
+        this.usersDao = new UsersDaoImpl();
+    }
+
+    public UsersServiceImpl(UsersDao usersDao) {
+        this.usersDao = usersDao;
+    }
 
     public void setUsersDao(UsersDao usersDao) {
         this.usersDao = usersDao;
