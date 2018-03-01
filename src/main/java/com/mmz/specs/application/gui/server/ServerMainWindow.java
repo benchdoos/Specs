@@ -5,6 +5,9 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerException;
+import com.mmz.specs.application.core.server.service.ServerMainBackgroundService;
+import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
+import com.mmz.specs.application.core.server.service.ServerMonitoringGraphics;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
@@ -25,10 +28,6 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.exception.ConstraintViolationException;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
-import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.XYSeries;
-import org.knowm.xchart.style.Styler;
-import org.knowm.xchart.style.markers.SeriesMarkers;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.NetworkParams;
 
@@ -43,7 +42,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -52,18 +50,12 @@ import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMainWindow extends JFrame {
 
-    private static final int MONITORING_TIMER_DELAY = 1000;
-    private static final int GRAPHICS_LENGTH = 60;
     private static int caretPosition = 0;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
     private final String DEGREE = "\u00b0";
     DefaultListModel<Object> usersListModel = new DefaultListModel<>();
-    private Timer monitorUiUpdateTimer;
-    private ArrayList<Float> memoryValues = new ArrayList<>(GRAPHICS_LENGTH);
-    private ArrayList<Float> cpuValues = new ArrayList<>(GRAPHICS_LENGTH);
-    private ArrayList<Float> cpuServerValues = new ArrayList<>(GRAPHICS_LENGTH);
-    private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(GRAPHICS_LENGTH);
+
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -122,8 +114,9 @@ public class ServerMainWindow extends JFrame {
     private JLabel loginedUserName;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
-    private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
     private JPanel onlyAdminTabsList[];
+    private Timer monitorUiUpdateTimer;
+    private int MONITORING_TIMER_DELAY = 1000;
 
     public ServerMainWindow() {
         setContentPane(contentPane);
@@ -131,7 +124,6 @@ public class ServerMainWindow extends JFrame {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/application/logo.png")));
 
         initGui();
-
 
         initKeyboardActions();
 
@@ -181,8 +173,6 @@ public class ServerMainWindow extends JFrame {
 
                 }
 
-                cpuTemperatureValue = updateGraphicValue(cpuTemperatureValue, getCpuTemperature());
-
                 temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE);
             }
 
@@ -191,10 +181,6 @@ public class ServerMainWindow extends JFrame {
                 final long runtimeUsedMemory = getRuntimeUsedMemory();
                 final long runtimeMaxMemory = getRuntimeMaxMemory();
                 String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + getRuntimeTotalMemory() + " МБ. ";
-
-                double usedMemory = CommonUtils.round(runtimeUsedMemory / (double) runtimeMaxMemory * 100, 2);
-
-                memoryValues = updateGraphicValue(memoryValues, usedMemory);
 
                 if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
                     setWarningMode(usedProcessMemoryInfoLabel, true);
@@ -209,7 +195,7 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateServerOnlineTimeLabel() {
-                long onlineNanoSeconds = Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds;
+                long onlineNanoSeconds = ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds();
                 if (serverOnlineCountLabelCounterShow) {
                     String text = getServerOnlineString(onlineNanoSeconds);
                     System.out.println(text);
@@ -220,8 +206,9 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateOnlineUsersCount() {
-                onlineUsersCountLabel.setText(onlineUserList.getModel().getSize() + "");
-                onlineUsersCount2.setText(onlineUserList.getModel().getSize() + "");
+                int onlineUsersCount = ServerMainBackgroundService.getInstance().getOnlineUsersCount();
+                onlineUsersCountLabel.setText(onlineUsersCount + "");
+                onlineUsersCount2.setText(onlineUsersCount + "");
             }
         });
         if (!monitorUiUpdateTimer.isRunning()) {
@@ -248,7 +235,6 @@ public class ServerMainWindow extends JFrame {
         double cpuLoad = getProcessCpuLoad();
         String cpuLoadString = CommonUtils.round(cpuLoad, 1) + "%";
 
-        cpuValues = updateGraphicValue(cpuValues, getProcessCpuLoad());
 
         if (cpuLoad >= 60.0d) {
             setWarningMode(usedCpuBySystemInfoLabel, true);
@@ -261,8 +247,6 @@ public class ServerMainWindow extends JFrame {
     private void updateUsedProcessCpuInfoLabel() {
         final double cpuUsageByApplication = getCpuUsageByApplication();
         String processInfo = cpuUsageByApplication + "%";
-
-        cpuServerValues = updateGraphicValue(cpuServerValues, cpuUsageByApplication);
 
 
         if (cpuUsageByApplication >= 60.0d) {
@@ -478,6 +462,23 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void initListeners() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                SystemTray tray = SystemTray.getSystemTray();
+                try {
+                    tray.add(new ServerIcon(getIconImage()));
+                } catch (AWTException e1) {
+                    log.warn("Could not create system icon", e);
+                }
+            }
+        });
+
+
+        powerServerButton.addActionListener(e -> onPowerServerButton());
+
+
         buttonForceUserDisconnect.addActionListener(e -> onForceUserDisconnect(usersListModel));
 
         buttonAdminLock.addActionListener(e -> onButtonAdminLock());
@@ -505,6 +506,14 @@ public class ServerMainWindow extends JFrame {
         addUserButton.addActionListener(e -> addNewUser());
 
         initUserInfoPanelListeners();
+    }
+
+    private void onPowerServerButton() {
+        ServerMainBackgroundService.getInstance().stopServerMainBackgroundService();
+        if (monitorUiUpdateTimer.isRunning()) {
+            monitorUiUpdateTimer.stop();
+        }
+        dispose();
     }
 
     private void initUserInfoPanelListeners() {
@@ -800,7 +809,7 @@ public class ServerMainWindow extends JFrame {
         final int width = graphicsPanel.getWidth();
         final int height = 210; // need to be hardcoded or it will rise
 
-        XYChart chart = getChart(width, height);
+        XYChart chart = new ServerMonitoringGraphics().getChart(width, height);
         XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
         if (graphicsPanel.getComponents().length > 0) {
             graphicsPanel.removeAll();
@@ -880,7 +889,7 @@ public class ServerMainWindow extends JFrame {
     private void onServerOnlineCountLabel() {
         serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
         if (serverOnlineCountLabelCounterShow) {
-            serverOnlineTimeLabel.setText(getServerOnlineString(Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds));
+            serverOnlineTimeLabel.setText(getServerOnlineString(ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds()));
         } else {
             serverOnlineTimeLabel.setText(serverStartDate.toString());
         }
@@ -907,16 +916,7 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-    private void selectCommonAvailableTab() {
-        for (JPanel tab : onlyAdminTabsList) {
-            if (tabbedPane.getSelectedComponent().equals(tab)) {
-                tabbedPane.setSelectedComponent(monitorPanel);
-            }
-        }
-
-    }
-
-    private XYChart getChart(int width, int height) {
+/*    private XYChart getChart(int width, int height) {
         final Color BACKGROUND_COLOR = new Color(242, 242, 242);
         Font defaultFont = new JLabel().getFont();
 
@@ -980,14 +980,23 @@ public class ServerMainWindow extends JFrame {
 
 
         return chart;
-    }
+    }*/
 
-    private ArrayList<Float> getGraphicXAges() {
+    /*private ArrayList<Float> getGraphicXAges() {
         ArrayList<Float> result = new ArrayList<>(GRAPHICS_LENGTH);
         for (int i = 0; i < GRAPHICS_LENGTH; i++) {
             result.add((float) i);
         }
         return result;
+    }*/
+
+    private void selectCommonAvailableTab() {
+        for (JPanel tab : onlyAdminTabsList) {
+            if (tabbedPane.getSelectedComponent().equals(tab)) {
+                tabbedPane.setSelectedComponent(monitorPanel);
+            }
+        }
+
     }
 
     @Override
@@ -996,24 +1005,6 @@ public class ServerMainWindow extends JFrame {
             monitorUiUpdateTimer.stop();
         }
         super.dispose();
-    }
-
-    private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
-        if (oldValues.size() != GRAPHICS_LENGTH) {
-            for (int i = 0; i < GRAPHICS_LENGTH; i++) {
-                oldValues.add(0f);
-            }
-        }
-
-        ArrayList<Float> result = new ArrayList<>(GRAPHICS_LENGTH);
-
-        if (oldValues.size() == GRAPHICS_LENGTH) {
-            for (int i = 1; i < oldValues.size(); i++) {
-                result.add(oldValues.get(i));
-            }
-            result.add((float) newValue);
-        }
-        return result;
     }
 
     {

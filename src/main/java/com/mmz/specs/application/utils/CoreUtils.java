@@ -1,13 +1,12 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.application.core.server.ServerStartException;
+import com.mmz.specs.application.core.server.service.ServerMainBackgroundService;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ModeManager;
 import com.mmz.specs.application.managers.ServerSettingsManager;
-import com.mmz.specs.connection.ServerConnectionPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,14 +30,7 @@ public class CoreUtils {
 
                     loadServerSettings();
 
-                    try {
-                        new ServerConnectionPool();
-                    } catch (ServerStartException e) {
-                        log.warn("Could not start server in background", e);
-                        JOptionPane.showMessageDialog(null,
-                                "Не удалось установить подключение к БД\n" + e.getLocalizedMessage(),
-                                "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
-                    }
+                    ServerMainBackgroundService service = ServerMainBackgroundService.getInstance();
 
                     ServerMainWindow serverMainWindow = new ServerMainWindow();
                     serverMainWindow.setVisible(true);
