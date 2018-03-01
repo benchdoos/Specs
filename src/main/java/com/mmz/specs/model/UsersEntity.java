@@ -33,11 +33,17 @@ public class UsersEntity {
     @Basic
     @Column(name = "USERNAME")
     public String getUsername() {
-        return username.toLowerCase();
+        if (username != null) {
+            username = username.toLowerCase();
+        }
+        return username;
     }
 
     public void setUsername(String username) {
-        this.username = username.toLowerCase();
+        if (username != null) {
+            username = username.toLowerCase();
+        }
+        this.username = username;
     }
 
     @Basic
