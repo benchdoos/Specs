@@ -20,7 +20,6 @@ import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
-import com.mmz.specs.service.ConstantsServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -365,8 +364,20 @@ public class ServerMainWindow extends JFrame {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof UsersEntity) {
                     UsersEntity usersEntity = (UsersEntity) value;
-                    String username = usersEntity.getUsername();
-                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                    String username = "";
+                    if (usersEntity.getUsername() != null) {
+                        username = usersEntity.getUsername();
+                    }
+                    Component listCellRendererComponent = super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                    try {
+                        if (usersEntity.getId() == 0) {
+                            setForeground(Color.GREEN.darker());
+                        }
+                    } catch (NullPointerException e) {
+                        /*NOP*/
+                    }
+
+                    return listCellRendererComponent;
                 } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
@@ -398,8 +409,8 @@ public class ServerMainWindow extends JFrame {
 
         for (Component component : currentUserPanel.getComponents()) {
             if (component instanceof JTextField) {
-                JTextField label = (JTextField) component;
-                label.setText("");
+                JTextField textField = (JTextField) component;
+                textField.setText("");
                 component.setEnabled(false);
             }
             if (component instanceof JCheckBox) {
@@ -490,94 +501,123 @@ public class ServerMainWindow extends JFrame {
         initUserInfoPanelListeners();
     }
 
-
     private void initUserInfoPanelListeners() {
 
-        usernameTextField.getDocument().addDocumentListener(new DocumentListener() {
+        DocumentListener listener = new DocumentListener() {
             private void updateData() {
-                registeredUserList.getSelectedValue().setUsername(usernameTextField.getText());
-                registeredUserList.updateUI();
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setUsername(usernameTextField.getText());
+                    registeredUserList.updateUI();
+                }
             }
 
             @Override
             public void insertUpdate(DocumentEvent e) {
                 updateData();
-
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
                 updateData();
-
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
                 updateData();
-
             }
-        });
+        };
+
+        usernameTextField.getDocument().addDocumentListener(listener);
 
         refreshPasswordButton.addActionListener(e -> onRefreshPasswordButton(registeredUserList.getSelectedValue()));
 
         nameTextField.getDocument().addDocumentListener(new DocumentListener() {
-
             @Override
             public void insertUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setName(nameTextField.getText());
-
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                }
             }
         });
 
         patronymicTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                }
             }
         });
 
         surnameTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                }
+
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                }
             }
         });
 
         userTypeComboBox.addActionListener(e -> registeredUserList.getSelectedValue().setUserType((UserTypeEntity) userTypeComboBox.getSelectedItem()));
 
-        isEditorCheckBox.addChangeListener(e -> registeredUserList.getSelectedValue().setEditor(isEditorCheckBox.isSelected()));
-        isAdminCheckBox.addChangeListener(e -> registeredUserList.getSelectedValue().setAdmin(isAdminCheckBox.isSelected()));
-        isActiveCheckBox.addChangeListener(e -> registeredUserList.getSelectedValue().setActive(isActiveCheckBox.isSelected()));
+        isEditorCheckBox.addChangeListener(e -> {
+            if (registeredUserList.getSelectedValue() != null) {
+                registeredUserList.getSelectedValue().setEditor(isEditorCheckBox.isSelected());
+            }
+        });
+        isAdminCheckBox.addChangeListener(e -> {
+            if (registeredUserList.getSelectedValue() != null) {
+                registeredUserList.getSelectedValue().setAdmin(isAdminCheckBox.isSelected());
+            }
+        });
+        isActiveCheckBox.addChangeListener(e -> {
+            if (registeredUserList.getSelectedValue() != null) {
+                registeredUserList.getSelectedValue().setActive(isActiveCheckBox.isSelected());
+            }
+        });
     }
 
     private void addNewUser() {
@@ -590,6 +630,7 @@ public class ServerMainWindow extends JFrame {
         model.addElement(usersEntity);
 
         registeredUserList.setModel(model);
+        registeredUserList.setSelectedIndex(registeredUserList.getModel().getSize() - 1);
     }
 
     private void onSaveAdminConstantsPanel() {
@@ -603,9 +644,6 @@ public class ServerMainWindow extends JFrame {
 
             final String key = model.getValueAt(i, 0).toString();
             final String value = model.getValueAt(i, 1).toString();
-
-            /*ConstantsServiceImpl service = new ConstantsServiceImpl();
-            service.setConstantsDao(constantsDao);*/
 
             ConstantsEntity entity = constantsDao.getConstantByKey(key);
             if (entity != null) {
@@ -632,10 +670,7 @@ public class ServerMainWindow extends JFrame {
         ConstantsDaoImpl constantsDao = new ConstantsDaoImpl();
         constantsDao.setSession(session);
 
-        ConstantsServiceImpl service = new ConstantsServiceImpl();
-        service.setConstantsDao(constantsDao);
-
-        List<ConstantsEntity> list = service.listConstants();
+        List<ConstantsEntity> list = constantsDao.listConstants();
         for (ConstantsEntity entity : list) {
             String key = entity.getKey();
             String value = entity.getValue();
@@ -1220,13 +1255,6 @@ public class ServerMainWindow extends JFrame {
         isAdminCheckBox.setDisplayedMnemonicIndex(1);
         isAdminCheckBox.setToolTipText("Администратор имеет самые большие полномочия");
         currentUserPanel.add(isAdminCheckBox, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        isActiveCheckBox = new JCheckBox();
-        isActiveCheckBox.setHorizontalTextPosition(10);
-        isActiveCheckBox.setText("Действующий");
-        isActiveCheckBox.setMnemonic('Ю');
-        isActiveCheckBox.setDisplayedMnemonicIndex(7);
-        isActiveCheckBox.setToolTipText("Пользователь активный или нет (вместо удаления, для архивирования)");
-        currentUserPanel.add(isActiveCheckBox, new GridConstraints(7, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         userTypeComboBox = new JComboBox();
         userTypeComboBox.setToolTipText("Тип пользователя");
         currentUserPanel.add(userTypeComboBox, new GridConstraints(6, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -1240,6 +1268,13 @@ public class ServerMainWindow extends JFrame {
         saveUserButton.setDisplayedMnemonicIndex(0);
         saveUserButton.setToolTipText("Сохранить пользователя");
         currentUserPanel.add(saveUserButton, new GridConstraints(8, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        isActiveCheckBox = new JCheckBox();
+        isActiveCheckBox.setHorizontalTextPosition(10);
+        isActiveCheckBox.setText("Действующий");
+        isActiveCheckBox.setMnemonic('Ю');
+        isActiveCheckBox.setDisplayedMnemonicIndex(7);
+        isActiveCheckBox.setToolTipText("Пользователь активный или нет (вместо удаления, для архивирования)");
+        currentUserPanel.add(isActiveCheckBox, new GridConstraints(7, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer20 = new Spacer();
         adminUsersPanel.add(spacer20, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer21 = new Spacer();

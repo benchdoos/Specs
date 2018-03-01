@@ -716,7 +716,7 @@
                                 </constraints>
                                 <properties>
                                   <icon value="img/gui/user/security-shield.png"/>
-                                  <text value="С&amp;бросить"/>
+                                  <text value="С&amp;бросить" noi18n="true"/>
                                   <toolTipText value="Сбросить пароль пользователя" noi18n="true"/>
                                 </properties>
                               </component>
