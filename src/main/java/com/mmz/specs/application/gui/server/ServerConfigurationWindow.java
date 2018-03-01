@@ -20,8 +20,6 @@ import java.io.IOException;
 public class ServerConfigurationWindow extends JDialog {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    public boolean isCorrect = false;
-
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -104,7 +102,6 @@ public class ServerConfigurationWindow extends JDialog {
         if (checkInput()) {
             try {
                 CommonSettingsManager.setServerSettingsFilePath(textField.getText());
-                isCorrect = true;
                 dispose();
             } catch (IOException e) {
                 log.warn("Could not save location of selected file", e);
