@@ -20,7 +20,7 @@ public class LoginWindow extends JDialog {
     private JButton buttonCancel;
     private JTextField loginTextField;
     private JPasswordField passwordField;
-    private UsersEntity user = new UsersEntity();
+    private UsersEntity user = null;
 
     public LoginWindow() {
         setContentPane(contentPane);

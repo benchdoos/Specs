@@ -44,7 +44,7 @@
                 </constraints>
                 <properties>
                   <font size="11" style="1"/>
-                  <text value="" noi18n="true"/>
+                  <text value="username" noi18n="true"/>
                 </properties>
               </component>
             </children>
