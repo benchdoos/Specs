@@ -87,13 +87,10 @@ public class LoginWindow extends JDialog {
     }
 
     public UsersEntity getAuthorizedUser() {
-        setVisible(true);
-
         return user;
     }
 
     private void onOK() {
-        // add your code here
         UsersService usersService = new UsersServiceImpl();
         try {
             UsersEntity usersEntity = usersService.getUserByUsername(loginTextField.getText());

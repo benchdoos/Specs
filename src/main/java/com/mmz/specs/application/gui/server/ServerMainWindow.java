@@ -828,11 +828,12 @@ public class ServerMainWindow extends JFrame {
         } else {
             LoginWindow loginWindow = new LoginWindow();
             loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+            loginWindow.setVisible(true);
             UsersEntity user = loginWindow.getAuthorizedUser();
             if (user != null) {
-                System.out.println("Hello, " + user.getUsername() + ", " + "p:" + user.getPassword());
+                log.info("User to log in as administrator: " + user);
                 if (user.isAdmin()) {
-                    System.out.println("Hello admin");
+                    log.info("User successfully authorized as administrator: " + user.getUsername());
                     setUnlocked(user.isAdmin());
                 }
             }
