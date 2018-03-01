@@ -4,11 +4,15 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.security.SecurityManager;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.model.UsersEntity;
+import com.mmz.specs.service.UsersService;
+import com.mmz.specs.service.UsersServiceImpl;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 
 public class LoginWindow extends JDialog {
     private JPanel contentPane;
@@ -25,17 +29,7 @@ public class LoginWindow extends JDialog {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/security-on.png")));
         setTitle("Вход");
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        initListeners();
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -53,6 +47,45 @@ public class LoginWindow extends JDialog {
         setResizable(false);
     }
 
+    public void initListeners() {
+
+        loginTextField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                loginTextField.selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                int caretPosition = 0;
+                caretPosition = loginTextField.getText().length() - 1;
+                if (caretPosition < 0) caretPosition = 0;
+
+                loginTextField.setCaretPosition(caretPosition);
+            }
+        });
+
+        passwordField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                int caretPosition = 0;
+                caretPosition = passwordField.getPassword().length - 1;
+                if (caretPosition < 0) caretPosition = 0;
+
+                passwordField.setCaretPosition(caretPosition);
+            }
+        });
+
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
     public UsersEntity getAuthorizedUser() {
         setVisible(true);
 
@@ -61,13 +94,21 @@ public class LoginWindow extends JDialog {
 
     private void onOK() {
         // add your code here
-        UsersEntity result = new UsersEntity();
-        result.setUsername(loginTextField.getText());
-        result.setPassword(SecurityManager.encryptPassword(new String(passwordField.getPassword())));
-        //TODO check with db... load... get full user... and only then return back
-        result.setAdmin(true);
-        user = result;
-        dispose();
+        UsersService usersService = new UsersServiceImpl();
+        try {
+            UsersEntity usersEntity = usersService.getUserByUsername(loginTextField.getText());
+            String password = Arrays.toString(passwordField.getPassword());
+
+            if (usersEntity.getPassword().equals(SecurityManager.encryptPassword(password))) {
+                user = usersEntity;
+                dispose();
+            } else {
+                FrameUtils.shakeFrame(this);
+            }
+        } catch (Exception e) {
+            FrameUtils.shakeFrame(this);
+        }
+
     }
 
     private void onCancel() {

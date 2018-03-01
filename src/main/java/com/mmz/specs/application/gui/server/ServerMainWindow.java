@@ -829,7 +829,7 @@ public class ServerMainWindow extends JFrame {
             LoginWindow loginWindow = new LoginWindow();
             loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
             UsersEntity user = loginWindow.getAuthorizedUser();
-            if (user != null) { // TODO !=null and admin...
+            if (user != null) {
                 System.out.println("Hello, " + user.getUsername() + ", " + "p:" + user.getPassword());
                 if (user.isAdmin()) {
                     System.out.println("Hello admin");
