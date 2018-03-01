@@ -338,6 +338,9 @@ public class ServerMainWindow extends JFrame {
         updateAdminRegisteredUsersPanel();
         clearCurrentUserPanel();
 
+
+        updateCurrentSelectedUserTypeList();
+
         //test
 
         for (int i = 0; i < 10 * 1000; i++) {
@@ -438,11 +441,11 @@ public class ServerMainWindow extends JFrame {
         isEditorCheckBox.setSelected(usersEntity.isEditor());
         isAdminCheckBox.setSelected(usersEntity.isAdmin());
         isActiveCheckBox.setSelected(usersEntity.isActive());
-        updateCurrentSelectedUserTypeList(usersEntity);
+        userTypeComboBox.setSelectedItem(usersEntity.getUserType());
         saveUserButton.setEnabled(true);
     }
 
-    private void updateCurrentSelectedUserTypeList(UsersEntity usersEntity) {
+    private void updateCurrentSelectedUserTypeList() {
         DefaultComboBoxModel<UserTypeEntity> model = new DefaultComboBoxModel<>();
 
         UserTypeDaoImpl userTypeDao = new UserTypeDaoImpl();
@@ -466,7 +469,6 @@ public class ServerMainWindow extends JFrame {
             }
         });
 
-        userTypeComboBox.setSelectedItem(usersEntity.getUserType());
     }
 
     private void initListeners() {
@@ -616,7 +618,19 @@ public class ServerMainWindow extends JFrame {
             }
         });
 
-        /*saveUserButton.addActionListener(e -> );*/
+        saveUserButton.addActionListener(e -> {
+            UsersEntity entity = onSaveUserButton(registeredUserList.getSelectedValue());
+            clearCurrentUserPanel();
+            updateAdminRegisteredUsersPanel();
+        });
+    }
+
+    private UsersEntity onSaveUserButton(UsersEntity usersEntity) {
+        UsersService usersService = new UsersServiceImpl();
+        usersService.getUserDao().getSession().getTransaction().begin();
+        UsersEntity entity = usersService.getUserById(usersService.addUser(usersEntity));
+        usersService.getUserDao().getSession().getTransaction().commit();
+        return entity;
     }
 
     private void addNewUser() {

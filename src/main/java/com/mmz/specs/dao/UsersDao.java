@@ -1,11 +1,14 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.model.UsersEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
 public interface UsersDao {
-    public void addUserType(UsersEntity usersEntity);
+    public Session getSession();
+
+    public int addUserType(UsersEntity usersEntity);
 
     public void updateUser(UsersEntity usersEntity);
 

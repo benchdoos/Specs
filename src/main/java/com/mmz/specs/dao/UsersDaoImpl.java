@@ -11,16 +11,21 @@ import org.hibernate.query.Query;
 import java.util.List;
 
 public class UsersDaoImpl implements UsersDao {
-    private Session session;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private Session session;
 
 
-    public UsersDaoImpl(){
+    public UsersDaoImpl() {
         session = ServerConnectionPool.getSession();
     }
 
-    public UsersDaoImpl(Session session){
+    public UsersDaoImpl(Session session) {
         this.session = session;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
     }
 
     public void setSession(Session session) {
@@ -28,9 +33,11 @@ public class UsersDaoImpl implements UsersDao {
     }
 
     @Override
-    public void addUserType(UsersEntity usersEntity) {
-        session.persist(usersEntity);
+    public int addUserType(UsersEntity usersEntity) {
+        Integer id = (Integer) session.save(usersEntity);
+        usersEntity = getUserById(id);
         log.info("User successfully saved. " + usersEntity);
+        return id;
     }
 
     @Override

@@ -23,10 +23,14 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    @Transactional
-    public void addUser(UsersEntity usersEntity) {
-        this.usersDao.addUserType(usersEntity);
+    public UsersDao getUserDao() {
+        return usersDao;
+    }
 
+    @Override
+    @Transactional
+    public int addUser(UsersEntity usersEntity) {
+        return this.usersDao.addUserType(usersEntity);
     }
 
     @Override

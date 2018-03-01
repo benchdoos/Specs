@@ -1,11 +1,14 @@
 package com.mmz.specs.service;
 
+import com.mmz.specs.dao.UsersDao;
 import com.mmz.specs.model.UsersEntity;
 
 import java.util.List;
 
 public interface UsersService {
-    public void addUser(UsersEntity usersEntity);
+    public UsersDao getUserDao();
+
+    public int addUser(UsersEntity usersEntity);
 
     public void updateUser(UsersEntity usersEntity);
 
