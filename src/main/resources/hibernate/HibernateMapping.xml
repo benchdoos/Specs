@@ -4,7 +4,9 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
     <class name="com.mmz.specs.model.DetailEntity" table="DETAIL" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="index" column="`INDEX`"/>
         <property name="unit" column="UNIT"/>
         <property name="finishedWeigth" column="FINISHED_WEIGTH"/>
@@ -13,7 +15,9 @@
         <property name="active" column="IS_ACTIVE"/>
     </class>
     <class name="com.mmz.specs.model.DetailListEntity" table="DETAIL_LIST" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="quantity" column="QUANTITY"/>
         <property name="interchangeableNode" column="IS_INTERCHANGEABLE_NODE"/>
         <property name="active" column="IS_ACTIVE"/>
@@ -25,12 +29,16 @@
         </many-to-one>
     </class>
     <class name="com.mmz.specs.model.DetailTitlesEntity" table="DETAIL_TITLES" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="title" column="TITLE"/>
         <property name="active" column="IS_ACTIVE"/>
     </class>
     <class name="com.mmz.specs.model.MaterialEntity" table="MATERIAL" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="shortMark" column="SHORT_MARK"/>
         <property name="shortProfile" column="SHORT_PROFILE"/>
         <property name="longMark" column="LONG_MARK"/>
@@ -38,7 +46,9 @@
         <property name="active" column="IS_ACTIVE"/>
     </class>
     <class name="com.mmz.specs.model.MaterialListEntity" table="MATERIAL_LIST" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="active" column="IS_ACTIVE"/>
         <many-to-one name="detailByDetailId" class="com.mmz.specs.model.DetailEntity">
             <column name="DETAIL_ID"/>
@@ -48,7 +58,9 @@
         </many-to-one>
     </class>
     <class name="com.mmz.specs.model.NoticeEntity" table="NOTICE" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="number" column="NUMBER"/>
         <property name="date" column="`DATE`"/>
         <property name="description" column="DESCRIPTION"/>
@@ -57,11 +69,15 @@
         </many-to-one>
     </class>
     <class name="com.mmz.specs.model.TechProcessEntity" table="TECH_PROCESS" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="process" column="PROCESS"/>
     </class>
     <class name="com.mmz.specs.model.UsersEntity" table="`USERS`" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="username" column="USERNAME"/>
         <property name="password" column="PASSWORD"/>
         <property name="name" column="NAME"/>
@@ -75,12 +91,16 @@
         </many-to-one>
     </class>
     <class name="com.mmz.specs.model.UserTypeEntity" table="USER_TYPE" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="name" column="NAME"/>
         <property name="active" column="IS_ACTIVE"/>
     </class>
     <class name="com.mmz.specs.model.ConstantsEntity" table="`CONSTANTS`" schema="">
-        <id name="id" column="ID"/>
+        <id name="id" column="ID">
+            <generator class="identity"/>
+        </id>
         <property name="key" column="KEY"/>
         <property name="value" column="`VALUE`"/>
     </class>
