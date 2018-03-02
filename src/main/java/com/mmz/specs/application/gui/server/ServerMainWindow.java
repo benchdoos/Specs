@@ -939,7 +939,7 @@ public class ServerMainWindow extends JFrame {
             }
         }
 
-    }//2343
+    }
 
     @Override
     public void dispose() {
