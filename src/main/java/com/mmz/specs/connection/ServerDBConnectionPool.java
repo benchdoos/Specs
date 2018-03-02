@@ -17,20 +17,20 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import java.io.File;
 
-public class ServerConnectionPool {
+public class ServerDBConnectionPool {
     private static String dbConnectionUrl;
     private static String connectionUsername;
     private static String connectionPassword;
     private static SessionFactory ourSessionFactory = null;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    public ServerConnectionPool() throws ServerStartException {
+    public ServerDBConnectionPool() throws ServerStartException {
         prepareServerSettings();
         prepareServer();
     }
 
-    public ServerConnectionPool(String connectionUrl, String username, String password) throws ServerStartException {
-        log.info("Forcing ServerConnectionPool settings");
+    public ServerDBConnectionPool(String connectionUrl, String username, String password) throws ServerStartException {
+        log.info("Forcing ServerDBConnectionPool settings");
         dbConnectionUrl = connectionUrl;
         connectionUsername = username;
         connectionPassword = password;

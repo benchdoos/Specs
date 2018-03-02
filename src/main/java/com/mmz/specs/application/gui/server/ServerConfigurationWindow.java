@@ -77,7 +77,7 @@ public class ServerConfigurationWindow extends JDialog {
         try {
             textField.setText(CommonSettingsManager.getServerSettingsFilePath());
         } catch (IOException e) {
-            log.warn("Could not get ServerConnectionPool Settings filepath", e);
+            log.warn("Could not get ServerDBConnectionPool Settings filepath", e);
         }
     }
 

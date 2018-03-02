@@ -17,7 +17,7 @@ package com.mmz.specs.application.core.server.service;
 
 import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerConnectionPool;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,12 +34,23 @@ public class ServerBackgroundService {
         startServerMainBackgroundService();
     }
 
+    public static ServerBackgroundService getInstance() {
+        return ourInstance;
+    }
+
     private void startServerMainBackgroundService() {
-        monitoringBackgroundService = ServerMonitoringBackgroundService.getInstance();
-        monitoringBackgroundService.startMonitoring();
+        startServerMonitoring();
+
+        startServerDBConnectionPool();
+
+        startServerHttpConnectionPool();
+    }
+
+    private void startServerDBConnectionPool() {
 
         try {
-            new ServerConnectionPool();
+            log.info("Starting server db connection pool");
+            new ServerDBConnectionPool();
         } catch (ServerStartException e) {
             log.warn("Could not start server in background", e);
             JOptionPane.showMessageDialog(null,
@@ -48,13 +59,18 @@ public class ServerBackgroundService {
         }
     }
 
+    private void startServerMonitoring() {
+        log.info("Starting server monitoring service");
+        monitoringBackgroundService = ServerMonitoringBackgroundService.getInstance();
+        monitoringBackgroundService.startMonitoring();
+    }
+
+    private void startServerHttpConnectionPool() {
+    }
+
     public void stopServerMainBackgroundService() {
         monitoringBackgroundService.stopMonitoring();
         //TODO stop this....
-    }
-
-    public static ServerBackgroundService getInstance() {
-        return ourInstance;
     }
 
     public int getOnlineUsersCount() {
