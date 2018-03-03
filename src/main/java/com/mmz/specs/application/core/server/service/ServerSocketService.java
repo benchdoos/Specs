@@ -73,7 +73,7 @@ public class ServerSocketService {
             log.info("Server got a new connection at: " + connection);
 
             ServerSocketDialog dialog = new ServerSocketDialog(connection);
-            Thread thread = new Thread(dialog, "Thread id: " + genThreadId + " for connection: " + connection.toString());
+            Thread thread = new Thread(dialog, "Thread-" + genThreadId + " for Client connection with socket: " + connection.getSocket());
             registerClientConnection(connection, thread);
             thread.start();
             genThreadId++;
@@ -125,7 +125,7 @@ public class ServerSocketService {
 
     }
 
-    private void closeAll(){
+    private void closeAll(){ //FixME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
         log.info("Removing all registered connections");
         AtomicInteger connectionsCount = new AtomicInteger();
 

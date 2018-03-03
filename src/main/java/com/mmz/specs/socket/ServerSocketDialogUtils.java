@@ -38,6 +38,7 @@ public class ServerSocketDialogUtils {
             return in.readUTF();
 
         } catch (IOException e) {
+            /*NOP*/
         }
 
         return "Unknown";

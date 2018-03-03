@@ -93,9 +93,13 @@ public class ClientConnectionImpl implements ClientConnection {
 
     @Override
     public String toString() {
+        String sessionString = "";
+        if (session != null) {
+            sessionString = "some session";
+        } else sessionString = "null session";
         return new ToStringBuilder(this)
                 .append("socket", socket)
-                .append("session", session)
+                .append("session", sessionString)
                 .toString();
     }
 }

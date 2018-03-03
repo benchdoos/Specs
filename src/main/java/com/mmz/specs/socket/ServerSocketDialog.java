@@ -82,6 +82,8 @@ public class ServerSocketDialog implements Runnable {
     }
 
     private void onQuitCommand() throws IOException {
+        log.info("Quiting connection for client: " + client);
+
         ServerSocketService.getInstance().closeClientConnection(connection);
         if (!client.isClosed()) {
             client.close();
