@@ -118,7 +118,9 @@ public class ServerMonitoringBackgroundService {
 
     public int getOnlineUsersCount() {
         ServerBackgroundService backgroundService = ServerBackgroundService.getInstance();
-        return backgroundService.getOnlineUsersCount();
+        if (backgroundService != null) {
+            return backgroundService.getOnlineUsersCount();
+        } else return 0;
     }
 
     private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {

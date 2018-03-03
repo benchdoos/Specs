@@ -14,7 +14,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
     private Session session;
 
     public UserTypeDaoImpl() {
-        session = ServerDBConnectionPool.getSession();
+        session = ServerDBConnectionPool.getInstance().getSession();
     }
 
     public UserTypeDaoImpl(Session session) {

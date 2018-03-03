@@ -22,16 +22,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class ServerBackgroundService {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private static ServerBackgroundService ourInstance = new ServerBackgroundService();
-    private static ServerMonitoringBackgroundService monitoringBackgroundService;
+    Thread serverBackGroundThread;
+    private ServerSocketService serverSocketService;
+    private ServerMonitoringBackgroundService monitoringBackgroundService;
+    private ServerDBConnectionPool serverDBConnectionPool;
     private int onlineUsersCount;
 
     private ServerBackgroundService() {
-        startServerMainBackgroundService();
+        Runnable runnable = this::startServerMainBackgroundService;
+
+        serverBackGroundThread = new Thread(runnable);
+        serverBackGroundThread.start();
     }
 
     public static ServerBackgroundService getInstance() {
@@ -43,18 +50,34 @@ public class ServerBackgroundService {
 
         startServerDBConnectionPool();
 
-        startServerHttpConnectionPool();
+        startServerSocketService();
+
+        createConnections();
+    }
+
+    private void createConnections() {
+        try {
+            serverSocketService.createConnections();
+        } catch (IOException e) {
+            log.error("Could not create socket connections", e);
+        }
+    }
+
+    private void startServerSocketService() {
+        serverSocketService = ServerSocketService.getInstance();
+        serverSocketService.startSocketService();
+
     }
 
     private void startServerDBConnectionPool() {
-
         try {
             log.info("Starting server db connection pool");
-            new ServerDBConnectionPool();
+            serverDBConnectionPool = ServerDBConnectionPool.getInstance();
+            serverDBConnectionPool.startDBConnectionPool();
         } catch (ServerStartException e) {
-            log.warn("Could not start server in background", e);
+            log.warn("Could not start DB connection pool in background", e);
             JOptionPane.showMessageDialog(null,
-                    "Не удалось установить подключение к БД\n" + e.getLocalizedMessage(),
+                    "Не удалось установить подключение к БД\r\n" + e.getLocalizedMessage(),
                     "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -65,12 +88,26 @@ public class ServerBackgroundService {
         monitoringBackgroundService.startMonitoring();
     }
 
-    private void startServerHttpConnectionPool() {
-    }
 
     public void stopServerMainBackgroundService() {
+        log.info("Stopping Server Main Background Service");
+        stopServerSocketService();
+        stopServerDBConnectionPool();
+        stopMonitoringBackgroundService();
+
+        serverBackGroundThread.interrupt();
+    }
+
+    private void stopServerSocketService() {
+        serverSocketService.stopSocketService();
+    }
+
+    private void stopServerDBConnectionPool() {
+        serverDBConnectionPool.stopDBConnectionPool();
+    }
+
+    private void stopMonitoringBackgroundService() {
         monitoringBackgroundService.stopMonitoring();
-        //TODO stop this....
     }
 
     public int getOnlineUsersCount() {

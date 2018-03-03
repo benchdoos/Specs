@@ -17,7 +17,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     private Session session;
 
     public ConstantsDaoImpl() {
-        session = ServerDBConnectionPool.getSession();
+        session = ServerDBConnectionPool.getInstance().getSession();
     }
 
     public ConstantsDaoImpl(Session session) {

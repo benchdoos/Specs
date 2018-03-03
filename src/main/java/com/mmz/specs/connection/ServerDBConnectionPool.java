@@ -18,23 +18,21 @@ import javax.persistence.metamodel.EntityType;
 import java.io.File;
 
 public class ServerDBConnectionPool {
+    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
+    private static ServerDBConnectionPool ourInstance = new ServerDBConnectionPool();
+    private static SessionFactory ourSessionFactory = null;
+
     private static String dbConnectionUrl;
     private static String connectionUsername;
     private static String connectionPassword;
-    private static SessionFactory ourSessionFactory = null;
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    public ServerDBConnectionPool() throws ServerStartException {
+    private ServerDBConnectionPool() {
         prepareServerSettings();
-        prepareServer();
     }
 
-    public ServerDBConnectionPool(String connectionUrl, String username, String password) throws ServerStartException {
-        log.info("Forcing ServerDBConnectionPool settings");
-        dbConnectionUrl = connectionUrl;
-        connectionUsername = username;
-        connectionPassword = password;
-        prepareServer();
+    public static ServerDBConnectionPool getInstance() {
+        return ourInstance;
     }
 
     private static void createConnection() {
@@ -52,23 +50,13 @@ public class ServerDBConnectionPool {
         }
     }
 
-    public static Session getSession() throws HibernateException {
-        if (ourSessionFactory == null) {
-            createConnection();
-            if (ourSessionFactory == null) {
-                throw new HibernateException("Could not create session factory");
-            }
-            return ourSessionFactory.openSession();
-        } else {
-            return ourSessionFactory.openSession();
-        }
-    }
-
-    private static void createDaoSession() {
-        try (Session session = getSession()) {
-            testConnection(session);
-        }
-    }
+    /*public ServerDBConnectionPool(String connectionUrl, String username, String password) throws ServerStartException {
+        log.info("Forcing ServerDBConnectionPool settings");
+        dbConnectionUrl = connectionUrl;
+        connectionUsername = username;
+        connectionPassword = password;
+        prepareServer();
+    }*/
 
     private static void testConnection(Session session) {
         System.out.println("querying all the managed entities...");
@@ -96,6 +84,26 @@ public class ServerDBConnectionPool {
         }
     }
 
+    public void startDBConnectionPool() throws ServerStartException {
+        prepareServer();
+    }
+
+    public Session getSession() throws HibernateException {
+        if (ourSessionFactory == null) {
+            createConnection();
+            if (ourSessionFactory == null) {
+                throw new HibernateException("Could not create session factory");
+            }
+        }
+        return ourSessionFactory.openSession();
+    }
+
+    private void createDaoSession() {
+        try (Session session = getSession()) {
+            testConnection(session);
+        }
+    }
+
     private void prepareServerSettings() {
         dbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
         connectionUsername = ServerSettingsManager.getInstance().getServerDbUsername();
@@ -103,14 +111,18 @@ public class ServerDBConnectionPool {
     }
 
     private void prepareServer() throws ServerStartException {
-        log.info("Starting server connection");
-        checkConnectionSettings();
-        try {
-            createDaoSession();
-        } catch (PersistenceException e) {
-            log.error("Could not establish hibernate connection to server",e);
-            throw new ServerStartException();
-        }
+        log.info("Starting server DB connection pool");
+        if (ourSessionFactory == null) {
+            try {
+                checkConnectionSettings();
+                createDaoSession();
+            } catch (ServerStartException e) {
+                log.error("DB connection settings are incorrect",e);
+                throw new ServerStartException(e);
+            } catch (PersistenceException e) {
+                log.error("Could not establish hibernate connection to server", e);
+            }
+        } else throw new ServerStartException("DB connection already started");
     }
 
     private void checkConnectionSettings() throws ServerStartException {
@@ -119,5 +131,10 @@ public class ServerDBConnectionPool {
         checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbUsername(), "Could not find DB Username. Set correct value at settings file: ");
 
         checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbPassword(), "Could not find DB Password. Set correct value at settings file: ");
+    }
+
+    public void stopDBConnectionPool() { //TODO test it....
+        getSession().close();
+        ourSessionFactory.close();
     }
 }
