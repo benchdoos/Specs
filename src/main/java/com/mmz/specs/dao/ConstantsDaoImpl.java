@@ -21,7 +21,6 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     public ConstantsDaoImpl(Session session) {
-
         this.session = session;
     }
 

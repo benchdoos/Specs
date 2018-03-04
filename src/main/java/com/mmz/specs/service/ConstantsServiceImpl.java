@@ -3,7 +3,6 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.ConstantsDao;
 import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
-import org.hibernate.Session;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -19,13 +18,16 @@ public class ConstantsServiceImpl implements ConstantsService {
         this.constantsDao = constantsDao;
     }
 
+    @Override
+    public ConstantsDao getConstantsDao() {
+        return constantsDao;
+    }
+
+    @Override
     public void setConstantsDao(ConstantsDao constantsDao) {
         this.constantsDao = constantsDao;
     }
 
-    public Session getSession() {
-        return constantsDao.getSession();
-    }
 
     @Override
     @Transactional
@@ -45,6 +47,7 @@ public class ConstantsServiceImpl implements ConstantsService {
         this.constantsDao.removeConstant(id);
     }
 
+
     @Override
     @Transactional
     public ConstantsEntity getConstantById(int id) {
@@ -56,6 +59,7 @@ public class ConstantsServiceImpl implements ConstantsService {
     public ConstantsEntity getConstantByKey(String key) {
         return this.constantsDao.getConstantByKey(key);
     }
+
 
     @Override
     @Transactional

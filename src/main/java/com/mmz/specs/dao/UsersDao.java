@@ -8,15 +8,20 @@ import java.util.List;
 public interface UsersDao {
     public Session getSession();
 
-    public int addUserType(UsersEntity usersEntity);
+    public void setSession(Session session);
+
+
+    public int addUser(UsersEntity usersEntity);
 
     public void updateUser(UsersEntity usersEntity);
 
     public void removeUser(int id);
 
+
     public UsersEntity getUserById(int id);
 
     public UsersEntity getUserByUsername(String name);
+
 
     public List<UsersEntity> listUsers();
 }

@@ -6,9 +6,14 @@ import com.mmz.specs.model.UserTypeEntity;
 import java.util.List;
 
 public interface UserTypeService {
-    public UserTypeDao getUserDao();
+
+    public void setUserTypeDao(UserTypeDao userTypeDao);
+
+    public UserTypeDao getUserTypeDao();
+
 
     public UserTypeEntity getUserTypeById(int id);
+
 
     public List<UserTypeEntity> listUserTypes();
 }

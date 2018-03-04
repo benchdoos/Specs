@@ -95,9 +95,9 @@ public class LoginWindow extends JDialog {
         try {
             String login = loginTextField.getText().toLowerCase();
 
-            usersService.getUserDao().getSession().getTransaction().begin();
+            usersService.getUsersDao().getSession().getTransaction().begin();
             UsersEntity usersEntity = usersService.getUserByUsername(login);
-            usersService.getUserDao().getSession().getTransaction().commit();
+            usersService.getUsersDao().getSession().getTransaction().commit();
 
             String password = Arrays.toString(passwordField.getPassword());
 

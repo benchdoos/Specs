@@ -18,19 +18,22 @@ public class UsersServiceImpl implements UsersService {
         this.usersDao = usersDao;
     }
 
+
+    @Override
     public void setUsersDao(UsersDao usersDao) {
         this.usersDao = usersDao;
     }
 
     @Override
-    public UsersDao getUserDao() {
+    public UsersDao getUsersDao() {
         return usersDao;
     }
+
 
     @Override
     @Transactional
     public int addUser(UsersEntity usersEntity) {
-        return this.usersDao.addUserType(usersEntity);
+        return this.usersDao.addUser(usersEntity);
     }
 
     @Override
@@ -45,6 +48,7 @@ public class UsersServiceImpl implements UsersService {
         this.usersDao.removeUser(id);
     }
 
+
     @Override
     @Transactional
     public UsersEntity getUserById(int id) {
@@ -56,6 +60,7 @@ public class UsersServiceImpl implements UsersService {
     public UsersEntity getUserByUsername(String username) {
         return this.usersDao.getUserByUsername(username);
     }
+
 
     @Override
     @Transactional

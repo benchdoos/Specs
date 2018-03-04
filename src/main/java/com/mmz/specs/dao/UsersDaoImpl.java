@@ -14,7 +14,10 @@ public class UsersDaoImpl implements UsersDao {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session;
 
-
+    /**
+     * Default constructor
+     * Use for server only!!! Otherwise use {@link UsersDaoImpl}({@link Session} session)
+     */
     public UsersDaoImpl() {
         session = ServerDBConnectionPool.getInstance().getSession();
     }
@@ -23,17 +26,20 @@ public class UsersDaoImpl implements UsersDao {
         this.session = session;
     }
 
+
     @Override
     public Session getSession() {
         return session;
     }
 
+    @Override
     public void setSession(Session session) {
         this.session = session;
     }
 
+
     @Override
-    public int addUserType(UsersEntity usersEntity) {
+    public int addUser(UsersEntity usersEntity) {
         Integer id = (Integer) session.save(usersEntity);
         usersEntity = getUserById(id);
         log.info("User successfully saved. " + usersEntity);
@@ -55,6 +61,7 @@ public class UsersDaoImpl implements UsersDao {
         log.info("User successfully removed. " + usersEntity);
     }
 
+
     @Override
     public UsersEntity getUserById(int id) {
         UsersEntity usersEntity = session.load(UsersEntity.class, id);
@@ -71,6 +78,7 @@ public class UsersDaoImpl implements UsersDao {
         log.info("User successfully found by username: " + username + " " + entity);
         return entity;
     }
+
 
     @Override
     public List<UsersEntity> listUsers() {

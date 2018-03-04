@@ -698,7 +698,7 @@ public class ServerMainWindow extends JFrame {
 
     private UsersEntity onSaveUserButton(UsersEntity usersEntity) {
         UsersService usersService = new UsersServiceImpl();
-        usersService.getUserDao().getSession().getTransaction().begin();
+        usersService.getUsersDao().getSession().getTransaction().begin();
 
         UsersEntity entity;
         if (usersEntity.getId() < 0) {
@@ -713,7 +713,7 @@ public class ServerMainWindow extends JFrame {
             entity = usersService.getUserById(usersService.addUser(usersEntity));
         }
         try {
-            usersService.getUserDao().getSession().getTransaction().commit();
+            usersService.getUsersDao().getSession().getTransaction().commit();
         } catch (ConstraintViolationException e) {
             JOptionPane.showMessageDialog(this,
                     "Такое имя пользователя уже занято: " + usersEntity.getUsername(),
@@ -742,7 +742,7 @@ public class ServerMainWindow extends JFrame {
         for (int i = 0; i < model.getRowCount(); i++) {
             ConstantsService constantsService = new ConstantsServiceImpl();
 
-            constantsService.getSession().beginTransaction();
+            constantsService.getConstantsDao().getSession().beginTransaction();
 
             final String key = model.getValueAt(i, 0).toString();
             final String value = model.getValueAt(i, 1).toString();
@@ -752,7 +752,7 @@ public class ServerMainWindow extends JFrame {
                 entity.setValue(value);
                 constantsService.updateConstant(entity);
             }
-            constantsService.getSession().getTransaction().commit();
+            constantsService.getConstantsDao().getSession().getTransaction().commit();
         }
     }
 

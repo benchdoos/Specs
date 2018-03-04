@@ -6,7 +6,11 @@ import com.mmz.specs.model.UsersEntity;
 import java.util.List;
 
 public interface UsersService {
-    public UsersDao getUserDao();
+
+    public UsersDao getUsersDao();
+
+    public void setUsersDao(UsersDao usersDao);
+
 
     public int addUser(UsersEntity usersEntity);
 
@@ -14,9 +18,11 @@ public interface UsersService {
 
     public void removeUser(int id);
 
+
     public UsersEntity getUserById(int id);
 
     public UsersEntity getUserByUsername(String username);
+
 
     public List<UsersEntity> listUsers();
 

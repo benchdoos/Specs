@@ -19,14 +19,20 @@ public class UserTypeServiceImpl implements UserTypeService {
     }
 
     @Override
-    public UserTypeDao getUserDao() {
+    public UserTypeDao getUserTypeDao() {
         return userTypeDao;
+    }
+
+    @Override
+    public void setUserTypeDao(UserTypeDao userTypeDao) {
+        this.userTypeDao = userTypeDao;
     }
 
     @Override
     public UserTypeEntity getUserTypeById(int id) {
         return userTypeDao.getUserTypeById(id);
     }
+
 
     @Override
     public List<UserTypeEntity> listUserTypes() {

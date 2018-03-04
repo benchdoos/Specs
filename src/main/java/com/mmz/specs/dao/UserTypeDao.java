@@ -7,9 +7,13 @@ import java.util.List;
 
 public interface UserTypeDao {
 
+    public void setSession(Session session);
+
     public Session getSession();
 
+
     public UserTypeEntity getUserTypeById(int id);
+
 
     public List<UserTypeEntity> listUserTypes();
 }

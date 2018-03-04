@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class UserTypeDaoImpl implements UserTypeDao {
@@ -21,16 +22,18 @@ public class UserTypeDaoImpl implements UserTypeDao {
         this.session = session;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
     @Override
     public Session getSession() {
         return session;
     }
 
     @Override
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    @Override
+    @Transactional
     public UserTypeEntity getUserTypeById(int id) {
         UserTypeEntity userTypeEntity = session.load(UserTypeEntity.class, id);
         log.info("UserType successfully found by id:" + id + " " + userTypeEntity);
@@ -38,6 +41,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
     }
 
     @Override
+    @Transactional
     public List<UserTypeEntity> listUserTypes() {
         List<UserTypeEntity> list = session.createQuery("from UserTypeEntity").list();
         for (UserTypeEntity userTypeEntity : list) {
