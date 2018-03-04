@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class DetailDaoImpl implements DetailDao {
@@ -48,6 +49,7 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    @Transactional
     public int addDetail(DetailEntity detailEntity) {
         Integer id = (Integer) session.save(detailEntity);
         detailEntity = getDetailById(id);
@@ -57,12 +59,14 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    @Transactional
     public void updateDetail(DetailEntity detailEntity) {
         session.merge(detailEntity);
         log.info("Detail successfully updated: " + detailEntity);
     }
 
     @Override
+    @Transactional
     public void removeDetail(int id) {
         DetailEntity detailEntity = session.load(DetailEntity.class, id);
         if (detailEntity != null) {
@@ -72,6 +76,7 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    @Transactional
     public DetailEntity getDetailById(int id) {
         DetailEntity detailEntity = session.load(DetailEntity.class, id);
         log.info("Detail successfully found by id:" + id + " " + detailEntity);
@@ -79,6 +84,7 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    @Transactional
     public DetailEntity getDetailByIndex(String index) {
         Query query = session.createQuery("from DetailEntity where DetailEntity.index = :index");
         query.setParameter("index", index);
@@ -89,6 +95,7 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    @Transactional
     public List<DetailEntity> listDetails() {
         List<DetailEntity> list = session.createQuery("from UsersEntity").list();
         for (DetailEntity detailEntity : list) {

@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class NoticeDaoImpl implements NoticeDao {
@@ -48,6 +49,7 @@ public class NoticeDaoImpl implements NoticeDao {
     }
 
     @Override
+    @Transactional
     public int addNotice(NoticeEntity noticeEntity) {
         Integer id = (Integer) session.save(noticeEntity);
         noticeEntity = getNoticeById(id);
@@ -56,12 +58,14 @@ public class NoticeDaoImpl implements NoticeDao {
     }
 
     @Override
+    @Transactional
     public void updateNotice(NoticeEntity noticeEntity) {
         session.merge(noticeEntity);
         log.info("Notice successfully updated: " + noticeEntity);
     }
 
     @Override
+    @Transactional
     public void removeNotice(int id) {
         NoticeEntity noticeEntity = session.load(NoticeEntity.class, id);
         if (noticeEntity != null) {
@@ -71,6 +75,7 @@ public class NoticeDaoImpl implements NoticeDao {
     }
 
     @Override
+    @Transactional
     public NoticeEntity getNoticeById(int id) {
         NoticeEntity noticeEntity = session.load(NoticeEntity.class, id);
         log.info("Notice successfully found by id:" + id + " " + noticeEntity);
@@ -78,6 +83,7 @@ public class NoticeDaoImpl implements NoticeDao {
     }
 
     @Override
+    @Transactional
     public NoticeEntity getNoticeByNumber(String number) {
         Query query = session.createQuery("from NoticeEntity where NoticeEntity.number = :number");
         query.setParameter("number", number);
@@ -88,6 +94,7 @@ public class NoticeDaoImpl implements NoticeDao {
     }
 
     @Override
+    @Transactional
     public List<NoticeEntity> listNotices() {
         List<NoticeEntity> list = session.createQuery("from NoticeEntity").list();
         for (NoticeEntity noticeEntity : list) {

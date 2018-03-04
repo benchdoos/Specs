@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class UsersDaoImpl implements UsersDao {
@@ -39,6 +40,7 @@ public class UsersDaoImpl implements UsersDao {
 
 
     @Override
+    @Transactional
     public int addUser(UsersEntity usersEntity) {
         Integer id = (Integer) session.save(usersEntity);
         usersEntity = getUserById(id);
@@ -47,12 +49,14 @@ public class UsersDaoImpl implements UsersDao {
     }
 
     @Override
+    @Transactional
     public void updateUser(UsersEntity usersEntity) {
         session.merge(usersEntity);
         log.info("User successfully updated: " + usersEntity);
     }
 
     @Override
+    @Transactional
     public void removeUser(int id) {
         UsersEntity usersEntity = session.load(UsersEntity.class, id);
         if (usersEntity != null) {
@@ -63,6 +67,7 @@ public class UsersDaoImpl implements UsersDao {
 
 
     @Override
+    @Transactional
     public UsersEntity getUserById(int id) {
         UsersEntity usersEntity = session.load(UsersEntity.class, id);
         log.info("User successfully found by id:" + id + " " + usersEntity);
@@ -70,6 +75,7 @@ public class UsersDaoImpl implements UsersDao {
     }
 
     @Override
+    @Transactional
     public UsersEntity getUserByUsername(String username) {
         Query query = session.createQuery("from UsersEntity where username = :username");
         query.setParameter("username", username);
@@ -81,6 +87,7 @@ public class UsersDaoImpl implements UsersDao {
 
 
     @Override
+    @Transactional
     public List<UsersEntity> listUsers() {
         List<UsersEntity> list = session.createQuery("from UsersEntity").list();
         for (UsersEntity usersEntity : list) {

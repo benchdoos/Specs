@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class ConstantsDaoImpl implements ConstantsDao {
@@ -33,6 +34,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     @Override
+    @Transactional
     public int addConstant(ConstantsEntity constantsEntity) {
         Integer id = (Integer) session.save(constantsEntity);
         constantsEntity = getConstantById(id);
@@ -41,12 +43,14 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     @Override
+    @Transactional
     public void updateConstant(ConstantsEntity constantsEntity) {
         session.update(constantsEntity);
         log.info("Constant successfully updated: " + constantsEntity);
     }
 
     @Override
+    @Transactional
     public void removeConstant(int id) {
         ConstantsEntity constantsEntity = (ConstantsEntity) session.load(ConstantsEntity.class, id);
         if (constantsEntity != null) {
@@ -57,6 +61,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     @Override
+    @Transactional
     public ConstantsEntity getConstantById(int id) {
         ConstantsEntity constantsEntity = session.load(ConstantsEntity.class, id);
         log.info("Constant successfully found by id:" + id + " " + constantsEntity);
@@ -64,6 +69,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     @Override
+    @Transactional
     public ConstantsEntity getConstantByKey(String key) {
         Query query = session.createQuery("from ConstantsEntity where key =:key");
         query.setParameter("key", key);
@@ -76,6 +82,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     @Override
+    @Transactional
     public List<ConstantsEntity> listConstants() {
         List<ConstantsEntity> list = session.createQuery("from ConstantsEntity").list();
         for (ConstantsEntity constantsEntity : list) {

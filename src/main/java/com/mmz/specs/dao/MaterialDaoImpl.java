@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class MaterialDaoImpl implements MaterialDao {
@@ -50,6 +51,7 @@ public class MaterialDaoImpl implements MaterialDao {
 
 
     @Override
+    @Transactional
     public int addMaterial(MaterialEntity materialEntity) {
         Integer id = (Integer) session.save(materialEntity);
         materialEntity = getMaterialById(id);
@@ -58,12 +60,14 @@ public class MaterialDaoImpl implements MaterialDao {
     }
 
     @Override
+    @Transactional
     public void updateMaterial(MaterialEntity materialEntity) {
         session.merge(materialEntity);
         log.info("Material successfully updated: " + materialEntity);
     }
 
     @Override
+    @Transactional
     public void removeMaterial(int id) {
         MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
         if (materialEntity != null) {
@@ -74,6 +78,7 @@ public class MaterialDaoImpl implements MaterialDao {
 
 
     @Override
+    @Transactional
     public MaterialEntity getMaterialById(int id) {
         MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
         log.info("Material successfully found by id:" + id + " " + materialEntity);
@@ -81,6 +86,7 @@ public class MaterialDaoImpl implements MaterialDao {
     }
 
     @Override
+    @Transactional
     public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile) {
         Query query = session.createQuery("from MaterialEntity where shortMark = :shortMark " +
                 "and shortProfile=:shortProfile");

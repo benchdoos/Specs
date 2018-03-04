@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class MaterialListDaoImpl implements MaterialListDao {
@@ -49,6 +50,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
+    @Transactional
     public int addMaterialList(MaterialListEntity materialListEntity) {
         Integer id = (Integer) session.save(materialListEntity);
         materialListEntity = getMaterialListById(id);
@@ -57,12 +59,14 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
+    @Transactional
     public void updateMaterialList(MaterialListEntity materialListEntity) {
         session.merge(materialListEntity);
         log.info("MaterialList successfully updated: " + materialListEntity);
     }
 
     @Override
+    @Transactional
     public void removeMaterialList(int id) {
         MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
         if (materialListEntity != null) {
@@ -72,6 +76,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
+    @Transactional
     public MaterialListEntity getMaterialListById(int id) {
         MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
         log.info("MaterialList successfully found by id:" + id + " " + materialListEntity);
@@ -79,6 +84,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
+    @Transactional
     public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity) {
         Query query = session.createQuery("from MaterialListEntity where MaterialListEntity.detailByDetailId= :detailEntity");
         query.setParameter("detailEntity", detailEntity);
@@ -91,6 +97,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
+    @Transactional
     public List<MaterialListEntity> listMaterialLists() {
         List<MaterialListEntity> list = session.createQuery("from MaterialListEntity").list();
         for (MaterialListEntity materialListEntity : list) {
