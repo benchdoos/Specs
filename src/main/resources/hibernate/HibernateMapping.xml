@@ -28,7 +28,7 @@
             <column name="CHILD_DETAIL_ID"/>
         </many-to-one>
     </class>
-    <class name="com.mmz.specs.model.DetailTitlesEntity" table="DETAIL_TITLES" schema="">
+    <class name="com.mmz.specs.model.DetailTitleEntity" table="DETAIL_TITLES" schema="">
         <id name="id" column="ID">
             <generator class="identity"/>
         </id>

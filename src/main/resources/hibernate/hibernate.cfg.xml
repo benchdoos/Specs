@@ -18,7 +18,7 @@
         <mapping resource="hibernate/HibernateMapping.xml"/>
         <mapping class="com.mmz.specs.model.DetailEntity"/>
         <mapping class="com.mmz.specs.model.DetailListEntity"/>
-        <mapping class="com.mmz.specs.model.DetailTitlesEntity"/>
+        <mapping class="com.mmz.specs.model.DetailTitleEntity"/>
         <mapping class="com.mmz.specs.model.MaterialEntity"/>
         <mapping class="com.mmz.specs.model.MaterialListEntity"/>
         <mapping class="com.mmz.specs.model.NoticeEntity"/>

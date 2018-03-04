@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "DETAIL_TITLES")
-public class DetailTitlesEntity {
+public class DetailTitleEntity {
     private int id;
     private String title;
     private Boolean isActive;
@@ -46,7 +46,7 @@ public class DetailTitlesEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DetailTitlesEntity that = (DetailTitlesEntity) o;
+        DetailTitleEntity that = (DetailTitleEntity) o;
 
         if (id != that.id) return false;
         if (title != null ? !title.equals(that.title) : that.title != null) return false;
