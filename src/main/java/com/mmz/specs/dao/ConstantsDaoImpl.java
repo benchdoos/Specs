@@ -33,9 +33,11 @@ public class ConstantsDaoImpl implements ConstantsDao {
     }
 
     @Override
-    public void addConstant(ConstantsEntity constantsEntity) {
-        session.persist(constantsEntity);
+    public int addConstant(ConstantsEntity constantsEntity) {
+        Integer id = (Integer) session.save(constantsEntity);
+        constantsEntity = getConstantById(id);
         log.info("Constant successfully saved: " + constantsEntity);
+        return id;
     }
 
     @Override

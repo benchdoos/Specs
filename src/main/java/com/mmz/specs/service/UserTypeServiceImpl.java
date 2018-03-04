@@ -24,6 +24,11 @@ public class UserTypeServiceImpl implements UserTypeService {
     }
 
     @Override
+    public void updateUserType(UserTypeEntity entity) {
+        this.userTypeDao.updateUserType(entity);
+    }
+
+    @Override
     public void setUserTypeDao(UserTypeDao userTypeDao) {
         this.userTypeDao = userTypeDao;
     }

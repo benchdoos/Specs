@@ -12,6 +12,9 @@ public interface UserTypeService {
     public UserTypeDao getUserTypeDao();
 
 
+    public void updateUserType(UserTypeEntity entity);
+
+
     public UserTypeEntity getUserTypeById(int id);
 
 

@@ -50,9 +50,11 @@ public class MaterialDaoImpl implements MaterialDao {
 
 
     @Override
-    public void addMaterial(MaterialEntity materialEntity) {
-        session.save(materialEntity);
+    public int addMaterial(MaterialEntity materialEntity) {
+        Integer id = (Integer) session.save(materialEntity);
+        materialEntity = getMaterialById(id);
         log.info("Material successfully saved: " + materialEntity);
+        return id;
     }
 
     @Override

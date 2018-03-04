@@ -28,6 +28,12 @@ public class UserTypeDaoImpl implements UserTypeDao {
     }
 
     @Override
+    public void updateUserType(UserTypeEntity userTypeEntity) {
+        session.merge(userTypeEntity);
+        log.info("UserType successfully updated: "+ userTypeEntity);
+    }
+
+    @Override
     public void setSession(Session session) {
         this.session = session;
     }

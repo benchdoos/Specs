@@ -31,8 +31,8 @@ public class ConstantsServiceImpl implements ConstantsService {
 
     @Override
     @Transactional
-    public void addConstant(ConstantsEntity constantsEntity) {
-        this.constantsDao.addConstant(constantsEntity);
+    public int addConstant(ConstantsEntity constantsEntity) {
+        return this.constantsDao.addConstant(constantsEntity);
     }
 
     @Override

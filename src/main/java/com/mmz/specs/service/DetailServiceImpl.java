@@ -43,8 +43,8 @@ public class DetailServiceImpl implements DetailService {
     }
 
     @Override
-    public void addDetail(DetailEntity detailEntity) {
-        detailDao.addDetail(detailEntity);
+    public int addDetail(DetailEntity detailEntity) {
+        return detailDao.addDetail(detailEntity);
     }
 
     @Override

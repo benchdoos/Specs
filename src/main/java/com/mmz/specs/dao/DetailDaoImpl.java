@@ -48,9 +48,11 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
-    public void addDetail(DetailEntity detailEntity) {
-        session.save(detailEntity);
+    public int addDetail(DetailEntity detailEntity) {
+        Integer id = (Integer) session.save(detailEntity);
+        detailEntity = getDetailById(id);
         log.info("Detail successfully saved: " + detailEntity);
+        return id;
 
     }
 

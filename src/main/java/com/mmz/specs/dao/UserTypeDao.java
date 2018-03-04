@@ -12,6 +12,8 @@ public interface UserTypeDao {
     public Session getSession();
 
 
+    public void updateUserType(UserTypeEntity userTypeEntity);
+
     public UserTypeEntity getUserTypeById(int id);
 
 

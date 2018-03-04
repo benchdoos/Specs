@@ -27,7 +27,7 @@ public interface MaterialDao {
     public void setSession(Session session);
 
 
-    public void addMaterial(MaterialEntity materialEntity);
+    public int addMaterial(MaterialEntity materialEntity);
 
     public void updateMaterial(MaterialEntity materialEntity);
 

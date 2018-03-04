@@ -12,7 +12,7 @@ public interface ConstantsService {
     public ConstantsDao getConstantsDao();
 
 
-    public void addConstant(ConstantsEntity constantsEntity);
+    public int addConstant(ConstantsEntity constantsEntity);
 
     public void updateConstant(ConstantsEntity constantsEntity);
 

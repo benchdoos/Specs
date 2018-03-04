@@ -26,7 +26,7 @@ public interface DetailDao {
     public Session getSession();
 
 
-    public void addDetail(DetailEntity detailEntity);
+    public int addDetail(DetailEntity detailEntity);
 
     public void updateDetail(DetailEntity detailEntity);
 

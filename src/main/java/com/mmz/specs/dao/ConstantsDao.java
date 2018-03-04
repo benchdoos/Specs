@@ -11,7 +11,7 @@ public interface ConstantsDao {
     /**
      * Add new constant //if needed for future releases
      */
-    public void addConstant(ConstantsEntity constantsEntity);
+    public int addConstant(ConstantsEntity constantsEntity);
 
     /**
      * Update existing constant
