@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018.  Eugene Zrazhevsky and others.
+ * (C) Copyright 2018:  Eugene Zrazhevsky and others.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,13 +52,13 @@ public class MaterialDaoImpl implements MaterialDao {
     @Override
     public void addMaterial(MaterialEntity materialEntity) {
         session.save(materialEntity);
-        log.info("Material successfully saved. " + materialEntity);
+        log.info("Material successfully saved: " + materialEntity);
     }
 
     @Override
     public void updateMaterial(MaterialEntity materialEntity) {
         session.merge(materialEntity);
-        log.info("Material successfully updated. " + materialEntity);
+        log.info("Material successfully updated: " + materialEntity);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MaterialDaoImpl implements MaterialDao {
         if (materialEntity != null) {
             session.delete(materialEntity);
         }
-        log.info("Material successfully removed. " + materialEntity);
+        log.info("Material successfully removed: " + materialEntity);
     }
 
 

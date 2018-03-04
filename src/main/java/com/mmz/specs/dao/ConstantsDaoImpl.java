@@ -35,13 +35,13 @@ public class ConstantsDaoImpl implements ConstantsDao {
     @Override
     public void addConstant(ConstantsEntity constantsEntity) {
         session.persist(constantsEntity);
-        log.info("Constant successfully saved. " + constantsEntity);
+        log.info("Constant successfully saved: " + constantsEntity);
     }
 
     @Override
     public void updateConstant(ConstantsEntity constantsEntity) {
         session.update(constantsEntity);
-        log.info("Constant successfully updated. " + constantsEntity);
+        log.info("Constant successfully updated: " + constantsEntity);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
         if (constantsEntity != null) {
             session.delete(constantsEntity);
         }
-        log.info("Constant successfully removed. " + constantsEntity);
+        log.info("Constant successfully removed: " + constantsEntity);
 
     }
 

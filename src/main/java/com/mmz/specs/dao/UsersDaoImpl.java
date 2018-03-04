@@ -42,14 +42,14 @@ public class UsersDaoImpl implements UsersDao {
     public int addUser(UsersEntity usersEntity) {
         Integer id = (Integer) session.save(usersEntity);
         usersEntity = getUserById(id);
-        log.info("User successfully saved. " + usersEntity);
+        log.info("User successfully saved: " + usersEntity);
         return id;
     }
 
     @Override
     public void updateUser(UsersEntity usersEntity) {
         session.merge(usersEntity);
-        log.info("User successfully updated. " + usersEntity);
+        log.info("User successfully updated: " + usersEntity);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UsersDaoImpl implements UsersDao {
         if (usersEntity != null) {
             session.delete(usersEntity);
         }
-        log.info("User successfully removed. " + usersEntity);
+        log.info("User successfully removed: " + usersEntity);
     }
 
 

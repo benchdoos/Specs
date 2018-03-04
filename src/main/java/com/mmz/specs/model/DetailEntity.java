@@ -10,7 +10,7 @@ public class DetailEntity {
     private int id;
     private String index;
     private boolean unit;
-    private Double finishedWeigth;
+    private Double finishedWeight;
     private Short workpieceWeight;
     private String imagePath;
     private Boolean isActive;
@@ -47,13 +47,13 @@ public class DetailEntity {
     }
 
     @Basic
-    @Column(name = "FINISHED_WEIGTH")
-    public Double getFinishedWeigth() {
-        return finishedWeigth;
+    @Column(name = "FINISHED_WEIGHT")
+    public Double getFinishedWeight() {
+        return finishedWeight;
     }
 
-    public void setFinishedWeigth(Double finishedWeigth) {
-        this.finishedWeigth = finishedWeigth;
+    public void setFinishedWeight(Double finishedWeigth) {
+        this.finishedWeight = finishedWeigth;
     }
 
     @Basic
@@ -96,7 +96,7 @@ public class DetailEntity {
         if (id != that.id) return false;
         if (unit != that.unit) return false;
         if (index != null ? !index.equals(that.index) : that.index != null) return false;
-        if (finishedWeigth != null ? !finishedWeigth.equals(that.finishedWeigth) : that.finishedWeigth != null)
+        if (finishedWeight != null ? !finishedWeight.equals(that.finishedWeight) : that.finishedWeight != null)
             return false;
         if (workpieceWeight != null ? !workpieceWeight.equals(that.workpieceWeight) : that.workpieceWeight != null)
             return false;
@@ -111,7 +111,7 @@ public class DetailEntity {
         int result = id;
         result = 31 * result + (index != null ? index.hashCode() : 0);
         result = 31 * result + (unit ? 1 : 0);
-        result = 31 * result + (finishedWeigth != null ? finishedWeigth.hashCode() : 0);
+        result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
         result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
         result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
         result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
@@ -134,7 +134,7 @@ public class DetailEntity {
                 .append("id", id)
                 .append("index", index)
                 .append("unit", unit)
-                .append("finishedWeigth", finishedWeigth)
+                .append("finishedWeigth", finishedWeight)
                 .append("workpieceWeight", workpieceWeight)
                 .append("imagePath", imagePath)
                 .append("isActive", isActive)

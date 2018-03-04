@@ -9,7 +9,7 @@
         </id>
         <property name="index" column="`INDEX`"/>
         <property name="unit" column="UNIT"/>
-        <property name="finishedWeigth" column="FINISHED_WEIGTH"/>
+        <property name="finishedWeight" column="FINISHED_WEIGHT"/>
         <property name="workpieceWeight" column="WORKPIECE_WEIGHT"/>
         <property name="imagePath" column="IMAGE_PATH"/>
         <property name="active" column="IS_ACTIVE"/>
