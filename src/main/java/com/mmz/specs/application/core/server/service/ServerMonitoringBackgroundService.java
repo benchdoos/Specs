@@ -27,26 +27,26 @@ import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 public class ServerMonitoringBackgroundService {
     private static final int MEMORY_LENGTH = 60;
     private static final int MONITORING_TIMER_DELAY = 1000;
-    private static ServerMonitoringBackgroundService ourInstance = new ServerMonitoringBackgroundService();
+    private static final ServerMonitoringBackgroundService ourInstance = new ServerMonitoringBackgroundService();
 
     private static Timer serverStateUpdateTimer;
 
-    private long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
+    private final long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
 
     public ArrayList<Float> getMemoryLoadValues() {
-        return memoryLoadValues;
+        return this.memoryLoadValues;
     }
 
     public ArrayList<Float> getCpuLoadValues() {
-        return cpuLoadValues;
+        return this.cpuLoadValues;
     }
 
     public ArrayList<Float> getCpuLoadByServerValues() {
-        return cpuLoadByServerValues;
+        return this.cpuLoadByServerValues;
     }
 
     public ArrayList<Float> getCpuTemperatureValue() {
-        return cpuTemperatureValue;
+        return this.cpuTemperatureValue;
     }
 
     private ArrayList<Float> memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
@@ -79,7 +79,7 @@ public class ServerMonitoringBackgroundService {
 
     private ActionListener getMonitorTimerActionListener() {
         return e -> {
-            getOnlineUsersCount();
+            /*getOnlineUsersCount();*/
             /*updateActiveThreadCounterLabel();*/
 
             updateCpuLoad();
@@ -92,7 +92,7 @@ public class ServerMonitoringBackgroundService {
 
     private void updateCpuLoadByServer() {
         final double cpuUsageByApplication = getCpuUsageByApplication();
-        cpuLoadByServerValues = updateGraphicValue(cpuLoadByServerValues, cpuUsageByApplication);
+        this.cpuLoadByServerValues = updateGraphicValue(this.cpuLoadByServerValues, cpuUsageByApplication);
     }
 
     private void updateMemoryLoad() {
@@ -101,27 +101,27 @@ public class ServerMonitoringBackgroundService {
 
         double usedMemory = CommonUtils.round(runtimeUsedMemory / (double) runtimeMaxMemory * 100, 2);
 
-        memoryLoadValues = updateGraphicValue(memoryLoadValues, usedMemory);
+        this.memoryLoadValues = updateGraphicValue(this.memoryLoadValues, usedMemory);
     }
 
     private void updateCpuLoad() {
-        cpuLoadValues = updateGraphicValue(cpuLoadValues, getProcessCpuLoad());
+        this.cpuLoadValues = updateGraphicValue(this.cpuLoadValues, getProcessCpuLoad());
     }
 
     private void updateTemperature() {
-        cpuTemperatureValue = updateGraphicValue(cpuTemperatureValue, getCpuTemperature());
+        this.cpuTemperatureValue = updateGraphicValue(this.cpuTemperatureValue, getCpuTemperature());
     }
 
     public long getServerOnlineTimeInSeconds() {
-        return Calendar.getInstance().getTime().getTime() / 1000 - serverStartDateSeconds;
+        return Calendar.getInstance().getTime().getTime() / 1000 - this.serverStartDateSeconds;
     }
 
-    public int getOnlineUsersCount() {
+    /*public int getOnlineUsersCount() {
         ServerBackgroundService backgroundService = ServerBackgroundService.getInstance();
         if (backgroundService != null) {
             return backgroundService.getOnlineUsersCount();
         } else return 0;
-    }
+    }*/
 
     private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
         if (oldValues.size() != MEMORY_LENGTH) {

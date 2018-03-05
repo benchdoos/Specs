@@ -24,20 +24,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerSocketService {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static ServerSocketService ourInstance = new ServerSocketService();
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final ServerSocketService ourInstance = new ServerSocketService();
 
-    private static ExecutorService executorService = Executors.newFixedThreadPool(ServerConstants.SERVER_SOCKED_THREAD_POOL_SIZE);
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(ServerConstants.SERVER_SOCKED_THREAD_POOL_SIZE);
+    private final HashMap<ClientConnection, Thread> connections = new HashMap<>();
     /*private static LinkedList<ClientConnection> connections = new LinkedList<>();
     private static LinkedList<Runnable> threads = new LinkedList<>();*/
     private long genThreadId = 0;
-    private HashMap<ClientConnection, Thread> connections = new HashMap<>();
     private boolean isNotClosing = true;
     private ServerSocketConnectionPool serverSocketConnectionPool;
 
@@ -66,38 +68,38 @@ public class ServerSocketService {
 
 
     public void createConnections() throws IOException {
-        while (isNotClosing) {
-            log.info("Server is waiting for new connection at: " + serverSocketConnectionPool.getServerInfo());
+        while (this.isNotClosing) {
+            log.info("Server is waiting for new connection at: " + this.serverSocketConnectionPool.getServerInfo());
 
             ClientConnection connection = getClientConnection();
             log.info("Server got a new connection at: " + connection);
 
             ServerSocketDialog dialog = new ServerSocketDialog(connection);
-            Thread thread = new Thread(dialog, "Thread-" + genThreadId + " for Client connection with socket: " + connection.getSocket());
+            Thread thread = new Thread(dialog, "Thread-" + this.genThreadId + " for Client connection with socket: " + connection.getSocket());
             registerClientConnection(connection, thread);
             thread.start();
-            genThreadId++;
+            this.genThreadId++;
         }
     }
 
     private void startServerSocketConnectionPool() {
         log.info("Starting server socket connection pool");
-        serverSocketConnectionPool = ServerSocketConnectionPool.getInstance();
+        this.serverSocketConnectionPool = ServerSocketConnectionPool.getInstance();
         try {
-            log.info("Is server currently started: " + serverSocketConnectionPool.isServerStarted());
-            serverSocketConnectionPool.startServer();
-            log.info("Is Server successfully started: " + serverSocketConnectionPool.getServerInfo());
+            log.info("Is server currently started: " + this.serverSocketConnectionPool.isServerStarted());
+            this.serverSocketConnectionPool.startServer();
+            log.info("Is Server successfully started: " + this.serverSocketConnectionPool.getServerInfo());
         } catch (IOException e) {
-            log.error("Could not start server at: " + serverSocketConnectionPool.getServerInfo());
+            log.error("Could not start server at: " + this.serverSocketConnectionPool.getServerInfo());
         }
 
     }
 
     private void stopServerSocketConnections() {
         try {
-            isNotClosing = false;
+            this.isNotClosing = false;
             closeAll();
-            serverSocketConnectionPool.stopServerSocketConnectionPool();
+            this.serverSocketConnectionPool.stopServerSocketConnectionPool();
             log.info("ServerSocketService successfully stopped all connections");
         } catch (IOException e) {
             log.warn("Could not close stop ServerSocket connection pool", e);
@@ -109,12 +111,12 @@ public class ServerSocketService {
         /*if (!connections.containsKey(client)) {
             connections.put(client, runnable);
         }*/
-        connections.put(client, thread); // TODO test this
+        this.connections.put(client, thread); // TODO test this
     }
 
     private void unregisterClientConnection(ClientConnection client) {
         /*connections.get(client).run();*/ //for what????
-        connections.remove(client);
+        this.connections.remove(client);
     }
 
     public void closeClientConnection(ClientConnection connection) throws IOException {
@@ -125,11 +127,11 @@ public class ServerSocketService {
 
     }
 
-    private void closeAll() { //FixME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
+    public void closeAll() { //FixME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
         log.info("Removing all registered connections");
         AtomicInteger connectionsCount = new AtomicInteger();
 
-        connections.forEach((client, thread) -> {
+        this.connections.forEach((client, thread) -> {
             thread.interrupt();
             log.debug("Found client: " + client);
             try {
@@ -141,8 +143,8 @@ public class ServerSocketService {
             }
         });
 
-        int totalConnectionsCount = connections.size();
-        connections.clear();
+        int totalConnectionsCount = this.connections.size();
+        this.connections.clear();
         if (connectionsCount.get() == totalConnectionsCount) {
             log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
         } else {
@@ -151,14 +153,23 @@ public class ServerSocketService {
     }
 
     public int getServerPort() {
-        if (serverSocketConnectionPool!=null) {
-            return serverSocketConnectionPool.getServerPort();
+        if (this.serverSocketConnectionPool != null) {
+            return this.serverSocketConnectionPool.getServerPort();
         } else return 0;
     }
 
     public int getConnectedClientsCount() {
-        if (connections != null) {
-            return connections.size();
-        } else return 0;
+        return this.connections.size();
+    }
+
+    public List<ClientConnection> getConnectedClientsList() {
+        Object[] objects = this.connections.keySet().toArray();
+        List<ClientConnection> result = new ArrayList<>();
+        for (Object object : objects) {
+            if (object instanceof ClientConnection) {
+                result.add((ClientConnection) object);
+            }
+        }
+        return result;
     }
 }

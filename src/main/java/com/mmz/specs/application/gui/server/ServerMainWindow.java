@@ -20,9 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerException;
-import com.mmz.specs.application.core.server.service.ServerBackgroundService;
-import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
-import com.mmz.specs.application.core.server.service.ServerMonitoringGraphics;
+import com.mmz.specs.application.core.server.service.*;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
@@ -64,16 +62,16 @@ import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMainWindow extends JFrame {
 
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static int lastActionTimeAgoCounter = 0;
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
     private final String DEGREE = "\u00b0";
     private final long logicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getLogicalProcessorCount();
     private final long physicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getPhysicalProcessorCount();
     private final long runtimeMaxMemory = getRuntimeMaxMemory();
-    private long runtimeTotalMemory = getRuntimeTotalMemory();
+    private final long runtimeTotalMemory = getRuntimeTotalMemory();
 
-    private DefaultListModel<Object> usersListModel = new DefaultListModel<>();
+    private final Date serverStartDate = Calendar.getInstance().getTime();
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -130,8 +128,10 @@ public class ServerMainWindow extends JFrame {
     private JButton updateUserListButton;
     private JPanel currentUserPanel;
     private JLabel authorizedUserName;
+    private JButton buttonForceAllUsersDisconnect;
+    private JButton removeUserButton;
+    private JButton saveUserListButton;
     private boolean serverOnlineCountLabelCounterShow = true;
-    private Date serverStartDate = Calendar.getInstance().getTime();
     private JPanel onlyAdminTabsList[];
     private Timer monitorUiUpdateTimer;
     private Timer userActionsUpdateTimer;
@@ -170,7 +170,10 @@ public class ServerMainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateOnlineUsersCount();
+                updateOnlineUsersList();
+
                 updateServerOnlineTimeLabel();
+
                 updateActiveThreadCounterLabel();
                 updateProcessorInfoLabel();
                 updateUsedProcessCpuInfoLabel();
@@ -227,14 +230,71 @@ public class ServerMainWindow extends JFrame {
                 }
             }
 
-            private void updateOnlineUsersCount() {
-                int onlineUsersCount = ServerBackgroundService.getInstance().getOnlineUsersCount();
-                onlineUsersCountLabel.setText(onlineUsersCount + "");
-                onlineUsersCount2.setText(onlineUsersCount + "");
-            }
+
         });
         if (!monitorUiUpdateTimer.isRunning()) {
             monitorUiUpdateTimer.start();
+        }
+    }
+
+    private void updateOnlineUsersCount() {
+        int onlineUsersCount = ServerBackgroundService.getInstance().getOnlineUsersCount();
+        onlineUsersCountLabel.setText(onlineUsersCount + "");
+        onlineUsersCount2.setText(onlineUsersCount + "");
+    }
+
+    private void updateOnlineUsersList() {
+        List<ClientConnection> connections = ServerBackgroundService.getInstance().getConnectedClientsList();
+        DefaultListModel<Object> model = new DefaultListModel<>();
+        for (ClientConnection connection : connections) {
+            model.addElement(connection);
+        }
+
+
+        int selectedIndex = onlineUserList.getSelectedIndex();
+        DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof ClientConnection) {
+                    ClientConnection client = (ClientConnection) value;
+                    String username = " ";
+                    UsersEntity userEntity = client.getUserEntity();
+                    if (userEntity != null) {
+                        if (!userEntity.getUsername().isEmpty()) {
+                            username = userEntity.getUsername();
+                            if (isSelected) {
+                                setForeground(Color.GREEN.brighter().brighter());
+                            } else {
+                                setForeground(Color.GREEN.darker().darker());
+                            }
+                        } else {
+                            username = "Some incorrect user, id: " + userEntity.getId();
+                            if (isSelected) {
+                                setForeground(Color.RED.brighter().brighter());
+                            } else {
+                                setForeground(Color.RED.darker().darker());
+                            }
+                        }
+                    } else {
+                        username = client.getSocket().getInetAddress().getHostName() + ":" + client.getSocket().getPort();
+                        if (isSelected) {
+                            setForeground(Color.DARK_GRAY.brighter().brighter());
+                        } else {
+                            setForeground(Color.DARK_GRAY.darker().darker());
+                        }
+                    }
+
+                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        };
+        onlineUserList.setCellRenderer(cellRenderer);
+        onlineUserList.setModel(model);
+
+        if (selectedIndex >= 0) {
+            onlineUserList.setSelectedIndex(selectedIndex);
         }
     }
 
@@ -316,8 +376,13 @@ public class ServerMainWindow extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        adminServerPanel.registerKeyboardAction(e -> onForceUserDisconnect(usersListModel),
+        adminServerPanel.registerKeyboardAction(e -> onForceUserDisconnect(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        adminServerPanel.registerKeyboardAction(e -> onForceAllUsersDisconnect(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
+                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, true),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
@@ -344,13 +409,6 @@ public class ServerMainWindow extends JFrame {
 
 
         updateUserTypeComboBox();
-
-        //test
-
-        for (int i = 0; i < 10 * 1000; i++) {
-            usersListModel.addElement("User: " + i);
-        }
-        onlineUserList.setModel(usersListModel);
 
         initListeners();
     }
@@ -530,24 +588,13 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void initListeners() {
-        addWindowListener(new WindowAdapter() {
-            /*@Override
-            public void windowClosing(WindowEvent e) {
-                createServerTrayIcon();
-                super.windowClosing(e);
-            }
-*/
-           /* @Override
-            public void windowClosed(WindowEvent e) {
-                super.windowClosed(e);
-            }*/
-        });
-
 
         powerServerButton.addActionListener(e -> onPowerServerButton());
 
 
-        buttonForceUserDisconnect.addActionListener(e -> onForceUserDisconnect(usersListModel));
+        buttonForceUserDisconnect.addActionListener(e -> onForceUserDisconnect());
+
+        buttonForceAllUsersDisconnect.addActionListener(e -> onForceAllUsersDisconnect());
 
         buttonAdminLock.addActionListener(e -> onButtonAdminLock());
 
@@ -929,10 +976,27 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-    private void onForceUserDisconnect(DefaultListModel<Object> listModel) {
+    private void onForceUserDisconnect() {
+        DefaultListModel<ClientConnection> listModel = new DefaultListModel<>();
+        for (int i = 0; i < onlineUserList.getModel().getSize(); i++) {
+            if (onlineUserList.getModel().getElementAt(i) instanceof ClientConnection) {
+                listModel.addElement((ClientConnection) onlineUserList.getModel().getElementAt(i));
+            }
+        }
+
         if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
             int selectedIndex = onlineUserList.getSelectedIndex();
-            listModel.remove(selectedIndex);
+
+            ClientConnection connection = listModel.get(selectedIndex);
+            try {
+                ServerSocketService.getInstance().closeClientConnection(connection);
+                listModel.remove(selectedIndex);
+            } catch (IOException e) {
+                log.warn("Could not close connection from GUI: " + connection, e);
+            }
+
+            updateOnlineUsersList();
+
             if (listModel.getSize() > selectedIndex) {
                 onlineUserList.setSelectedIndex(selectedIndex);
             } else {
@@ -941,6 +1005,11 @@ public class ServerMainWindow extends JFrame {
                 }
             }
         }
+    }
+
+    private void onForceAllUsersDisconnect() {
+        ServerSocketService.getInstance().closeAll();
+        updateOnlineUsersList();
     }
 
     private void onButtonAdminLock() {
@@ -1109,6 +1178,7 @@ public class ServerMainWindow extends JFrame {
         panel5.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         osInfoLabel = new JLabel();
         osInfoLabel.setText("_");
+        osInfoLabel.setToolTipText("Версия операционной системы");
         panel5.add(osInfoLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Процессор:");
@@ -1136,6 +1206,7 @@ public class ServerMainWindow extends JFrame {
         panel5.add(label5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         jvmInfoLabel = new JLabel();
         jvmInfoLabel.setText("_");
+        jvmInfoLabel.setToolTipText("Версия Java Virtual Machine");
         panel5.add(jvmInfoLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel6 = new JPanel();
         panel6.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -1253,8 +1324,12 @@ public class ServerMainWindow extends JFrame {
         buttonForceUserDisconnect.setIcon(new ImageIcon(getClass().getResource("/img/gui/disconnect.png")));
         buttonForceUserDisconnect.setMargin(new Insets(2, 2, 2, 2));
         buttonForceUserDisconnect.setText("");
-        buttonForceUserDisconnect.setToolTipText("Отключить пользователя (delete)");
+        buttonForceUserDisconnect.setToolTipText("Отключить пользователя (DELETE)");
         toolBar1.add(buttonForceUserDisconnect);
+        buttonForceAllUsersDisconnect = new JButton();
+        buttonForceAllUsersDisconnect.setIcon(new ImageIcon(getClass().getResource("/img/gui/disconnect_total.png")));
+        buttonForceAllUsersDisconnect.setToolTipText("Отключить всех пользователей(CTRL+SHIFT+DELETE)");
+        toolBar1.add(buttonForceAllUsersDisconnect);
         buttonUserInfo = new JButton();
         buttonUserInfo.setIcon(new ImageIcon(getClass().getResource("/img/gui/info.png")));
         buttonUserInfo.setMargin(new Insets(2, 2, 2, 2));
@@ -1313,7 +1388,7 @@ public class ServerMainWindow extends JFrame {
         adminUsersPanel.setLayout(new GridLayoutManager(6, 3, new Insets(0, 0, 0, 0), -1, -1));
         adminPane.addTab("Пользователи", adminUsersPanel);
         final JScrollPane scrollPane3 = new JScrollPane();
-        adminUsersPanel.add(scrollPane3, new GridConstraints(2, 0, 4, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(200, -1), new Dimension(200, -1), null, 0, false));
+        adminUsersPanel.add(scrollPane3, new GridConstraints(2, 0, 4, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(150, -1), new Dimension(150, -1), null, 0, false));
         registeredUserList = new JList();
         registeredUserList.setSelectionMode(0);
         scrollPane3.setViewportView(registeredUserList);
@@ -1416,6 +1491,11 @@ public class ServerMainWindow extends JFrame {
         addUserButton.setText("");
         addUserButton.setToolTipText("Добавить пользователя");
         toolBar2.add(addUserButton);
+        removeUserButton = new JButton();
+        removeUserButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
+        removeUserButton.setText("");
+        removeUserButton.setToolTipText("Удалить пользователя (только если он не внес никаких изменений)");
+        toolBar2.add(removeUserButton);
         updateUserListButton = new JButton();
         updateUserListButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         updateUserListButton.setText("");

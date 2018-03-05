@@ -16,6 +16,7 @@
 package com.mmz.specs.application.core.server.service;
 
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.model.UsersEntity;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,22 +26,33 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ClientConnectionImpl implements ClientConnection {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private Socket socket;
     private Session session;
+    private UsersEntity entity;
 
-    public ClientConnectionImpl() {
+    ClientConnectionImpl() {
     }
 
-    public ClientConnectionImpl(Socket socket, Session session) {
+    public ClientConnectionImpl(Socket socket, Session session, UsersEntity entity) {
         this.socket = socket;
         this.session = session;
     }
 
     @Override
+    public UsersEntity getUserEntity() {
+        return entity;
+    }
+
+    @Override
+    public void setUserEntity(UsersEntity entity) {
+        this.entity = entity;
+    }
+
+    @Override
     public Socket getSocket() {
-        return socket;
+        return this.socket;
     }
 
     @Override
@@ -61,11 +73,11 @@ public class ClientConnectionImpl implements ClientConnection {
     @Override
     public void close() throws IOException {
         try {
-            if (session != null) {
-                session.close();
+            if (this.session != null) {
+                this.session.close();
             }
-            if (socket != null) {
-                socket.close();
+            if (this.socket != null) {
+                this.socket.close();
             }
         } catch (IOException | RuntimeException e) {
             log.warn("Could not close session or socket", e);
@@ -80,25 +92,25 @@ public class ClientConnectionImpl implements ClientConnection {
 
         ClientConnectionImpl that = (ClientConnectionImpl) o;
 
-        if (!socket.equals(that.socket)) return false;
-        return session.equals(that.session);
+        if (!this.socket.equals(that.socket)) return false;
+        return this.session.equals(that.session);
     }
 
     @Override
     public int hashCode() {
-        int result = socket != null ? socket.hashCode() : 0;
-        result = 31 * result + (session != null ? session.hashCode() : 0);
+        int result = this.socket != null ? this.socket.hashCode() : 0;
+        result = 31 * result + (this.session != null ? this.session.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         String sessionString = "";
-        if (session != null) {
+        if (this.session != null) {
             sessionString = "some session";
         } else sessionString = "null session";
         return new ToStringBuilder(this)
-                .append("socket", socket)
+                .append("socket", this.socket)
                 .append("session", sessionString)
                 .toString();
     }

@@ -122,6 +122,7 @@
                             </constraints>
                             <properties>
                               <text value="_"/>
+                              <toolTipText value="Версия операционной системы" noi18n="true"/>
                             </properties>
                           </component>
                           <component id="ecafb" class="javax.swing.JLabel">
@@ -189,6 +190,7 @@
                             </constraints>
                             <properties>
                               <text value="_"/>
+                              <toolTipText value="Версия Java Virtual Machine" noi18n="true"/>
                             </properties>
                           </component>
                         </children>
@@ -510,7 +512,14 @@
                                       <icon value="img/gui/disconnect.png"/>
                                       <margin top="2" left="2" bottom="2" right="2"/>
                                       <text value=""/>
-                                      <toolTipText value="Отключить пользователя (delete)" noi18n="true"/>
+                                      <toolTipText value="Отключить пользователя (DELETE)" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <component id="9d237" class="javax.swing.JButton" binding="buttonForceAllUsersDisconnect">
+                                    <constraints/>
+                                    <properties>
+                                      <icon value="img/gui/disconnect_total.png"/>
+                                      <toolTipText value="Отключить всех пользователей(CTRL+SHIFT+DELETE)" noi18n="true"/>
                                     </properties>
                                   </component>
                                   <component id="be46" class="javax.swing.JButton" binding="buttonUserInfo">
@@ -649,8 +658,8 @@
                           <scrollpane id="f2ba5">
                             <constraints>
                               <grid row="2" column="0" row-span="4" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                                <minimum-size width="200" height="-1"/>
-                                <preferred-size width="200" height="-1"/>
+                                <minimum-size width="150" height="-1"/>
+                                <preferred-size width="150" height="-1"/>
                               </grid>
                             </constraints>
                             <properties/>
@@ -882,7 +891,23 @@
                                   <icon value="img/gui/edit/add.png"/>
                                   <margin top="2" left="2" bottom="2" right="2"/>
                                   <text value=""/>
-                                  <toolTipText value="Добавить пользователя"/>
+                                  <toolTipText value="Добавить пользователя" noi18n="true"/>
+                                </properties>
+                              </component>
+                              <component id="acdb4" class="javax.swing.JButton" binding="removeUserButton">
+                                <constraints/>
+                                <properties>
+                                  <icon value="img/gui/edit/remove.png"/>
+                                  <text value=""/>
+                                  <toolTipText value="Удалить пользователя (только если он не внес никаких изменений)" noi18n="true"/>
+                                </properties>
+                              </component>
+                              <component id="9d967" class="javax.swing.JButton" binding="saveUserListButton">
+                                <constraints/>
+                                <properties>
+                                  <icon value="img/gui/save.png"/>
+                                  <text value=""/>
+                                  <toolTipText value="Сохранить изменения" noi18n="true"/>
                                 </properties>
                               </component>
                               <component id="3db22" class="javax.swing.JButton" binding="updateUserListButton">

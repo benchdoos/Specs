@@ -23,12 +23,13 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.List;
 
 public class ServerBackgroundService {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    private static ServerBackgroundService ourInstance = new ServerBackgroundService();
-    private Thread serverBackGroundThread;
+    private static final ServerBackgroundService ourInstance = new ServerBackgroundService();
+    private final Thread serverBackGroundThread;
     private ServerSocketService serverSocketService;
     private ServerMonitoringBackgroundService monitoringBackgroundService;
     private ServerDBConnectionPool serverDBConnectionPool;
@@ -57,9 +58,9 @@ public class ServerBackgroundService {
 
     private void createConnections() {
         try {
-            serverSocketService.createConnections();
+            this.serverSocketService.createConnections();
         } catch (IOException e) {
-            if (!isServerShuttingDown) {
+            if (!this.isServerShuttingDown) {
                 log.error("Could not create socket connections", e);
             } else {
                 log.info("ServerSocket is shut down");
@@ -68,16 +69,16 @@ public class ServerBackgroundService {
     }
 
     private void startServerSocketService() {
-        serverSocketService = ServerSocketService.getInstance();
-        serverSocketService.startSocketService();
+        this.serverSocketService = ServerSocketService.getInstance();
+        this.serverSocketService.startSocketService();
 
     }
 
     private void startServerDBConnectionPool() {
         try {
             log.info("Starting server db connection pool");
-            serverDBConnectionPool = ServerDBConnectionPool.getInstance();
-            serverDBConnectionPool.startDBConnectionPool();
+            this.serverDBConnectionPool = ServerDBConnectionPool.getInstance();
+            this.serverDBConnectionPool.startDBConnectionPool();
         } catch (ServerStartException e) {
             log.warn("Could not start DB connection pool in background", e);
             JOptionPane.showMessageDialog(null,
@@ -88,42 +89,48 @@ public class ServerBackgroundService {
 
     private void startServerMonitoring() {
         log.info("Starting server monitoring service");
-        monitoringBackgroundService = ServerMonitoringBackgroundService.getInstance();
-        monitoringBackgroundService.startMonitoring();
+        this.monitoringBackgroundService = ServerMonitoringBackgroundService.getInstance();
+        this.monitoringBackgroundService.startMonitoring();
     }
 
 
     public void stopServerMainBackgroundService() {
         log.info("Stopping Server Main Background Service");
-        isServerShuttingDown = true;
+        this.isServerShuttingDown = true;
         stopServerSocketService();
         stopServerDBConnectionPool();
         stopMonitoringBackgroundService();
 
-        serverBackGroundThread.interrupt();
+        this.serverBackGroundThread.interrupt();
     }
 
     private void stopServerSocketService() {
-        serverSocketService.stopSocketService();
+        this.serverSocketService.stopSocketService();
     }
 
     private void stopServerDBConnectionPool() {
-        serverDBConnectionPool.stopDBConnectionPool();
+        this.serverDBConnectionPool.stopDBConnectionPool();
     }
 
     private void stopMonitoringBackgroundService() {
-        monitoringBackgroundService.stopMonitoring();
+        this.monitoringBackgroundService.stopMonitoring();
     }
 
     public int getOnlineUsersCount() {
-        if (serverSocketService!=null) {
-            return serverSocketService.getConnectedClientsCount();
+        if (this.serverSocketService != null) {
+            return this.serverSocketService.getConnectedClientsCount();
         } else return 0;
     }
 
+    public List<ClientConnection> getConnectedClientsList() {
+        if (this.serverSocketService != null) {
+            return this.serverSocketService.getConnectedClientsList();
+        } else return null;
+    }
+
     public int getServerPort() {
-        if (serverSocketService!=null) {
-            return serverSocketService.getServerPort();
+        if (this.serverSocketService != null) {
+            return this.serverSocketService.getServerPort();
         } else return 0;
     }
 }
