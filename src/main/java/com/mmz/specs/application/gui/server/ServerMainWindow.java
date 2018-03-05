@@ -129,7 +129,7 @@ public class ServerMainWindow extends JFrame {
     private JButton constantsRefreshButton;
     private JButton updateUserListButton;
     private JPanel currentUserPanel;
-    private JLabel loginedUserName;
+    private JLabel authorizedUserName;
     private boolean serverOnlineCountLabelCounterShow = true;
     private Date serverStartDate = Calendar.getInstance().getTime();
     private JPanel onlyAdminTabsList[];
@@ -956,7 +956,7 @@ public class ServerMainWindow extends JFrame {
                 if (user.isActive()) {
                     if (user.isAdmin()) {
                         log.info("User successfully authorized as administrator: " + user.getUsername());
-                        loginedUserName.setText(user.getUsername());
+                        authorizedUserName.setText(user.getUsername());
                         setUnlocked(user.isAdmin());
                     } else {
                         log.warn("User could not be authorized as administrator: " + user.getUsername() + ", he is not an admin: " + user);
@@ -1005,7 +1005,7 @@ public class ServerMainWindow extends JFrame {
             lastActionTimeAgoCounter = 0;
         } else {
             buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
-            loginedUserName.setText("");
+            authorizedUserName.setText("");
             selectCommonAvailableTab();
         }
         setTabsEnabled(isUnlocked);
@@ -1078,11 +1078,11 @@ public class ServerMainWindow extends JFrame {
         buttonAdminLock.setText("");
         buttonAdminLock.setToolTipText("Разблокировать / заблокировать интерфейс (CTRL+L)");
         panel2.add(buttonAdminLock, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        loginedUserName = new JLabel();
-        Font loginedUserNameFont = this.$$$getFont$$$(null, Font.BOLD, 11, loginedUserName.getFont());
-        if (loginedUserNameFont != null) loginedUserName.setFont(loginedUserNameFont);
-        loginedUserName.setText("username");
-        panel2.add(loginedUserName, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        authorizedUserName = new JLabel();
+        Font loginedUserNameFont = this.$$$getFont$$$(null, Font.BOLD, 11, authorizedUserName.getFont());
+        if (loginedUserNameFont != null) authorizedUserName.setFont(loginedUserNameFont);
+        authorizedUserName.setText("username");
+        panel2.add(authorizedUserName, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         panel1.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
