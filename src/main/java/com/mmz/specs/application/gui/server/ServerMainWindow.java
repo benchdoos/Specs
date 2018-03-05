@@ -117,7 +117,7 @@ public class ServerMainWindow extends JFrame {
     private JLabel networkNameInfoLabel;
     private JLabel ipAddressInfoLabel;
     private JLabel totalMemoryInfoLabel;
-    private JLabel serverConnectionPortInfoLabel;
+    private JLabel serverSocketPortInfoLabel;
     private JLabel jvmInfoLabel;
     private JTable constantsTable;
     private JButton updateServerConstantsButton;
@@ -335,6 +335,8 @@ public class ServerMainWindow extends JFrame {
         updateTotalMemoryLabel();
         updateJvmInfoLabel();
 
+        updateServerSocketPortInfoLabel();
+
         updateAdminSettingsPanel();
         updateAdminConstantsPanel();
         updateAdminRegisteredUsersPanel();
@@ -351,6 +353,10 @@ public class ServerMainWindow extends JFrame {
         onlineUserList.setModel(usersListModel);
 
         initListeners();
+    }
+
+    private void updateServerSocketPortInfoLabel() {
+        serverSocketPortInfoLabel.setText(ServerBackgroundService.getInstance().getServerPort() + "");
     }
 
     private void createLockerTimer() {
@@ -603,8 +609,15 @@ public class ServerMainWindow extends JFrame {
             private void updateData() {
                 UsersEntity selectedValue = registeredUserList.getSelectedValue();
                 if (selectedValue != null) {
-                    selectedValue.setUsername(usernameTextField.getText());
-                    registeredUserList.updateUI();
+                    final int VARCHAR_LENGTH = 20;
+                    if (usernameTextField.getText().length() > VARCHAR_LENGTH) {
+                        String text = usernameTextField.getText();
+                        text = text.substring(0, VARCHAR_LENGTH) + "...";
+                        selectedValue.setUsername(text);
+                    } else {
+                        selectedValue.setUsername(usernameTextField.getText());
+                    }
+                    SwingUtilities.invokeLater(() -> registeredUserList.updateUI());
                     try {
                         ValidationUtils.validateUserName(selectedValue.getUsername());
                         usernameTextField.setBackground(Color.WHITE);
@@ -1180,9 +1193,9 @@ public class ServerMainWindow extends JFrame {
         final JLabel label11 = new JLabel();
         label11.setText("Порт:");
         panel8.add(label11, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        serverConnectionPortInfoLabel = new JLabel();
-        serverConnectionPortInfoLabel.setText("0000");
-        panel8.add(serverConnectionPortInfoLabel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        serverSocketPortInfoLabel = new JLabel();
+        serverSocketPortInfoLabel.setText("0000");
+        panel8.add(serverSocketPortInfoLabel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label12 = new JLabel();
         label12.setText("Использовано памяти (JVM):");
         panel8.add(label12, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

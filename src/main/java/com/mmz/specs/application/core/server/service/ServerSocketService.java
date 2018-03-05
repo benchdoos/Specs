@@ -149,4 +149,8 @@ public class ServerSocketService {
         connections.clear();
         log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
     }
+
+    public int getServerPort() {
+        return serverSocketConnectionPool.getServerPort();
+    }
 }

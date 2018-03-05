@@ -120,4 +120,8 @@ public class ServerBackgroundService {
     public int getOnlineUsersCount() {
         return onlineUsersCount; //TODO find all connected users, return back
     }
+
+    public int getServerPort() {
+        return serverSocketService.getServerPort();
+    }
 }

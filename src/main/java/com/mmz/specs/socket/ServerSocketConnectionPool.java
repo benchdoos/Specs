@@ -86,4 +86,8 @@ public class ServerSocketConnectionPool {
             }
         }
     }
+
+    public int getServerPort() {
+        return serverSocketPort;
+    }
 }
