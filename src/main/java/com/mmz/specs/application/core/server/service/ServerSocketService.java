@@ -113,7 +113,7 @@ public class ServerSocketService {
     }
 
     private void unregisterClientConnection(ClientConnection client) {
-        connections.get(client).run();
+        /*connections.get(client).run();*/ //for what????
         connections.remove(client);
     }
 
@@ -143,7 +143,7 @@ public class ServerSocketService {
 
         int totalConnectionsCount = connections.size();
         connections.clear();
-        if (Integer.getInteger(connectionsCount.toString()) == totalConnectionsCount) {
+        if (connectionsCount.get() == totalConnectionsCount) {
             log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
         } else {
             log.warn("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
@@ -151,7 +151,9 @@ public class ServerSocketService {
     }
 
     public int getServerPort() {
-        return serverSocketConnectionPool.getServerPort();
+        if (serverSocketConnectionPool!=null) {
+            return serverSocketConnectionPool.getServerPort();
+        } else return 0;
     }
 
     public int getConnectedClientsCount() {

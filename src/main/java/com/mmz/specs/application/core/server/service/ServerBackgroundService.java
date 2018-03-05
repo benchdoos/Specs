@@ -122,6 +122,8 @@ public class ServerBackgroundService {
     }
 
     public int getServerPort() {
-        return serverSocketService.getServerPort();
+        if (serverSocketService!=null) {
+            return serverSocketService.getServerPort();
+        } else return 0;
     }
 }
