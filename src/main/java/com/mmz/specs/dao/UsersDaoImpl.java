@@ -86,7 +86,7 @@ public class UsersDaoImpl implements UsersDao {
     @Transactional
     public UsersEntity getUserById(int id) {
         UsersEntity usersEntity = session.load(UsersEntity.class, id);
-        log.info("User successfully found by id:" + id + " " + usersEntity);
+        log.info("User found by id:" + id + " " + usersEntity);
         return usersEntity;
     }
 
@@ -97,7 +97,7 @@ public class UsersDaoImpl implements UsersDao {
         query.setParameter("username", username);
 
         final UsersEntity entity = (UsersEntity) query.uniqueResult();
-        log.info("User successfully found by username: " + username + " " + entity);
+        log.info("User found by username " + username + ": " + entity);
         return entity;
     }
 

@@ -95,7 +95,7 @@ public class MaterialDaoImpl implements MaterialDao {
         query.setParameter("shortProfile", shortProfile);
 
         final MaterialEntity entity = (MaterialEntity) query.uniqueResult();
-        log.info("Material successfully found by short mark and short profile: " + shortMark + " " + shortProfile
+        log.info("Material found by short mark and short profile: " + shortMark + " " + shortProfile
                 + "; " + entity);
         return entity;
     }

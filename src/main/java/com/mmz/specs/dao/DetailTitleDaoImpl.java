@@ -90,7 +90,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
         query.setParameter("title", title);
 
         final DetailTitleEntity entity = (DetailTitleEntity) query.uniqueResult();
-        log.info("DetailTitle successfully found by title: " + title + " " + entity);
+        log.info("DetailTitle found by title: " + title + " " + entity);
         return entity;
     }
 

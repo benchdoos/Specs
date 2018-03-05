@@ -60,7 +60,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
     @Transactional
     public UserTypeEntity getUserTypeById(int id) {
         UserTypeEntity userTypeEntity = session.load(UserTypeEntity.class, id);
-        log.info("UserType successfully found by id:" + id + " " + userTypeEntity);
+        log.info("UserType found by id:" + id + " " + userTypeEntity);
         return userTypeEntity;
     }
 

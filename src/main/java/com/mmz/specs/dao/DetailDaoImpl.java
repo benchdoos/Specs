@@ -80,7 +80,7 @@ public class DetailDaoImpl implements DetailDao {
     @Transactional
     public DetailEntity getDetailById(int id) {
         DetailEntity detailEntity = session.load(DetailEntity.class, id);
-        log.info("Detail successfully found by id:" + id + " " + detailEntity);
+        log.info("Detail found by id:" + id + " " + detailEntity);
         return detailEntity;
     }
 
@@ -91,7 +91,7 @@ public class DetailDaoImpl implements DetailDao {
         query.setParameter("index", index);
 
         final DetailEntity entity = (DetailEntity) query.uniqueResult();
-        log.info("Detail successfully found by index: " + index + " " + entity);
+        log.info("Detail found by index: " + index + " " + entity);
         return entity;
     }
 

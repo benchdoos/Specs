@@ -79,7 +79,7 @@ public class NoticeDaoImpl implements NoticeDao {
     @Transactional
     public NoticeEntity getNoticeById(int id) {
         NoticeEntity noticeEntity = session.load(NoticeEntity.class, id);
-        log.info("Notice successfully found by id:" + id + " " + noticeEntity);
+        log.info("Notice found by id:" + id + " " + noticeEntity);
         return noticeEntity;
     }
 

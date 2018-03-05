@@ -80,7 +80,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     @Transactional
     public MaterialListEntity getMaterialListById(int id) {
         MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
-        log.info("MaterialList successfully found by id:" + id + " " + materialListEntity);
+        log.info("MaterialList found by id:" + id + " " + materialListEntity);
         return materialListEntity;
     }
 

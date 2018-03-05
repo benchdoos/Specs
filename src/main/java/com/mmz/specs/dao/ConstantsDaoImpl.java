@@ -68,7 +68,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     @Override
     @Transactional
     public void removeConstant(int id) {
-        ConstantsEntity constantsEntity = (ConstantsEntity) session.load(ConstantsEntity.class, id);
+        ConstantsEntity constantsEntity = session.load(ConstantsEntity.class, id);
         if (constantsEntity != null) {
             session.delete(constantsEntity);
         }
@@ -80,7 +80,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     @Transactional
     public ConstantsEntity getConstantById(int id) {
         ConstantsEntity constantsEntity = session.load(ConstantsEntity.class, id);
-        log.info("Constant successfully found by id:" + id + " " + constantsEntity);
+        log.info("Constant found by id:" + id + " " + constantsEntity);
         return constantsEntity;
     }
 
@@ -92,7 +92,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
         query.setFirstResult(0);
         query.setMaxResults(1);
         final ConstantsEntity entity = (ConstantsEntity) query.getSingleResult();
-        log.info("Constant successfully found by key: " + key + " " + entity);
+        log.info("Constant found by key: " + key + " " + entity);
         return entity;
 
     }
