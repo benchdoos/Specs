@@ -1079,8 +1079,8 @@ public class ServerMainWindow extends JFrame {
         buttonAdminLock.setToolTipText("Разблокировать / заблокировать интерфейс (CTRL+L)");
         panel2.add(buttonAdminLock, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         authorizedUserName = new JLabel();
-        Font loginedUserNameFont = this.$$$getFont$$$(null, Font.BOLD, 11, authorizedUserName.getFont());
-        if (loginedUserNameFont != null) authorizedUserName.setFont(loginedUserNameFont);
+        Font authorizedUserNameFont = this.$$$getFont$$$(null, Font.BOLD, 11, authorizedUserName.getFont());
+        if (authorizedUserNameFont != null) authorizedUserName.setFont(authorizedUserNameFont);
         authorizedUserName.setText("username");
         panel2.add(authorizedUserName, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();

@@ -125,7 +125,7 @@ public class ServerSocketService {
 
     }
 
-    private void closeAll(){ //FixME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
+    private void closeAll() { //FixME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
         log.info("Removing all registered connections");
         AtomicInteger connectionsCount = new AtomicInteger();
 
@@ -135,22 +135,28 @@ public class ServerSocketService {
             try {
                 log.debug("Closing client: " + client);
                 client.close();
+                connectionsCount.getAndIncrement();
             } catch (IOException e) {
                 log.warn("Could not close client connection: " + client);
             }
-            connectionsCount.getAndIncrement();
         });
 
-       /* for (ClientConnection clientConnection : connections) {
-            clientConnection.close();
-            connectionsCount++;
-        }*/
         int totalConnectionsCount = connections.size();
         connections.clear();
-        log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
+        if (Integer.getInteger(connectionsCount.toString()) == totalConnectionsCount) {
+            log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
+        } else {
+            log.warn("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
+        }
     }
 
     public int getServerPort() {
         return serverSocketConnectionPool.getServerPort();
+    }
+
+    public int getConnectedClientsCount() {
+        if (connections != null) {
+            return connections.size();
+        } else return 0;
     }
 }

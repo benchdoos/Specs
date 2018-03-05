@@ -34,8 +34,6 @@ public class ServerBackgroundService {
     private ServerDBConnectionPool serverDBConnectionPool;
     private boolean isServerShuttingDown = false;
 
-    private int onlineUsersCount;
-
     private ServerBackgroundService() {
         Runnable runnable = this::startServerMainBackgroundService;
 
@@ -118,7 +116,9 @@ public class ServerBackgroundService {
     }
 
     public int getOnlineUsersCount() {
-        return onlineUsersCount; //TODO find all connected users, return back
+        if (serverSocketService!=null) {
+            return serverSocketService.getConnectedClientsCount();
+        } else return 0;
     }
 
     public int getServerPort() {
