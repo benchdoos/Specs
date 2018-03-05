@@ -135,4 +135,31 @@ public class FrameUtils {
             return FrameUtils.getFrameOnCenterLocationPoint(child);
         }
     }
+
+    public static void addActionListenerToAll(Component parent, ActionListener listener) {
+        if (parent instanceof AbstractButton) {
+            ((AbstractButton) parent).addActionListener(listener);
+        } else if (parent instanceof JComboBox) {
+            ((JComboBox<?>) parent).addActionListener(listener);
+        }
+        if (parent instanceof JTabbedPane) {
+            ((JTabbedPane) parent).addChangeListener(e -> listener.actionPerformed(null));
+        }
+
+        if (parent instanceof JTable) {
+            ((JTable) parent).getSelectionModel().addListSelectionListener(e -> {
+                if (!e.getValueIsAdjusting()) {
+                    listener.actionPerformed(null);
+                }
+            });
+        }
+
+        if (parent instanceof Container) {
+            // recursively map child components
+            Component[] comps = ((Container) parent).getComponents();
+            for (Component c : comps) {
+                addActionListenerToAll(c, listener);
+            }
+        }
+    }
 }

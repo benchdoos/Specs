@@ -28,10 +28,12 @@ public class ServerBackgroundService {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private static ServerBackgroundService ourInstance = new ServerBackgroundService();
-    Thread serverBackGroundThread;
+    private Thread serverBackGroundThread;
     private ServerSocketService serverSocketService;
     private ServerMonitoringBackgroundService monitoringBackgroundService;
     private ServerDBConnectionPool serverDBConnectionPool;
+    private boolean isServerShuttingDown = false;
+
     private int onlineUsersCount;
 
     private ServerBackgroundService() {
@@ -59,7 +61,11 @@ public class ServerBackgroundService {
         try {
             serverSocketService.createConnections();
         } catch (IOException e) {
-            log.error("Could not create socket connections", e);
+            if (!isServerShuttingDown) {
+                log.error("Could not create socket connections", e);
+            } else {
+                log.info("ServerSocket is shut down");
+            }
         }
     }
 
@@ -91,6 +97,7 @@ public class ServerBackgroundService {
 
     public void stopServerMainBackgroundService() {
         log.info("Stopping Server Main Background Service");
+        isServerShuttingDown = true;
         stopServerSocketService();
         stopServerDBConnectionPool();
         stopMonitoringBackgroundService();

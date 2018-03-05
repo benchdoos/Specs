@@ -31,6 +31,7 @@ import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.validation.UserTypeValidationException;
 import com.mmz.specs.application.utils.validation.UsernameValidationException;
 import com.mmz.specs.application.utils.validation.ValidationUtils;
+import com.mmz.specs.connection.DaoConstants;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
@@ -62,7 +63,7 @@ import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMainWindow extends JFrame {
 
-    private static int caretPosition = 0;
+    private static int lastActionTimeAgoCounter = 0;
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static boolean isUnlocked = false;
     private final String DEGREE = "\u00b0";
@@ -132,6 +133,8 @@ public class ServerMainWindow extends JFrame {
     private Date serverStartDate = Calendar.getInstance().getTime();
     private JPanel onlyAdminTabsList[];
     private Timer monitorUiUpdateTimer;
+    private Timer userActionsUpdateTimer;
+
     private boolean isWindowClosing = false;
 
     public ServerMainWindow() {
@@ -175,7 +178,6 @@ public class ServerMainWindow extends JFrame {
                 updateTemperatureInfoLabel();
                 createGraphics();
 
-                caretPosition++;
             }
 
             private void updateTemperatureInfoLabel() {
@@ -305,9 +307,7 @@ public class ServerMainWindow extends JFrame {
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        contentPane.registerKeyboardAction(e -> {
-                    dispose();
-                },
+        contentPane.registerKeyboardAction(e -> dispose(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -327,6 +327,8 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void initGui() {
+        createLockerTimer();
+
         updateSystemInfoLabel();
         updateNetworkInfoPanel();
         updateTotalMemoryLabel();
@@ -348,6 +350,51 @@ public class ServerMainWindow extends JFrame {
         onlineUserList.setModel(usersListModel);
 
         initListeners();
+    }
+
+    private void createLockerTimer() {
+        int timerTimeout = getAdminLockDelayFromConstants();
+        ActionListener listener = e -> lastActionTimeAgoCounter = 0;
+
+        FrameUtils.addActionListenerToAll(contentPane, listener);
+
+        userActionsUpdateTimer = new Timer(1000, e -> {
+            if (!isWindowClosing) {
+                if (lastActionTimeAgoCounter >= timerTimeout || lastActionTimeAgoCounter < 0) {
+                    if (isUnlocked) {
+                        setUnlocked(false);
+                    }
+                }
+                lastActionTimeAgoCounter++;
+            }
+        });
+
+        userActionsUpdateTimer.setRepeats(true);
+        if (!userActionsUpdateTimer.isRunning()) {
+            userActionsUpdateTimer.start();
+        }
+    }
+
+    private int getAdminLockDelayFromConstants() {
+        ConstantsService service = new ConstantsServiceImpl();
+        ConstantsEntity constant = service.getConstantByKey(DaoConstants.USER_ADMIN_TIMEOUT);
+        try {
+            int result = Integer.parseInt(constant.getValue());
+            if (result < 10) {
+                result = DaoConstants.USER_ADMIN_TIMEOUT_MINIMUM;
+            } else if (result > DaoConstants.USER_ADMIN_TIMEOUT_MAXIMUM) {
+                result = DaoConstants.USER_ADMIN_TIMEOUT_MAXIMUM;
+            }
+            return result;
+        } catch (NumberFormatException e) {
+            log.warn("Constant for " + DaoConstants.USER_ADMIN_TIMEOUT + " is not set correctly: " + constant.getValue() + ", setting default");
+            constant.setValue(Integer.toString(DaoConstants.USER_ADMIN_TIMEOUT_DEFAULT));
+            service.getConstantsDao().getSession().getTransaction().begin();
+            service.updateConstant(constant);
+            service.getConstantsDao().getSession().getTransaction().commit();
+            log.info("Constant for " + DaoConstants.USER_ADMIN_TIMEOUT + " was set: " + constant.getValue());
+            return Integer.parseInt(constant.getValue());
+        }
     }
 
     private void updateAdminRegisteredUsersPanel() {
@@ -533,9 +580,18 @@ public class ServerMainWindow extends JFrame {
 
     private void onPowerServerButton() {
         ServerBackgroundService.getInstance().stopServerMainBackgroundService();
-        if (monitorUiUpdateTimer.isRunning()) {
-            monitorUiUpdateTimer.stop();
+        if (monitorUiUpdateTimer != null) {
+            if (monitorUiUpdateTimer.isRunning()) {
+                monitorUiUpdateTimer.stop();
+            }
         }
+
+        if (userActionsUpdateTimer != null) {
+            if (userActionsUpdateTimer.isRunning()) {
+                userActionsUpdateTimer.stop();
+            }
+        }
+
         isWindowClosing = true;
         dispose();
     }
@@ -711,7 +767,7 @@ public class ServerMainWindow extends JFrame {
         usernameTextField.setBackground(Color.WHITE);
     }
 
-    private UsersEntity onSaveUserButton(UsersEntity usersEntity) {
+    private void onSaveUserButton(UsersEntity usersEntity) {
         UsersService usersService = new UsersServiceImpl();
         usersService.getUsersDao().getSession().getTransaction().begin();
 
@@ -724,8 +780,6 @@ public class ServerMainWindow extends JFrame {
         //ObjectNotFoundException
         if (entity != null) {
             usersService.updateUser(usersEntity);
-        } else {
-            entity = usersService.getUserById(usersService.addUser(usersEntity));
         }
         try {
             usersService.getUsersDao().getSession().getTransaction().commit();
@@ -734,7 +788,6 @@ public class ServerMainWindow extends JFrame {
                     "Такое имя пользователя уже занято: " + usersEntity.getUsername(),
                     "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
         }
-        return entity;
     }
 
     private void addNewUser() {
@@ -796,9 +849,7 @@ public class ServerMainWindow extends JFrame {
         connectionUrlTextField.setText(ServerSettingsManager.getInstance().getServerDbConnectionUrl());
         connectionLoginTextField.setText(ServerSettingsManager.getInstance().getServerDbUsername());
         connectionPasswordField.setText(ServerSettingsManager.getInstance().getServerDbPassword());
-        saveSettingsToButton.addActionListener(e -> {
-            onSaveSettingsToButton();
-        });
+        saveSettingsToButton.addActionListener(e -> onSaveSettingsToButton());
     }
 
     private void onSaveSettingsToButton() {
@@ -930,8 +981,10 @@ public class ServerMainWindow extends JFrame {
         ServerMainWindow.isUnlocked = isUnlocked;
         initAdminAccessArray();
 
+
         if (isUnlocked) {
             buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
+            lastActionTimeAgoCounter = 0;
         } else {
             buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
             loginedUserName.setText("");
