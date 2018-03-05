@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConstantsDaoImpl implements ConstantsDao {
@@ -99,10 +100,17 @@ public class ConstantsDaoImpl implements ConstantsDao {
     @Override
     @Transactional
     public List<ConstantsEntity> listConstants() {
-        List<ConstantsEntity> list = session.createQuery("from ConstantsEntity").list();
-        for (ConstantsEntity constantsEntity : list) {
-            log.info("Constants list: " + constantsEntity);
+        List list = session.createQuery("from ConstantsEntity").list();
+        List<ConstantsEntity> result = new ArrayList<>(list.size());
+
+        for (Object constantsEntity : list) {
+            if (constantsEntity instanceof ConstantsEntity) {
+                result.add((ConstantsEntity) constantsEntity);
+                log.info("Constant from list: " + constantsEntity);
+            } else {
+                log.warn("Not Constant from list: " + constantsEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

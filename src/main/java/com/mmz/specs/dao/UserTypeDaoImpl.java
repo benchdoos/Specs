@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserTypeDaoImpl implements UserTypeDao {
@@ -66,10 +67,16 @@ public class UserTypeDaoImpl implements UserTypeDao {
     @Override
     @Transactional
     public List<UserTypeEntity> listUserTypes() {
-        List<UserTypeEntity> list = session.createQuery("from UserTypeEntity").list();
-        for (UserTypeEntity userTypeEntity : list) {
-            log.info("UserType list: " + userTypeEntity);
+        List list = session.createQuery("from UserTypeEntity").list();
+        List<UserTypeEntity> result = new ArrayList<>(list.size());
+        for (Object userTypeEntity : list) {
+            if (userTypeEntity instanceof UserTypeEntity) {
+                result.add((UserTypeEntity) userTypeEntity);
+                log.info("UserType from list: " + userTypeEntity);
+            } else {
+                log.warn("Not UserType from list: " + userTypeEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

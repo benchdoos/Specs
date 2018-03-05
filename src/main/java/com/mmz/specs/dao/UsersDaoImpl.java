@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UsersDaoImpl implements UsersDao {
@@ -104,10 +105,17 @@ public class UsersDaoImpl implements UsersDao {
     @Override
     @Transactional
     public List<UsersEntity> listUsers() {
-        List<UsersEntity> list = session.createQuery("from UsersEntity").list();
-        for (UsersEntity usersEntity : list) {
-            log.info("Users list: " + usersEntity);
+        List list = session.createQuery("from UsersEntity").list();
+        List<UsersEntity> result = new ArrayList<>(list.size());
+
+        for (Object usersEntity : list) {
+            if (usersEntity instanceof UsersEntity) {
+                result.add((UsersEntity) usersEntity);
+                log.info("User from list: " + usersEntity);
+            } else {
+                log.warn("Not User from list: " + usersEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

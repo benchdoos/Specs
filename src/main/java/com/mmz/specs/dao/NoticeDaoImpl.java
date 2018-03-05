@@ -24,11 +24,12 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NoticeDaoImpl implements NoticeDao {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    Session session;
+    private Session session;
 
     public NoticeDaoImpl() {
         session = ServerDBConnectionPool.getInstance().getSession();
@@ -96,10 +97,17 @@ public class NoticeDaoImpl implements NoticeDao {
     @Override
     @Transactional
     public List<NoticeEntity> listNotices() {
-        List<NoticeEntity> list = session.createQuery("from NoticeEntity").list();
-        for (NoticeEntity noticeEntity : list) {
-            log.info("Notice list: " + noticeEntity);
+        List list = session.createQuery("from NoticeEntity").list();
+        List<NoticeEntity> result = new ArrayList<>(list.size());
+
+        for (Object noticeEntity : list) {
+            if (noticeEntity instanceof NoticeEntity) {
+                result.add((NoticeEntity) noticeEntity);
+                log.info("Notice from list: " + noticeEntity);
+            } else {
+                log.warn("Not Notice from list: " + noticeEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

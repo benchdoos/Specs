@@ -24,11 +24,12 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DetailDaoImpl implements DetailDao {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    Session session;
+    private Session session;
 
     public DetailDaoImpl() {
         session = ServerDBConnectionPool.getInstance().getSession();
@@ -97,10 +98,17 @@ public class DetailDaoImpl implements DetailDao {
     @Override
     @Transactional
     public List<DetailEntity> listDetails() {
-        List<DetailEntity> list = session.createQuery("from UsersEntity").list();
-        for (DetailEntity detailEntity : list) {
-            log.info("Detail list: " + detailEntity);
+        List list = session.createQuery("from UsersEntity").list();
+        List<DetailEntity> result = new ArrayList<>(list.size());
+
+        for (Object detailEntity : list) {
+            if (detailEntity instanceof DetailEntity) {
+                result.add((DetailEntity) detailEntity);
+                log.info("Detail from list: " + detailEntity);
+            } else {
+                log.warn("Not Detail from list: " + detailEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

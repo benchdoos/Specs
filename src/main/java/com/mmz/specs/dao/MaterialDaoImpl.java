@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MaterialDaoImpl implements MaterialDao {
@@ -102,10 +103,17 @@ public class MaterialDaoImpl implements MaterialDao {
 
     @Override
     public List<MaterialEntity> listMaterials() {
-        List<MaterialEntity> list = session.createQuery("from MaterialEntity").list();
-        for (MaterialEntity materialEntity : list) {
-            log.info("Material list: " + materialEntity);
+        List list = session.createQuery("from MaterialEntity").list();
+        List<MaterialEntity> result = new ArrayList<>(list.size());
+
+        for (Object materialEntity : list) {
+            if (materialEntity instanceof MaterialEntity) {
+                result.add((MaterialEntity) materialEntity);
+                log.info("Material from list: " + materialEntity);
+            } else {
+                log.warn("Not Material from list: " + materialEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

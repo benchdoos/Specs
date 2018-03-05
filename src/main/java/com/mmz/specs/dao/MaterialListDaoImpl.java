@@ -25,11 +25,12 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MaterialListDaoImpl implements MaterialListDao {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    Session session;
+    private Session session;
 
     public MaterialListDaoImpl() {
         session = ServerDBConnectionPool.getInstance().getSession();
@@ -40,13 +41,13 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
-    public void setSession(Session session) {
-        this.session = session;
+    public Session getSession() {
+        return session;
     }
 
     @Override
-    public Session getSession() {
-        return session;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     @Override
@@ -89,20 +90,32 @@ public class MaterialListDaoImpl implements MaterialListDao {
         Query query = session.createQuery("from MaterialListEntity where MaterialListEntity.detailByDetailId= :detailEntity");
         query.setParameter("detailEntity", detailEntity);
 
-        List<MaterialListEntity> list = query.list();
-        for (MaterialListEntity materialListEntity : list) {
-            log.info("MaterialList successfully found by detail index: " + detailEntity.getIndex() + " material:" + materialListEntity);
+        List list = query.list();
+        List<MaterialListEntity> result = new ArrayList<>(list.size());
+        for (Object materialListEntity : list) {
+            if (materialListEntity instanceof MaterialListEntity) {
+                result.add((MaterialListEntity) materialListEntity);
+                log.info("MaterialList successfully found by detail index: " + detailEntity.getIndex() + " material:" + materialListEntity);
+            } else {
+                log.warn("Not MaterialList found by detail index: " + detailEntity.getIndex() + " material:" + materialListEntity);
+            }
         }
-        return list;
+        return result;
     }
 
     @Override
     @Transactional
     public List<MaterialListEntity> listMaterialLists() {
-        List<MaterialListEntity> list = session.createQuery("from MaterialListEntity").list();
-        for (MaterialListEntity materialListEntity : list) {
-            log.info("MaterialList list: " + materialListEntity);
+        List list = session.createQuery("from MaterialListEntity").list();
+        List<MaterialListEntity> result = new ArrayList<>(list.size());
+        for (Object materialListEntity : list) {
+            if (materialListEntity instanceof MaterialListEntity) {
+                result.add((MaterialListEntity) materialListEntity);
+                log.info("MaterialList from list: " + materialListEntity);
+            } else {
+                log.warn("Not MaterialList from list: " + materialListEntity);
+            }
         }
-        return list;
+        return result;
     }
 }

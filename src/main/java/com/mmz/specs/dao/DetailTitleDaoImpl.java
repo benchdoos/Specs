@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DetailTitleDaoImpl implements DetailTitleDao {
@@ -96,10 +97,17 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     @Override
     @Transactional
     public List<DetailTitleEntity> listDetailTitles() {
-        List<DetailTitleEntity> list = session.createQuery("from UsersEntity").list();
-        for (DetailTitleEntity detailTitleEntity : list) {
-            log.info("DetailTitle list: " + detailTitleEntity);
+        List list = session.createQuery("from UsersEntity").list();
+        List<DetailTitleEntity> result = new ArrayList<>(list.size());
+
+        for (Object detailTitleEntity : list) {
+            if (detailTitleEntity instanceof DetailTitleEntity) {
+                result.add((DetailTitleEntity) detailTitleEntity);
+                log.info("DetailTitle list: " + detailTitleEntity);
+            } else {
+                log.warn("DetailTitle from list: " + detailTitleEntity);
+            }
         }
-        return list;
+        return result;
     }
 }
