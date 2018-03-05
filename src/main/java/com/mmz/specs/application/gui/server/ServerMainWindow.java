@@ -38,6 +38,7 @@ import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
@@ -810,18 +811,22 @@ public class ServerMainWindow extends JFrame {
         for (int i = 0; i < model.getRowCount(); i++) {
             ConstantsService constantsService = new ConstantsServiceImpl();
 
-            constantsService.getConstantsDao().getSession().beginTransaction();
+            Transaction transaction = constantsService.getConstantsDao().getSession().getTransaction();
 
             final String key = model.getValueAt(i, 0).toString();
             final String value = model.getValueAt(i, 1).toString();
+
+            transaction.begin();
 
             ConstantsEntity entity = constantsService.getConstantByKey(key);
             if (entity != null) {
                 entity.setValue(value);
                 constantsService.updateConstant(entity);
             }
-            constantsService.getConstantsDao().getSession().getTransaction().commit();
+            transaction.commit();
         }
+        JOptionPane.showMessageDialog(this, "Настройки успешно изменены, все изменения \r\n" +
+                "будут применены после перезагрузки сервера.", "Успех", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void updateAdminConstantsPanel() {
@@ -1011,10 +1016,17 @@ public class ServerMainWindow extends JFrame {
 
     @Override
     public void dispose() {
-        if (monitorUiUpdateTimer.isRunning()) {
-            monitorUiUpdateTimer.stop();
+        if (monitorUiUpdateTimer != null) {
+            if (monitorUiUpdateTimer.isRunning()) {
+                monitorUiUpdateTimer.stop();
+            }
         }
 
+        if (userActionsUpdateTimer != null) {
+            if (userActionsUpdateTimer.isRunning()) {
+                userActionsUpdateTimer.stop();
+            }
+        }
         if (!isWindowClosing) {
             createServerTrayIcon();
         }
