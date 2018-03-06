@@ -18,6 +18,7 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.NoticeDao;
 import com.mmz.specs.dao.NoticeDaoImpl;
 import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.model.UsersEntity;
 
 import java.util.List;
 
@@ -68,7 +69,12 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
+    public List<NoticeEntity> listNoticesByUser(UsersEntity entity) {
+        return noticeDao.listNoticesByUser(entity);
+    }
+
+    @Override
     public List<NoticeEntity> listNotices() {
-        return null;
+        return noticeDao.listNotices();
     }
 }

@@ -18,6 +18,7 @@ package com.mmz.specs.dao;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.model.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NoticeDaoImpl implements NoticeDao {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session;
 
     public NoticeDaoImpl() {
@@ -92,6 +93,29 @@ public class NoticeDaoImpl implements NoticeDao {
         final NoticeEntity entity = (NoticeEntity) query.uniqueResult();
         log.info("Notice successfully found by number: " + number + " " + entity);
         return entity;
+    }
+
+    @Override
+    @Transactional
+    public List<NoticeEntity> listNoticesByUser(UsersEntity user) {
+        if (user == null) return null;
+
+        Query query = session.createQuery("from NoticeEntity where usersByProvidedByUserId =:user");
+        query.setParameter("user", user);
+
+        List list = query.list();
+
+        List<NoticeEntity> result = new ArrayList<>(list.size());
+
+        for (Object noticeEntity : list) {
+            if (noticeEntity instanceof NoticeEntity) {
+                result.add((NoticeEntity) noticeEntity);
+                log.info("Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
+            } else {
+                log.warn("Not Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
+            }
+        }
+        return result;
     }
 
     @Override

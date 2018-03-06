@@ -16,6 +16,7 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.model.UsersEntity;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -36,6 +37,8 @@ public interface NoticeDao {
     public NoticeEntity getNoticeById(int id);
 
     public NoticeEntity getNoticeByNumber(String number);
+
+    public List<NoticeEntity> listNoticesByUser(UsersEntity entity);
 
     public List<NoticeEntity> listNotices();
 }

@@ -17,6 +17,7 @@ package com.mmz.specs.service;
 
 import com.mmz.specs.dao.NoticeDao;
 import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.model.UsersEntity;
 
 import java.util.List;
 
@@ -37,6 +38,8 @@ public interface NoticeService {
 
     public NoticeEntity getNoticeByNumber(String number);
 
+
+    public List<NoticeEntity> listNoticesByUser(UsersEntity entity);
 
     public List<NoticeEntity> listNotices();
 }
