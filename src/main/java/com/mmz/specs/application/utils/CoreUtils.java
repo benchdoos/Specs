@@ -1,18 +1,40 @@
+/*
+ * (C) Copyright 2018.  Eugene Zrazhevsky and others.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * Contributors:
+ * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
+ */
+
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
+import com.mmz.specs.application.core.server.ServerConstants;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ModeManager;
 import com.mmz.specs.application.managers.ServerSettingsManager;
+import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class CoreUtils {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -24,6 +46,34 @@ public class CoreUtils {
             switch (firstArgument) {
                 case ApplicationArgumentsConstants.CLIENT:
                     log.debug("Argument is for " + ModeManager.MODE.CLIENT);
+                    loadClientSettings();
+                    Runnable runnable = () -> {
+                        try (Socket socket = new Socket("localhost", ServerConstants.SERVER_DEFAULT_SOCKET_PORT);
+                             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+                             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
+
+                            int randomClientId = ThreadLocalRandom.current().nextInt(0, 100);
+
+
+                            for (int j = 0; j < 3; j++) {
+                                outputStream.writeUTF(SocketConstants.HELLO_COMMAND);
+                                String answer = dataInputStream.readUTF();
+                                if (answer.equalsIgnoreCase(SocketConstants.USER_PC_NAME)) {
+                                    outputStream.writeUTF("Client id: " + randomClientId + " real id: " + Thread.currentThread().getId() + " address:" + InetAddress.getLocalHost().getHostAddress());
+                                } else {
+                                    System.out.println("Received from server: " + answer);
+                                }
+                            }
+                            outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    };
+                    for (int i = 0; i < 100; i++) {
+                        Thread thread = new Thread(runnable);
+                        thread.start();
+                    }
                     break;
                 case ApplicationArgumentsConstants.SERVER:
                     log.debug("Argument is for " + ModeManager.MODE.SERVER);
@@ -45,6 +95,10 @@ public class CoreUtils {
             log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
             ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
         }
+    }
+
+    private static void loadClientSettings() {
+//        throw new UnsupportedOperationException("Operation is not supported yet.");
     }
 
     private static void loadServerSettings() {
