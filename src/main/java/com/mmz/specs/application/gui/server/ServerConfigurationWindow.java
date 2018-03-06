@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ServerConfigurationWindow extends JDialog {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private JPanel contentPane;
     private JButton buttonOK;
@@ -47,7 +47,7 @@ public class ServerConfigurationWindow extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         setTitle("Конфигурация файла настроек сервера");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/interfaces/usb.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/interfaces/usb_16.png")));
         initGui();
 
         // call onCancel() when cross is clicked

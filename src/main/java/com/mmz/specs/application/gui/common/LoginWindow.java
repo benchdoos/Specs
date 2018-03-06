@@ -41,7 +41,7 @@ public class LoginWindow extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/security-on.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/securityOn16.png")));
         setTitle("Вход");
 
         initListeners();
@@ -170,11 +170,11 @@ public class LoginWindow extends JDialog {
         loginTextField = new JTextField();
         panel3.add(loginTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label1 = new JLabel();
-        label1.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/user.png")));
+        label1.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/user16.png")));
         label1.setText("Логин:");
         panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        label2.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/password.png")));
+        label2.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/password16.png")));
         label2.setText("Пароль");
         panel3.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         passwordField = new JPasswordField();

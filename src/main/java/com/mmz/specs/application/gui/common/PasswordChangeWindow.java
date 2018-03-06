@@ -30,7 +30,7 @@ import java.awt.event.*;
 import java.util.Arrays;
 
 public class PasswordChangeWindow extends JDialog {
-    private UsersEntity user;
+    private final UsersEntity user;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -45,7 +45,7 @@ public class PasswordChangeWindow extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/security-shield.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/securityShield16.png")));
         setTitle("Смена пароля");
 
 
