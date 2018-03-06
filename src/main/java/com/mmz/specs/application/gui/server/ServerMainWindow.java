@@ -1064,10 +1064,15 @@ public class ServerMainWindow extends JFrame {
 
         if (isUnlocked) {
             buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
+            authorizedUserName.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/authorizedUser128.png"))
+                    .getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+            authorizedUserName.setToolTipText("Авторизированный пользователь");
             lastActionTimeAgoCounter = 0;
         } else {
             buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
-            authorizedUserName.setText("");
+            authorizedUserName.setText(null);
+            authorizedUserName.setIcon(null);
+            authorizedUserName.setToolTipText(null);
             selectCommonAvailableTab();
         }
         setTabsEnabled(isUnlocked);
