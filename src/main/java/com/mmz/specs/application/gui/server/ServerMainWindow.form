@@ -907,7 +907,7 @@
                                 <properties>
                                   <icon value="img/gui/refresh-left-arrow.png"/>
                                   <text value=""/>
-                                  <toolTipText value="Обновить список" noi18n="true"/>
+                                  <toolTipText value="Обновить список (CTRL+R)" noi18n="true"/>
                                 </properties>
                               </component>
                             </children>
