@@ -46,50 +46,51 @@ public class FrameUtils {
      */
     public static void shakeFrame(final Component component) {
         final Window window = findWindow(component);
+        ActionListener listener = new ActionListener() {
+            final static int maxCounter = 6;
+            Point location = window.getLocation();
+            int counter = 0;
+            int step = 14;
 
-        if (!timer.isRunning()) {
-            timer.addActionListener(new ActionListener() {
-                final static int maxCounter = 6;
-                Point location = window.getLocation();
-                int counter = 0;
-                int step = 14;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (counter <= 2) {
+                    step = 14;
+                } else if (counter <= 4) {
+                    step = 7;
+                } else if (counter <= 6) {
+                    step = 3;
+                }
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (counter <= 2) {
-                        step = 14;
-                    } else if (counter > 2 && counter <= 4) {
-                        step = 7;
-                    } else if (counter > 4 && counter <= 6) {
-                        step = 3;
-                    }
+                if (counter >= 0) {
+                    if (counter <= maxCounter) {
+                        counter++;
 
-                    if (counter >= 0) {
-                        if (counter <= maxCounter) {
-                            counter++;
-
-                            if (location.x < 0 || location.y < 0) {
-                                window.setLocation(getFrameOnCenterLocationPoint(window));
-                                location = window.getLocation();
-                            }
-                            if (counter % 2 != 0) {
-                                Point newLocation = new Point(location.x + step, location.y);
-                                window.setLocation(newLocation);
-                            } else {
-                                Point newLocation = new Point(location.x - step, location.y);
-                                window.setLocation(newLocation);
-                            }
-                        } else {
-                            Point newLocation = new Point(location.x, location.y);
-                            window.setLocation(newLocation);
-
-                            counter = 0;
-                            timer.removeActionListener(timer.getActionListeners()[0]);
-                            timer.stop();
+                        if (location.x < 0 || location.y < 0) {
+                            window.setLocation(getFrameOnCenterLocationPoint(window));
+                            location = window.getLocation();
                         }
+                        if (counter % 2 != 0) {
+                            Point newLocation = new Point(location.x + step, location.y);
+                            window.setLocation(newLocation);
+                        } else {
+                            Point newLocation = new Point(location.x - step, location.y);
+                            window.setLocation(newLocation);
+                        }
+                    } else {
+                        Point newLocation = new Point(location.x, location.y);
+                        window.setLocation(newLocation);
+
+                        counter = 0;
+                        timer.removeActionListener(timer.getActionListeners()[0]);
+                        timer.stop();
                     }
                 }
-            });
+            }
+        };
+
+        if (!timer.isRunning()) {
+            timer.addActionListener(listener);
             timer.start();
         }
         Toolkit.getDefaultToolkit().beep();
@@ -101,7 +102,7 @@ public class FrameUtils {
      * @return Point of <code>Window</code> that is moved to center of the screen.
      * @see java.awt.Component#getLocation
      */
-    public static Point getFrameOnCenterLocationPoint(Window window) {
+    private static Point getFrameOnCenterLocationPoint(Window window) {
         Dimension size = window.getSize();
         int width = (int) ((Toolkit.getDefaultToolkit().getScreenSize().width / (double) 2) - (size.getWidth() / (double) 2));
         int height = (int) ((Toolkit.getDefaultToolkit().getScreenSize().height / (double) 2) - (size.getHeight() / (double) 2));
@@ -128,6 +129,13 @@ public class FrameUtils {
         return new Point(width, height);
     }
 
+    /**
+     * Gets the point-position to set <code>Window</code> on center of the parent or center of the screen
+     *
+     * @param parent of the new-child window
+     * @param child  to set on center
+     * @see java.awt.Component#getLocation
+     */
     public static Point getFrameOnCenter(Window parent, Window child) {
         if (parent != null) {
             return FrameUtils.getFrameOnParentCenterLocationPoint(parent, child);
@@ -142,8 +150,13 @@ public class FrameUtils {
         } else if (parent instanceof JComboBox) {
             ((JComboBox<?>) parent).addActionListener(listener);
         }
+
         if (parent instanceof JTabbedPane) {
             ((JTabbedPane) parent).addChangeListener(e -> listener.actionPerformed(null));
+        }
+
+        if (parent instanceof JTextField) {
+            ((JTextField) parent).addActionListener(e -> listener.actionPerformed(null));
         }
 
         if (parent instanceof JTable) {
