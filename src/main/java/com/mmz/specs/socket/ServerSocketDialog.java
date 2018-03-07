@@ -25,13 +25,12 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import static com.mmz.specs.socket.SocketConstants.HELLO_COMMAND;
-import static com.mmz.specs.socket.SocketConstants.QUIT_COMMAND;
+import static com.mmz.specs.socket.SocketConstants.*;
 
 public class ServerSocketDialog implements Runnable {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     Socket client;
-    private ClientConnection connection;
+    private final ClientConnection connection;
 
     public ServerSocketDialog(ClientConnection connection) {
         this.connection = connection;
@@ -68,11 +67,16 @@ public class ServerSocketDialog implements Runnable {
     private void manageCommand(final String command) throws IOException {
         log.debug("Got command from client: " + command);
         switch (command) {
+            case TESTING_CONNECTION_COMMAND:
+                log.info("User testing connection");
+                client.close();//TODO unregister user!!!
+                break;
             case HELLO_COMMAND:
                 String name = new ServerSocketDialogUtils(client).getPcName();
                 log.info("User connected: " + name); // TODO manage this to server somewhere
                 break;
             case QUIT_COMMAND:
+                log.info("Quiting connection for client: " + client);
                 onQuitCommand();
                 break;
             default:
@@ -82,8 +86,6 @@ public class ServerSocketDialog implements Runnable {
     }
 
     private void onQuitCommand() throws IOException {
-        log.info("Quiting connection for client: " + client);
-
         ServerSocketService.getInstance().closeClientConnection(connection);
         if (!client.isClosed()) {
             client.close();

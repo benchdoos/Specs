@@ -16,28 +16,24 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.application.core.server.ServerConstants;
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
+import com.mmz.specs.application.gui.client.ClientConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
+import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ModeManager;
 import com.mmz.specs.application.managers.ServerSettingsManager;
-import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class CoreUtils {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     public static void manageArguments(final String[] args) {
         if (args.length > 0) {
@@ -47,7 +43,8 @@ public class CoreUtils {
                 case ApplicationArgumentsConstants.CLIENT:
                     log.debug("Argument is for " + ModeManager.MODE.CLIENT);
                     loadClientSettings();
-                    Runnable runnable = () -> {
+
+                    /*Runnable runnable = () -> {
                         try (Socket socket = new Socket("localhost", ServerConstants.SERVER_DEFAULT_SOCKET_PORT);
                              DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
                              DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
@@ -73,7 +70,7 @@ public class CoreUtils {
                     for (int i = 0; i < 100; i++) {
                         Thread thread = new Thread(runnable);
                         thread.start();
-                    }
+                    }*/
                     break;
                 case ApplicationArgumentsConstants.SERVER:
                     log.debug("Argument is for " + ModeManager.MODE.SERVER);
@@ -98,7 +95,21 @@ public class CoreUtils {
     }
 
     private static void loadClientSettings() {
-//        throw new UnsupportedOperationException("Operation is not supported yet.");
+        log.info("Loading client settings");
+        ClientSettingsManager settingsManager = ClientSettingsManager.getInstance();
+        try {
+            settingsManager.loadSettingsFile();
+            if (!settingsManager.isSettingsFileCorrect()) {
+                throw new Exception("Settings file is not correct");
+            }
+        } catch (Exception e) {
+            log.warn("Could not load client settings file at: " + ApplicationConstants.CLIENT_SETTINGS_FILE, e);
+
+            ClientConfigurationWindow clientConfigurationWindow = new ClientConfigurationWindow();
+            clientConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientConfigurationWindow));
+            clientConfigurationWindow.setVisible(true);
+            //loadClientSettings(); //TODO check this properly
+        }
     }
 
     private static void loadServerSettings() {
@@ -117,7 +128,7 @@ public class CoreUtils {
             serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, serverConfigurationWindow));
 
             serverConfigurationWindow.setVisible(true);
-            loadServerSettings();//TODO check this properly
+            //loadServerSettings();//TODO check this properly
         }
 
     }

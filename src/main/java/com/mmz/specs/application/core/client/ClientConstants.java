@@ -13,12 +13,9 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.socket;
+package com.mmz.specs.application.core.client;
 
-public interface SocketConstants {
-    String TESTING_CONNECTION_COMMAND = "testing";
-    String HELLO_COMMAND = "hello";
-    String QUIT_COMMAND = "quit";
-
-    String USER_PC_NAME = "user.pc.name";
+public class ClientConstants {
+    public static final String CLIENT_SERVER_ADDRESS_KEY = "server.address";
+    public static final String CLIENT_SERVER_PORT_KEY = "server.port";
 }
