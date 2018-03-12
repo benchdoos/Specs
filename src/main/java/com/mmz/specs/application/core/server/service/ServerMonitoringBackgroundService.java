@@ -79,8 +79,6 @@ public class ServerMonitoringBackgroundService {
 
     private ActionListener getMonitorTimerActionListener() {
         return e -> {
-            /*getOnlineUsersCount();*/
-            /*updateActiveThreadCounterLabel();*/
 
             updateCpuLoad();
             updateCpuLoadByServer();
@@ -115,13 +113,6 @@ public class ServerMonitoringBackgroundService {
     public long getServerOnlineTimeInSeconds() {
         return Calendar.getInstance().getTime().getTime() / 1000 - this.serverStartDateSeconds;
     }
-
-    /*public int getOnlineUsersCount() {
-        ServerBackgroundService backgroundService = ServerBackgroundService.getInstance();
-        if (backgroundService != null) {
-            return backgroundService.getOnlineUsersCount();
-        } else return 0;
-    }*/
 
     private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
         if (oldValues.size() != MEMORY_LENGTH) {
