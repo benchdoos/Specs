@@ -26,7 +26,7 @@ public class DetailEntity {
     private String index;
     private boolean unit;
     private Double finishedWeight;
-    private Short workpieceWeight;
+    private Double workpieceWeight;
     private String imagePath;
     private Boolean isActive;
     private TechProcessEntity techProcessByTechProcessId;
@@ -73,11 +73,11 @@ public class DetailEntity {
 
     @Basic
     @Column(name = "WORKPIECE_WEIGHT")
-    public Short getWorkpieceWeight() {
+    public Double getWorkpieceWeight() {
         return workpieceWeight;
     }
 
-    public void setWorkpieceWeight(Short workpieceWeight) {
+    public void setWorkpieceWeight(Double workpieceWeight) {
         this.workpieceWeight = workpieceWeight;
     }
 
