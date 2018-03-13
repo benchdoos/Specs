@@ -62,9 +62,9 @@ public class ButtonTabComponent extends JPanel {
         }
     };
     private final JTabbedPane pane;
-    private final Image grayCircle = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/circleGray12.png"));
-    private final Image redDarkCircle = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/circleRedDarker12.png"));
-    private final Image redCircle = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/circleRed12.png"));
+    private final static Image grayCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleGray12.png"));
+    private final static Image redDarkCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleRedDarker12.png"));
+    private final static Image redCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleRed12.png"));
 
     public ButtonTabComponent(final JTabbedPane pane) {
         //unset default FlowLayout' gaps
@@ -98,7 +98,7 @@ public class ButtonTabComponent extends JPanel {
 
     private class TabButton extends JButton implements ActionListener {
         TabButton() {
-            int size = 12;
+            int size = 10;
             setPreferredSize(new Dimension(size, size));
             setToolTipText("Закрыть вкладку");
             //Make the button looks the same for all Laf's
@@ -143,6 +143,7 @@ public class ButtonTabComponent extends JPanel {
             } else {
                 g2.drawImage(grayCircle, 0, 0, null);
             }
+            g2.dispose();
         }
     }
 }

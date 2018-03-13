@@ -18,19 +18,17 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 
 public class ClientConfigurationWindow extends JFrame {
     private final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -52,8 +50,10 @@ public class ClientConfigurationWindow extends JFrame {
     public ClientConfigurationWindow() {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(okButton);
-        setTitle("Конфигурация подключения к серверу.");
+        setTitle("Конфигурация подключения к серверу");
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/networkConnections128.png")));
+
+        initTextFields();
 
         initListeners();
 
@@ -108,10 +108,15 @@ public class ClientConfigurationWindow extends JFrame {
         }
     }
 
+    private void initTextFields() {
+        serverAddressTextField.setText(ClientSettingsManager.getInstance().getServerAddress());
+        serverPortTextField.setText(ClientSettingsManager.getInstance().getServerPort() + "");
+    }
+
     private void onTestConnection() {
         if (areSettingsValid()) {
             log.debug("Testing connection to " + serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
-            try (Socket socket = new Socket(serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()))) {
+            /*try (Socket socket = new Socket(serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()))) {
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                 try {
                     out.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
@@ -129,6 +134,13 @@ public class ClientConfigurationWindow extends JFrame {
                 showIncorrectSettingsOptionPaneMessage("Сервер " + serverAddressTextField.getText() + ":"
                                 + serverPortTextField.getText() + " не найден.",
                         "Ошибка подключения");
+            }*/
+
+            if (ClientBackgroundService.getInstance().isConnected()) {
+                ClientBackgroundService.getInstance().createConnection();
+                JOptionPane.showMessageDialog(this, "Сервер " + serverAddressTextField.getText() + ":"
+                                + serverPortTextField.getText() + " успешно найден.",
+                        "Успех", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
             log.warn("Incorrect server settings: " + serverAddressTextField.getText(), serverPortTextField.getText());
@@ -138,26 +150,29 @@ public class ClientConfigurationWindow extends JFrame {
         }
     }
 
+    private void showIncorrectSettingsOptionPaneMessage(String message, String title) {
+        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
+    }
+
     private boolean areSettingsValid() {
         if (serverAddressTextField.getText().isEmpty()) {
+            log.warn("Server address should not be empty: [" + serverAddressTextField.getText() + "]");
             return false;
         }
         try {
             int maxSocketPortValue = (int) Math.pow(2d, 16d) - 1;//((2 ^ 16) - 1) - maximum  socket port
             Integer port = Integer.parseInt(serverPortTextField.getText());
             if (port < 0 || port > maxSocketPortValue) {
+                log.warn("Server port should be in range [" + 0 + ";" + maxSocketPortValue + "], but it is: " + port);
                 return false;
             }
-
         } catch (NumberFormatException e) {
+            log.warn("Server port is not a number: " + serverAddressTextField.getText());
             return false;
         }
 
+        log.info("Server params are valid: " + serverAddressTextField.getText() + ":" + serverPortTextField.getText());
         return true;
-    }
-
-    private void showIncorrectSettingsOptionPaneMessage(String message, String title) {
-        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     /**

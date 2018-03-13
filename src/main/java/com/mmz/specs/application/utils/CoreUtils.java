@@ -16,12 +16,10 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
-import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
-import com.mmz.specs.application.gui.client.ClientConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
-import com.mmz.specs.application.managers.ClientSettingsManager;
+import com.mmz.specs.application.managers.ClientManager;
 import com.mmz.specs.application.managers.CommonSettingsManager;
 import com.mmz.specs.application.managers.ModeManager;
 import com.mmz.specs.application.managers.ServerSettingsManager;
@@ -42,35 +40,7 @@ public class CoreUtils {
             switch (firstArgument) {
                 case ApplicationArgumentsConstants.CLIENT:
                     log.debug("Argument is for " + ModeManager.MODE.CLIENT);
-                    loadClientSettings();
-
-                    /*Runnable runnable = () -> {
-                        try (Socket socket = new Socket("localhost", ServerConstants.SERVER_DEFAULT_SOCKET_PORT);
-                             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
-
-                            int randomClientId = ThreadLocalRandom.current().nextInt(0, 100);
-
-
-                            for (int j = 0; j < 3; j++) {
-                                outputStream.writeUTF(SocketConstants.HELLO_COMMAND);
-                                String answer = dataInputStream.readUTF();
-                                if (answer.equalsIgnoreCase(SocketConstants.USER_PC_NAME)) {
-                                    outputStream.writeUTF("Client id: " + randomClientId + " real id: " + Thread.currentThread().getId() + " address:" + InetAddress.getLocalHost().getHostAddress());
-                                } else {
-                                    System.out.println("Received from server: " + answer);
-                                }
-                            }
-                            outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    };
-                    for (int i = 0; i < 100; i++) {
-                        Thread thread = new Thread(runnable);
-                        thread.start();
-                    }*/
+                    ClientManager clientManager = ClientManager.getInstance();
                     break;
                 case ApplicationArgumentsConstants.SERVER:
                     log.debug("Argument is for " + ModeManager.MODE.SERVER);
@@ -91,24 +61,6 @@ public class CoreUtils {
         } else {
             log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
             ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
-        }
-    }
-
-    private static void loadClientSettings() {
-        log.info("Loading client settings");
-        ClientSettingsManager settingsManager = ClientSettingsManager.getInstance();
-        try {
-            settingsManager.loadSettingsFile();
-            if (!settingsManager.isSettingsFileCorrect()) {
-                throw new Exception("Settings file is not correct");
-            }
-        } catch (Exception e) {
-            log.warn("Could not load client settings file at: " + ApplicationConstants.CLIENT_SETTINGS_FILE, e);
-
-            ClientConfigurationWindow clientConfigurationWindow = new ClientConfigurationWindow();
-            clientConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientConfigurationWindow));
-            clientConfigurationWindow.setVisible(true);
-            //loadClientSettings(); //TODO check this properly
         }
     }
 

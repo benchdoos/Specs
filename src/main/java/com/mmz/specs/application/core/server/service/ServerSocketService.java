@@ -127,7 +127,7 @@ public class ServerSocketService {
 
     }
 
-    public void closeAll() { //FixME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
+    public void closeAll() { //FIXME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
         log.info("Removing all registered connections");
         AtomicInteger connectionsCount = new AtomicInteger();
 

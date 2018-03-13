@@ -29,7 +29,7 @@ import static com.mmz.specs.socket.SocketConstants.*;
 
 public class ServerSocketDialog implements Runnable {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    Socket client;
+    private final Socket client;
     private final ClientConnection connection;
 
     public ServerSocketDialog(ClientConnection connection) {
@@ -45,22 +45,28 @@ public class ServerSocketDialog implements Runnable {
     @Override
     public void run() {
         log.info("Thread started for client: " + connection);
+        Thread currentThread = Thread.currentThread();
 
-        try {
+        try (DataInputStream in = new DataInputStream(client.getInputStream())) {
             while (!client.isClosed()) {
-                Thread currentThread = Thread.currentThread();
                 final boolean interrupted = currentThread.isInterrupted();
                 log.trace("Current thread name: " + currentThread.getName());
                 log.trace("Current thread is interrupted: " + interrupted);
 
                 if (!interrupted) {
-                    DataInputStream in = new DataInputStream(client.getInputStream());
                     manageCommand(in.readUTF());
-                    in.close();
                 }
             }
         } catch (IOException e) {
             log.warn("Got IOException from: " + connection, e);
+        } finally {
+            try {
+                log.info("Trying to close ClientConnection " + connection);
+                connection.close();
+                log.info("ClientConnection closed successfully.");
+            } catch (IOException e) {
+                log.warn("Could not close ClientConnection properly");
+            }
         }
     }
 
@@ -69,7 +75,7 @@ public class ServerSocketDialog implements Runnable {
         switch (command) {
             case TESTING_CONNECTION_COMMAND:
                 log.info("User testing connection");
-                client.close();//TODO unregister user!!!
+                /*ServerSocketService.getInstance().closeClientConnection(connection);*/
                 break;
             case HELLO_COMMAND:
                 String name = new ServerSocketDialogUtils(client).getPcName();
@@ -90,7 +96,6 @@ public class ServerSocketDialog implements Runnable {
         if (!client.isClosed()) {
             client.close();
         }
-
         try {
             connection.close();
         } catch (IOException e) {

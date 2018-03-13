@@ -15,6 +15,10 @@
 
 package com.mmz.specs.socket;
 
+import com.mmz.specs.application.utils.Logging;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,21 +28,24 @@ import static com.mmz.specs.socket.SocketConstants.USER_PC_NAME;
 
 public class ServerSocketDialogUtils {
 
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    private Socket client;
+    private final Socket client;
 
     public ServerSocketDialogUtils(Socket client) {
         this.client = client;
     }
 
     public String getPcName() {
-        try (DataOutputStream out = new DataOutputStream(client.getOutputStream());
-             DataInputStream in = new DataInputStream(client.getInputStream())) {
+        try {
+            DataOutputStream out = new DataOutputStream(client.getOutputStream());
+            DataInputStream in = new DataInputStream(client.getInputStream());
             out.writeUTF(USER_PC_NAME);
             return in.readUTF();
 
         } catch (IOException e) {
             /*NOP*/
+            log.info("Could not ask client PC name", e);
         }
 
         return "Unknown";

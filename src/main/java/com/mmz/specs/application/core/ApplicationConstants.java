@@ -21,6 +21,7 @@ public class ApplicationConstants {
     public static final String INTERNAL_FULL_NAME = "com.mmz.specs";
     public static final String APPLICATION_NAME = "MMZ - Спецификации";
     public static final String APPLICATION_NAME_POSTFIX_SERVER = " - Сервер";
+    public static final String APPLICATION_NAME_POSTFIX_CLIENT = " - Клиент";
     public static final String USER_HOME_LOCATION = System.getProperty("user.home");
     public static final String APPLICATION_SETTINGS_FOLDER_LOCATION = System
             .getProperty("java.io.tmpdir") + File.separator + INTERNAL_FULL_NAME + File.separator;
@@ -37,4 +38,9 @@ public class ApplicationConstants {
 
     public static final String CLIENT_SETTINGS_FILE = APPLICATION_SETTINGS_FOLDER_LOCATION
             + LOG_PREFIX_CLIENT + "settings.xml";
+
+    public static final String specsNoticeFileExtension = "nspecs"; //извещение
+    public static final String specsDetailFileExtension = "dspecs"; //детали
+    public static final String specsUnitFileExtension = "uspecs"; //Узлы
+
 }
