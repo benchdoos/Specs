@@ -1416,7 +1416,7 @@ public class ServerMainWindow extends JFrame {
         buttonUserInfo.setIcon(new ImageIcon(getClass().getResource("/img/gui/info.png")));
         buttonUserInfo.setMargin(new Insets(2, 2, 2, 2));
         buttonUserInfo.setText("");
-        buttonUserInfo.setToolTipText("Информация о подключенном пользователе (ctrl+i)");
+        buttonUserInfo.setToolTipText("Информация о подключенном пользователе (CTRL+I)");
         toolBar1.add(buttonUserInfo);
         final JPanel panel10 = new JPanel();
         panel10.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));

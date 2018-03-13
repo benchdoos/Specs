@@ -15,6 +15,7 @@
 
 package com.mmz.specs.socket;
 
+import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,5 +50,18 @@ public class ServerSocketDialogUtils {
         }
 
         return "Unknown";
+    }
+
+    public void sendSessionInfo() {
+        try {
+            DataOutputStream out = new DataOutputStream(client.getOutputStream());
+            String serverDbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
+            /*serverDbConnectionUrl = serverDbConnectionUrl.replace("localhost", ServerSocketService.getInstance().getServerInetAddress());*/
+            out.writeUTF(serverDbConnectionUrl);
+            out.writeUTF(ServerSettingsManager.getInstance().getServerDbUsername());
+            out.writeUTF(ServerSettingsManager.getInstance().getServerDbPassword());
+        } catch (IOException e) {
+            log.warn("Could not send session info for client");
+        }
     }
 }

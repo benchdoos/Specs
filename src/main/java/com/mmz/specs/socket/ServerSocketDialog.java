@@ -59,6 +59,11 @@ public class ServerSocketDialog implements Runnable {
             }
         } catch (IOException e) {
             log.warn("Got IOException from: " + connection, e);
+            try {
+                ServerSocketService.getInstance().closeClientConnection(connection);
+            } catch (IOException e1) {
+                log.warn("Could not close connection", e1);
+            }
         } finally {
             try {
                 log.info("Trying to close ClientConnection " + connection);
@@ -74,12 +79,16 @@ public class ServerSocketDialog implements Runnable {
         log.debug("Got command from client: " + command);
         switch (command) {
             case TESTING_CONNECTION_COMMAND:
-                log.info("User testing connection");
+                /*log.info("User testing connection");*/
                 /*ServerSocketService.getInstance().closeClientConnection(connection);*/
                 break;
             case HELLO_COMMAND:
                 String name = new ServerSocketDialogUtils(client).getPcName();
                 log.info("User connected: " + name); // TODO manage this to server somewhere
+                break;
+            case GIVE_SESSION:
+                log.info("User asking Session, giving it");
+                new ServerSocketDialogUtils(client).sendSessionInfo();
                 break;
             case QUIT_COMMAND:
                 log.info("Quiting connection for client: " + client);

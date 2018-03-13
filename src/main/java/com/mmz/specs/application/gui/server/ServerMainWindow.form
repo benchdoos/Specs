@@ -528,7 +528,7 @@
                                       <icon value="img/gui/info.png"/>
                                       <margin top="2" left="2" bottom="2" right="2"/>
                                       <text value=""/>
-                                      <toolTipText value="Информация о подключенном пользователе (ctrl+i)" noi18n="true"/>
+                                      <toolTipText value="Информация о подключенном пользователе (CTRL+I)" noi18n="true"/>
                                     </properties>
                                   </component>
                                 </children>

@@ -18,12 +18,17 @@ package com.mmz.specs.application.core.client.service;
 import com.mmz.specs.application.managers.ClientManager;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.HibernateConstants;
 import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -36,7 +41,7 @@ public class ClientBackgroundService {
     private Socket socket;
     private String serverAddress;
     private int serverPort;
-
+    private Session session;
 
     private ClientBackgroundService() {
 
@@ -94,17 +99,49 @@ public class ClientBackgroundService {
         thread.start();
     }
 
+    public Session getSession() {
+        if (session != null) {
+            return session;
+        } else {
+            if (outputStream != null) {
+                return getSessionFromServer();
+
+            } else return null;
+        }
+    }
+
+    public Session getSessionFromServer() {
+        try {
+            outputStream.writeUTF(SocketConstants.GIVE_SESSION);
+            String dbAddress = dataInputStream.readUTF();
+            String dbUsername = dataInputStream.readUTF();
+            String dbPassword = dataInputStream.readUTF();
+            dbAddress = dbAddress.replace("localhost", socket.getInetAddress().getHostAddress());
+
+            Configuration configuration = new Configuration();
+            configuration.configure(new File("src/main/resources/hibernate/hibernate.cfg.xml"));
+            configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbAddress);
+            configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, dbUsername);
+            configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, dbPassword);
+            configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "1"); // only 1 connection for client, important!!!
+            log.info("Creating Hibernate connection at: " + dbAddress
+                    + " username: " + dbUsername + " password length: " + dbPassword.length());
+            SessionFactory factory = configuration.buildSessionFactory();
+            return factory.openSession();
+        } catch (Exception e) {
+            log.warn("Could not ask server for session", e);
+        }
+
+        return null;
+    }
+
     public void closeConnection() throws IOException {
         log.info("Trying to close connection to server");
-        if (socket != null) {
-            if (!socket.isClosed()) {
-                if (outputStream != null) {
-                    System.out.println("writing to server that we're quiting");
-                    outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
-                }
-                socket.close();
-                log.info("Connection to server successfully closed");
-            }
+        if (isConnected()) {
+            log.info("Writing to server that we're quiting");
+            outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
+            socket.close();
         }
+        log.info("Connection to server successfully closed");
     }
 }

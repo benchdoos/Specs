@@ -27,8 +27,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ServerSocketConnectionPool {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static ServerSocketConnectionPool ourInstance = new ServerSocketConnectionPool();
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final ServerSocketConnectionPool ourInstance = new ServerSocketConnectionPool();
 
     private ServerSocket server;
 
@@ -74,7 +74,7 @@ public class ServerSocketConnectionPool {
     }
 
     public String getServerInfo() {
-        if (server!=null) {
+        if (server != null) {
             return server.toString();
         } else return "";
     }

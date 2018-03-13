@@ -22,4 +22,5 @@ public class HibernateConstants {
     public static final String CP_CONNECTION_USERNAME_KEY = "hibernate.hikari.dataSource.user";
     public static final String CONNECTION_PASSWORD_KEY = "hibernate.connection.password";
     public static final String CP_CONNECTION_PASSWORD_KEY = "hibernate.hikari.dataSource.password";
+    public static final String CP_CONNECTION_POOL_SIZE = "hibernate.hikari.maximumPoolSize";
 }

@@ -21,4 +21,5 @@ public interface SocketConstants {
     String QUIT_COMMAND = "quit";
 
     String USER_PC_NAME = "user.pc.name";
+    String GIVE_SESSION = "give_session";
 }
