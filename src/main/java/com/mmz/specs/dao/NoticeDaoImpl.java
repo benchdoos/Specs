@@ -87,7 +87,7 @@ public class NoticeDaoImpl implements NoticeDao {
     @Override
     @Transactional
     public NoticeEntity getNoticeByNumber(String number) {
-        Query query = session.createQuery("from NoticeEntity where NoticeEntity.number = :number");
+        Query query = session.createQuery("from NoticeEntity where number = :number");
         query.setParameter("number", number);
 
         final NoticeEntity entity = (NoticeEntity) query.uniqueResult();

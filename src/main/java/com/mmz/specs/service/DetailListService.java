@@ -46,5 +46,9 @@ public interface DetailListService {
     public List<DetailListEntity> getDetailListByChild(String detailEntityIndex);
 
 
+    public List<DetailEntity> listParents(DetailEntity detailEntity);
+
+    public List<DetailEntity> listChildren(DetailEntity detailEntity);
+
     public List<DetailListEntity> listDetailLists();
 }

@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DetailDaoImpl implements DetailDao {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session;
 
     public DetailDaoImpl() {
@@ -87,7 +87,10 @@ public class DetailDaoImpl implements DetailDao {
     @Override
     @Transactional
     public DetailEntity getDetailByIndex(String index) {
-        Query query = session.createQuery("from DetailEntity where DetailEntity.index = :index");
+        System.out.println(">>> session:" + session);
+        System.out.println(">>> index:" + index);
+        Query query = session.createQuery("from DetailEntity where number = :index");
+
         query.setParameter("index", index);
 
         final DetailEntity entity = (DetailEntity) query.uniqueResult();

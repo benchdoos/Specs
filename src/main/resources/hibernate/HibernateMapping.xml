@@ -7,7 +7,7 @@
         <id name="id" column="ID">
             <generator class="identity"/>
         </id>
-        <property name="index" column="`INDEX`"/>
+        <property name="number" column="NUMBER"/>
         <property name="unit" column="UNIT"/>
         <property name="finishedWeight" column="FINISHED_WEIGHT"/>
         <property name="workpieceWeight" column="WORKPIECE_WEIGHT"/>

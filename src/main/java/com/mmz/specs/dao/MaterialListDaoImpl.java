@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MaterialListDaoImpl implements MaterialListDao {
-    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session;
 
     public MaterialListDaoImpl() {
@@ -87,7 +87,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     @Override
     @Transactional
     public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity) {
-        Query query = session.createQuery("from MaterialListEntity where MaterialListEntity.detailByDetailId= :detailEntity");
+        Query query = session.createQuery("from MaterialListEntity where detailByDetailId= :detailEntity");
         query.setParameter("detailEntity", detailEntity);
 
         List list = query.list();
@@ -95,9 +95,9 @@ public class MaterialListDaoImpl implements MaterialListDao {
         for (Object materialListEntity : list) {
             if (materialListEntity instanceof MaterialListEntity) {
                 result.add((MaterialListEntity) materialListEntity);
-                log.info("MaterialList successfully found by detail index: " + detailEntity.getIndex() + " material:" + materialListEntity);
+                log.info("MaterialList successfully found by detail index: " + detailEntity.getNumber() + " material:" + materialListEntity);
             } else {
-                log.warn("Not MaterialList found by detail index: " + detailEntity.getIndex() + " material:" + materialListEntity);
+                log.warn("Not MaterialList found by detail index: " + detailEntity.getNumber() + " material:" + materialListEntity);
             }
         }
         return result;

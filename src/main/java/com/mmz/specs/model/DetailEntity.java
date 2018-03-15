@@ -23,7 +23,7 @@ import javax.persistence.*;
 @Table(name = "DETAIL")
 public class DetailEntity {
     private int id;
-    private String index;
+    private String number;
     private boolean unit;
     private Double finishedWeight;
     private Double workpieceWeight;
@@ -42,13 +42,13 @@ public class DetailEntity {
     }
 
     @Basic
-    @Column(name = "INDEX")
-    public String getIndex() {
-        return index;
+    @Column(name = "NUMBER")
+    public String getNumber() {
+        return number;
     }
 
-    public void setIndex(String index) {
-        this.index = index;
+    public void setNumber(String index) {
+        this.number = index;
     }
 
     @Basic
@@ -102,6 +102,18 @@ public class DetailEntity {
     }
 
     @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (number != null ? number.hashCode() : 0);
+        result = 31 * result + (unit ? 1 : 0);
+        result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
+        result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
+        result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
+        result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -110,7 +122,7 @@ public class DetailEntity {
 
         if (id != that.id) return false;
         if (unit != that.unit) return false;
-        if (index != null ? !index.equals(that.index) : that.index != null) return false;
+        if (number != null ? !number.equals(that.number) : that.number != null) return false;
         if (finishedWeight != null ? !finishedWeight.equals(that.finishedWeight) : that.finishedWeight != null)
             return false;
         if (workpieceWeight != null ? !workpieceWeight.equals(that.workpieceWeight) : that.workpieceWeight != null)
@@ -119,18 +131,6 @@ public class DetailEntity {
         if (isActive != null ? !isActive.equals(that.isActive) : that.isActive != null) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (index != null ? index.hashCode() : 0);
-        result = 31 * result + (unit ? 1 : 0);
-        result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
-        result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
-        result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
-        result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
-        return result;
     }
 
     @ManyToOne
@@ -147,7 +147,7 @@ public class DetailEntity {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
-                .append("index", index)
+                .append("index", number)
                 .append("unit", unit)
                 .append("finishedWeigth", finishedWeight)
                 .append("workpieceWeight", workpieceWeight)

@@ -87,7 +87,7 @@ public class DetailListDaoImpl implements DetailListDao {
     @Override
     @Transactional
     public List<DetailListEntity> getDetailListByParent(DetailEntity parent) {
-        Query query = this.session.createQuery("from DetailListEntity where DetailListEntity.detailByParentDetailId= :parent");
+        Query query = this.session.createQuery("from DetailListEntity where detailByParentDetailId= :parent");
         query.setParameter("parent", parent);
 
         List list = query.list();
@@ -97,7 +97,7 @@ public class DetailListDaoImpl implements DetailListDao {
     @Override
     @Transactional
     public List<DetailListEntity> getDetailListByChild(DetailEntity child) {
-        Query query = this.session.createQuery("from DetailListEntity where DetailListEntity.detailByChildDetailId= :child");
+        Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
         query.setParameter("child", child);
 
         List list = query.list();
@@ -107,10 +107,10 @@ public class DetailListDaoImpl implements DetailListDao {
     @Override
     @Transactional
     public List<DetailListEntity> getDetailListByParent(String detailEntityIndex) {
-        DetailDao detailDao = new DetailDaoImpl(this.session);
+        DetailDao detailDao = new DetailDaoImpl(session);
         DetailEntity parent = detailDao.getDetailByIndex(detailEntityIndex);
 
-        Query query = this.session.createQuery("from DetailListEntity where DetailListEntity.detailByParentDetailId= :parent");
+        Query query = this.session.createQuery("from DetailListEntity where detailByParentDetailId= :parent");
         query.setParameter("parent", parent);
 
         List list = query.list();
@@ -125,12 +125,63 @@ public class DetailListDaoImpl implements DetailListDao {
         DetailDao detailDao = new DetailDaoImpl(this.session);
         DetailEntity child = detailDao.getDetailByIndex(detailEntityIndex);
 
-        Query query = this.session.createQuery("from DetailListEntity where DetailListEntity.detailByChildDetailId= :child");
+        Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
         query.setParameter("child", child);
 
         List list = query.list();
 
         return getDetailEntity(child, list);
+    }
+
+    @Override
+    public List<DetailEntity> listParents(DetailEntity child) {
+        Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
+        query.setParameter("child", child);
+
+        List list = query.list();
+
+        List<DetailListEntity> detailListEntities = new ArrayList<>(list.size());
+        for (Object object : list) {
+            if (object instanceof DetailListEntity) {
+                detailListEntities.add((DetailListEntity) object);
+            }
+        }
+
+        List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
+
+        for (DetailListEntity entity : detailListEntities) {
+            if (!containsEntityInList(result, entity.getDetailByParentDetailId())) {
+                result.add(entity.getDetailByParentDetailId());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<DetailEntity> listChildren(DetailEntity parent) {
+        Query query = session.createQuery("from DetailListEntity where detailByParentDetailId = :parent");
+        query.setParameter("parent", parent);
+
+        List list = query.list();
+
+        List<DetailListEntity> detailListEntities = new ArrayList<>(list.size());
+
+        for (Object object : list) {
+            if (object instanceof DetailListEntity) {
+                detailListEntities.add((DetailListEntity) object);
+            }
+        }
+
+
+        List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
+
+        for (DetailListEntity entity : detailListEntities) {
+            if (!containsEntityInList(result, entity.getDetailByChildDetailId())) {
+                result.add(entity.getDetailByChildDetailId());
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -150,14 +201,27 @@ public class DetailListDaoImpl implements DetailListDao {
         return result;
     }
 
+    private boolean containsEntityInList(List<DetailEntity> list, DetailEntity entity) {
+        if (list == null) return false;
+        if (list.size() <= 0) return false;
+
+        for (DetailEntity detailEntity : list) {
+            if (detailEntity.getNumber().equalsIgnoreCase(entity.getNumber())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private List<DetailListEntity> getDetailEntity(DetailEntity entity, List list) {
         List<DetailListEntity> result = new ArrayList<>(list.size());
         for (Object detailListEntity : list) {
             if (detailListEntity instanceof DetailListEntity) {
                 result.add((DetailListEntity) detailListEntity);
-                log.info("DetailList successfully found by detail index: " + entity.getIndex() + " DetailList:" + detailListEntity);
+                log.info("DetailList successfully found by detail index: " + entity.getNumber() + " DetailList:" + detailListEntity);
             } else {
-                log.warn("Not DetailList found by detail index: " + entity.getIndex() + " DetailList:" + detailListEntity);
+                log.warn("Not DetailList found by detail index: " + entity.getNumber() + " DetailList:" + detailListEntity);
             }
         }
         return result;

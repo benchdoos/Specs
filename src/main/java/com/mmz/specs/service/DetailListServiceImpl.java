@@ -84,6 +84,15 @@ public class DetailListServiceImpl implements DetailListService {
     }
 
     @Override
+    public List<DetailEntity> listParents(DetailEntity child) {
+        return this.detailListDao.listParents(child);
+    }
+
+    public List<DetailEntity> listChildren(DetailEntity parent) {
+        return this.detailListDao.listChildren(parent);
+    }
+
+    @Override
     public List<DetailListEntity> listDetailLists() {
         return this.detailListDao.listDetailLists();
     }
