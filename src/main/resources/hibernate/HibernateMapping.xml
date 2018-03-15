@@ -8,10 +8,16 @@
             <generator class="identity"/>
         </id>
         <property name="number" column="NUMBER"/>
+        <many-to-one name="detailTitleByDetailTitleId" class="com.mmz.specs.model.DetailTitleEntity">
+            <column name="TITLE_ID"/>
+        </many-to-one>
         <property name="unit" column="UNIT"/>
         <property name="finishedWeight" column="FINISHED_WEIGHT"/>
         <property name="workpieceWeight" column="WORKPIECE_WEIGHT"/>
         <property name="imagePath" column="IMAGE_PATH"/>
+        <many-to-one name="techProcessByTechProcessId" class="com.mmz.specs.model.TechProcessEntity">
+            <column name="TECH_PROCESS_ID"/>
+        </many-to-one>
         <property name="active" column="IS_ACTIVE"/>
     </class>
     <class name="com.mmz.specs.model.DetailListEntity" table="DETAIL_LIST" schema="">

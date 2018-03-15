@@ -29,6 +29,7 @@ public class DetailEntity {
     private Double workpieceWeight;
     private String imagePath;
     private Boolean isActive;
+    private DetailTitleEntity detailTitleByDetailTitleId;
     private TechProcessEntity techProcessByTechProcessId;
 
     @Id
@@ -101,6 +102,26 @@ public class DetailEntity {
         isActive = active;
     }
 
+    @ManyToOne
+    @JoinColumn(name = "TECH_PROCESS_ID", referencedColumnName = "ID")
+    public TechProcessEntity getTechProcessByTechProcessId() {
+        return techProcessByTechProcessId;
+    }
+
+    public void setTechProcessByTechProcessId(TechProcessEntity techProcessByTechProcessId) {
+        this.techProcessByTechProcessId = techProcessByTechProcessId;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "TITLE_ID", referencedColumnName = "ID")
+    public DetailTitleEntity getDetailTitleByDetailTitleId() {
+        return detailTitleByDetailTitleId;
+    }
+
+    public void setDetailTitleByDetailTitleId(DetailTitleEntity detailTitleByDetailTitleId) {
+        this.detailTitleByDetailTitleId = detailTitleByDetailTitleId;
+    }
+
     @Override
     public int hashCode() {
         int result = id;
@@ -133,16 +154,6 @@ public class DetailEntity {
         return true;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "TECH_PROCESS_ID", referencedColumnName = "ID")
-    public TechProcessEntity getTechProcessByTechProcessId() {
-        return techProcessByTechProcessId;
-    }
-
-    public void setTechProcessByTechProcessId(TechProcessEntity techProcessByTechProcessId) {
-        this.techProcessByTechProcessId = techProcessByTechProcessId;
-    }
-
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -154,6 +165,7 @@ public class DetailEntity {
                 .append("imagePath", imagePath)
                 .append("isActive", isActive)
                 .append("techProcessByTechProcessId", techProcessByTechProcessId)
+                .append("detailTitleByDetailTitleId", detailTitleByDetailTitleId)
                 .toString();
     }
 }
