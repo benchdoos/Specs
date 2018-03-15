@@ -28,25 +28,8 @@ import java.util.List;
 
 public class MainWindowUtils {
 
-    /*public TreeSet<DetailEntity> getDetailListFullTree(Session session) {
-        TreeSet<DetailEntity> result = new TreeSet<>();
-        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-        return getList(service);
-    }
-
-    public TreeSet<DetailEntity> getList(DetailListService service) { //TODO rename this somehow
-        TreeSet<DetailEntity> result = new TreeSet<>();
-
-        List<DetailEntity> listParents = service.listParents(null);
-        for (DetailEntity parent : listParents) {
-            List<DetailEntity> detailEntities = service.listChildren(parent);
-            result.addAll(detailEntities);
-        }
-        return result;
-    }*/
-
     public DefaultMutableTreeNode getDetailListFullTree(Session session) {
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode("Узлы");
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
 
 
