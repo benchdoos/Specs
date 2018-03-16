@@ -24,4 +24,18 @@ public class CommonUtils {
         long tmp = Math.round(value);
         return (double) tmp / factor;
     }
+
+    public static String substring(final int length, final String text) {
+        String result;
+
+        if (text == null) {
+            result = "";
+            return result;
+        }
+
+        if (text.length() > length) {
+            return text.substring(0, length - 3) + "...";
+        } else return text;
+
+    }
 }

@@ -28,7 +28,7 @@ public class DetailEntity {
     private Double finishedWeight;
     private Double workpieceWeight;
     private String imagePath;
-    private Boolean isActive;
+    private boolean active;
     private DetailTitleEntity detailTitleByDetailTitleId;
     private TechProcessEntity techProcessByTechProcessId;
 
@@ -94,12 +94,12 @@ public class DetailEntity {
 
     @Basic
     @Column(name = "IS_ACTIVE")
-    public Boolean getActive() {
-        return isActive;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @ManyToOne
@@ -130,7 +130,7 @@ public class DetailEntity {
         result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
         result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
         result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
-        result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
+        result = 31 * result + Boolean.hashCode(active);
         return result;
     }
 
@@ -149,7 +149,7 @@ public class DetailEntity {
         if (workpieceWeight != null ? !workpieceWeight.equals(that.workpieceWeight) : that.workpieceWeight != null)
             return false;
         if (imagePath != null ? !imagePath.equals(that.imagePath) : that.imagePath != null) return false;
-        if (isActive != null ? !isActive.equals(that.isActive) : that.isActive != null) return false;
+        if (active != ((DetailEntity) o).active) return false;
 
         return true;
     }
@@ -163,7 +163,7 @@ public class DetailEntity {
                 .append("finishedWeigth", finishedWeight)
                 .append("workpieceWeight", workpieceWeight)
                 .append("imagePath", imagePath)
-                .append("isActive", isActive)
+                .append("active", active)
                 .append("techProcessByTechProcessId", techProcessByTechProcessId)
                 .append("detailTitleByDetailTitleId", detailTitleByDetailTitleId)
                 .toString();
