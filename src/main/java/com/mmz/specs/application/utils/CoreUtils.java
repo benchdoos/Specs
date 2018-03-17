@@ -16,6 +16,7 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
@@ -40,6 +41,10 @@ public class CoreUtils {
             switch (firstArgument) {
                 case ApplicationArgumentsConstants.CLIENT:
                     log.debug("Argument is for " + ModeManager.MODE.CLIENT);
+
+                    ClientBackgroundService clientBackgroundService = ClientBackgroundService.getInstance();
+                    clientBackgroundService.createConnection();
+
                     ClientManager clientManager = ClientManager.getInstance();
                     break;
                 case ApplicationArgumentsConstants.SERVER:
@@ -132,4 +137,6 @@ public class CoreUtils {
 
         UIManager.put("FileChooser.acceptAllFileFilterText", "Все файлы");
     }
+
+
 }

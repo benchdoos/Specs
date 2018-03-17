@@ -63,7 +63,6 @@ public class ClientBackgroundService {
                 return false;
             } else {
                 try {
-                    /*return socket.getInetAddress().isReachable(3000);*/
                     outputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
                     return true;
                 } catch (IOException e) {

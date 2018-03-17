@@ -16,12 +16,16 @@
 package com.mmz.specs.connection;
 
 public class DaoConstants {
-    public static final String BLOB_LOCATION_PREFIX_KEY = "blob.location.prefix";
+    public static final String BLOB_LOCATION_POSTFIX_KEY = "blob.location.postfix";
+    public static final String BLOB_CONNECTION_URL_KEY = "blob.connection.url";
+    public static final String BLOB_ACCESS_USERNAME_KEY = "blob.access.username";
+    public static final String BLOB_ACCESS_PASSWORD_KEY = "blob.access.password";
 
     public static final String USER_ADMIN_TIMEOUT = "user.admin.timeout";
     public static final int USER_ADMIN_TIMEOUT_DEFAULT = 60;
     public static final int USER_ADMIN_TIMEOUT_MINIMUM = 10; //10 sec
     public static final int USER_ADMIN_TIMEOUT_MAXIMUM = 60 * 60; // 1 hour
+
     public static final String USER_EDITOR_TIMEOUT = "user.editor.timeout";
     public static final int USER_EDITOR_TIMEOUT_DEFAULT = 60;
     public static final int USER_EDITOR_TIMEOUT_MINIMUM = 10;
