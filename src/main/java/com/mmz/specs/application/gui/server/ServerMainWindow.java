@@ -71,6 +71,8 @@ public class ServerMainWindow extends JFrame {
     private final long runtimeMaxMemory = getRuntimeMaxMemory();
     private final long runtimeTotalMemory = getRuntimeTotalMemory();
 
+    private boolean isMonitoringActive = true;
+
     private final Date serverStartDate = Calendar.getInstance().getTime();
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
@@ -130,6 +132,7 @@ public class ServerMainWindow extends JFrame {
     private JLabel authorizedUserName;
     private JButton buttonForceAllUsersDisconnect;
     private JButton removeUserButton;
+    private JButton switchMonitoringButton;
     private boolean serverOnlineCountLabelCounterShow = true;
     private JPanel onlyAdminTabsList[];
     private Timer monitorUiUpdateTimer;
@@ -156,7 +159,47 @@ public class ServerMainWindow extends JFrame {
 
         initThreads();
 
+
+    }
+
+    private void initListeners() {
+
+        powerServerButton.addActionListener(e -> onPowerServerButton());
+
+        buttonUserInfo.addActionListener(e -> onUserInfoButton());
+
+        buttonForceUserDisconnect.addActionListener(e -> onForceDisconnectUserButton());
+
+        buttonForceAllUsersDisconnect.addActionListener(e -> onForceDisconnectAllUsersButton());
+
+        buttonAdminLock.addActionListener(e -> onButtonAdminLock());
+
+        serverOnlineTimeLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onServerOnlineCountLabel();
+            }
+        });
+
+
+        openLogFolderButton.addActionListener(e -> onOpenLogFolder());
+
+        constantsRefreshButton.addActionListener(e -> updateAdminConstantsPanel());
+
+        updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
+
+        updateUserListButton.addActionListener(e -> {
+            clearCurrentUserPanel();
+            updateAdminRegisteredUsersPanel();
+            restoreTextFieldsColors();
+        });
+
+        addUserButton.addActionListener(e -> onAddNewUserButton());
+
         removeUserButton.addActionListener(e -> onRemoveUserButton());
+        switchMonitoringButton.addActionListener(e -> onSwitchMonitoring());
+
+        initUserInfoPanelListeners();
     }
 
     private void updateOnlineUsersCount() {
@@ -1160,41 +1203,20 @@ public class ServerMainWindow extends JFrame {
         super.dispose();
     }
 
-    private void initListeners() {
-
-        powerServerButton.addActionListener(e -> onPowerServerButton());
-
-        buttonUserInfo.addActionListener(e -> onUserInfoButton());
-
-        buttonForceUserDisconnect.addActionListener(e -> onForceDisconnectUserButton());
-
-        buttonForceAllUsersDisconnect.addActionListener(e -> onForceDisconnectAllUsersButton());
-
-        buttonAdminLock.addActionListener(e -> onButtonAdminLock());
-
-        serverOnlineTimeLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                onServerOnlineCountLabel();
+    private void onSwitchMonitoring() {
+        if (!isMonitoringActive) {
+            ServerMonitoringBackgroundService.getInstance().startMonitoring();
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), true);
+            if (tabbedPane.getSelectedIndex() == tabbedPane.getComponentZOrder(monitorPanel)) {
+                tabbedPane.setSelectedIndex(1);
             }
-        });
-
-
-        openLogFolderButton.addActionListener(e -> onOpenLogFolder());
-
-        constantsRefreshButton.addActionListener(e -> updateAdminConstantsPanel());
-
-        updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
-
-        updateUserListButton.addActionListener(e -> {
-            clearCurrentUserPanel();
-            updateAdminRegisteredUsersPanel();
-            restoreTextFieldsColors();
-        });
-
-        addUserButton.addActionListener(e -> onAddNewUserButton());
-
-        initUserInfoPanelListeners();
+            switchMonitoringButton.setText("Отключить мониторинг");
+        } else {
+            ServerMonitoringBackgroundService.getInstance().stopMonitoring();
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), false);
+            switchMonitoringButton.setText("Включить мониторинг");
+        }
+        isMonitoringActive = !isMonitoringActive;
     }
 
     {
@@ -1456,7 +1478,7 @@ public class ServerMainWindow extends JFrame {
         final Spacer spacer15 = new Spacer();
         panel11.add(spacer15, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel12 = new JPanel();
-        panel12.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel12.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel11.add(panel12, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel12.setBorder(BorderFactory.createTitledBorder("Анализ"));
         openLogFolderButton = new JButton();
@@ -1467,7 +1489,11 @@ public class ServerMainWindow extends JFrame {
         openLogFolderButton.setToolTipText("Открыть папку с логами для анализа работы сервера и поиска ошибок");
         panel12.add(openLogFolderButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer16 = new Spacer();
-        panel12.add(spacer16, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel12.add(spacer16, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        switchMonitoringButton = new JButton();
+        switchMonitoringButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/monitoring16.png")));
+        switchMonitoringButton.setText("Отключить мониторинг");
+        panel12.add(switchMonitoringButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         adminUsersPanel = new JPanel();
         adminUsersPanel.setLayout(new GridLayoutManager(6, 3, new Insets(0, 0, 0, 0), -1, -1));
         adminPane.addTab("Пользователи", adminUsersPanel);
