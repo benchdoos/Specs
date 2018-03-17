@@ -50,8 +50,6 @@ public class ServerSocketDialog implements Runnable {
         try (DataInputStream in = new DataInputStream(client.getInputStream())) {
             while (!client.isClosed()) {
                 final boolean interrupted = currentThread.isInterrupted();
-                log.trace("Current thread name: " + currentThread.getName());
-                log.trace("Current thread is interrupted: " + interrupted);
 
                 if (!interrupted) {
                     manageCommand(in.readUTF());
@@ -76,22 +74,19 @@ public class ServerSocketDialog implements Runnable {
     }
 
     private void manageCommand(final String command) throws IOException {
-        log.debug("Got command from client: " + command);
         switch (command) {
             case TESTING_CONNECTION_COMMAND:
-                /*log.info("User testing connection");*/
-                /*ServerSocketService.getInstance().closeClientConnection(connection);*/
                 break;
             case HELLO_COMMAND:
                 String name = new ServerSocketDialogUtils(client).getPcName();
-                log.info("User connected: " + name); // TODO manage this to server somewhere
+                log.info("User connected: " + name + " Command: " + command); // TODO manage this to server somewhere
                 break;
             case GIVE_SESSION:
-                log.info("User asking Session, giving it");
+                log.info("User asking Session, giving it. Command: " + command);
                 new ServerSocketDialogUtils(client).sendSessionInfo();
                 break;
             case QUIT_COMMAND:
-                log.info("Quiting connection for client: " + client);
+                log.info("Quiting connection for client: " + client + " Command: " + command);
                 onQuitCommand();
                 break;
             default:
