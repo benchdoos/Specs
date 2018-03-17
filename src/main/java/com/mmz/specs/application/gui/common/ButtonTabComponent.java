@@ -147,6 +147,7 @@ public class ButtonTabComponent extends JPanel {
                 g2.drawImage(grayCircle, 0, 0, null);
             }
             g2.dispose();
+            revalidate();
         }
     }
 }
