@@ -44,6 +44,8 @@ public interface DetailListDao {
 
     public List<DetailListEntity> getDetailListByChild(String detailEntityIndex);
 
+    public List<DetailListEntity> getDetailListByNoticeId(int id);
+
 
     public List<DetailEntity> listParents(DetailEntity detailEntity);
 
