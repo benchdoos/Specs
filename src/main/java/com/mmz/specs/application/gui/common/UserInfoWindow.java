@@ -41,6 +41,7 @@ public class UserInfoWindow extends JDialog {
     private JLabel patronomycLabel;
     private JLabel userIconLabel;
     private ClientConnection clientConnection;
+    private UsersEntity usersEntity;
 
     public UserInfoWindow() {
         setContentPane(contentPane);
@@ -66,6 +67,12 @@ public class UserInfoWindow extends JDialog {
         setResizable(false);
     }
 
+    public void setClientConnection(ClientConnection clientConnection) {
+        this.clientConnection = clientConnection;
+        initGui();
+
+    }
+
     private void initListeners() {
         buttonOK.addActionListener(e -> onOK());
 
@@ -77,53 +84,18 @@ public class UserInfoWindow extends JDialog {
         dispose();
     }
 
-    public void setClientConnection(ClientConnection clientConnection) {
-        this.clientConnection = clientConnection;
-        initGui();
-
-    }
-
-    private void updateTitle() {
-        String title = "Информация о пользователе: ";
-
-        if (clientConnection != null) {
-            if (isUserEntityAvailable()) {
-                setTitle(title + clientConnection.getUserEntity().getUsername());
-            } else {
-                setTitle(title + clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
-            }
-        } else {
-            setTitle(title + "Нет данных");
-        }
-    }
-
-    private void updateUserData() {
-        if (isUserEntityAvailable()) {
-            UsersEntity userEntity = clientConnection.getUserEntity();
-            usernameLabel.setText(userEntity.getUsername());
-            surnameLabel.setText(userEntity.getSurname());
-            nameLabel.setText(userEntity.getName());
-            patronomycLabel.setText(userEntity.getPatronymic());
-            userTypeLabel.setText(userEntity.getUserType().getName());
-            isEditorCheckBox.setSelected(userEntity.isEditor());
-            isAdminCheckBox.setSelected(userEntity.isAdmin());
-            isActiveCheckBox.setSelected(userEntity.isActive());
-        }
-    }
-
     private void initGui() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user16.png")));
 
-        updateUserIcon();
+        updateUserIcon(null);
         updateTitle();
         updateClientConnectionAddressLabel();
-        updateUserData();
+        /*updateUserData();*/
     }
 
-    private void updateUserIcon() {
+    private void updateUserIcon(UsersEntity entity) {
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user128.png")));
-        if (isUserEntityAvailable()) {
-            UsersEntity entity = clientConnection.getUserEntity();
+        if (usersEntity != null) {
             updateIcon(icon);
 
             if (entity.isAdmin()) {
@@ -142,10 +114,6 @@ public class UserInfoWindow extends JDialog {
         }
     }
 
-    private boolean isUserEntityAvailable() {
-        return clientConnection != null && clientConnection.getUserEntity() != null;
-    }
-
     private void updateClientConnectionAddressLabel() {
         if (clientConnection != null) {
             connectionAddressLabel.setText(clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
@@ -155,6 +123,54 @@ public class UserInfoWindow extends JDialog {
     private void updateIcon(ImageIcon icon) {
         userIconLabel.setIcon(icon);
         setIconImage(icon.getImage());
+    }
+
+    private void updateTitle() {
+        String title = "Информация о пользователе: ";
+        if (clientConnection != null) {
+            if (isUserEntityAvailable()) {
+                setTitle(title + clientConnection.getUserEntity().getUsername());
+            } else {
+                if (clientConnection.getSocket() != null) {
+                    setTitle(title + clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
+                }
+            }
+        } else {
+            if (usersEntity != null) {
+                setTitle(title + usersEntity.getUsername());
+            } else {
+                setTitle(title + "Нет данных");
+
+            }
+        }
+    }
+
+    private boolean isUserEntityAvailable() {
+        return clientConnection != null && clientConnection.getUserEntity() != null;
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        if (usersEntity != null) {
+            fillUserInformation(usersEntity);
+        }
+        super.setVisible(b);
+    }
+
+    private void fillUserInformation(UsersEntity entity) {
+        updateUserIcon(entity);
+        usernameLabel.setText(entity.getUsername() == null ? "Нет данных" : entity.getUsername());
+        surnameLabel.setText(entity.getSurname() == null ? "Нет данных" : entity.getSurname());
+        nameLabel.setText(entity.getName() == null ? "Нет данных" : entity.getName());
+        patronomycLabel.setText(entity.getPatronymic() == null ? "Нет данных" : entity.getPatronymic());
+        userTypeLabel.setText(entity.getUserType().getName() == null ? "Нет данных" : entity.getUserType().getName());
+        isEditorCheckBox.setSelected(entity.isEditor());
+        isAdminCheckBox.setSelected(entity.isAdmin());
+        isActiveCheckBox.setSelected(entity.isActive());
+    }
+
+    public void setUsersEntity(UsersEntity usersEntity) {
+        this.usersEntity = usersEntity;
     }
 
     {
@@ -232,6 +248,13 @@ public class UserInfoWindow extends JDialog {
         panel3.add(surnameLabel, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator1 = new JSeparator();
         panel3.add(separator1, new GridConstraints(8, 0, 1, 3, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        userIconLabel = new JLabel();
+        userIconLabel.setHorizontalAlignment(0);
+        userIconLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/user128.png")));
+        userIconLabel.setText("");
+        panel3.add(userIconLabel, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JSeparator separator2 = new JSeparator();
+        panel3.add(separator2, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         isEditorCheckBox = new JCheckBox();
         isEditorCheckBox.setBorderPainted(false);
         isEditorCheckBox.setBorderPaintedFlat(false);
@@ -240,32 +263,28 @@ public class UserInfoWindow extends JDialog {
         isEditorCheckBox.setHorizontalAlignment(10);
         isEditorCheckBox.setHorizontalTextPosition(2);
         isEditorCheckBox.setRolloverEnabled(true);
-        isEditorCheckBox.setText("Редактор");
-        isEditorCheckBox.setMnemonic('Р');
-        isEditorCheckBox.setDisplayedMnemonicIndex(0);
-        panel3.add(isEditorCheckBox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        isEditorCheckBox.setText("");
+        panel3.add(isEditorCheckBox, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isAdminCheckBox = new JCheckBox();
         isAdminCheckBox.setEnabled(false);
         isAdminCheckBox.setHorizontalTextPosition(2);
         isAdminCheckBox.setOpaque(true);
-        isAdminCheckBox.setText("Администратор");
-        isAdminCheckBox.setMnemonic('А');
-        isAdminCheckBox.setDisplayedMnemonicIndex(0);
-        panel3.add(isAdminCheckBox, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        isAdminCheckBox.setText("");
+        panel3.add(isAdminCheckBox, new GridConstraints(10, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveCheckBox = new JCheckBox();
         isActiveCheckBox.setEnabled(false);
         isActiveCheckBox.setHorizontalTextPosition(2);
-        isActiveCheckBox.setText("Действующий");
-        isActiveCheckBox.setMnemonic('Д');
-        isActiveCheckBox.setDisplayedMnemonicIndex(0);
-        panel3.add(isActiveCheckBox, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        userIconLabel = new JLabel();
-        userIconLabel.setHorizontalAlignment(0);
-        userIconLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/user128.png")));
-        userIconLabel.setText("");
-        panel3.add(userIconLabel, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JSeparator separator2 = new JSeparator();
-        panel3.add(separator2, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        isActiveCheckBox.setText("");
+        panel3.add(isActiveCheckBox, new GridConstraints(11, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label7 = new JLabel();
+        label7.setText("Редактор:");
+        panel3.add(label7, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label8 = new JLabel();
+        label8.setText("Администратор:");
+        panel3.add(label8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label9 = new JLabel();
+        label9.setText("Действующий:");
+        panel3.add(label9, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

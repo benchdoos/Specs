@@ -161,42 +161,6 @@
             </constraints>
             <properties/>
           </component>
-          <component id="c4a4a" class="javax.swing.JCheckBox" binding="isEditorCheckBox">
-            <constraints>
-              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <borderPainted value="false"/>
-              <borderPaintedFlat value="false"/>
-              <enabled value="false"/>
-              <focusCycleRoot value="false"/>
-              <horizontalAlignment value="10"/>
-              <horizontalTextPosition value="2"/>
-              <rolloverEnabled value="true"/>
-              <text value="&amp;Редактор" noi18n="true"/>
-            </properties>
-          </component>
-          <component id="aa776" class="javax.swing.JCheckBox" binding="isAdminCheckBox">
-            <constraints>
-              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <enabled value="false"/>
-              <horizontalTextPosition value="2"/>
-              <opaque value="true"/>
-              <text value="&amp;Администратор" noi18n="true"/>
-            </properties>
-          </component>
-          <component id="40361" class="javax.swing.JCheckBox" binding="isActiveCheckBox">
-            <constraints>
-              <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <enabled value="false"/>
-              <horizontalTextPosition value="2"/>
-              <text value="&amp;Действующий" noi18n="true"/>
-            </properties>
-          </component>
           <component id="f46ad" class="javax.swing.JLabel" binding="userIconLabel">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -212,6 +176,66 @@
               <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
+          </component>
+          <component id="c4a4a" class="javax.swing.JCheckBox" binding="isEditorCheckBox">
+            <constraints>
+              <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <borderPainted value="false"/>
+              <borderPaintedFlat value="false"/>
+              <enabled value="false"/>
+              <focusCycleRoot value="false"/>
+              <horizontalAlignment value="10"/>
+              <horizontalTextPosition value="2"/>
+              <rolloverEnabled value="true"/>
+              <text value="" noi18n="true"/>
+            </properties>
+          </component>
+          <component id="aa776" class="javax.swing.JCheckBox" binding="isAdminCheckBox">
+            <constraints>
+              <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <horizontalTextPosition value="2"/>
+              <opaque value="true"/>
+              <text value="" noi18n="true"/>
+            </properties>
+          </component>
+          <component id="40361" class="javax.swing.JCheckBox" binding="isActiveCheckBox">
+            <constraints>
+              <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <horizontalTextPosition value="2"/>
+              <text value="" noi18n="true"/>
+            </properties>
+          </component>
+          <component id="91ef1" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Редактор:"/>
+            </properties>
+          </component>
+          <component id="546ac" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Администратор:"/>
+            </properties>
+          </component>
+          <component id="bf87f" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Действующий:"/>
+            </properties>
           </component>
         </children>
       </grid>

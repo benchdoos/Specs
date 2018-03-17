@@ -143,4 +143,8 @@ public class ClientBackgroundService {
         }
         log.info("Connection to server successfully closed");
     }
+
+    public Socket getSocket() {
+        return socket;
+    }
 }
