@@ -1124,7 +1124,11 @@ public class ServerMainWindow extends JFrame {
     private void selectCommonAvailableTab() {
         for (JPanel tab : onlyAdminTabsList) {
             if (tabbedPane.getSelectedComponent().equals(tab)) {
-                tabbedPane.setSelectedComponent(monitorPanel);
+                if (tabbedPane.isEnabledAt(tabbedPane.getComponentZOrder(monitorPanel))) {
+                    tabbedPane.setSelectedComponent(monitorPanel);
+                } else {
+                    tabbedPane.setSelectedComponent(logPanel);
+                }
             }
         }
 
