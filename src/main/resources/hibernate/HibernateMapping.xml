@@ -33,6 +33,9 @@
         <many-to-one name="detailByChildDetailId" class="com.mmz.specs.model.DetailEntity">
             <column name="CHILD_DETAIL_ID"/>
         </many-to-one>
+        <many-to-one name="noticeByNoticeId" class="com.mmz.specs.model.NoticeEntity">
+            <column name="NOTICE_ID"/>
+        </many-to-one>
     </class>
     <class name="com.mmz.specs.model.DetailTitleEntity" table="DETAIL_TITLES" schema="">
         <id name="id" column="ID">

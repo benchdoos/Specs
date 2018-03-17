@@ -28,6 +28,7 @@ public class DetailListEntity {
     private boolean isActive;
     private DetailEntity detailByParentDetailId;
     private DetailEntity detailByChildDetailId;
+    private NoticeEntity noticeByNoticeId;
 
     @Id
     @Column(name = "ID")
@@ -70,6 +71,13 @@ public class DetailListEntity {
     }
 
     @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + quantity;
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -83,10 +91,15 @@ public class DetailListEntity {
     }
 
     @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + quantity;
-        return result;
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("quantity", quantity)
+                .append("isInterchangeableNode", isInterchangeableNode)
+                .append("isActive", isActive)
+                .append("detailByParentDetailId", detailByParentDetailId)
+                .append("detailByChildDetailId", detailByChildDetailId)
+                .toString();
     }
 
     @ManyToOne
@@ -109,15 +122,14 @@ public class DetailListEntity {
         this.detailByChildDetailId = detailByChildDetailId;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", id)
-                .append("quantity", quantity)
-                .append("isInterchangeableNode", isInterchangeableNode)
-                .append("isActive", isActive)
-                .append("detailByParentDetailId", detailByParentDetailId)
-                .append("detailByChildDetailId", detailByChildDetailId)
-                .toString();
+    @ManyToOne
+    @JoinColumn(name = "NOTICE_ID", referencedColumnName = "ID", nullable = false)
+    public NoticeEntity getNoticeByNoticeId() {
+        return noticeByNoticeId;
     }
+
+    public void setNoticeByNoticeId(NoticeEntity noticeByNoticeId) {
+        this.noticeByNoticeId = noticeByNoticeId;
+    }
+
 }
