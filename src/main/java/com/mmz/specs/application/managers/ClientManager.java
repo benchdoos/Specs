@@ -32,8 +32,16 @@ public class ClientManager {
     private ClientManager() {
         loadClientSettings();
 
-        ClientBackgroundService clientBackgroundService = ClientBackgroundService.getInstance();
-        clientBackgroundService.createConnection();
+        Runnable runnable = new Runnable() {
+            public void run() {
+                ClientBackgroundService.getInstance();
+            }
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
+
+        /*clientBackgroundService.createConnection();*/
 
         clientMainWindow = new ClientMainWindow();
         clientMainWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientMainWindow));
@@ -54,7 +62,6 @@ public class ClientManager {
             ClientConfigurationWindow clientConfigurationWindow = new ClientConfigurationWindow();
             clientConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientConfigurationWindow));
             clientConfigurationWindow.setVisible(true);
-            //loadClientSettings(); //TODO check this properly
         }
     }
 
@@ -68,6 +75,7 @@ public class ClientManager {
                 clientMainWindow.notifyConnectionRefused();
                 break;
             case ERROR:
+                clientMainWindow.notifyConnectionError();
                 break;
             case SECCUSS:
                 break;

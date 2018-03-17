@@ -44,7 +44,7 @@ public class ClientBackgroundService {
     private Session session;
 
     private ClientBackgroundService() {
-
+        createConnection();
     }
 
     public static ClientBackgroundService getInstance() {

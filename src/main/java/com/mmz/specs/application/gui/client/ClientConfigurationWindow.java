@@ -109,28 +109,8 @@ public class ClientConfigurationWindow extends JFrame {
     private void onTestConnection() {
         if (areSettingsValid()) {
             log.debug("Testing connection to " + serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
-            /*try (Socket socket = new Socket(serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()))) {
-                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-                try {
-                    out.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
-                    JOptionPane.showMessageDialog(this, "Сервер " + serverAddressTextField.getText() + ":"
-                                    + serverPortTextField.getText() + " успешно найден.",
-                            "Успех", JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException e) {
-                    log.warn("Could not find server, server connected: " + socket.isConnected());
-                    showIncorrectSettingsOptionPaneMessage("Сервер " + serverAddressTextField.getText() + ":"
-                                    + serverPortTextField.getText() + " не найден.",
-                            "Ошибка подключения");
-                }
-            } catch (IOException e) {
-                log.warn("Could not connect to server", e);
-                showIncorrectSettingsOptionPaneMessage("Сервер " + serverAddressTextField.getText() + ":"
-                                + serverPortTextField.getText() + " не найден.",
-                        "Ошибка подключения");
-            }*/
-
             if (ClientBackgroundService.getInstance().isConnected()) {
-                ClientBackgroundService.getInstance().createConnection();
+                /*ClientBackgroundService.getInstance().createConnection();*/
                 JOptionPane.showMessageDialog(this, "Сервер " + serverAddressTextField.getText() + ":"
                                 + serverPortTextField.getText() + " успешно найден.",
                         "Успех", JOptionPane.INFORMATION_MESSAGE);
