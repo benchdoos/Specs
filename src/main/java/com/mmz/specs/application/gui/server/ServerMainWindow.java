@@ -31,6 +31,7 @@ import com.mmz.specs.application.utils.validation.UserTypeValidationException;
 import com.mmz.specs.application.utils.validation.UsernameValidationException;
 import com.mmz.specs.application.utils.validation.ValidationUtils;
 import com.mmz.specs.connection.DaoConstants;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.UserTypeEntity;
 import com.mmz.specs.model.UsersEntity;
@@ -1001,7 +1002,7 @@ public class ServerMainWindow extends JFrame {
         if (ServerMainWindow.isUnlocked) {
             setUnlocked(false);
         } else {
-            LoginWindow loginWindow = new LoginWindow();
+            LoginWindow loginWindow = new LoginWindow(ServerDBConnectionPool.getInstance().getSession());
             loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
             loginWindow.setVisible(true);
             UsersEntity user = loginWindow.getAuthorizedUser();

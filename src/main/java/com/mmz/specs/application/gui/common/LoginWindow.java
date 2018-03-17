@@ -20,9 +20,11 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.security.SecurityManager;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.UsersService;
 import com.mmz.specs.service.UsersServiceImpl;
+import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +32,7 @@ import java.awt.event.*;
 import java.util.Arrays;
 
 public class LoginWindow extends JDialog {
+    private final Session session;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -37,7 +40,9 @@ public class LoginWindow extends JDialog {
     private JPasswordField passwordField;
     private UsersEntity user = null;
 
-    public LoginWindow() {
+    public LoginWindow(Session session) {
+        this.session = session;
+
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -106,7 +111,7 @@ public class LoginWindow extends JDialog {
     }
 
     private void onOK() {
-        UsersService usersService = new UsersServiceImpl();
+        UsersService usersService = new UsersServiceImpl(new UsersDaoImpl(session));
         try {
             String login = loginTextField.getText().toLowerCase();
 

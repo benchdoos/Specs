@@ -18,6 +18,7 @@ package com.mmz.specs.application.gui.server;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.UsersEntity;
 
 import javax.swing.*;
@@ -51,7 +52,7 @@ public class ServerIcon extends TrayIcon {
     }
 
     private void onShutDownClick() {
-        LoginWindow loginWindow = new LoginWindow();
+        LoginWindow loginWindow = new LoginWindow(ServerDBConnectionPool.getInstance().getSession());
         loginWindow.setLocation(FrameUtils.getFrameOnCenter(null, loginWindow));
         loginWindow.setVisible(true);
         UsersEntity user = loginWindow.getAuthorizedUser();
