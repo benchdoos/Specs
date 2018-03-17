@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 
 public class FrameUtils {
     private static final Timer timer = new Timer(60, null);
+    public static final Dimension DEFAULT_DIMENSION = new Dimension(640, 480);
 
     /**
      * Finds window on component given.
