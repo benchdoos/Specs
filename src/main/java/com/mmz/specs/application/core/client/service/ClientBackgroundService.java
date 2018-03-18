@@ -81,6 +81,7 @@ public class ClientBackgroundService {
             log.info("Trying to connect to " + serverAddress + ":" + serverPort);
             try {
                 socket = new Socket(serverAddress, serverPort);
+                socket.setSoTimeout(3000);
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
 
