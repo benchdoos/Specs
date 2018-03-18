@@ -48,7 +48,6 @@
                       <contentAreaFilled value="true"/>
                       <foreground color="-16765749"/>
                       <horizontalTextPosition value="2"/>
-                      <icon value="img/application/loading.gif"/>
                       <margin top="0" left="0" bottom="0" right="0"/>
                       <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
@@ -71,7 +70,6 @@
                       <contentAreaFilled value="true"/>
                       <foreground color="-16765749"/>
                       <horizontalTextPosition value="2"/>
-                      <icon value="img/application/loading.gif"/>
                       <margin top="0" left="0" bottom="0" right="0"/>
                       <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
@@ -89,7 +87,6 @@
                       <contentAreaFilled value="true"/>
                       <foreground color="-16765749"/>
                       <horizontalTextPosition value="2"/>
-                      <icon value="img/application/loading.gif"/>
                       <margin top="0" left="0" bottom="0" right="0"/>
                       <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
