@@ -54,6 +54,8 @@ public class ServerMonitoringBackgroundService {
     private ArrayList<Float> cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
 
+    private ArrayList<ServerLogMessage> serverLogMessages = new ArrayList<>(Integer.MAX_VALUE / 10);
+
 
     private ServerMonitoringBackgroundService() {
         ActionListener listener = getMonitorTimerActionListener();
@@ -75,6 +77,14 @@ public class ServerMonitoringBackgroundService {
         if (serverStateUpdateTimer.isRunning()) {
             serverStateUpdateTimer.stop();
         }
+    }
+
+    public void addMessage(ServerLogMessage serverLogMessage) {
+        serverLogMessages.add(serverLogMessage);
+    }
+
+    public ArrayList<ServerLogMessage> getServerLogMessages() {
+        return serverLogMessages;
     }
 
     private ActionListener getMonitorTimerActionListener() {

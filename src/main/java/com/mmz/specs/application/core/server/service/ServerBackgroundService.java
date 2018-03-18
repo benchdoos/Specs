@@ -56,6 +56,41 @@ public class ServerBackgroundService {
         createConnections();
     }
 
+    private void startServerMonitoring() {
+        log.info("Starting server monitoring service");
+        this.monitoringBackgroundService = ServerMonitoringBackgroundService.getInstance();
+        this.monitoringBackgroundService.startMonitoring();
+    }
+
+    private void startServerDBConnectionPool() {
+        try {
+            log.info("Starting server db connection pool");
+
+            ServerLogMessage message = new ServerLogMessage("Запускается пул подключений к БД",
+                    ServerLogMessage.ServerLogMessageLevel.INFO);
+            ServerMonitoringBackgroundService.getInstance().addMessage(message);
+
+            this.serverDBConnectionPool = ServerDBConnectionPool.getInstance();
+            this.serverDBConnectionPool.startDBConnectionPool();
+        } catch (ServerStartException e) {
+            log.warn("Could not start DB connection pool in background", e);
+            ServerLogMessage message = new ServerLogMessage(
+                    "Не удалось запустить пул подключений к БД. " + e.getLocalizedMessage(),
+                    ServerLogMessage.ServerLogMessageLevel.WARN);
+            ServerMonitoringBackgroundService.getInstance().addMessage(message);
+
+            JOptionPane.showMessageDialog(null,
+                    "Не удалось установить подключение к БД\r\n" + e.getLocalizedMessage(),
+                    "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void startServerSocketService() {
+        this.serverSocketService = ServerSocketService.getInstance();
+        this.serverSocketService.startSocketService();
+
+    }
+
     private void createConnections() {
         try {
             this.serverSocketService.createConnections();
@@ -67,32 +102,6 @@ public class ServerBackgroundService {
             }
         }
     }
-
-    private void startServerSocketService() {
-        this.serverSocketService = ServerSocketService.getInstance();
-        this.serverSocketService.startSocketService();
-
-    }
-
-    private void startServerDBConnectionPool() {
-        try {
-            log.info("Starting server db connection pool");
-            this.serverDBConnectionPool = ServerDBConnectionPool.getInstance();
-            this.serverDBConnectionPool.startDBConnectionPool();
-        } catch (ServerStartException e) {
-            log.warn("Could not start DB connection pool in background", e);
-            JOptionPane.showMessageDialog(null,
-                    "Не удалось установить подключение к БД\r\n" + e.getLocalizedMessage(),
-                    "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void startServerMonitoring() {
-        log.info("Starting server monitoring service");
-        this.monitoringBackgroundService = ServerMonitoringBackgroundService.getInstance();
-        this.monitoringBackgroundService.startMonitoring();
-    }
-
 
     public void stopServerMainBackgroundService() {
         log.info("Stopping Server Main Background Service");

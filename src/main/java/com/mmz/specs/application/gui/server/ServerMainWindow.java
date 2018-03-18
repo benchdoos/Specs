@@ -50,6 +50,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -71,10 +74,8 @@ public class ServerMainWindow extends JFrame {
     private final long physicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getPhysicalProcessorCount();
     private final long runtimeMaxMemory = getRuntimeMaxMemory();
     private final long runtimeTotalMemory = getRuntimeTotalMemory();
-
-    private boolean isMonitoringActive = true;
-
     private final Date serverStartDate = Calendar.getInstance().getTime();
+    private boolean isMonitoringActive = true;
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
@@ -138,6 +139,8 @@ public class ServerMainWindow extends JFrame {
     private JPanel onlyAdminTabsList[];
     private Timer monitorUiUpdateTimer;
     private Timer userActionsUpdateTimer;
+
+    private ArrayList<ServerLogMessage> logMessages = new ArrayList<>(Integer.MAX_VALUE / 100);
 
     private boolean isWindowClosing = false;
 
@@ -625,6 +628,8 @@ public class ServerMainWindow extends JFrame {
                 updateTemperatureInfoLabel();
                 createGraphics();
 
+                updateLogTextPane();
+
             }
 
             private void updateServerOnlineTimeLabel() {
@@ -669,6 +674,42 @@ public class ServerMainWindow extends JFrame {
                 }
 
                 temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE);
+            }
+
+            private void updateLogTextPane() {
+                ArrayList<ServerLogMessage> serverLogMessages = ServerMonitoringBackgroundService.getInstance().getServerLogMessages();
+                if (serverLogMessages.size() != logMessages.size()) {
+                    int messagesToLoad = serverLogMessages.size() - logMessages.size();
+                    for (int i = 0; i < messagesToLoad; i++) {
+                        int j = messagesToLoad - i;
+                        ServerLogMessage message = serverLogMessages.get(serverLogMessages.size() - j);
+                        logMessages.add(message);
+                        appendTextToTextPane(message);
+                    }
+                }
+            }
+
+            private void appendTextToTextPane(ServerLogMessage message) {
+
+                StyledDocument doc = logTextPane.getStyledDocument();
+
+
+                SimpleAttributeSet newMessage = new SimpleAttributeSet();
+                if (message.getLevel().equals(ServerLogMessage.ServerLogMessageLevel.SUCCESS)) {
+                    StyleConstants.setForeground(newMessage, Color.GREEN.darker().darker());
+                } else if (message.getLevel().equals(ServerLogMessage.ServerLogMessageLevel.WARN)) {
+                    StyleConstants.setForeground(newMessage, Color.WHITE);
+                    StyleConstants.setBackground(newMessage, Color.RED);
+                }
+                StyleConstants.setBold(newMessage, true);
+
+
+                try {
+                    /*doc.insertString(0, "Start of text\n", null);*/
+                    doc.insertString(doc.getLength(), message.getFormattedMessage() + "\n", newMessage);
+                } catch (Exception e) {
+                    log.warn("Could not add message", e);
+                }
             }
 
 

@@ -17,6 +17,8 @@ package com.mmz.specs.connection;
 
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerStartException;
+import com.mmz.specs.application.core.server.service.ServerLogMessage;
+import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
 import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
@@ -84,6 +86,9 @@ public class ServerDBConnectionPool {
                 System.out.println("  " + o.toString());
             }
         }
+        ServerLogMessage message = new ServerLogMessage("Пул подключений успешно запущен",
+                ServerLogMessage.ServerLogMessageLevel.SUCCESS);
+        ServerMonitoringBackgroundService.getInstance().addMessage(message);
     }
 
     private static void checkConnectionProperty(String serverDbConnectionUrl, String exceptionMessage) throws ServerStartException {
@@ -132,7 +137,7 @@ public class ServerDBConnectionPool {
                 checkConnectionSettings();
                 createDaoSession();
             } catch (ServerStartException e) {
-                log.error("DB connection settings are incorrect",e);
+                log.error("DB connection settings are incorrect", e);
                 throw new ServerStartException(e);
             } catch (PersistenceException e) {
                 log.error("Could not establish hibernate connection to server", e);
