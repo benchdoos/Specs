@@ -86,7 +86,7 @@ public class ServerDBConnectionPool {
                 System.out.println("  " + o.toString());
             }
         }
-        ServerLogMessage message = new ServerLogMessage("Пул подключений успешно запущен",
+        ServerLogMessage message = new ServerLogMessage("Пул подключений к БД успешно запущен",
                 ServerLogMessage.ServerLogMessageLevel.SUCCESS);
         ServerMonitoringBackgroundService.getInstance().addMessage(message);
     }

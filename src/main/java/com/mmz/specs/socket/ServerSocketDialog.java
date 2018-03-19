@@ -16,6 +16,8 @@
 package com.mmz.specs.socket;
 
 import com.mmz.specs.application.core.server.service.ClientConnection;
+import com.mmz.specs.application.core.server.service.ServerLogMessage;
+import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
 import com.mmz.specs.application.core.server.service.ServerSocketService;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +63,9 @@ public class ServerSocketDialog implements Runnable {
                 ServerSocketService.getInstance().closeClientConnection(connection);
             } catch (IOException e1) {
                 log.warn("Could not close connection", e1);
+                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                        "Не удалось закрыть socket-соединение с: " + connection.getSocket().getInetAddress() + " " + e1.getLocalizedMessage(),
+                        ServerLogMessage.ServerLogMessageLevel.WARN));
             }
         } finally {
             try {

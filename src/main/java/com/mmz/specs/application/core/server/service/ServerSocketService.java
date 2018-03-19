@@ -59,7 +59,7 @@ public class ServerSocketService {
     }
 
 
-    public ClientConnection getClientConnection() throws IOException {
+    private ClientConnection getClientConnection() throws IOException {
         ClientConnection client = new ClientConnectionImpl();
         client.setSession(ServerDBConnectionPool.getInstance().getSession());
         client.setSocket(ServerSocketConnectionPool.getInstance().getClient());
@@ -73,6 +73,9 @@ public class ServerSocketService {
 
             ClientConnection connection = getClientConnection();
             log.info("Server got a new connection at: " + connection);
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Подключён пользователь: " + connection.getSocket().getInetAddress(),
+                    ServerLogMessage.ServerLogMessageLevel.INFO));
 
             ServerSocketDialog dialog = new ServerSocketDialog(connection);
             Thread thread = new Thread(dialog, "Thread-" + this.genThreadId + " for Client connection with socket: " + connection.getSocket());
@@ -84,25 +87,46 @@ public class ServerSocketService {
 
     private void startServerSocketConnectionPool() {
         log.info("Starting server socket connection pool");
+        ServerLogMessage message = new ServerLogMessage(
+                "Запускается пул socket-соединений сервера",
+                ServerLogMessage.ServerLogMessageLevel.INFO);
+        ServerMonitoringBackgroundService.getInstance().addMessage(message);
+
         this.serverSocketConnectionPool = ServerSocketConnectionPool.getInstance();
         try {
             log.info("Is server currently started: " + this.serverSocketConnectionPool.isServerStarted());
             this.serverSocketConnectionPool.startServer();
             log.info("Is Server successfully started: " + this.serverSocketConnectionPool.getServerInfo());
+
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Пул socket-соединений сервера успешно запущен",
+                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         } catch (IOException e) {
             log.error("Could not start server at: " + this.serverSocketConnectionPool.getServerInfo());
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Не удалось запустить пул socket-соединений сервера" + e.getLocalizedMessage(),
+                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         }
 
     }
 
     private void stopServerSocketConnections() {
         try {
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Закрывается пул socket-соединений сервера",
+                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
             this.isNotClosing = false;
             closeAll();
             this.serverSocketConnectionPool.stopServerSocketConnectionPool();
             log.info("ServerSocketService successfully stopped all connections");
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Пул socket-соединений сервера успешно закрыт",
+                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         } catch (IOException e) {
             log.warn("Could not close stop ServerSocket connection pool", e);
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Пул socket-соединений сервера не был закрыт: " + e.getLocalizedMessage(),
+                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         }
     }
 
@@ -121,14 +145,19 @@ public class ServerSocketService {
 
     public void closeClientConnection(ClientConnection connection) throws IOException {
         log.debug("Trying to close connection: " + connection);
+        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                "Отключаем пользователя: " + connection.getSocket().getInetAddress(),
+                ServerLogMessage.ServerLogMessageLevel.INFO));
         unregisterClientConnection(connection);
         connection.close();
         log.info("Connection successfully closed: " + connection);
-
     }
 
     public void closeAll() { //FIXME ConcurrentModificationException, read https://habrahabr.ru/post/325426/
         log.info("Removing all registered connections");
+        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                "Отключаем всех пользователей ",
+                ServerLogMessage.ServerLogMessageLevel.INFO));
         AtomicInteger connectionsCount = new AtomicInteger();
 
         this.connections.forEach((client, thread) -> {
@@ -147,8 +176,15 @@ public class ServerSocketService {
         this.connections.clear();
         if (connectionsCount.get() == totalConnectionsCount) {
             log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
+
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Отключено пользователей: " + connectionsCount + " из: " + totalConnectionsCount,
+                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         } else {
             log.warn("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
+            ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                    "Отключено пользователей: " + connectionsCount + " из: " + totalConnectionsCount,
+                    ServerLogMessage.ServerLogMessageLevel.WARN));
         }
     }
 

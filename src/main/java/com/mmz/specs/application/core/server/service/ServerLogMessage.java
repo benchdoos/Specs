@@ -26,10 +26,6 @@ public class ServerLogMessage {
     private String message;
     private ServerLogMessageLevel level;
 
-    public ServerLogMessage() {
-
-    }
-
     public ServerLogMessage(String message, ServerLogMessageLevel level) {
         this.time = Calendar.getInstance().getTimeInMillis();
         this.message = message;
@@ -38,7 +34,7 @@ public class ServerLogMessage {
 
     public String getFormattedMessage() {
         Date date = new Date(time);
-        String dateString = new SimpleDateFormat("hh:mm:ss").format(date);
+        String dateString = new SimpleDateFormat("HH:mm:ss").format(date);
         return "[" + dateString + "]\t" + message.replace("\n", " ");
     }
 

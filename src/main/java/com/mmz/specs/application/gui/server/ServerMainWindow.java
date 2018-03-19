@@ -135,12 +135,13 @@ public class ServerMainWindow extends JFrame {
     private JButton buttonForceAllUsersDisconnect;
     private JButton removeUserButton;
     private JButton switchMonitoringButton;
+    private JScrollPane logTextScrollPane;
     private boolean serverOnlineCountLabelCounterShow = true;
     private JPanel onlyAdminTabsList[];
     private Timer monitorUiUpdateTimer;
     private Timer userActionsUpdateTimer;
 
-    private ArrayList<ServerLogMessage> logMessages = new ArrayList<>(Integer.MAX_VALUE / 100);
+    private ArrayList<ServerLogMessage> logMessages = new ArrayList<>(10000);
 
     private boolean isWindowClosing = false;
 
@@ -185,6 +186,21 @@ public class ServerMainWindow extends JFrame {
             }
         });
 
+
+        logTextPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    JPopupMenu menu = new JPopupMenu();
+                    JMenuItem clear = new JMenuItem("Очистить");
+                    clear.addActionListener(e1 -> {
+                        ServerMonitoringBackgroundService.getInstance().clearServerLogMessages();
+                    });
+                    menu.add(clear);
+                    logTextPane.add(menu);
+                }
+            }
+        });
 
         openLogFolderButton.addActionListener(e -> onOpenLogFolder());
 
@@ -678,7 +694,14 @@ public class ServerMainWindow extends JFrame {
 
             private void updateLogTextPane() {
                 ArrayList<ServerLogMessage> serverLogMessages = ServerMonitoringBackgroundService.getInstance().getServerLogMessages();
-                if (serverLogMessages.size() != logMessages.size()) {
+                if (serverLogMessages.size() > logMessages.size()) {
+                    int startCaretPosition = logTextPane.getCaretPosition();
+                    boolean change = false;
+
+                    if (startCaretPosition == logTextPane.getDocument().getLength()) {
+                        change = true;
+                    }
+
                     int messagesToLoad = serverLogMessages.size() - logMessages.size();
                     for (int i = 0; i < messagesToLoad; i++) {
                         int j = messagesToLoad - i;
@@ -686,6 +709,13 @@ public class ServerMainWindow extends JFrame {
                         logMessages.add(message);
                         appendTextToTextPane(message);
                     }
+
+                    if (change) {
+                        logTextPane.setCaretPosition(logTextPane.getDocument().getLength());
+                    }
+                } else if (serverLogMessages.size() < logMessages.size()) {
+                    logMessages.clear();
+                    logTextPane.setText("");
                 }
             }
 
@@ -705,7 +735,6 @@ public class ServerMainWindow extends JFrame {
 
 
                 try {
-                    /*doc.insertString(0, "Start of text\n", null);*/
                     doc.insertString(doc.getLength(), message.getFormattedMessage() + "\n", newMessage);
                 } catch (Exception e) {
                     log.warn("Could not add message", e);
@@ -773,6 +802,9 @@ public class ServerMainWindow extends JFrame {
                 listModel.remove(selectedIndex);
             } catch (IOException e) {
                 log.warn("Could not close connection from GUI: " + connection, e);
+                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                        "Не удалось закрыть socket-соединение с: " + connection.getSocket().getInetAddress(),
+                        ServerLogMessage.ServerLogMessageLevel.WARN));
             }
 
             updateOnlineUsersList();
@@ -1097,22 +1129,39 @@ public class ServerMainWindow extends JFrame {
                         log.info("User successfully authorized as administrator: " + user.getUsername());
                         authorizedUserName.setText(user.getUsername());
                         setUnlocked(user.isAdmin());
+                        ServerMonitoringBackgroundService.getInstance().addMessage(
+                                new ServerLogMessage("Администратор " + user.getUsername()
+                                        + " (" + user.getName() + " " + user.getSurname() + ") успешно выполнил вход.",
+                                        ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+
                     } else {
                         log.warn("User could not be authorized as administrator: " + user.getUsername() + ", he is not an admin: " + user);
                         JOptionPane.showMessageDialog(this,
                                 "Вход разрешен только администраторам сервера",
                                 "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+                        ServerMonitoringBackgroundService.getInstance().addMessage(
+                                new ServerLogMessage("Пользоватесь " + user.getUsername()
+                                        + " (" + user.getName() + " " + user.getSurname() + ") пытался выполнить вход в администраторскую часть, не имея права администратора.",
+                                        ServerLogMessage.ServerLogMessageLevel.WARN));
                     }
                 } else {
                     log.warn("User" + user.getUsername() + " can not be authorized, he is not active.");
                     JOptionPane.showMessageDialog(this,
                             "Вход разрешен только активным пользователям",
                             "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+                    ServerMonitoringBackgroundService.getInstance().addMessage(
+                            new ServerLogMessage("Не действующий пользователь " + user.getUsername()
+                                    + " (" + user.getName() + " " + user.getSurname() + ") пытался выполнить вход в администраторскую часть.",
+                                    ServerLogMessage.ServerLogMessageLevel.WARN));
                 }
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Необходимо войти в систему, чтобы продолжить",
                         "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+                ServerMonitoringBackgroundService.getInstance().addMessage(
+                        new ServerLogMessage("Кто-то пытался войти в администраторскую часть, " +
+                                "но судя по всему пароль не подошёл.",
+                                ServerLogMessage.ServerLogMessageLevel.WARN));
             }
         }
     }
@@ -1152,6 +1201,13 @@ public class ServerMainWindow extends JFrame {
             authorizedUserName.setToolTipText(null);
             selectCommonAvailableTab();
         }
+
+        if (!isUnlocked) {
+            ServerMonitoringBackgroundService.getInstance().addMessage(
+                    new ServerLogMessage("Администратор вышел из системы",
+                            ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+        }
+
         setTabsEnabled(isUnlocked);
 
     }
@@ -1439,11 +1495,12 @@ public class ServerMainWindow extends JFrame {
         logPanel = new JPanel();
         logPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane.addTab("История сеанса", logPanel);
-        final JScrollPane scrollPane1 = new JScrollPane();
-        logPanel.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        logTextScrollPane = new JScrollPane();
+        logTextScrollPane.setAutoscrolls(true);
+        logPanel.add(logTextScrollPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         logTextPane = new JTextPane();
         logTextPane.setEditable(false);
-        scrollPane1.setViewportView(logTextPane);
+        logTextScrollPane.setViewportView(logTextPane);
         controlPanel = new JPanel();
         controlPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         controlPanel.setEnabled(false);
@@ -1457,13 +1514,13 @@ public class ServerMainWindow extends JFrame {
         panel9.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
         adminServerPanel.add(panel9, new GridConstraints(0, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel9.setBorder(BorderFactory.createTitledBorder("Управление текущими сеансами"));
-        final JScrollPane scrollPane2 = new JScrollPane();
-        scrollPane2.setHorizontalScrollBarPolicy(31);
-        panel9.add(scrollPane2, new GridConstraints(0, 0, 3, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(200, -1), new Dimension(200, -1), null, 0, false));
+        final JScrollPane scrollPane1 = new JScrollPane();
+        scrollPane1.setHorizontalScrollBarPolicy(31);
+        panel9.add(scrollPane1, new GridConstraints(0, 0, 3, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(200, -1), new Dimension(200, -1), null, 0, false));
         onlineUserList = new JList();
         onlineUserList.setLayoutOrientation(0);
         onlineUserList.setSelectionMode(0);
-        scrollPane2.setViewportView(onlineUserList);
+        scrollPane1.setViewportView(onlineUserList);
         final Spacer spacer10 = new Spacer();
         panel9.add(spacer10, new GridConstraints(1, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JToolBar toolBar1 = new JToolBar();
@@ -1543,11 +1600,11 @@ public class ServerMainWindow extends JFrame {
         adminUsersPanel = new JPanel();
         adminUsersPanel.setLayout(new GridLayoutManager(6, 3, new Insets(0, 0, 0, 0), -1, -1));
         adminPane.addTab("Пользователи", adminUsersPanel);
-        final JScrollPane scrollPane3 = new JScrollPane();
-        adminUsersPanel.add(scrollPane3, new GridConstraints(1, 0, 5, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(200, -1), new Dimension(200, -1), null, 0, false));
+        final JScrollPane scrollPane2 = new JScrollPane();
+        adminUsersPanel.add(scrollPane2, new GridConstraints(1, 0, 5, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(200, -1), new Dimension(200, -1), null, 0, false));
         registeredUserList = new JList();
         registeredUserList.setSelectionMode(0);
-        scrollPane3.setViewportView(registeredUserList);
+        scrollPane2.setViewportView(registeredUserList);
         final Spacer spacer17 = new Spacer();
         adminUsersPanel.add(spacer17, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         currentUserPanel = new JPanel();

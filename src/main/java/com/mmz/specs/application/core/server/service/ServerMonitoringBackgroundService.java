@@ -32,59 +32,17 @@ public class ServerMonitoringBackgroundService {
     private static Timer serverStateUpdateTimer;
 
     private final long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
-
-    public ArrayList<Float> getMemoryLoadValues() {
-        return this.memoryLoadValues;
-    }
-
-    public ArrayList<Float> getCpuLoadValues() {
-        return this.cpuLoadValues;
-    }
-
-    public ArrayList<Float> getCpuLoadByServerValues() {
-        return this.cpuLoadByServerValues;
-    }
-
-    public ArrayList<Float> getCpuTemperatureValue() {
-        return this.cpuTemperatureValue;
-    }
-
     private ArrayList<Float> memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
-
-    private ArrayList<ServerLogMessage> serverLogMessages = new ArrayList<>(Integer.MAX_VALUE / 10);
-
+    private static final int MAXIMUM_LOG_HISTORY_LENGTH = 10000;
+    private ArrayList<ServerLogMessage> serverLogMessages = new ArrayList<>(MAXIMUM_LOG_HISTORY_LENGTH);
 
     private ServerMonitoringBackgroundService() {
         ActionListener listener = getMonitorTimerActionListener();
         serverStateUpdateTimer = new Timer(MONITORING_TIMER_DELAY, listener);
         serverStateUpdateTimer.setRepeats(true);
-    }
-
-    public static ServerMonitoringBackgroundService getInstance() {
-        return ourInstance;
-    }
-
-    public void startMonitoring() {
-        if (!serverStateUpdateTimer.isRunning()) {
-            serverStateUpdateTimer.start();
-        }
-    }
-
-    public void stopMonitoring() {
-        if (serverStateUpdateTimer.isRunning()) {
-            serverStateUpdateTimer.stop();
-        }
-    }
-
-    public void addMessage(ServerLogMessage serverLogMessage) {
-        serverLogMessages.add(serverLogMessage);
-    }
-
-    public ArrayList<ServerLogMessage> getServerLogMessages() {
-        return serverLogMessages;
     }
 
     private ActionListener getMonitorTimerActionListener() {
@@ -96,6 +54,10 @@ public class ServerMonitoringBackgroundService {
             updateTemperature();
 
         };
+    }
+
+    private void updateCpuLoad() {
+        this.cpuLoadValues = updateGraphicValue(this.cpuLoadValues, getProcessCpuLoad());
     }
 
     private void updateCpuLoadByServer() {
@@ -112,16 +74,8 @@ public class ServerMonitoringBackgroundService {
         this.memoryLoadValues = updateGraphicValue(this.memoryLoadValues, usedMemory);
     }
 
-    private void updateCpuLoad() {
-        this.cpuLoadValues = updateGraphicValue(this.cpuLoadValues, getProcessCpuLoad());
-    }
-
     private void updateTemperature() {
         this.cpuTemperatureValue = updateGraphicValue(this.cpuTemperatureValue, getCpuTemperature());
-    }
-
-    public long getServerOnlineTimeInSeconds() {
-        return Calendar.getInstance().getTime().getTime() / 1000 - this.serverStartDateSeconds;
     }
 
     private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
@@ -142,11 +96,78 @@ public class ServerMonitoringBackgroundService {
         return result;
     }
 
+    public ArrayList<Float> getMemoryLoadValues() {
+        return this.memoryLoadValues;
+    }
+
+    public ArrayList<Float> getCpuLoadValues() {
+        return this.cpuLoadValues;
+    }
+
+    public ArrayList<Float> getCpuLoadByServerValues() {
+        return this.cpuLoadByServerValues;
+    }
+
+    public ArrayList<Float> getCpuTemperatureValue() {
+        return this.cpuTemperatureValue;
+    }
+
+    public void startMonitoring() {
+        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                "Запускается сервис мониторинга состояния сервера",
+                ServerLogMessage.ServerLogMessageLevel.INFO));
+
+        if (!serverStateUpdateTimer.isRunning()) {
+            serverStateUpdateTimer.start();
+        }
+
+        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                "Успешно запущен сервис мониторинга состояния сервера",
+                ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+    }
+
+    public void stopMonitoring() {
+        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                "Завершается сервис мониторинга состояния сервера",
+                ServerLogMessage.ServerLogMessageLevel.INFO));
+
+        if (serverStateUpdateTimer.isRunning()) {
+            serverStateUpdateTimer.stop();
+        }
+        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                "Успешно завершен сервис мониторинга состояния сервера",
+                ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+    }
+
+    public void addMessage(ServerLogMessage message) {
+        if (serverLogMessages.size() >= 10000) {
+            serverLogMessages.clear();
+        }
+        serverLogMessages.add(message);
+
+    }
+
+    public static ServerMonitoringBackgroundService getInstance() {
+        return ourInstance;
+    }
+
+    public ArrayList<ServerLogMessage> getServerLogMessages() {
+        return serverLogMessages;
+    }
+
+    public long getServerOnlineTimeInSeconds() {
+        return Calendar.getInstance().getTime().getTime() / 1000 - this.serverStartDateSeconds;
+    }
+
     ArrayList<Float> getGraphicXAges() {
         ArrayList<Float> result = new ArrayList<>(MEMORY_LENGTH);
         for (int i = 0; i < MEMORY_LENGTH; i++) {
             result.add((float) i);
         }
         return result;
+    }
+
+    public void clearServerLogMessages() {
+        serverLogMessages.clear();
     }
 }
