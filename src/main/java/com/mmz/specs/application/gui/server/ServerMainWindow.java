@@ -193,9 +193,7 @@ public class ServerMainWindow extends JFrame {
                 if (e.getButton() == MouseEvent.BUTTON2) {
                     JPopupMenu menu = new JPopupMenu();
                     JMenuItem clear = new JMenuItem("Очистить");
-                    clear.addActionListener(e1 -> {
-                        ServerMonitoringBackgroundService.getInstance().clearServerLogMessages();
-                    });
+                    clear.addActionListener(e1 -> ServerMonitoringBackgroundService.getInstance().clearServerLogMessages());
                     menu.add(clear);
                     logTextPane.add(menu);
                 }
@@ -1117,6 +1115,9 @@ public class ServerMainWindow extends JFrame {
     private void onButtonAdminLock() {
         if (ServerMainWindow.isUnlocked) {
             setUnlocked(false);
+            ServerMonitoringBackgroundService.getInstance().addMessage(
+                    new ServerLogMessage("Администратор вышел из системы",
+                            ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         } else {
             LoginWindow loginWindow = new LoginWindow(ServerDBConnectionPool.getInstance().getSession());
             loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
@@ -1200,12 +1201,6 @@ public class ServerMainWindow extends JFrame {
             authorizedUserName.setIcon(null);
             authorizedUserName.setToolTipText(null);
             selectCommonAvailableTab();
-        }
-
-        if (!isUnlocked) {
-            ServerMonitoringBackgroundService.getInstance().addMessage(
-                    new ServerLogMessage("Администратор вышел из системы",
-                            ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         }
 
         setTabsEnabled(isUnlocked);
