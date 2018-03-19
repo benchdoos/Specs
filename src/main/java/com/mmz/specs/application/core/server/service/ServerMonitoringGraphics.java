@@ -76,7 +76,9 @@ public class ServerMonitoringGraphics {
         ArrayList<Float> cpuTemperatureData = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValue();
 
         XYSeries memory = chart.addSeries("ОЗУ (cервер)", xAges, memoryData);
-        memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN);
+        memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
+        memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN.darker());
+        memory.setFillColor(Color.GREEN.darker());
 
         XYSeries cpuServer = chart.addSeries("ЦП (сервер)", xAges, cpuServerData);
         cpuServer.setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
