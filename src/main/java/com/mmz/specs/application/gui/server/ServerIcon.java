@@ -23,9 +23,10 @@ import com.mmz.specs.model.UsersEntity;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
-public class ServerIcon extends TrayIcon {
-    public ServerIcon(Image image) {
+class ServerIcon extends TrayIcon {
+    ServerIcon(Image image) {
         super(image);
         initIcon();
     }
@@ -75,9 +76,16 @@ public class ServerIcon extends TrayIcon {
     }
 
     private void onIconClick() {
+        removeListeners();
+        removeIcon();
         ServerMainWindow serverMainWindow = new ServerMainWindow();
         serverMainWindow.setVisible(true);
-        removeIcon();
+    }
+
+    private void removeListeners() {
+        for (ActionListener listener : getActionListeners()) {
+            removeActionListener(listener);
+        }
     }
 
     private void removeIcon() {
