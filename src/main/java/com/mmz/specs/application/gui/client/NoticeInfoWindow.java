@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class NoticeInfoWindow extends JDialog {
+public class NoticeInfoWindow extends JFrame {
     private JPanel contentPane;
     private JButton buttonOK;
     private JList<NoticeEntity> noticeList;
@@ -45,7 +45,7 @@ public class NoticeInfoWindow extends JDialog {
     private Session session;
     private List<NoticeEntity> noticeEntities;
 
-    public NoticeInfoWindow(Session session, List<NoticeEntity> noticeEntities) {
+    NoticeInfoWindow(Session session, List<NoticeEntity> noticeEntities) {
 
         this.session = session;
         this.noticeEntities = noticeEntities;
@@ -56,9 +56,8 @@ public class NoticeInfoWindow extends JDialog {
         setMinimumSize(FrameUtils.DEFAULT_DIMENSION);
     }
 
-    public void initGui() {
+    private void initGui() {
         setContentPane(contentPane);
-        setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setTitle("Информация о извещениях");
@@ -118,7 +117,7 @@ public class NoticeInfoWindow extends JDialog {
         });
     }
 
-    public void initListeners() {
+    private void initListeners() {
         buttonOK.addActionListener(e -> onOK());
     }
 
