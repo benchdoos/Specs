@@ -32,14 +32,12 @@ import com.mmz.specs.connection.DaoConstants;
 import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.dao.DetailListDaoImpl;
+import com.mmz.specs.dao.NoticeDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.model.UsersEntity;
-import com.mmz.specs.service.ConstantsServiceImpl;
-import com.mmz.specs.service.DetailListService;
-import com.mmz.specs.service.DetailListServiceImpl;
-import com.mmz.specs.service.DetailServiceImpl;
+import com.mmz.specs.service.*;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
 import org.apache.logging.log4j.LogManager;
@@ -149,18 +147,6 @@ public class ClientMainWindow extends JFrame {
         setMenuBar(mainMenuBar);
     }
 
-    private void initListeners() {
-        viewDetailListButton.addActionListener(e -> onViewDetailList());
-        noticeInfoButton.addActionListener(e -> onNoticeInfo());
-        loginButton.addActionListener(e -> onLogin());
-        usernameLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                onUsernameInfo();
-            }
-        });
-    }
-
     public ClientMainWindow() {
         setContentPane(contentPane);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -173,6 +159,19 @@ public class ClientMainWindow extends JFrame {
 
         pack();
 
+    }
+
+    private void initListeners() {
+        viewDetailListButton.addActionListener(e -> onViewDetailList());
+        noticeInfoButton.addActionListener(e -> onNoticeInfo());
+        loginButton.addActionListener(e -> onLogin());
+        usernameLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onUsernameInfo();
+            }
+        });
+        noticeListViewButton.addActionListener(e -> onListNoticeInfo());
     }
 
     private void unlock(boolean status) {
@@ -360,6 +359,14 @@ public class ClientMainWindow extends JFrame {
             userInfoWindow.pack();
             userInfoWindow.setVisible(true);
         }
+    }
+
+    private void onListNoticeInfo() {
+
+        List<NoticeEntity> noticeEntities = new NoticeServiceImpl(new NoticeDaoImpl(session)).listNotices();
+        NoticeInfoWindow noticeInfoWindow = new NoticeInfoWindow(session, noticeEntities);
+        noticeInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, noticeInfoWindow));
+        noticeInfoWindow.setVisible(true);
     }
 
     private void updateDetailInfoPanel(DetailEntity selectedComponent) {
@@ -644,13 +651,6 @@ public class ClientMainWindow extends JFrame {
         imageFrame.setVisible(true);
     }
 
-    private void fillMainTree() {
-        if (session != null) {
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(service.listDetailLists())));
-        }
-    }
-
     public void notifyConnectionRefused() {
         JOptionPane.showMessageDialog(this,
                 "Не установлена связь с сервером, проверьте настройки.",
@@ -670,6 +670,13 @@ public class ClientMainWindow extends JFrame {
             ftpUtils.disconnect();
         } catch (IOException e) {
             log.warn("Could not disconnect from ftp server: " + ftpUtils, e);
+        }
+    }
+
+    private void fillMainTree() {
+        if (session != null) {
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(service.listDetailLists())));
         }
     }
 
