@@ -28,22 +28,31 @@ import java.util.List;
 
 public class MainWindowUtils {
 
-    public DefaultMutableTreeNode getDetailListFullTree(Session session) {
+    private Session session;
+
+    public MainWindowUtils(Session session) {
+        this.session = session;
+    }
+
+    public DefaultMutableTreeNode getDetailListFullTree(List<DetailListEntity> askedListRoot) {
+
         DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
 
 
         ArrayList<String> uniqueRootDetails = new ArrayList<>();
 
-        List<DetailListEntity> fullDetailListList = service.listDetailLists();
-        for (DetailListEntity detailListEntity : fullDetailListList) {
+        /*List<DetailListEntity> askedListRoot = service.listDetailLists();*/
+        for (DetailListEntity detailListEntity : askedListRoot) {
             List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
             if (rootParentsList.size() == 0) {
                 if (!uniqueRootDetails.contains(detailListEntity.getDetailByParentDetailId().getNumber())) {
-                    uniqueRootDetails.add(detailListEntity.getDetailByParentDetailId().getNumber());
+                    if (detailListEntity.getDetailByParentDetailId().isActive()) {
+                        uniqueRootDetails.add(detailListEntity.getDetailByParentDetailId().getNumber());
 
-                    DefaultMutableTreeNode node = getChildren(service, detailListEntity.getDetailByParentDetailId());
-                    result.add(node);
+                        DefaultMutableTreeNode node = getChildren(service, detailListEntity.getDetailByParentDetailId());
+                        result.add(node);
+                    }
                 }
             }
         }
@@ -55,11 +64,45 @@ public class MainWindowUtils {
         DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         if (childes.size() > 0) {
             for (DetailEntity entity : childes) {
-                result.add(getChildren(service, entity));
+                System.out.println(">>>  " + entity.isActive() + entity);
+                if (entity.isActive()) {
+                    result.add(getChildren(service, entity));
+                }
             }
         }
         result.setAllowsChildren(parent.isUnit());
         result.setUserObject(parent);
         return result;
+    }
+
+    public List<DetailListEntity> getDetailListEntitiesWhereParentAndChild(DetailEntity parent, DetailEntity child) {
+        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+        List<DetailListEntity> list = service.listDetailLists();
+        List<DetailListEntity> result = new ArrayList<>();
+
+        for (DetailListEntity current : list) {
+            if (current.getDetailByParentDetailId().getId() == parent.getId()) {
+                if (current.getDetailByChildDetailId().getId() == child.getId()) {
+                    result.add(current);
+                }
+            }
+        }
+        return result;
+    }
+
+
+    public DetailListEntity getLatestDetailListEntity(List<DetailListEntity> result) {
+        DetailListEntity latest = null;
+        for (DetailListEntity entity : result) {
+            if (latest != null) {
+                if (latest.getNoticeByNoticeId().getDate().before(entity.getNoticeByNoticeId().getDate())
+                        || latest.getNoticeByNoticeId().getDate().equals(entity.getNoticeByNoticeId().getDate())) {
+                    latest = entity;
+                }
+            } else {
+                latest = entity;
+            }
+        }
+        return latest;
     }
 }
