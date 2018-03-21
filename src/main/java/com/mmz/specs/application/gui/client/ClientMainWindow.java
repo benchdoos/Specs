@@ -57,7 +57,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -391,11 +390,9 @@ public class ClientMainWindow extends JFrame {
                         if (row >= 0) {
                             if (tree.getPathForRow(row) != null) {
                                 Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
-                                System.out.println(">:" + Arrays.toString(pathForRow));
                                 if (pathForRow.length > 1) {
                                     DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
                                     DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
-                                    System.out.println("Parent is: " + parent);
 
                                     MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
 
@@ -408,7 +405,6 @@ public class ClientMainWindow extends JFrame {
                                     if (result.size() > 0) {
                                         DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);
                                         if (detailListEntity.isInterchangeableNode()) {
-                                            System.out.println("HORRRAY: " + detailListEntity);
                                             if (!selected) {
                                                 setBackground(Color.GRAY.brighter());
                                             } else {
