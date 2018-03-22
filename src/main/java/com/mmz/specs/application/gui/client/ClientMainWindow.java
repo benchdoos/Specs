@@ -94,8 +94,6 @@ public class ClientMainWindow extends JFrame {
     private JButton noticeListViewButton;
     private Timer uiUpdateTimer;
 
-    private boolean isActive = false;
-
     private void initGui() {
         setMinimumSize(new Dimension(860, 480));
 
@@ -170,7 +168,6 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void unlock(boolean status) {
-        isActive = status;
         if (status) {
             loginButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
         } else {
