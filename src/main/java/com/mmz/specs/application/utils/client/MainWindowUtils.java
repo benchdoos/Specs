@@ -42,7 +42,6 @@ public class MainWindowUtils {
 
         ArrayList<String> uniqueRootDetails = new ArrayList<>();
 
-        /*List<DetailListEntity> askedListRoot = service.listDetailLists();*/
         for (DetailListEntity detailListEntity : askedListRoot) {
             List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
             if (rootParentsList.size() == 0) {
@@ -75,7 +74,7 @@ public class MainWindowUtils {
         return result;
     }
 
-    public List<DetailListEntity> getDetailListEntitiesWhereParentAndChild(DetailEntity parent, DetailEntity child) {
+    public List<DetailListEntity> getDetailListEntitiesByParentAndChild(DetailEntity parent, DetailEntity child) {
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
         List<DetailListEntity> list = service.listDetailLists();
         List<DetailListEntity> result = new ArrayList<>();

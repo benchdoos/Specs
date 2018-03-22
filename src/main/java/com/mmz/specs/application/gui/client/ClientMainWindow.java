@@ -368,107 +368,11 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    private void initMainTree() {
-        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
-            private Color backgroundSelectionColor = new Color(0, 120, 215);
-            private Color backgroundNonSelectionColor = new Color(255, 255, 255);
-
-            @Override
-            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-
-                if (selected) {
-                    setBackground(backgroundSelectionColor);
-                } else {
-                    setBackground(backgroundNonSelectionColor);
-                }
-
-                if (value instanceof DefaultMutableTreeNode) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-                    if (node.getUserObject() instanceof DetailEntity) {
-                        DetailEntity child = (DetailEntity) node.getUserObject();
-                        if (row >= 0) {
-                            if (tree.getPathForRow(row) != null) {
-                                Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
-                                if (pathForRow.length > 1) {
-                                    DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
-                                    DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
-
-                                    MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-
-
-                                    List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesWhereParentAndChild(parent, child);
-
-                                    setOpaque(true);
-
-
-                                    if (result.size() > 0) {
-                                        DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);
-                                        if (detailListEntity.isInterchangeableNode()) {
-                                            if (!selected) {
-                                                setBackground(Color.GRAY.brighter());
-                                            } else {
-                                                setBackground(backgroundSelectionColor);
-                                            }
-                                            setToolTipText("Взаимозаменяемая деталь");
-                                        }
-                                        String value1 = child.getNumber() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
-                                        return super.getTreeCellRendererComponent(tree, value1, selected, true, leaf, row, hasFocus);
-                                    }
-                                }
-                            }
-                        }
-                        return super.getTreeCellRendererComponent(tree,
-                                child.getNumber() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
-                        // issue when (detailListEntity.getQuantity()) does not work... fix it some how????
-                    }
-                }
-                return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension dim = super.getPreferredSize();
-                FontMetrics fm = getFontMetrics(getFont());
-                char[] chars = getText().toCharArray();
-
-                int w = getIconTextGap() + 32;
-                for (char ch : chars) {
-                    w += fm.charWidth(ch);
-                }
-                w += getText().length();
-                dim.width = w;
-                return dim;
-            }
-        };
-        Icon closedIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
-        Icon openIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
-        Icon leafIcon = new ImageIcon(getClass().getResource("/img/gui/tree/detail.png"));
-        renderer.setClosedIcon(closedIcon);
-        renderer.setOpenIcon(openIcon);
-        renderer.setLeafIcon(leafIcon);
-
-        mainTree.setCellRenderer(renderer);
-
-        mainTree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-
-            if (lastSelectedPathComponent != null) {
-                if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
-                    DetailEntity entityFromTree = (DetailEntity) lastSelectedPathComponent.getUserObject();
-
-                    DetailServiceImpl detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                    DetailEntity loadedEntity = detailService.getDetailById(entityFromTree.getId());
-
-                    updateDetailInfoPanel(loadedEntity);
-                } else {
-                    log.warn("Not DetailEntity: " + mainTree.getLastSelectedPathComponent().getClass().getName());
-                }
-            }
-        });
-
-        mainTree.setExpandsSelectedPaths(true);
-
-        fillMainTree();
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
     }
 
     private void initFtp() {
@@ -546,13 +450,6 @@ public class ClientMainWindow extends JFrame {
         techProcessLabel.setText("");
 
         isActiveLabel.setText("");
-    }
-
-    {
-// GUI initializer generated by IntelliJ IDEA GUI Designer
-// >>> IMPORTANT!! <<<
-// DO NOT EDIT OR ADD ANY CODE HERE!
-        $$$setupUI$$$();
     }
 
     public void notifyConnectionRefused() {
@@ -651,6 +548,109 @@ public class ClientMainWindow extends JFrame {
         }
         Collections.sort(result);
         return result;
+    }
+
+    private void initMainTree() {
+        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
+            private Color backgroundSelectionColor = new Color(0, 120, 215);
+            private Color backgroundNonSelectionColor = new Color(255, 255, 255);
+
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+
+                if (selected) {
+                    setBackground(backgroundSelectionColor);
+                } else {
+                    setBackground(backgroundNonSelectionColor);
+                }
+
+                if (value instanceof DefaultMutableTreeNode) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+                    if (node.getUserObject() instanceof DetailEntity) {
+                        DetailEntity child = (DetailEntity) node.getUserObject();
+                        if (row >= 0) {
+                            if (tree.getPathForRow(row) != null) {
+                                Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
+                                if (pathForRow.length > 1) {
+                                    DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
+                                    DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
+
+                                    MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+
+
+                                    List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesByParentAndChild(parent, child);
+
+                                    setOpaque(true);
+
+
+                                    if (result.size() > 0) {
+                                        DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);
+                                        if (detailListEntity.isInterchangeableNode()) {
+                                            if (!selected) {
+                                                setBackground(Color.GRAY.brighter());
+                                            } else {
+                                                setBackground(backgroundSelectionColor);
+                                            }
+                                            setToolTipText("Взаимозаменяемая деталь");
+                                        }
+                                        String value1 = child.getNumber() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
+                                        return super.getTreeCellRendererComponent(tree, value1, selected, true, leaf, row, hasFocus);
+                                    }
+                                }
+                            }
+                        }
+                        return super.getTreeCellRendererComponent(tree,
+                                child.getNumber() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
+                        // issue when (detailListEntity.getQuantity()) does not work... fix it some how????
+                    }
+                }
+                return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension dim = super.getPreferredSize();
+                FontMetrics fm = getFontMetrics(getFont());
+                char[] chars = getText().toCharArray();
+
+                int w = getIconTextGap() + 32;
+                for (char ch : chars) {
+                    w += fm.charWidth(ch);
+                }
+                w += getText().length();
+                dim.width = w;
+                return dim;
+            }
+        };
+        Icon closedIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
+        Icon openIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
+        Icon leafIcon = new ImageIcon(getClass().getResource("/img/gui/tree/detail.png"));
+        renderer.setClosedIcon(closedIcon);
+        renderer.setOpenIcon(openIcon);
+        renderer.setLeafIcon(leafIcon);
+
+        mainTree.setCellRenderer(renderer);
+
+        mainTree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+
+            if (lastSelectedPathComponent != null) {
+                if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
+                    DetailEntity entityFromTree = (DetailEntity) lastSelectedPathComponent.getUserObject();
+
+                    DetailServiceImpl detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                    DetailEntity loadedEntity = detailService.getDetailById(entityFromTree.getId());
+
+                    updateDetailInfoPanel(loadedEntity);
+                } else {
+                    log.warn("Not DetailEntity: " + mainTree.getLastSelectedPathComponent().getClass().getName());
+                }
+            }
+        });
+
+        mainTree.setExpandsSelectedPaths(true);
+
+        fillMainTree();
     }
 
     /**
