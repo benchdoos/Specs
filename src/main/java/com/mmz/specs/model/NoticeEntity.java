@@ -22,7 +22,7 @@ import java.sql.Date;
 
 @Entity
 @Table(name = "NOTICE")
-public class NoticeEntity {
+public class NoticeEntity implements Comparable<NoticeEntity> {
     private int id;
     private String number;
     private Date date;
@@ -40,26 +40,6 @@ public class NoticeEntity {
     }
 
     @Basic
-    @Column(name = "NUMBER")
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    @Basic
-    @Column(name = "DATE")
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    @Basic
     @Column(name = "DESCRIPTION")
     public String getDescription() {
         return description;
@@ -67,6 +47,15 @@ public class NoticeEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (number != null ? number.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -85,12 +74,14 @@ public class NoticeEntity {
     }
 
     @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (number != null ? number.hashCode() : 0);
-        result = 31 * result + (date != null ? date.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        return result;
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("number", number)
+                .append("date", date)
+                .append("description", description)
+                .append("usersByProvidedByUserId", usersByProvidedByUserId)
+                .toString();
     }
 
     @ManyToOne
@@ -104,13 +95,31 @@ public class NoticeEntity {
     }
 
     @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", id)
-                .append("number", number)
-                .append("date", date)
-                .append("description", description)
-                .append("usersByProvidedByUserId", usersByProvidedByUserId)
-                .toString();
+    public int compareTo(NoticeEntity that) {
+        int result = 0;
+        result += that.getDate().compareTo(this.getDate());
+        result += that.getNumber().compareTo(this.getNumber());
+        return result;
+
+    }
+
+    @Basic
+    @Column(name = "DATE")
+    public Date getDate() {
+        return date;
+    }
+
+    @Basic
+    @Column(name = "NUMBER")
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }
