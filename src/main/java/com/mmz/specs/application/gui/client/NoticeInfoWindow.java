@@ -136,6 +136,7 @@ public class NoticeInfoWindow extends JFrame {
             userLabel.setText(selectedValue.getUsersByProvidedByUserId().getName()
                     + " " + selectedValue.getUsersByProvidedByUserId().getSurname());
             descriptionTextArea.setText(selectedValue.getDescription());
+            descriptionTextArea.setCaretPosition(0);
 
             ListModel<DetailEntity> effectList = new CommonWindowUtils(session).getEffectList(selectedValue.getId());
 
