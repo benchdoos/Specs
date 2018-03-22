@@ -15,10 +15,16 @@
 
 package com.mmz.specs.application.utils;
 
+import hu.kazocsaba.imageviewer.ImageViewer;
+import hu.kazocsaba.imageviewer.ResizeStrategy;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferedImage;
 
 public class FrameUtils {
     private static final Timer timer = new Timer(60, null);
@@ -175,5 +181,39 @@ public class FrameUtils {
                 addActionListenerToAll(c, listener);
             }
         }
+    }
+
+
+    public static void onShowImage(Window parent, BufferedImage image, String title) {
+        final ImageViewer imageViewer = new ImageViewer(image);
+        imageViewer.setPixelatedZoom(true);
+
+        final JFrame imageFrame = new JFrame();
+        imageFrame.setTitle(title);
+        imageFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(FrameUtils.class.getResource("/img/gui/picture64.png")));
+        imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        imageFrame.add(imageViewer.getComponent());
+
+        imageFrame.setSize(FrameUtils.DEFAULT_DIMENSION);
+        imageFrame.setMinimumSize(new Dimension(256, 256));
+        imageFrame.setLocation(FrameUtils.getFrameOnCenter(parent, imageFrame));
+
+        imageFrame.addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {//FIXME zooming not working correctly
+                if (e.isControlDown()) {
+                    if (e.getWheelRotation() < 0) {
+                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() + 0.1);
+                    } else {
+                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() - 0.1);
+                    }
+                }
+            }
+        });
+
+        imageFrame.setVisible(true);
     }
 }
