@@ -22,10 +22,13 @@ import com.mmz.specs.connection.HibernateConstants;
 import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Metamodel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
+import javax.persistence.metamodel.EntityType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -45,10 +48,6 @@ public class ClientBackgroundService {
 
     private ClientBackgroundService() {
         createConnection();
-    }
-
-    public static ClientBackgroundService getInstance() {
-        return ourInstance;
     }
 
     public void createConnection() {
@@ -99,6 +98,10 @@ public class ClientBackgroundService {
         thread.start();
     }
 
+    public static ClientBackgroundService getInstance() {
+        return ourInstance;
+    }
+
     public Session getSession() {
         if (session != null) {
             return session;
@@ -127,7 +130,9 @@ public class ClientBackgroundService {
             log.info("Creating Hibernate connection at: " + dbAddress
                     + " username: " + dbUsername + " password length: " + dbPassword.length());
             SessionFactory factory = configuration.buildSessionFactory();
-            return factory.openSession();
+            Session session = factory.openSession();
+            this.session = session;
+            return session;
         } catch (Exception e) {
             log.warn("Could not ask server for session", e);
         }
@@ -147,5 +152,18 @@ public class ClientBackgroundService {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public void refreshSession() {
+        if (session != null) {
+            final Metamodel metamodel = session.getSessionFactory().getMetamodel();
+            for (EntityType<?> entityType : metamodel.getEntities()) {
+                final String entityName = entityType.getName();
+                final Query query = session.createQuery("from " + entityName);
+                for (Object o : query.list()) {
+                    session.refresh(o);
+                }
+            }
+        }
     }
 }

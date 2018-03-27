@@ -18,12 +18,14 @@ package com.mmz.specs.application.utils.client;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
+import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
 import org.hibernate.Session;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainWindowUtils {
@@ -63,10 +65,36 @@ public class MainWindowUtils {
         DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         if (childes.size() > 0) {
             for (DetailEntity entity : childes) {
-                System.out.println(">>>  " + entity.isActive() + entity);
-                if (entity.isActive()) {
-                    result.add(getChildren(service, entity));
+
+                List<DetailListEntity> detailListEntities = service.getDetailListByParent(parent);
+                for (DetailListEntity detailListEntity : detailListEntities) {
+                    if (entity != null) {
+                        NoticeEntity lastNotice = null;
+                        ArrayList<NoticeEntity> notices = new ArrayList<>();
+
+                        if (detailListEntity.getDetailByChildDetailId().getId() == entity.getId()) {
+                            notices.add(detailListEntity.getNoticeByNoticeId());
+
+                            Collections.sort(notices);
+
+                            if (notices.size() > 0) {
+                                lastNotice = notices.get(0);
+                            }
+
+                            if (lastNotice != null) { //todo test this properly
+                                if (!detailListEntity.isActive()) {
+                                    entity = null;
+                                }
+                            }
+                        }
+                    }
                 }
+                if (entity != null) {
+                    if (entity.isActive()) {
+                        result.add(getChildren(service, entity));
+                    }
+                }
+
             }
         }
         result.setAllowsChildren(parent.isUnit());

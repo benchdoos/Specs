@@ -9,7 +9,8 @@
         <property name="hibernate.connection.CharSet">RUSSIAN_CHARSET</property>
         <property name="hibernate.connection.characterEncoding">UTF-8</property>
 
-        <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider</property>
+        <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider
+        </property>
         <property name="hibernate.hikari.minimumIdle">5</property>
         <property name="hibernate.hikari.maximumPoolSize">100</property>
         <property name="hibernate.hikari.idleTimeout">30000</property>
