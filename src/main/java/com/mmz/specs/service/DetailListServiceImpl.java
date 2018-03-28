@@ -88,6 +88,11 @@ public class DetailListServiceImpl implements DetailListService {
         return this.detailListDao.getDetailListByNoticeId(id);
     }
 
+    @Override
+    public List<DetailListEntity> getDetailListBySearch(String searchText) {
+        return this.detailListDao.getDetailListBySearch(searchText);
+    }
+
 
     @Override
     public List<DetailEntity> listParents(DetailEntity child) {

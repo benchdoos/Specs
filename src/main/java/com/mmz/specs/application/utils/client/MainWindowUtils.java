@@ -47,14 +47,36 @@ public class MainWindowUtils {
         for (DetailListEntity detailListEntity : askedListRoot) {
             List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
             if (rootParentsList.size() == 0) {
-                if (!uniqueRootDetails.contains(detailListEntity.getDetailByParentDetailId().getNumber())) {
-                    if (detailListEntity.getDetailByParentDetailId().isActive()) {
-                        uniqueRootDetails.add(detailListEntity.getDetailByParentDetailId().getNumber());
+                addUniqueResult(result, service, uniqueRootDetails, detailListEntity);
+            }
+        }
+        return result;
+    }
 
-                        DefaultMutableTreeNode node = getChildren(service, detailListEntity.getDetailByParentDetailId());
-                        result.add(node);
-                    }
-                }
+    private void addUniqueResult(DefaultMutableTreeNode result, DetailListService service, ArrayList<String> uniqueRootDetails, DetailListEntity detailListEntity) {
+        //testme, does it work properly
+        if (!uniqueRootDetails.contains(detailListEntity.getDetailByParentDetailId().getCode())) {
+            if (detailListEntity.getDetailByParentDetailId().isActive()) {
+                uniqueRootDetails.add(detailListEntity.getDetailByParentDetailId().getCode());
+
+                DefaultMutableTreeNode node = getChildren(service, detailListEntity.getDetailByParentDetailId());
+                result.add(node);
+            }
+        }
+    }
+
+    public DefaultMutableTreeNode getDetailListTreeByDetailList(List<DetailListEntity> askedListRoot) {
+
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
+        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+
+
+        ArrayList<String> uniqueRootDetails = new ArrayList<>();
+
+        for (DetailListEntity detailListEntity : askedListRoot) {
+            List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
+            if (rootParentsList.size() > 0) {
+                addUniqueResult(result, service, uniqueRootDetails, detailListEntity);
             }
         }
         return result;

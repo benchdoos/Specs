@@ -150,6 +150,34 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
+    public List<DetailListEntity> getDetailListBySearch(String searchText) {
+        Query query = session.createQuery("from DetailEntity where code like '%" + searchText + "%'");
+        ArrayList<DetailEntity> details = new ArrayList<>();
+
+        List list = query.list();
+        for (Object o : list) {
+            details.add((DetailEntity) o);
+        }
+
+
+        List<DetailListEntity> result = new ArrayList<>();
+
+        for (DetailEntity entity : details) {
+            /*if (entity.isActive()) {*/
+            Query query1 = session.createQuery("from DetailListEntity where detailByChildDetailId = " + entity.getId());
+            List list1 = query1.list();
+            for (Object o : list1) {
+                DetailListEntity detailListEntity = (DetailListEntity) o;
+                if (detailListEntity.isActive()) {
+                    result.add(detailListEntity);
+                }
+            }
+            /*}*/
+        }
+        return result;
+    }
+
+    @Override
     public List<DetailEntity> listParents(DetailEntity child) {
         Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
         query.setParameter("child", child);
@@ -222,7 +250,7 @@ public class DetailListDaoImpl implements DetailListDao {
         if (list.size() <= 0) return false;
 
         for (DetailEntity detailEntity : list) {
-            if (detailEntity.getNumber().equalsIgnoreCase(entity.getNumber())) {
+            if (detailEntity.getCode().equalsIgnoreCase(entity.getCode())) {
                 return true;
             }
         }
@@ -235,9 +263,9 @@ public class DetailListDaoImpl implements DetailListDao {
         for (Object detailListEntity : list) {
             if (detailListEntity instanceof DetailListEntity) {
                 result.add((DetailListEntity) detailListEntity);
-                log.info("DetailList successfully found by detail index: " + entity.getNumber() + " DetailList:" + detailListEntity);
+                log.info("DetailList successfully found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
             } else {
-                log.warn("Not DetailList found by detail index: " + entity.getNumber() + " DetailList:" + detailListEntity);
+                log.warn("Not DetailList found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
             }
         }
         return result;

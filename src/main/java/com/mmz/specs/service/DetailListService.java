@@ -48,6 +48,8 @@ public interface DetailListService {
 
     public List<DetailListEntity> getDetailListByNoticeId(int id);
 
+    public List<DetailListEntity> getDetailListBySearch(String searchText);
+
 
     public List<DetailEntity> listParents(DetailEntity detailEntity);
 

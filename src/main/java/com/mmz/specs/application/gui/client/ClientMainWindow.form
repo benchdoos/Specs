@@ -324,15 +324,6 @@
                       <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
-                  <component id="83e4f" class="javax.swing.JButton" binding="editButton">
-                    <constraints>
-                      <grid row="12" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text value="&amp;Редактировать"/>
-                    </properties>
-                  </component>
                   <vspacer id="82e65">
                     <constraints>
                       <grid row="3" column="5" row-span="10" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
@@ -380,7 +371,7 @@
                     </constraints>
                     <properties>
                       <floatable value="false"/>
-                      <orientation value="1"/>
+                      <orientation value="0"/>
                     </properties>
                     <border type="none"/>
                     <children>
@@ -389,6 +380,28 @@
                         <properties>
                           <icon value="img/gui/refresh-left-arrow.png"/>
                           <margin top="2" left="2" bottom="2" right="2"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="91c7a" class="javax.swing.JToolBar$Separator">
+                        <constraints/>
+                        <properties>
+                          <orientation value="1"/>
+                        </properties>
+                      </component>
+                      <component id="43cfc" class="javax.swing.JButton" binding="button1" default-binding="true">
+                        <constraints/>
+                        <properties>
+                          <enabled value="false"/>
+                          <icon value="img/gui/edit/add.png"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="83e4f" class="javax.swing.JButton" binding="editButton">
+                        <constraints/>
+                        <properties>
+                          <enabled value="false"/>
+                          <icon value="img/gui/edit/edit.png"/>
                           <text value=""/>
                         </properties>
                       </component>

@@ -95,9 +95,9 @@ public class MaterialListDaoImpl implements MaterialListDao {
         for (Object materialListEntity : list) {
             if (materialListEntity instanceof MaterialListEntity) {
                 result.add((MaterialListEntity) materialListEntity);
-                log.info("MaterialList successfully found by detail index: " + detailEntity.getNumber() + " material:" + materialListEntity);
+                log.info("MaterialList successfully found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             } else {
-                log.warn("Not MaterialList found by detail index: " + detailEntity.getNumber() + " material:" + materialListEntity);
+                log.warn("Not MaterialList found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             }
         }
         return result;

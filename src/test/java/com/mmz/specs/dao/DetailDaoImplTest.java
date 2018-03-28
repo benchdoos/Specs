@@ -27,6 +27,6 @@ public class DetailDaoImplTest {
         DetailDao detailDao = new DetailDaoImpl();
 
         DetailEntity entity = detailDao.getDetailByIndex("ЛВ-185.00.050");
-        System.out.println("entity - " + entity.getNumber());
+        System.out.println("entity - " + entity.getCode());
     }
 }

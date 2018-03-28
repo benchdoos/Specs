@@ -40,13 +40,13 @@ public class CommonWindowUtils {
         ArrayList<String> unique = new ArrayList<>();
 
         for (DetailListEntity entity : list) {
-            if (!unique.contains(entity.getDetailByParentDetailId().getNumber())) {
-                unique.add(entity.getDetailByParentDetailId().getNumber());
+            if (!unique.contains(entity.getDetailByParentDetailId().getCode())) {
+                unique.add(entity.getDetailByParentDetailId().getCode());
                 model.addElement(entity.getDetailByParentDetailId());
             }
 
-            if (!unique.contains(entity.getDetailByChildDetailId().getNumber())) {
-                unique.add(entity.getDetailByChildDetailId().getNumber());
+            if (!unique.contains(entity.getDetailByChildDetailId().getCode())) {
+                unique.add(entity.getDetailByChildDetailId().getCode());
                 model.addElement(entity.getDetailByChildDetailId());
             }
         }
@@ -62,7 +62,7 @@ public class CommonWindowUtils {
         for (String name : unique) {
             for (int i = 0; i < model.getSize(); i++) {
                 DetailEntity entity = model.getElementAt(i);
-                if (name.equalsIgnoreCase(entity.getNumber())) {
+                if (name.equalsIgnoreCase(entity.getCode())) {
                     result.addElement(entity);
                 }
             }

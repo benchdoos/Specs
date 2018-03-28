@@ -45,6 +45,8 @@ import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -93,6 +95,7 @@ public class ClientMainWindow extends JFrame {
     private JButton editDataButton;
     private JButton noticeListViewButton;
     private JButton refreshSessionButton;
+    private JButton button1;
     private Timer uiUpdateTimer;
 
     {
@@ -175,7 +178,48 @@ public class ClientMainWindow extends JFrame {
         noticeListViewButton.addActionListener(e -> onListNoticeInfo());
 
 
+        searchTextField.getDocument().addDocumentListener(new DocumentListener() {
+            String searchText = "";
+            final Timer searchTimer = new Timer(1000, e -> {
+                if (!searchText.isEmpty()) {
+                    searchText = searchText.replace(",", ".");
+                    System.out.println("timer works: " + searchText);
+                    fillMainTreeBySearch(searchText);
+                } else {
+                    fillMainTreeFully();
+                }
+            });
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+        });
+
         refreshSessionButton.addActionListener(e -> onRefreshSession());
+
     }
 
     private void unlock(boolean status) {
@@ -296,7 +340,7 @@ public class ClientMainWindow extends JFrame {
 
         updateDetailInfoPanelWithEmptyEntity();
 
-        fillMainTree();
+        fillMainTreeFully();
     }
 
     private void onNoticeInfo() {
@@ -373,23 +417,30 @@ public class ClientMainWindow extends JFrame {
         noticeInfoWindow.setVisible(true);
     }
 
+    private void fillMainTreeBySearch(String searchText) {
+        if (session != null) {
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByDetailList(service.getDetailListBySearch(searchText))));
+        }
+    }
+
+    private void fillMainTreeFully() {
+        if (session != null) {
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(service.listDetailLists())));
+        }
+    }
+
     private void onRefreshSession() {
         //todo add expansion for selected path
         ClientBackgroundService.getInstance().refreshSession();
-        fillMainTree();
+        fillMainTreeFully();
     }
 
     private void updateDetailInfoPanel(DetailEntity selectedComponent) {
         updateDetailInfoPanelWithEmptyEntity();
         if (selectedComponent != null) {
             updateDetailInfoPanelWithEntity(selectedComponent);
-        }
-    }
-
-    private void fillMainTree() {
-        if (session != null) {
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(service.listDetailLists())));
         }
     }
 
@@ -497,11 +548,9 @@ public class ClientMainWindow extends JFrame {
 
                                     MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
 
-
                                     List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesByParentAndChild(parent, child);
 
                                     setOpaque(true);
-
 
                                     if (result.size() > 0) {
                                         DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);
@@ -513,14 +562,23 @@ public class ClientMainWindow extends JFrame {
                                             }
                                             setToolTipText("Взаимозаменяемая деталь");
                                         }
-                                        String value1 = child.getNumber() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
+
+                                        if (!detailListEntity.isActive()) {
+                                            if (!selected) {
+                                                setBackground(Color.RED.darker());
+                                            } else {
+                                                setBackground(backgroundSelectionColor);
+                                            }
+                                        }
+
+                                        String value1 = child.getCode() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
                                         return super.getTreeCellRendererComponent(tree, value1, selected, true, leaf, row, hasFocus);
                                     }
                                 }
                             }
                         }
                         return super.getTreeCellRendererComponent(tree,
-                                child.getNumber() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
+                                child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
                         // issue when (detailListEntity.getQuantity()) does not work... fix it some how????
                     }
                 }
@@ -570,56 +628,7 @@ public class ClientMainWindow extends JFrame {
 
         mainTree.setExpandsSelectedPaths(true);
 
-        fillMainTree();
-    }
-
-
-    private void updateDetailInfoPanelWithEntity(DetailEntity selectedComponent) {
-        numberLabel.setText(CommonUtils.substring(25, selectedComponent.getNumber()));
-
-        if (selectedComponent.getDetailTitleByDetailTitleId() != null) {
-            String title = selectedComponent.getDetailTitleByDetailTitleId().getTitle();
-            titleLabel.setToolTipText(title);
-            titleLabel.setText(CommonUtils.substring(25, title));
-        }
-
-        unitLabel.setText(Boolean.toString(selectedComponent.isUnit())
-                .replace("false", "нет").replace("true", "да"));
-
-        if (selectedComponent.getFinishedWeight() != null) {
-            finishedWeightLabel.setText((Double.toString(selectedComponent.getFinishedWeight())));
-        }
-
-        if (selectedComponent.getWorkpieceWeight() != null) {
-            workpieceWeightLabel.setText(Double.toString(selectedComponent.getWorkpieceWeight()));
-        }
-
-        FtpUtils ftp = FtpUtils.getInstance();
-        BufferedImage image = ftp.getImage(selectedComponent.getId());
-
-        if (image != null) {
-            BufferedImage scaledImage = Scalr.resize(image, 128);
-            detailIconLabel.setIcon(new ImageIcon(scaledImage));
-            detailIconLabel.setText("");
-            detailIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    FrameUtils.onShowImage(ClientMainWindow.super.getOwner(), image, "Изображение " + selectedComponent.getNumber());
-                }
-            });
-        } else {
-            detailIconLabel.setIcon(null);
-            detailIconLabel.setText("Нет изображения");
-        }
-
-        if (selectedComponent.getTechProcessByTechProcessId() != null) {
-            String process = selectedComponent.getTechProcessByTechProcessId().getProcess();
-            techProcessLabel.setToolTipText(process);
-            techProcessLabel.setText(CommonUtils.substring(25, process));
-        }
-
-        isActiveLabel.setText(Boolean.toString(!selectedComponent.isActive())
-                .replace("false", "нет").replace("true", "да"));
+        fillMainTreeFully();
     }
 
     private List<NoticeEntity> getUniqueNoticeList(List<DetailListEntity> list) {
@@ -663,6 +672,54 @@ public class ClientMainWindow extends JFrame {
         JOptionPane.showMessageDialog(this,
                 "Не установлена связь с сервером, ошибка. Звоните фиксикам.",
                 "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void updateDetailInfoPanelWithEntity(DetailEntity selectedComponent) {
+        numberLabel.setText(CommonUtils.substring(25, selectedComponent.getCode()));
+
+        if (selectedComponent.getDetailTitleByDetailTitleId() != null) {
+            String title = selectedComponent.getDetailTitleByDetailTitleId().getTitle();
+            titleLabel.setToolTipText(title);
+            titleLabel.setText(CommonUtils.substring(25, title));
+        }
+
+        unitLabel.setText(Boolean.toString(selectedComponent.isUnit())
+                .replace("false", "нет").replace("true", "да"));
+
+        if (selectedComponent.getFinishedWeight() != null) {
+            finishedWeightLabel.setText((Double.toString(selectedComponent.getFinishedWeight())));
+        }
+
+        if (selectedComponent.getWorkpieceWeight() != null) {
+            workpieceWeightLabel.setText(Double.toString(selectedComponent.getWorkpieceWeight()));
+        }
+
+        FtpUtils ftp = FtpUtils.getInstance();
+        BufferedImage image = ftp.getImage(selectedComponent.getId());
+
+        if (image != null) {
+            BufferedImage scaledImage = Scalr.resize(image, 128);
+            detailIconLabel.setIcon(new ImageIcon(scaledImage));
+            detailIconLabel.setText("");
+            detailIconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    FrameUtils.onShowImage(ClientMainWindow.super.getOwner(), image, "Изображение " + selectedComponent.getCode());
+                }
+            });
+        } else {
+            detailIconLabel.setIcon(null);
+            detailIconLabel.setText("Нет изображения");
+        }
+
+        if (selectedComponent.getTechProcessByTechProcessId() != null) {
+            String process = selectedComponent.getTechProcessByTechProcessId().getProcess();
+            techProcessLabel.setToolTipText(process);
+            techProcessLabel.setText(CommonUtils.substring(25, process));
+        }
+
+        isActiveLabel.setText(Boolean.toString(!selectedComponent.isActive())
+                .replace("false", "нет").replace("true", "да"));
     }
 
     /**
@@ -727,18 +784,18 @@ public class ClientMainWindow extends JFrame {
         panel1.add(editDataButton, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
         panel1.add(spacer3, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final JButton button1 = new JButton();
-        button1.setAutoscrolls(false);
-        button1.setBorderPainted(false);
-        button1.setContentAreaFilled(true);
-        button1.setForeground(new Color(-16765749));
-        button1.setMargin(new Insets(0, 0, 0, 0));
-        button1.setOpaque(false);
-        button1.setRequestFocusEnabled(true);
-        button1.setRolloverEnabled(true);
-        button1.setText("Администрирование");
-        button1.setToolTipText("Редактирование данных");
-        panel1.add(button1, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JButton button2 = new JButton();
+        button2.setAutoscrolls(false);
+        button2.setBorderPainted(false);
+        button2.setContentAreaFilled(true);
+        button2.setForeground(new Color(-16765749));
+        button2.setMargin(new Insets(0, 0, 0, 0));
+        button2.setOpaque(false);
+        button2.setRequestFocusEnabled(true);
+        button2.setRolloverEnabled(true);
+        button2.setText("Администрирование");
+        button2.setToolTipText("Редактирование данных");
+        panel1.add(button2, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         noticeListViewButton = new JButton();
         noticeListViewButton.setAutoscrolls(false);
         noticeListViewButton.setBorderPainted(false);
@@ -823,12 +880,6 @@ public class ClientMainWindow extends JFrame {
         detailInfoPanel.add(noticeInfoButton, new GridConstraints(10, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
         detailInfoPanel.add(spacer4, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        editButton = new JButton();
-        editButton.setEnabled(false);
-        editButton.setText("Редактировать");
-        editButton.setMnemonic('Р');
-        editButton.setDisplayedMnemonicIndex(0);
-        detailInfoPanel.add(editButton, new GridConstraints(12, 3, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer5 = new Spacer();
         detailInfoPanel.add(spacer5, new GridConstraints(3, 5, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer6 = new Spacer();
@@ -845,13 +896,25 @@ public class ClientMainWindow extends JFrame {
         scrollPane1.setViewportView(mainTree);
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
-        toolBar1.setOrientation(1);
+        toolBar1.setOrientation(0);
         panel2.add(toolBar1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         refreshSessionButton = new JButton();
         refreshSessionButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         refreshSessionButton.setMargin(new Insets(2, 2, 2, 2));
         refreshSessionButton.setText("");
         toolBar1.add(refreshSessionButton);
+        final JToolBar.Separator toolBar$Separator1 = new JToolBar.Separator();
+        toolBar1.add(toolBar$Separator1);
+        button1 = new JButton();
+        button1.setEnabled(false);
+        button1.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
+        button1.setText("");
+        toolBar1.add(button1);
+        editButton = new JButton();
+        editButton.setEnabled(false);
+        editButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
+        editButton.setText("");
+        toolBar1.add(editButton);
         final Spacer spacer7 = new Spacer();
         detailListPanel.add(spacer7, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();

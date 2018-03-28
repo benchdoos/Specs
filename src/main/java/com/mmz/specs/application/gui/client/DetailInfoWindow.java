@@ -100,9 +100,9 @@ public class DetailInfoWindow extends JFrame {
         String name = detailEntity.isUnit() ? "/img/gui/tree/unitOpened.png" : "/img/gui/tree/detail.png";
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(name)));
 
-        setTitle(entity.getNumber() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
+        setTitle(entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
 
-        numberLabel.setText(CommonUtils.substring(25, detailEntity.getNumber()));
+        numberLabel.setText(CommonUtils.substring(25, detailEntity.getCode()));
 
         if (detailEntity.getDetailTitleByDetailTitleId() != null) {
             String title = detailEntity.getDetailTitleByDetailTitleId().getTitle();
@@ -131,7 +131,7 @@ public class DetailInfoWindow extends JFrame {
             detailIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    FrameUtils.onShowImage(DetailInfoWindow.super.getOwner(), image, "Изображение " + detailEntity.getNumber());
+                    FrameUtils.onShowImage(DetailInfoWindow.super.getOwner(), image, "Изображение " + detailEntity.getCode());
                 }
             });
         } else {
