@@ -23,7 +23,7 @@ import javax.persistence.*;
 @Table(name = "DETAIL")
 public class DetailEntity {
     private int id;
-    private String number;
+    private String code;
     private boolean unit;
     private Double finishedWeight;
     private Double workpieceWeight;
@@ -43,13 +43,13 @@ public class DetailEntity {
     }
 
     @Basic
-    @Column(name = "NUMBER")
-    public String getNumber() {
-        return number;
+    @Column(name = "CODE")
+    public String getCode() {
+        return code;
     }
 
-    public void setNumber(String index) {
-        this.number = index;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Basic
@@ -125,7 +125,7 @@ public class DetailEntity {
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + (number != null ? number.hashCode() : 0);
+        result = 31 * result + (code != null ? code.hashCode() : 0);
         result = 31 * result + (unit ? 1 : 0);
         result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
         result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
@@ -143,7 +143,7 @@ public class DetailEntity {
 
         if (id != that.id) return false;
         if (unit != that.unit) return false;
-        if (number != null ? !number.equals(that.number) : that.number != null) return false;
+        if (code != null ? !code.equals(that.code) : that.code != null) return false;
         if (finishedWeight != null ? !finishedWeight.equals(that.finishedWeight) : that.finishedWeight != null)
             return false;
         if (workpieceWeight != null ? !workpieceWeight.equals(that.workpieceWeight) : that.workpieceWeight != null)
@@ -158,7 +158,7 @@ public class DetailEntity {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
-                .append("index", number)
+                .append("index", code)
                 .append("unit", unit)
                 .append("finishedWeigth", finishedWeight)
                 .append("workpieceWeight", workpieceWeight)

@@ -86,15 +86,13 @@ public class DetailDaoImpl implements DetailDao {
 
     @Override
     @Transactional
-    public DetailEntity getDetailByIndex(String index) {
-        System.out.println(">>> session:" + session);
-        System.out.println(">>> index:" + index);
-        Query query = session.createQuery("from DetailEntity where number = :index");
+    public DetailEntity getDetailByIndex(String code) {
+        Query query = session.createQuery("from DetailEntity where code = :code");
 
-        query.setParameter("index", index);
+        query.setParameter("code", code);
 
         final DetailEntity entity = (DetailEntity) query.uniqueResult();
-        log.info("Detail found by index: " + index + " " + entity);
+        log.info("Detail found by code: " + code + " " + entity);
         return entity;
     }
 

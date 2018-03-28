@@ -7,7 +7,7 @@
         <id name="id" column="ID">
             <generator class="identity"/>
         </id>
-        <property name="number" column="NUMBER"/>
+        <property name="code" column="CODE"/>
         <many-to-one name="detailTitleByDetailTitleId" class="com.mmz.specs.model.DetailTitleEntity">
             <column name="TITLE_ID"/>
         </many-to-one>
