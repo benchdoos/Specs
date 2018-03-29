@@ -23,6 +23,7 @@ import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.ButtonTabComponent;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.UserInfoWindow;
+import com.mmz.specs.application.gui.panels.DetailListPanel;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -473,6 +474,7 @@ public class ClientMainWindow extends JFrame {
         adminButton.setBorderPainted(false);
         adminButton.setContentAreaFilled(true);
         adminButton.setForeground(new Color(-16765749));
+        adminButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/securityShield16.png")));
         adminButton.setMargin(new Insets(0, 0, 0, 0));
         adminButton.setOpaque(false);
         adminButton.setRequestFocusEnabled(true);

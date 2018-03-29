@@ -43,7 +43,7 @@ public class NoticeInfoWindow extends JFrame {
     private Session session;
     private List<NoticeEntity> noticeEntities;
 
-    NoticeInfoWindow(Session session, List<NoticeEntity> noticeEntities) {
+    public NoticeInfoWindow(Session session, List<NoticeEntity> noticeEntities) {
 
         this.session = session;
         this.noticeEntities = noticeEntities;
