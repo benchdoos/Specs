@@ -36,7 +36,7 @@ public class FrameUtils {
      * @param component Component where window is located.
      * @return Window that is searched.
      **/
-    private static Window findWindow(Component component) {
+    public static Window findWindow(Component component) {
         if (component == null) {
             return JOptionPane.getRootFrame();
         } else if (component instanceof Window) {
