@@ -91,6 +91,7 @@
                       <borderPainted value="false"/>
                       <contentAreaFilled value="true"/>
                       <foreground color="-16765749"/>
+                      <icon value="img/gui/user/securityShield16.png"/>
                       <margin top="0" left="0" bottom="0" right="0"/>
                       <opaque value="false"/>
                       <requestFocusEnabled value="true"/>

@@ -227,6 +227,7 @@
                   <component id="cee4d" class="javax.swing.JTree" binding="mainTree">
                     <constraints/>
                     <properties>
+                      <background color="-855310"/>
                       <focusable value="true"/>
                       <rootVisible value="false"/>
                     </properties>
