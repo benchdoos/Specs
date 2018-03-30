@@ -347,14 +347,16 @@ public class DetailListPanel extends JPanel {
             materialLabel.removeMouseListener(listener);
         }
 
-        materialLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                MaterialListWindow materialListWindow = new MaterialListWindow(materialList);
-                materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), materialListWindow));
-                materialListWindow.setVisible(true);
-            }
-        });
+        if (materialList != null) {
+            materialLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    MaterialListWindow materialListWindow = new MaterialListWindow(materialList);
+                    materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), materialListWindow));
+                    materialListWindow.setVisible(true);
+                }
+            });
+        }
     }
 
     private void initMainTree() {
