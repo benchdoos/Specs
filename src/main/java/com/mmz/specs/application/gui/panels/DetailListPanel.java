@@ -226,6 +226,11 @@ public class DetailListPanel extends JPanel {
         }
     }
 
+    public void enableAdminButtons(boolean enable) {
+        button1.setEnabled(enable);
+        editButton.setEnabled(enable);
+    }
+
     private List<NoticeEntity> getUniqueNoticeList(List<DetailListEntity> list) {
         List<NoticeEntity> result = new ArrayList<>();
         List<String> noticeList = new ArrayList<>(); //fixme this shit
