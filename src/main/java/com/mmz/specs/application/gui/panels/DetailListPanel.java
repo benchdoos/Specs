@@ -19,9 +19,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
-import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.MaterialListWindow;
-import com.mmz.specs.application.gui.common.DetailJTree;
+import com.mmz.specs.application.gui.client.NoticeInfoWindow;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
@@ -45,6 +44,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -71,13 +71,12 @@ public class DetailListPanel extends JPanel {
     private JButton noticeInfoButton;
     private JTree mainTree;
     private JButton refreshSessionButton;
-    private JButton addButton;
+    private JButton button1;
     private Session session;
     private JButton editButton;
     private JLabel materialLabel;
 
     public DetailListPanel() {
-        $$$setupUI$$$();
         session = ClientBackgroundService.getInstance().getSession();
 
         initGui();
@@ -91,36 +90,19 @@ public class DetailListPanel extends JPanel {
 
         initMainTree();
 
+        /*updateDetailInfoPanelWithEmptyEntity();*/
+
+        /*fillMainTreeFully();*/
     }
 
     private void initListeners() {
-        noticeInfoButton.addActionListener(e -> onNoticeInfo(true));
-
-        noticeInfoButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    onNoticeInfo(false);
-                }
-            }
-        });
+        noticeInfoButton.addActionListener(e -> onNoticeInfo());
 
         initSearchTextFieldDocumentListeners();
 
         refreshSessionButton.addActionListener(e -> onRefreshSession());
 
         initSearchTextFieldKeysBindings();
-
-
-        editButton.addActionListener(e -> onEditDetail(true));
-        editButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    onEditDetail(false);
-                }
-            }
-        });
     }
 
     private void initSearchTextFieldKeysBindings() {
@@ -209,7 +191,7 @@ public class DetailListPanel extends JPanel {
         }
     }
 
-    private void onNoticeInfo(boolean select) {
+    private void onNoticeInfo() {
         DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
         if (lastSelectedPathComponent != null) {
             if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
@@ -227,10 +209,9 @@ public class DetailListPanel extends JPanel {
                 if (list != null) {
                     if (list.size() > 0) {
                         List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
-                        NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
-                        ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
-                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
-                        clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);
+                        NoticeInfoWindow noticeInfoWindow = new NoticeInfoWindow(session, noticeEntities);
+                        noticeInfoWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), noticeInfoWindow));
+                        noticeInfoWindow.setVisible(true);
                     }
                 }
             } else {
@@ -248,8 +229,8 @@ public class DetailListPanel extends JPanel {
         }
     }
 
-    public void enableEditorButtons(boolean enable) {
-        addButton.setEnabled(enable);
+    public void enableAdminButtons(boolean enable) {
+        button1.setEnabled(enable);
         editButton.setEnabled(enable);
     }
 
@@ -372,6 +353,98 @@ public class DetailListPanel extends JPanel {
     }
 
     private void initMainTree() {
+        final Color backgroundSelectionColor = new Color(0, 120, 215);
+        final Color backgroundNonSelectionColor = new Color(242, 242, 242);
+
+        mainTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
+        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
+
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
+
+                if (selected) {
+                    setBackground(backgroundSelectionColor);
+                } else {
+                    setBackground(backgroundNonSelectionColor);
+                }
+
+                if (value instanceof DefaultMutableTreeNode) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+                    if (node.getUserObject() instanceof DetailEntity) {
+                        DetailEntity child = (DetailEntity) node.getUserObject();
+                        if (row >= 0) {
+                            if (tree.getPathForRow(row) != null) {
+                                Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
+                                if (pathForRow.length > 1) {
+                                    DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
+                                    DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
+
+                                    MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+
+                                    List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesByParentAndChild(parent, child);
+
+                                    setOpaque(true);
+
+                                    if (result.size() > 0) {
+                                        DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);
+                                        if (detailListEntity.isInterchangeableNode()) {
+                                            if (!selected) {
+                                                setBackground(Color.GRAY.brighter());
+                                            } else {
+                                                setBackground(backgroundSelectionColor);
+                                            }
+                                            setToolTipText("Взаимозаменяемая деталь");
+                                        }
+
+                                        if (!detailListEntity.isActive()) {
+                                            if (!selected) {
+                                                setBackground(Color.RED.darker());
+                                            } else {
+                                                setBackground(backgroundSelectionColor);
+                                            }
+                                        }
+
+                                        String value1 = child.getCode() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
+                                        return super.getTreeCellRendererComponent(tree, value1, selected, true, leaf, row, hasFocus);
+                                    }
+                                }
+                            }
+                        }
+                        return super.getTreeCellRendererComponent(tree,
+                                child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
+                        // issue when (detailListEntity.getQuantity()) does not work... fix it some how????
+                    }
+                }
+                return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension dim = super.getPreferredSize();
+                FontMetrics fm = getFontMetrics(getFont());
+                char[] chars = getText().toCharArray();
+
+                int w = getIconTextGap() + 32;
+                for (char ch : chars) {
+                    w += fm.charWidth(ch);
+                }
+                w += getText().length();
+                dim.width = w;
+                return dim;
+            }
+        };
+        Icon closedIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
+        Icon openIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
+        Icon leafIcon = new ImageIcon(getClass().getResource("/img/gui/tree/detail.png"));
+        renderer.setClosedIcon(closedIcon);
+        renderer.setOpenIcon(openIcon);
+        renderer.setLeafIcon(leafIcon);
+
+        renderer.setBackgroundSelectionColor(backgroundSelectionColor);
+        renderer.setBackgroundNonSelectionColor(backgroundNonSelectionColor);
+
+        mainTree.setCellRenderer(renderer);
+
         mainTree.addTreeSelectionListener(e -> {
             DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
 
@@ -389,25 +462,16 @@ public class DetailListPanel extends JPanel {
             }
         });
 
+        mainTree.setExpandsSelectedPaths(true);
+
         fillMainTreeFully();
     }
 
-    private void onEditDetail(boolean select) {
-        if (mainTree.getLastSelectedPathComponent() != null) {
-            DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-            DetailEntity entityFromTree = (DetailEntity) defaultMutableTreeNode.getUserObject();
-
-            Window window = FrameUtils.findWindow(this);
-            if (window instanceof ClientMainWindow) {
-                ClientMainWindow mainWindow = (ClientMainWindow) window;
-                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
-            }
-        }
-    }
-
-    private void createUIComponents() {
-        mainTree = new DetailJTree();
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
     }
 
     /**
@@ -418,7 +482,6 @@ public class DetailListPanel extends JPanel {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        createUIComponents();
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         detailListPanel = new JPanel();
@@ -509,6 +572,7 @@ public class DetailListPanel extends JPanel {
         final JScrollPane scrollPane1 = new JScrollPane();
         panel2.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(300, -1), new Dimension(300, -1), null, 0, false));
         scrollPane1.setBorder(BorderFactory.createTitledBorder("Узлы"));
+        mainTree = new JTree();
         mainTree.setBackground(new Color(-855310));
         mainTree.setFocusable(true);
         mainTree.setRootVisible(false);
@@ -525,11 +589,11 @@ public class DetailListPanel extends JPanel {
         toolBar1.add(refreshSessionButton);
         final JToolBar.Separator toolBar$Separator1 = new JToolBar.Separator();
         toolBar1.add(toolBar$Separator1);
-        addButton = new JButton();
-        addButton.setEnabled(false);
-        addButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
-        addButton.setText("");
-        toolBar1.add(addButton);
+        button1 = new JButton();
+        button1.setEnabled(false);
+        button1.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
+        button1.setText("");
+        toolBar1.add(button1);
         editButton = new JButton();
         editButton.setEnabled(false);
         editButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
