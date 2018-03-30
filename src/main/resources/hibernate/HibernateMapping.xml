@@ -59,6 +59,7 @@
             <generator class="identity"/>
         </id>
         <property name="active" column="IS_ACTIVE"/>
+        <property name="mainMaterial" column="IS_MAIN_MATERIAL"/>
         <many-to-one name="detailByDetailId" class="com.mmz.specs.model.DetailEntity">
             <column name="DETAIL_ID"/>
         </many-to-one>

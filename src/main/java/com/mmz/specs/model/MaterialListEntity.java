@@ -26,6 +26,7 @@ public class MaterialListEntity {
     private boolean isActive;
     private DetailEntity detailByDetailId;
     private MaterialEntity materialByMaterialId;
+    private boolean isMainMaterial;
 
     @Id
     @Column(name = "ID")
@@ -45,6 +46,16 @@ public class MaterialListEntity {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    @OneToMany
+    @JoinColumn(name = "IS_MAIN_MATERIAL", nullable = false)
+    public boolean isMainMaterial() {
+        return isMainMaterial;
+    }
+
+    public void setMainMaterial(boolean mainMaterial) {
+        isMainMaterial = mainMaterial;
     }
 
     @Override
