@@ -69,4 +69,19 @@ public class CommonWindowUtils {
         }
         return result;
     }
+
+    public static String createDelimiter(String longMark, String longProfile) {
+        if (longMark.length() > longProfile.length()) {
+            return getDelimiter(longMark.length());
+        } else return getDelimiter(longProfile.length());
+    }
+
+    private static String getDelimiter(int size) {
+        size = (int) (size * 1.4);
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            result.append("-");
+        }
+        return result.toString();
+    }
 }
