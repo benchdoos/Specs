@@ -13,7 +13,7 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.application.gui.client;
+package com.mmz.specs.application.gui.panels;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -23,11 +23,9 @@ import com.mmz.specs.model.DetailListEntity;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 
-public class EditNoticeWindow extends JDialog {
+public class EditNoticePanel extends JPanel {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -44,19 +42,6 @@ public class EditNoticeWindow extends JDialog {
         $$$setupUI$$$();
     }
 
-    public EditNoticeWindow(List<DetailListEntity> detailListByChild) {
-        this.detailListByChild = detailListByChild;
-
-        initGui();
-
-        initListeners();
-
-        initKeyBindings();
-
-        pack();
-        setMinimumSize(getSize());
-    }
-
     private void initKeyBindings() {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
@@ -66,29 +51,30 @@ public class EditNoticeWindow extends JDialog {
 
         buttonCancel.addActionListener(e -> onCancel());
 
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
     }
 
     private void onOK() {
         // add your code here
-        dispose();
     }
 
     private void onCancel() {
         // add your code here if necessary
-        dispose();
+    }
+
+    public EditNoticePanel(List<DetailListEntity> detailListByChild) {
+        this.detailListByChild = detailListByChild;
+
+        initGui();
+
     }
 
     private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+        setLayout(new GridLayout());
+        add(contentPane);
 
+        initListeners();
+
+        initKeyBindings();
     }
 
     /**
@@ -100,7 +86,7 @@ public class EditNoticeWindow extends JDialog {
      */
     private void $$$setupUI$$$() {
         contentPane = new JPanel();
-        contentPane.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
+        contentPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane = new JTabbedPane();
         contentPane.add(mainTabbedPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();

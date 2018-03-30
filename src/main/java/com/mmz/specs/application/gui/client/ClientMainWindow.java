@@ -418,10 +418,11 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onViewDetailList() {
-        clientMainTabbedPane.add("Просмотр вложенности", new DetailListPanel());
+       /* clientMainTabbedPane.add("Просмотр вложенности", new DetailListPanel());
         int index = clientMainTabbedPane.getTabCount() - 1;
         clientMainTabbedPane.setTabComponentAt(index, new ButtonTabComponent(clientMainTabbedPane));
-        clientMainTabbedPane.setSelectedIndex(index);
+        clientMainTabbedPane.setSelectedIndex(index);*/
+        addTab("Просмотр вложенности", new DetailListPanel());
 
         if (currentUser != null) {
             if (currentUser.isAdmin()) {
@@ -434,6 +435,13 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
+    public void addTab(String title, JPanel panel) {
+        clientMainTabbedPane.add(title, panel);
+        int index = clientMainTabbedPane.getTabCount() - 1;
+        clientMainTabbedPane.setTabComponentAt(index, new ButtonTabComponent(clientMainTabbedPane));
+        clientMainTabbedPane.setSelectedIndex(index);
+    }
+
     private void setButtonsEnabled(final boolean enabled) {
 
         adminButton.setEnabled(enabled);
@@ -442,6 +450,10 @@ public class ClientMainWindow extends JFrame {
         noticeListViewButton.setEnabled(enabled);
         editDataButton.setEnabled(enabled);
 
+    }
+
+    public JTabbedPane getTabbedPane() {
+        return clientMainTabbedPane;
     }
 
     {
