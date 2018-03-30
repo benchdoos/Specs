@@ -152,7 +152,7 @@ public class ServerMainWindow extends JFrame {
 
         initGui();
 
-        initKeyboardActions();
+        initKeyBindings();
 
         pack();
         setMinimumSize(getSize());
@@ -548,7 +548,7 @@ public class ServerMainWindow extends JFrame {
         });
     }
 
-    private void initKeyboardActions() {
+    private void initKeyBindings() {
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
