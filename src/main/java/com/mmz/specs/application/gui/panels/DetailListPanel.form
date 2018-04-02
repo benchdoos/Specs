@@ -240,7 +240,7 @@
                 <properties/>
                 <border type="none" title="Узлы"/>
                 <children>
-                  <component id="cee4d" class="javax.swing.JTree" binding="mainTree">
+                  <component id="cee4d" class="javax.swing.JTree" binding="mainTree" custom-create="true">
                     <constraints/>
                     <properties>
                       <background color="-855310"/>
