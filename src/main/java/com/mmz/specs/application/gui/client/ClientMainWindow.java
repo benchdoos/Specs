@@ -42,6 +42,7 @@ import org.imgscalr.Scalr;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -134,6 +135,9 @@ public class ClientMainWindow extends JFrame {
             }
         });
         noticeListViewButton.addActionListener(e -> onListNoticeInfo());
+        contentPane.registerKeyboardAction(e -> onLogin(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void unlock(boolean status) {
@@ -348,7 +352,8 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onRestoreFromDb() {
-        System.out.println("onRestoreFromDb is not supported yet");
+        ClientBackgroundService.getInstance().refreshSession();
+        //todo refresh all GUIs
     }
 
     private void onConnectionSettings() {
