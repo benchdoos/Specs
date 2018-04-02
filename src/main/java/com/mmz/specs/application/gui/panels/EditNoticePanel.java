@@ -49,6 +49,7 @@ public class EditNoticePanel extends JPanel {
     private JLabel noticeNumberLabel;
     private JLabel noticeDateLabel;
     private JLabel noticeUserLabel;
+    private JButton editNoticeButton;
     private List<DetailListEntity> detailListByChild;
     private Session session;
 
@@ -69,7 +70,9 @@ public class EditNoticePanel extends JPanel {
 
         createNoticeButton.addActionListener(e -> onCreateNewNotice());
 
+        editNoticeButton.addActionListener(e -> onEditNotice());
     }
+
 
     private void onOK() {
         // add your code here
@@ -77,6 +80,19 @@ public class EditNoticePanel extends JPanel {
 
     private void onCancel() {
         // add your code here if necessary
+    }
+
+    private void onEditNotice() {
+        Object selectedItem = noticeComboBox.getSelectedItem();
+        if (selectedItem != null) {
+            NoticeEntity entity = (NoticeEntity) selectedItem;
+            CreateNoticeWindow noticeWindow = new CreateNoticeWindow(entity);
+            noticeWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), noticeWindow));
+            noticeWindow.setVisible(true);
+            ClientBackgroundService.getInstance().refreshSession();
+            noticeComboBox.removeAllItems();
+            initNoticeComboBox();
+        }
     }
 
     private void onCreateNewNotice() {
@@ -179,10 +195,12 @@ public class EditNoticePanel extends JPanel {
         label1.setText("Извещение:");
         panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         createNoticeButton = new JButton();
-        createNoticeButton.setText("...");
+        createNoticeButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/noticeNew16.png")));
+        createNoticeButton.setText("");
+        createNoticeButton.setToolTipText("Создать новое извещение");
         panel2.add(createNoticeButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         noticeComboBox = new JComboBox();
-        panel2.add(noticeComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(noticeComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, new Dimension(-1, 150), 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Номер:");
         panel2.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -216,6 +234,11 @@ public class EditNoticePanel extends JPanel {
         panel2.add(spacer1, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         panel2.add(spacer2, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        editNoticeButton = new JButton();
+        editNoticeButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
+        editNoticeButton.setText("");
+        editNoticeButton.setToolTipText("Отредактировать извещение");
+        panel2.add(editNoticeButton, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Изменения", panel3);

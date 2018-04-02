@@ -55,7 +55,11 @@ public class CreateNoticeWindow extends JDialog {
     }
 
     private void initGui() {
-        setTitle("Новое извещение");
+        if (noticeEntity != null) {
+            setTitle("Редактирование извещения " + noticeEntity.getNumber());
+        } else {
+            setTitle("Новое извещение");
+        }
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeNew64.png")));
         setContentPane(contentPane);
         setModal(true);
@@ -113,14 +117,23 @@ public class CreateNoticeWindow extends JDialog {
                                 || user.getUserType().getId() == 4))) {
                     NoticeService service = new NoticeServiceImpl(new NoticeDaoImpl(session));
 
-                    NoticeEntity entity = new NoticeEntity();
+                    NoticeEntity entity;
+                    if (noticeEntity != null) {
+                        entity = noticeEntity;
+                    } else {
+                        entity = new NoticeEntity();
+                    }
                     entity.setNumber(numberTextField.getText());
                     entity.setDate(new Date(Calendar.getInstance().getTime().getTime()));
                     entity.setDescription(noticeDescriptionTextArea.getText());
                     entity.setUsersByProvidedByUserId(user);
 
                     session.beginTransaction();
-                    service.addNotice(entity);
+                    if (noticeEntity != null) {
+                        service.updateNotice(entity);
+                    } else {
+                        service.addNotice(entity);
+                    }
                     session.getTransaction().commit();
                     dispose();
                 } else {
@@ -138,7 +151,6 @@ public class CreateNoticeWindow extends JDialog {
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
 

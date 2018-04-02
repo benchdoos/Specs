@@ -46,12 +46,16 @@
                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text value="..."/>
+                      <icon value="img/gui/noticeNew16.png"/>
+                      <text value=""/>
+                      <toolTipText value="Создать новое извещение"/>
                     </properties>
                   </component>
                   <component id="c4efa" class="javax.swing.JComboBox" binding="noticeComboBox">
                     <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <maximum-size width="-1" height="150"/>
+                      </grid>
                     </constraints>
                     <properties/>
                   </component>
@@ -140,6 +144,16 @@
                       <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
+                  <component id="e98d3" class="javax.swing.JButton" binding="editNoticeButton">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <icon value="img/gui/edit/edit.png"/>
+                      <text value=""/>
+                      <toolTipText value="Отредактировать извещение"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
             </children>
