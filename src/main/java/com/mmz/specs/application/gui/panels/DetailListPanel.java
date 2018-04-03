@@ -94,7 +94,16 @@ public class DetailListPanel extends JPanel {
     }
 
     private void initListeners() {
-        noticeInfoButton.addActionListener(e -> onNoticeInfo());
+        noticeInfoButton.addActionListener(e -> onNoticeInfo(true));
+
+        noticeInfoButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    onNoticeInfo(false);
+                }
+            }
+        });
 
         initSearchTextFieldDocumentListeners();
 
@@ -103,7 +112,15 @@ public class DetailListPanel extends JPanel {
         initSearchTextFieldKeysBindings();
 
 
-        editButton.addActionListener(e -> onEditDetail());
+        editButton.addActionListener(e -> onEditDetail(true));
+        editButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    onEditDetail(false);
+                }
+            }
+        });
     }
 
     private void initSearchTextFieldKeysBindings() {
@@ -192,7 +209,7 @@ public class DetailListPanel extends JPanel {
         }
     }
 
-    private void onNoticeInfo() {
+    private void onNoticeInfo(boolean select) {
         DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
         if (lastSelectedPathComponent != null) {
             if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
@@ -213,7 +230,7 @@ public class DetailListPanel extends JPanel {
                         NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
                         ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
                         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
-                        clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel);
+                        clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);
                     }
                 }
             } else {
@@ -375,7 +392,7 @@ public class DetailListPanel extends JPanel {
         fillMainTreeFully();
     }
 
-    private void onEditDetail() {
+    private void onEditDetail(boolean select) {
         if (mainTree.getLastSelectedPathComponent() != null) {
             DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
             DetailEntity entityFromTree = (DetailEntity) defaultMutableTreeNode.getUserObject();
@@ -384,7 +401,7 @@ public class DetailListPanel extends JPanel {
             if (window instanceof ClientMainWindow) {
                 ClientMainWindow mainWindow = (ClientMainWindow) window;
                 ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree));
+                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
             }
             /*List<DetailListEntity> detailListByChild = service.getDetailListByChild(entityFromTree);
             if (detailListByChild.size() > 0) {
