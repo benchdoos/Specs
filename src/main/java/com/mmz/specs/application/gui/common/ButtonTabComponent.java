@@ -35,7 +35,8 @@ package com.mmz.specs.application.gui.common;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Component to be used as tabComponent;
@@ -43,29 +44,10 @@ import java.awt.event.*;
  * a JButton to close the tab it belongs to
  */
 public class ButtonTabComponent extends JPanel {
-    boolean isEnabled = true;
-
-    private final static MouseListener buttonMouseListener = new MouseAdapter() {
-        public void mouseEntered(MouseEvent e) {
-            Component component = e.getComponent();
-            if (component instanceof AbstractButton) {
-                AbstractButton button = (AbstractButton) component;
-                /*button.setBorderPainted(true);*/
-            }
-        }
-
-        public void mouseExited(MouseEvent e) {
-            Component component = e.getComponent();
-            if (component instanceof AbstractButton) {
-                AbstractButton button = (AbstractButton) component;
-                /*button.setBorderPainted(false);*/
-            }
-        }
-    };
-    private final JTabbedPane pane;
     private final static Image grayCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleGray12.png"));
     private final static Image redDarkCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleRedDarker12.png"));
     private final static Image redCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleRed12.png"));
+    private final JTabbedPane pane;
 
     public ButtonTabComponent(final JTabbedPane pane) {
         //unset default FlowLayout' gaps
@@ -78,10 +60,20 @@ public class ButtonTabComponent extends JPanel {
 
         //make JLabel read titles from JTabbedPane
         JLabel label = new JLabel() {
+            @Override
             public String getText() {
                 int i = pane.indexOfTabComponent(ButtonTabComponent.this);
                 if (i != -1) {
                     return pane.getTitleAt(i);
+                }
+                return null;
+            }
+
+            @Override
+            public Icon getIcon() {
+                int i = pane.indexOfTabComponent(ButtonTabComponent.this);
+                if (i != -1) {
+                    return pane.getIconAt(i);
                 }
                 return null;
             }
@@ -112,7 +104,6 @@ public class ButtonTabComponent extends JPanel {
             setBorderPainted(false);
             //Making nice rollover effect
             //we use the same listener for all buttons
-            addMouseListener(buttonMouseListener);
             setRolloverEnabled(true);
             //Close the proper tab by clicking the button
             addActionListener(this);
