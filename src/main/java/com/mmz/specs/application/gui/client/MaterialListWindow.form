@@ -47,7 +47,10 @@
             <preferred-size width="200" height="200"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <dividerLocation value="128"/>
+          <lastDividerLocation value="128"/>
+        </properties>
         <border type="none"/>
         <children>
           <scrollpane id="37612">

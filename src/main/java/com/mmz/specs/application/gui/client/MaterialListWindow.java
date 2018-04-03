@@ -38,7 +38,7 @@ public class MaterialListWindow extends JDialog {
     public MaterialListWindow(List<MaterialListEntity> rootList) {
         this.rootList = rootList;
 
-        setTitle("Возможные материалы:");
+        setTitle("Возможные материалы");
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/list64.png")));
 
         initGui();
@@ -75,7 +75,7 @@ public class MaterialListWindow extends JDialog {
 
         materialList.addListSelectionListener(e -> {
             MaterialListEntity entity = materialList.getSelectedValue();
-            shortMaterialLabel.setText(entity.getMaterialByMaterialId().getShortMark() + entity.getMaterialByMaterialId().getShortProfile());
+            shortMaterialLabel.setText(entity.getMaterialByMaterialId().getShortMark() + " " + entity.getMaterialByMaterialId().getShortProfile());
 
             String longMark = entity.getMaterialByMaterialId().getLongMark();
             String longProfile = entity.getMaterialByMaterialId().getLongProfile();
@@ -131,6 +131,8 @@ public class MaterialListWindow extends JDialog {
         buttonOK.setText("OK");
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSplitPane splitPane1 = new JSplitPane();
+        splitPane1.setDividerLocation(128);
+        splitPane1.setLastDividerLocation(128);
         contentPane.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         splitPane1.setLeftComponent(scrollPane1);
