@@ -25,6 +25,7 @@ import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.UserInfoWindow;
 import com.mmz.specs.application.gui.panels.DetailListPanel;
 import com.mmz.specs.application.gui.panels.EditNoticePanel;
+import com.mmz.specs.application.gui.panels.NoticeInfoPanel;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -89,11 +90,17 @@ public class ClientMainWindow extends JFrame {
     private void initGui() {
         setMinimumSize(new Dimension(860, 480));
 
+        initHomeTab();
         initConnectionLabels();
 
         initMainMenuBar();
         initListeners();
         unlock(false);
+    }
+
+    private void initHomeTab() {
+        clientMainTabbedPane.setIconAt(0,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/home16.png"))));
     }
 
     private void initTimer() {
@@ -325,12 +332,11 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onListNoticeInfo() {
-
         List<NoticeEntity> noticeEntities = new NoticeServiceImpl(new NoticeDaoImpl(session)).listNotices();
         Collections.sort(noticeEntities);
-        NoticeInfoWindow noticeInfoWindow = new NoticeInfoWindow(session, noticeEntities);
-        noticeInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, noticeInfoWindow));
-        noticeInfoWindow.setVisible(true);
+        NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
+        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
+        addTab("Информация о извещениях", icon, noticeInfoPanel);
     }
 
     private void initFtp() {
@@ -428,7 +434,8 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onViewDetailList() {
-        addTab("Просмотр вложенности", new DetailListPanel());
+        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
+        addTab("Просмотр вложенности", icon, new DetailListPanel());
 
         if (currentUser != null) {
             if (currentUser.isAdmin()) {
@@ -441,8 +448,8 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    public void addTab(String title, JPanel panel) {
-        clientMainTabbedPane.add(title, panel);
+    public void addTab(String title, Icon icon, JPanel panel) {
+        clientMainTabbedPane.addTab(title, icon, panel);
         int index = clientMainTabbedPane.getTabCount() - 1;
         clientMainTabbedPane.setTabComponentAt(index, new ButtonTabComponent(clientMainTabbedPane));
         clientMainTabbedPane.setSelectedIndex(index);

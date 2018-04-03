@@ -21,7 +21,6 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.MaterialListWindow;
-import com.mmz.specs.application.gui.client.NoticeInfoWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -211,9 +210,10 @@ public class DetailListPanel extends JPanel {
                 if (list != null) {
                     if (list.size() > 0) {
                         List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
-                        NoticeInfoWindow noticeInfoWindow = new NoticeInfoWindow(session, noticeEntities);
-                        noticeInfoWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), noticeInfoWindow));
-                        noticeInfoWindow.setVisible(true);
+                        NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
+                        ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
+                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
+                        clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel);
                     }
                 }
             } else {
@@ -383,7 +383,8 @@ public class DetailListPanel extends JPanel {
             Window window = FrameUtils.findWindow(this);
             if (window instanceof ClientMainWindow) {
                 ClientMainWindow mainWindow = (ClientMainWindow) window;
-                mainWindow.addTab("Редактирование извещения", new EditNoticePanel(entityFromTree));
+                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree));
             }
             /*List<DetailListEntity> detailListByChild = service.getDetailListByChild(entityFromTree);
             if (detailListByChild.size() > 0) {
