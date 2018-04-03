@@ -135,7 +135,10 @@ public class EditNoticePanel extends JPanel {
         if (session != null) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             if (!detailEntity.isUnit()) {
-                mainTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(detailEntity.getCode(), false)));
+                DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                DefaultMutableTreeNode detail = new DefaultMutableTreeNode(detailEntity, false);
+                root.add(detail);
+                mainTree.setModel(new DefaultTreeModel(root));
             } else {
                 mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByDetailList(service.getDetailListByParent(detailEntity.getCode()))));
             }

@@ -396,30 +396,13 @@ public class DetailListPanel extends JPanel {
         if (mainTree.getLastSelectedPathComponent() != null) {
             DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
             DetailEntity entityFromTree = (DetailEntity) defaultMutableTreeNode.getUserObject();
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+
             Window window = FrameUtils.findWindow(this);
             if (window instanceof ClientMainWindow) {
                 ClientMainWindow mainWindow = (ClientMainWindow) window;
                 ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                 mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
             }
-            /*List<DetailListEntity> detailListByChild = service.getDetailListByChild(entityFromTree);
-            if (detailListByChild.size() > 0) {
-                Window window = FrameUtils.findWindow(this);
-                if (window instanceof ClientMainWindow) {
-                    ClientMainWindow mainWindow = (ClientMainWindow) window;
-                    mainWindow.addTab("Редактирование извещения", new EditNoticePanel(entityFromTree));
-                }
-            } else {
-                List<DetailListEntity> detailListByParent = service.getDetailListByParent(entityFromTree);
-                if (detailListByParent.size() > 0) {
-                    Window window = FrameUtils.findWindow(this);
-                    if (window instanceof ClientMainWindow) {
-                        ClientMainWindow mainWindow = (ClientMainWindow) window;
-                        mainWindow.addTab("Редактирование извещения", new EditNoticePanel(entityFromTree));
-                    }
-                }
-            }*/
         }
     }
 

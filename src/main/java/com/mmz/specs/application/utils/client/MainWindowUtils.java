@@ -74,7 +74,7 @@ public class MainWindowUtils {
         ArrayList<String> uniqueRootDetails = new ArrayList<>();
 
         for (DetailListEntity detailListEntity : askedListRoot) {
-            List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
+            List<DetailEntity> rootParentsList = service.listChildren(detailListEntity.getDetailByParentDetailId());
             if (rootParentsList.size() > 0) {
                 addUniqueResult(result, service, uniqueRootDetails, detailListEntity);
             }
