@@ -273,6 +273,9 @@ public class ClientMainWindow extends JFrame {
                     if (user.isEditor() || user.isAdmin()) {
                         currentUser = user;
                         unlock(true);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Вы должны быть администратором или редактором.",
+                                "Доступ запрещен", JOptionPane.WARNING_MESSAGE);
                     }
 
                     if (user.isAdmin()) {
