@@ -380,13 +380,17 @@ public class DetailListPanel extends JPanel {
             DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
             DetailEntity entityFromTree = (DetailEntity) defaultMutableTreeNode.getUserObject();
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-
-            List<DetailListEntity> detailListByChild = service.getDetailListByChild(entityFromTree);
+            Window window = FrameUtils.findWindow(this);
+            if (window instanceof ClientMainWindow) {
+                ClientMainWindow mainWindow = (ClientMainWindow) window;
+                mainWindow.addTab("Редактирование извещения", new EditNoticePanel(entityFromTree));
+            }
+            /*List<DetailListEntity> detailListByChild = service.getDetailListByChild(entityFromTree);
             if (detailListByChild.size() > 0) {
                 Window window = FrameUtils.findWindow(this);
                 if (window instanceof ClientMainWindow) {
                     ClientMainWindow mainWindow = (ClientMainWindow) window;
-                    mainWindow.addTab("Редактирование извещения", new EditNoticePanel(detailListByChild));
+                    mainWindow.addTab("Редактирование извещения", new EditNoticePanel(entityFromTree));
                 }
             } else {
                 List<DetailListEntity> detailListByParent = service.getDetailListByParent(entityFromTree);
@@ -394,10 +398,10 @@ public class DetailListPanel extends JPanel {
                     Window window = FrameUtils.findWindow(this);
                     if (window instanceof ClientMainWindow) {
                         ClientMainWindow mainWindow = (ClientMainWindow) window;
-                        mainWindow.addTab("Редактирование извещения", new EditNoticePanel(detailListByParent));
+                        mainWindow.addTab("Редактирование извещения", new EditNoticePanel(entityFromTree));
                     }
                 }
-            }
+            }*/
         }
     }
 

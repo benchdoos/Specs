@@ -151,7 +151,7 @@
                     <properties>
                       <icon value="img/gui/edit/edit.png"/>
                       <text value=""/>
-                      <toolTipText value="Отредактировать извещение"/>
+                      <toolTipText value="Редактировать извещение"/>
                     </properties>
                   </component>
                 </children>
@@ -173,9 +173,12 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="8bfad" class="javax.swing.JTree" binding="mainTree">
+                  <component id="8bfad" class="javax.swing.JTree" binding="mainTree" custom-create="true">
                     <constraints/>
-                    <properties/>
+                    <properties>
+                      <background color="-855310"/>
+                      <rootVisible value="false"/>
+                    </properties>
                   </component>
                 </children>
               </scrollpane>
