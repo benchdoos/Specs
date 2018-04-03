@@ -93,7 +93,7 @@ public class ButtonTabComponent extends JPanel {
         TabButton() {
             int size = 10;
             setPreferredSize(new Dimension(size, size));
-            setToolTipText("Закрыть вкладку");
+            setToolTipText("Закрыть вкладку (CTRL+W)");
             //Make the button looks the same for all Laf's
             setUI(new BasicButtonUI());
             //Make it transparent
