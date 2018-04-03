@@ -163,7 +163,6 @@ public class DetailListDaoImpl implements DetailListDao {
         List<DetailListEntity> result = new ArrayList<>();
 
         for (DetailEntity entity : details) {
-            /*if (entity.isActive()) {*/
             Query query1 = session.createQuery("from DetailListEntity where detailByChildDetailId = " + entity.getId());
             List list1 = query1.list();
             for (Object o : list1) {
@@ -172,7 +171,6 @@ public class DetailListDaoImpl implements DetailListDao {
                     result.add(detailListEntity);
                 }
             }
-            /*}*/
         }
         return result;
     }
