@@ -21,7 +21,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "DETAIL_TITLES")
-public class DetailTitleEntity {
+public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
     private int id;
     private String title;
     private Boolean active;
@@ -85,5 +85,13 @@ public class DetailTitleEntity {
                 .append("title", title)
                 .append("active", active)
                 .toString();
+    }
+
+    @Override
+    public int compareTo(DetailTitleEntity that) {
+        int result = 0;
+        result -= that.getTitle().compareTo(this.getTitle());
+        result += that.isActive() == this.isActive() ? 1 : -1;
+        return result;
     }
 }

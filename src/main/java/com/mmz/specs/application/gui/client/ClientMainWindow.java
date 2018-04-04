@@ -273,6 +273,7 @@ public class ClientMainWindow extends JFrame {
                     if (user.isEditor() || user.isAdmin()) {
                         currentUser = user;
                         unlock(true);
+                        unlockLockableTools(true);
                     } else {
                         JOptionPane.showMessageDialog(this, "Вы должны быть администратором или редактором.",
                                 "Доступ запрещен", JOptionPane.WARNING_MESSAGE);
@@ -290,12 +291,23 @@ public class ClientMainWindow extends JFrame {
             } else {
                 unlock(false);
                 unlockAdminTools(false);
+                unlockLockableTools(false);
             }
         } else {
             unlock(false);
             unlockAdminTools(false);
+            unlockLockableTools(false);
             currentUser = null;
         }
+    }
+
+    private void unlockLockableTools(boolean unlock) {
+        unlockEditNoticePanels(unlock);
+        unlockDetailLists(unlock);
+    }
+
+    private void unlockAdminTools(boolean unlock) {
+        adminButton.setEnabled(unlock);
     }
 
     private void setTabsEnabled(boolean enabled) {
@@ -315,14 +327,6 @@ public class ClientMainWindow extends JFrame {
                 clientMainTabbedPane.setSelectedIndex(0);
             }
         }
-    }
-
-    private void unlockAdminTools(boolean unlock) {
-        adminButton.setEnabled(unlock);
-
-        unlockDetailLists(unlock);
-
-        unlockEditNoticePanels(unlock);
     }
 
     private void onUsernameInfo() {
@@ -432,7 +436,7 @@ public class ClientMainWindow extends JFrame {
         for (Component component : clientMainTabbedPane.getComponents()) {
             if (component instanceof DetailListPanel) {
                 DetailListPanel panel = (DetailListPanel) component;
-                panel.enableAdminButtons(unlock);
+                panel.enableEditorButtons(unlock);
             }
         }
     }
@@ -510,6 +514,10 @@ public class ClientMainWindow extends JFrame {
         if (selectedIndex > 0) {
             clientMainTabbedPane.remove(selectedIndex);
         }
+    }
+
+    public UsersEntity getCurrentUser() {
+        return currentUser;
     }
 
     {
