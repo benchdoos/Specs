@@ -24,7 +24,7 @@ import javax.persistence.*;
 public class DetailTitleEntity {
     private int id;
     private String title;
-    private Boolean isActive;
+    private Boolean active;
 
     @Id
     @Column(name = "ID")
@@ -48,12 +48,20 @@ public class DetailTitleEntity {
 
     @Basic
     @Column(name = "IS_ACTIVE")
-    public Boolean getActive() {
-        return isActive;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (active != null ? active.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -65,17 +73,9 @@ public class DetailTitleEntity {
 
         if (id != that.id) return false;
         if (title != null ? !title.equals(that.title) : that.title != null) return false;
-        if (isActive != null ? !isActive.equals(that.isActive) : that.isActive != null) return false;
+        if (active != null ? !active.equals(that.active) : that.active != null) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
-        return result;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class DetailTitleEntity {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("title", title)
-                .append("isActive", isActive)
+                .append("active", active)
                 .toString();
     }
 }

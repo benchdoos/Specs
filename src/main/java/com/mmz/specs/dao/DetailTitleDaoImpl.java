@@ -97,7 +97,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     @Override
     @Transactional
     public List<DetailTitleEntity> listDetailTitles() {
-        List list = session.createQuery("from UsersEntity").list();
+        List list = session.createQuery("from DetailTitleEntity").list();
         List<DetailTitleEntity> result = new ArrayList<>(list.size());
 
         for (Object detailTitleEntity : list) {
@@ -105,7 +105,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
                 result.add((DetailTitleEntity) detailTitleEntity);
                 log.info("DetailTitle list: " + detailTitleEntity);
             } else {
-                log.warn("DetailTitle from list: " + detailTitleEntity);
+                log.warn("Not DetailTitle from list: " + detailTitleEntity);
             }
         }
         return result;
