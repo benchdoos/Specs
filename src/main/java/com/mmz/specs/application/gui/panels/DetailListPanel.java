@@ -71,7 +71,7 @@ public class DetailListPanel extends JPanel {
     private JButton noticeInfoButton;
     private JTree mainTree;
     private JButton refreshSessionButton;
-    private JButton button1;
+    private JButton addButton;
     private Session session;
     private JButton editButton;
     private JLabel materialLabel;
@@ -248,8 +248,8 @@ public class DetailListPanel extends JPanel {
         }
     }
 
-    public void enableAdminButtons(boolean enable) {
-        button1.setEnabled(enable);
+    public void enableEditorButtons(boolean enable) {
+        addButton.setEnabled(enable);
         editButton.setEnabled(enable);
     }
 
@@ -525,11 +525,11 @@ public class DetailListPanel extends JPanel {
         toolBar1.add(refreshSessionButton);
         final JToolBar.Separator toolBar$Separator1 = new JToolBar.Separator();
         toolBar1.add(toolBar$Separator1);
-        button1 = new JButton();
-        button1.setEnabled(false);
-        button1.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
-        button1.setText("");
-        toolBar1.add(button1);
+        addButton = new JButton();
+        addButton.setEnabled(false);
+        addButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
+        addButton.setText("");
+        toolBar1.add(addButton);
         editButton = new JButton();
         editButton.setEnabled(false);
         editButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));

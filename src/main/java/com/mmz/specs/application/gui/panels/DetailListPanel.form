@@ -277,7 +277,7 @@
                       <orientation value="1"/>
                     </properties>
                   </component>
-                  <component id="8cec3" class="javax.swing.JButton" binding="button1" default-binding="true">
+                  <component id="8cec3" class="javax.swing.JButton" binding="addButton" default-binding="true">
                     <constraints/>
                     <properties>
                       <enabled value="false"/>
