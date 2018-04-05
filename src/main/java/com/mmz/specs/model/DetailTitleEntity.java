@@ -26,6 +26,15 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
     private String title;
     private boolean active;
 
+    public DetailTitleEntity(int id, String title, boolean active) {
+        this.id = id;
+        this.title = title;
+        this.active = active;
+    }
+
+    public DetailTitleEntity() {
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {

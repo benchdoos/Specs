@@ -29,6 +29,18 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
     private String description;
     private UsersEntity usersByProvidedByUserId;
 
+    public NoticeEntity(int id, String number, Date date, String description, UsersEntity usersByProvidedByUserId) {
+        this.id = id;
+        this.number = number;
+        this.date = date;
+        this.description = description;
+        this.usersByProvidedByUserId = usersByProvidedByUserId;
+    }
+
+    public NoticeEntity() {
+
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {
