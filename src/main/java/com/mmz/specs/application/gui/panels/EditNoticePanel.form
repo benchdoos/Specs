@@ -404,7 +404,7 @@
                   <text value="нет данных"/>
                 </properties>
               </component>
-              <component id="e7b38" class="javax.swing.JComboBox" binding="titleComboBox">
+              <component id="e7b38" class="javax.swing.JComboBox" binding="detailTitleComboBox">
                 <constraints>
                   <grid row="1" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>

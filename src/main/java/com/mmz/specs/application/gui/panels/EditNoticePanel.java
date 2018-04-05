@@ -62,7 +62,7 @@ public class EditNoticePanel extends JPanel {
     private JButton moveItemUpButton;
     private JButton moveItemDownButton;
     private JComboBox numberComboBox;
-    private JComboBox<DetailTitleEntity> titleComboBox;
+    private JComboBox<DetailTitleEntity> detailTitleComboBox;
     private JCheckBox unitCheckBox;
     private JTextField finishedWeightTextField;
     private JTextField workpieceWeightTextField;
@@ -125,6 +125,7 @@ public class EditNoticePanel extends JPanel {
         }
 
         techProcessComboBox.setModel(model);
+        techProcessComboBox.setSelectedIndex(-1);
     }
 
 
@@ -200,10 +201,10 @@ public class EditNoticePanel extends JPanel {
 
             ClientBackgroundService.getInstance().refreshSession();
 
-            titleComboBox.removeAllItems();
+            detailTitleComboBox.removeAllItems();
             fillDetailTitleComboBox();
 
-            titleComboBox.setSelectedItem(titleEntity);
+            detailTitleComboBox.setSelectedItem(titleEntity);
 
         } catch (Throwable throwable) {
             JOptionPane.showMessageDialog(this,
@@ -213,7 +214,7 @@ public class EditNoticePanel extends JPanel {
     }
 
     private void initDetailTitleComboBox() {
-        titleComboBox.setRenderer(new DefaultListCellRenderer() {
+        detailTitleComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof DetailTitleEntity) {
@@ -225,11 +226,11 @@ public class EditNoticePanel extends JPanel {
             }
         });
 
-        titleComboBox.addActionListener(e -> System.out.println(">> " + titleComboBox.getSelectedItem()));
+        detailTitleComboBox.addActionListener(e -> System.out.println(">> " + detailTitleComboBox.getSelectedItem()));
     }
 
     private void fillDetailTitleComboBox() {
-        DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) titleComboBox.getModel();
+        DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) detailTitleComboBox.getModel();
         DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
         List<DetailTitleEntity> detailTitleEntities = service.listDetailTitles();
         Collections.sort(detailTitleEntities);
@@ -244,6 +245,7 @@ public class EditNoticePanel extends JPanel {
                 }
             }
         }
+        detailTitleComboBox.setSelectedIndex(-1);
     }
 
     private void initTechProcessComboBox() {
@@ -572,10 +574,10 @@ public class EditNoticePanel extends JPanel {
         materialLabel = new JLabel();
         materialLabel.setText("нет данных");
         changePanel.add(materialLabel, new GridConstraints(6, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        titleComboBox = new JComboBox();
-        titleComboBox.setMaximumRowCount(30);
-        titleComboBox.setToolTipText("Тип пользователя");
-        changePanel.add(titleComboBox, new GridConstraints(1, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailTitleComboBox = new JComboBox();
+        detailTitleComboBox.setMaximumRowCount(30);
+        detailTitleComboBox.setToolTipText("Тип пользователя");
+        changePanel.add(detailTitleComboBox, new GridConstraints(1, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         savePanel = new JPanel();
         savePanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Сохранение", savePanel);
