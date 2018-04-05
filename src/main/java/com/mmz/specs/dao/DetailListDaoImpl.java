@@ -176,6 +176,26 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
+    public List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child) {
+        Query query = session.createQuery("from DetailListEntity where detailByParentDetailId = :parent and detailByChildDetailId = :child");
+        query.setParameter("parent", parent);
+        query.setParameter("child", child);
+        
+        List list = query.list();
+        ArrayList<DetailListEntity> arrayList = new ArrayList<>(list.size());
+        arrayList.addAll(list);
+
+        ArrayList<DetailListEntity> result = new ArrayList<>();
+        for (DetailListEntity e : arrayList) {
+            if (e.isActive()) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public List<DetailEntity> listParents(DetailEntity child) {
         Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
         query.setParameter("child", child);

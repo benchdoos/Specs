@@ -329,6 +329,38 @@ public class EditNoticePanel extends JPanel {
         if (detailEntity != null) {
             fillMainTree();
         }
+        mainTree.addTreeSelectionListener(e -> {
+            Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
+            if (lastSelectedPathComponent instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) lastSelectedPathComponent;
+                DetailEntity selected = (DetailEntity) node.getUserObject();
+
+                DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+                Object parent = ((DefaultMutableTreeNode) node.getParent()).getUserObject();
+                List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild((DetailEntity) parent, selected);
+
+                DetailListEntity lastUsed = null;
+
+                for (DetailListEntity entity : detailListByParentAndChild) {
+                    if (entity.isActive()) {
+                        lastUsed = entity;
+                    }
+                }
+
+                fillDetailInfoPanel(lastUsed, selected);
+            }
+        });
+    }
+
+    private void fillDetailInfoPanel(DetailListEntity mentioned, DetailEntity detailEntity) {
+        if (mentioned != null) {
+            detailCount.setText(mentioned.getQuantity() + "");
+        } else {
+            detailCount.setText("");
+        }
+        if (detailEntity != null) {
+            detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
+        }
     }
 
     private void fillMainTree() {

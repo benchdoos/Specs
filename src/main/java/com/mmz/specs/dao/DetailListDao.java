@@ -48,6 +48,8 @@ public interface DetailListDao {
 
     public List<DetailListEntity> getDetailListBySearch(String searchText);
 
+    public List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child);
+
 
     public List<DetailEntity> listParents(DetailEntity detailEntity);
 
