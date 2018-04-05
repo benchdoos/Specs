@@ -113,7 +113,7 @@ public class TechProcessDaoImpl implements TechProcessDao {
     @Override
     @Transactional
     public List<TechProcessEntity> listTechProcesses() {
-        List list = session.createQuery("from UsersEntity").list();
+        List list = session.createQuery("from TechProcessEntity").list();
         List<TechProcessEntity> result = new ArrayList<>(list.size());
 
         result = getTechProcessEntityList(list, result);
