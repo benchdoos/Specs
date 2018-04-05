@@ -24,7 +24,7 @@ import javax.persistence.*;
 public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
     private int id;
     private String title;
-    private Boolean active;
+    private boolean active;
 
     @Id
     @Column(name = "ID")
@@ -60,7 +60,7 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
     public int hashCode() {
         int result = id;
         result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (active != null ? active.hashCode() : 0);
+        result = 31 * result + (active ? 1 : 0);
         return result;
     }
 
@@ -73,7 +73,7 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
 
         if (id != that.id) return false;
         if (title != null ? !title.equals(that.title) : that.title != null) return false;
-        if (active != null ? !active.equals(that.active) : that.active != null) return false;
+        if (active ? active != (that.active) : that.active) return false;
 
         return true;
     }
