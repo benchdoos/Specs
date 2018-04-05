@@ -288,7 +288,7 @@ public class EditNoticePanel extends JPanel {
         noticeWindow.setVisible(true);
         ClientBackgroundService.getInstance().refreshSession();
         noticeComboBox.removeAllItems();
-        initNoticeComboBox();
+        fillNoticeComboBox();
     }
 
     private void initMainTree() {
