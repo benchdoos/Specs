@@ -28,10 +28,8 @@ import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.DetailTitleDaoImpl;
 import com.mmz.specs.dao.NoticeDaoImpl;
-import com.mmz.specs.model.DetailEntity;
-import com.mmz.specs.model.DetailTitleEntity;
-import com.mmz.specs.model.NoticeEntity;
-import com.mmz.specs.model.UsersEntity;
+import com.mmz.specs.dao.TechProcessDaoImpl;
+import com.mmz.specs.model.*;
 import com.mmz.specs.service.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -70,7 +68,7 @@ public class EditNoticePanel extends JPanel {
     private JTextField workpieceWeightTextField;
     private JButton createMaterialButton;
     private JButton createTitleButton;
-    private JComboBox techProcessComboBox;
+    private JComboBox<TechProcessEntity> techProcessComboBox;
     private JButton createTechProcessButton;
     private JCheckBox isActive;
     private JPanel changePanel;
@@ -108,7 +106,27 @@ public class EditNoticePanel extends JPanel {
 
         fillDetailTitleComboBox();
 
+        initTechProcessComboBox();
+
+        fillTechProcessComboBox();
     }
+
+    private void fillTechProcessComboBox() {
+        TechProcessService service = new TechProcessServiceImpl(new TechProcessDaoImpl(session));
+        DefaultComboBoxModel<TechProcessEntity> model = new DefaultComboBoxModel<>();
+
+        List<TechProcessEntity> techProcessEntities = service.listTechProcesses();
+
+        techProcessComboBox.removeAllItems();
+
+        for (TechProcessEntity entity : techProcessEntities) {
+            TechProcessEntity current = new TechProcessEntity(entity.getId(), entity.getProcess());
+            model.addElement(current);
+        }
+
+        techProcessComboBox.setModel(model);
+    }
+
 
     private void initListeners() {
         buttonOK.addActionListener(e -> onOK());
@@ -228,6 +246,22 @@ public class EditNoticePanel extends JPanel {
         }
     }
 
+    private void initTechProcessComboBox() {
+        techProcessComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof TechProcessEntity) {
+                    TechProcessEntity techProcessEntity = (TechProcessEntity) value;
+                    return super.getListCellRendererComponent(list, techProcessEntity.getProcess(), index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+
+        techProcessComboBox.addActionListener(e -> System.out.println(">>>" + techProcessComboBox.getSelectedItem()));
+    }
+
     private void initKeyBindings() {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -245,12 +279,10 @@ public class EditNoticePanel extends JPanel {
 
     private void onRemoveItem() {
         System.out.println("not supported yet");
-
     }
 
     private void onMoveItemUp() {
         System.out.println("not supported yet");
-
     }
 
     private void onMoveItemDown() {

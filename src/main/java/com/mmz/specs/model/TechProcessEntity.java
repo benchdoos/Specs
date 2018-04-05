@@ -25,6 +25,15 @@ public class TechProcessEntity {
     private int id;
     private String process;
 
+    public TechProcessEntity(int id, String process) {
+        this.id = id;
+        this.process = process;
+    }
+
+    public TechProcessEntity() {
+
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {
