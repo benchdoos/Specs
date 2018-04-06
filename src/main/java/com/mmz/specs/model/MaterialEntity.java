@@ -27,7 +27,7 @@ public class MaterialEntity {
     private String shortProfile;
     private String longMark;
     private String longProfile;
-    private Boolean isActive;
+    private boolean active;
 
     @Id
     @Column(name = "ID")
@@ -81,12 +81,23 @@ public class MaterialEntity {
 
     @Basic
     @Column(name = "IS_ACTIVE")
-    public Boolean getActive() {
-        return isActive;
+    public boolean getActive() {
+        return active;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (shortMark != null ? shortMark.hashCode() : 0);
+        result = 31 * result + (shortProfile != null ? shortProfile.hashCode() : 0);
+        result = 31 * result + (longMark != null ? longMark.hashCode() : 0);
+        result = 31 * result + (longProfile != null ? longProfile.hashCode() : 0);
+        result = 31 * result + (active ? 1 : 0);
+        return result;
     }
 
     @Override
@@ -101,20 +112,9 @@ public class MaterialEntity {
         if (shortProfile != null ? !shortProfile.equals(that.shortProfile) : that.shortProfile != null) return false;
         if (longMark != null ? !longMark.equals(that.longMark) : that.longMark != null) return false;
         if (longProfile != null ? !longProfile.equals(that.longProfile) : that.longProfile != null) return false;
-        if (isActive != null ? !isActive.equals(that.isActive) : that.isActive != null) return false;
+        if (active == that.active) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (shortMark != null ? shortMark.hashCode() : 0);
-        result = 31 * result + (shortProfile != null ? shortProfile.hashCode() : 0);
-        result = 31 * result + (longMark != null ? longMark.hashCode() : 0);
-        result = 31 * result + (longProfile != null ? longProfile.hashCode() : 0);
-        result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
-        return result;
     }
 
     @Override
@@ -125,7 +125,7 @@ public class MaterialEntity {
                 .append("shortProfile", shortProfile)
                 .append("longMark", longMark)
                 .append("longProfile", longProfile)
-                .append("isActive", isActive)
+                .append("active", active)
                 .toString();
     }
 }

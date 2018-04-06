@@ -25,10 +25,7 @@ import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
-import com.mmz.specs.dao.DetailListDaoImpl;
-import com.mmz.specs.dao.DetailTitleDaoImpl;
-import com.mmz.specs.dao.NoticeDaoImpl;
-import com.mmz.specs.dao.TechProcessDaoImpl;
+import com.mmz.specs.dao.*;
 import com.mmz.specs.model.*;
 import com.mmz.specs.service.*;
 import org.hibernate.Session;
@@ -370,9 +367,7 @@ public class EditNoticePanel extends JPanel {
 
                     detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
 
-
                     unitCheckBox.setSelected(detailEntity.isUnit());
-
 
                     if (detailEntity.isUnit()) {
                         finishedWeightTextField.setText("");
@@ -382,9 +377,11 @@ public class EditNoticePanel extends JPanel {
                         workpieceWeightTextField.setText(detailEntity.getWorkpieceWeight() + "");
                     }
 
+                    List<MaterialListEntity> usedMaterials = getUsedMaterials(detailEntity);
+                    materialLabel.setText(CommonUtils.substring(25, getUsedMaterialsString(usedMaterials)));
+                    materialLabel.setToolTipText(getUsedMaterialsString(usedMaterials));
 
                     techProcessComboBox.setSelectedItem(detailEntity.getTechProcessByTechProcessId());
-
 
                     isActiveCheckBox.setSelected(!detailEntity.isActive());
 
@@ -393,6 +390,30 @@ public class EditNoticePanel extends JPanel {
             }
         }
 
+    }
+
+    private String getUsedMaterialsString(List<MaterialListEntity> usedMaterials) {
+        if (usedMaterials != null) {
+            if (usedMaterials.size() > 0) {
+                StringBuilder result = new StringBuilder();
+                for (MaterialListEntity entity : usedMaterials) {
+                    if (entity.isActive()) {
+                        MaterialEntity materialByMaterialId = entity.getMaterialByMaterialId();
+                        if (materialByMaterialId.getActive()) {
+                            result.append(materialByMaterialId.getShortMark()).append(" ").append(materialByMaterialId.getShortProfile()).append(", ");
+                        }
+                    }
+                }
+                result.delete(result.toString().length() - 2, result.toString().length());
+                return result.toString();
+            }
+        }
+        return "";
+    }
+
+    private List<MaterialListEntity> getUsedMaterials(DetailEntity detailEntity) {
+        MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+        return service.getMaterialListByDetail(detailEntity);
     }
 
     public void updatePermissions() {

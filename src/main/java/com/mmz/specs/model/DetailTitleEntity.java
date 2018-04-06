@@ -82,7 +82,7 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
 
         if (id != that.id) return false;
         if (title != null ? !title.equals(that.title) : that.title != null) return false;
-        if (active ? active != (that.active) : that.active) return false;
+        if (active == that.active) return false;
 
         return true;
     }
