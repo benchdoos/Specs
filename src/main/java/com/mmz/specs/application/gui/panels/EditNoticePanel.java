@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -61,7 +62,7 @@ public class EditNoticePanel extends JPanel {
     private JButton removeItemButton;
     private JButton moveItemUpButton;
     private JButton moveItemDownButton;
-    private JComboBox numberComboBox;
+    private JComboBox<DetailEntity> codeComboBox;
     private JComboBox<DetailTitleEntity> detailTitleComboBox;
     private JCheckBox unitCheckBox;
     private JTextField finishedWeightTextField;
@@ -95,6 +96,10 @@ public class EditNoticePanel extends JPanel {
 
         initKeyBindings();
 
+        initCodeComboBox();
+
+        fillCodeComboBox();
+
         initNoticeComboBox();
 
         fillNoticeComboBox();
@@ -110,24 +115,6 @@ public class EditNoticePanel extends JPanel {
 
         fillTechProcessComboBox();
     }
-
-    private void fillTechProcessComboBox() {
-        TechProcessService service = new TechProcessServiceImpl(new TechProcessDaoImpl(session));
-        DefaultComboBoxModel<TechProcessEntity> model = new DefaultComboBoxModel<>();
-
-        List<TechProcessEntity> techProcessEntities = service.listTechProcesses();
-
-        techProcessComboBox.removeAllItems();
-
-        for (TechProcessEntity entity : techProcessEntities) {
-            TechProcessEntity current = new TechProcessEntity(entity.getId(), entity.getProcess());
-            model.addElement(current);
-        }
-
-        techProcessComboBox.setModel(model);
-        techProcessComboBox.setSelectedIndex(-1);
-    }
-
 
     private void initListeners() {
         createNoticeButton.addActionListener(e -> onCreateNewNotice());
@@ -201,10 +188,6 @@ public class EditNoticePanel extends JPanel {
                 verifyInput(finishedWeightTextField, toolTip);
             }
 
-            private void showWarning() {
-                finishedWeightTextField.setBorder(BorderFactory.createLineBorder(Color.RED));
-                finishedWeightTextField.setToolTipText("Масса должна состоять только из положительных чисел.");
-            }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -218,10 +201,11 @@ public class EditNoticePanel extends JPanel {
 
 
         };
+
         finishedWeightTextField.getDocument().addDocumentListener(finishedWeightTextFieldDocumentListener);
 
         final DocumentListener workpieceWeightTextFieldDocumentListener = new DocumentListener() {
-            private final String toolTip = workpieceWeightTextField.getToolTipText(); //todo change to generic or someth
+            private final String toolTip = workpieceWeightTextField.getToolTipText();
 
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -240,6 +224,7 @@ public class EditNoticePanel extends JPanel {
 
 
         };
+
         workpieceWeightTextField.getDocument().addDocumentListener(workpieceWeightTextFieldDocumentListener);
 
         createTitleButton.addActionListener(e -> onCreateNewTitle());
@@ -263,8 +248,14 @@ public class EditNoticePanel extends JPanel {
             textField.setBorder(new JTextField().getBorder());
             textField.setToolTipText(toolTip);
         } catch (Throwable throwable) {
-            textField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            textField.setToolTipText("Масса должна состоять только из положительных чисел.");
+            DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+            if (!detailEntity.isUnit()) {
+                textField.setBorder(BorderFactory.createLineBorder(Color.RED));
+                textField.setToolTipText("Масса должна состоять только из положительных чисел.");
+            } else {
+                textField.setBorder(new JTextField().getBorder());
+                textField.setToolTipText(toolTip);
+            }
         }
     }
 
@@ -351,8 +342,6 @@ public class EditNoticePanel extends JPanel {
                 }
             }
         });
-
-        detailTitleComboBox.addActionListener(e -> System.out.println(">> " + detailTitleComboBox.getSelectedItem()));
     }
 
     private void fillDetailTitleComboBox() {
@@ -374,21 +363,6 @@ public class EditNoticePanel extends JPanel {
         detailTitleComboBox.setSelectedIndex(-1);
     }
 
-    private void initTechProcessComboBox() {
-        techProcessComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof TechProcessEntity) {
-                    TechProcessEntity techProcessEntity = (TechProcessEntity) value;
-                    return super.getListCellRendererComponent(list, techProcessEntity.getProcess(), index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        });
-
-        techProcessComboBox.addActionListener(e -> System.out.println(">>>" + techProcessComboBox.getSelectedItem()));
-    }
 
     private void initKeyBindings() {
         /*contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);*/
@@ -452,32 +426,6 @@ public class EditNoticePanel extends JPanel {
         fillNoticeComboBox();
     }
 
-    private void initMainTree() {
-        if (detailEntity != null) {
-            fillMainTree();
-        }
-        mainTree.addTreeSelectionListener(e -> {
-            Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
-            if (lastSelectedPathComponent instanceof DefaultMutableTreeNode) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) lastSelectedPathComponent;
-                DetailEntity selected = (DetailEntity) node.getUserObject();
-
-                DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-                Object parent = ((DefaultMutableTreeNode) node.getParent()).getUserObject();
-                List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild((DetailEntity) parent, selected);
-
-                DetailListEntity lastUsed = null;
-
-                for (DetailListEntity entity : detailListByParentAndChild) {
-                    if (entity.isActive()) {
-                        lastUsed = entity;
-                    }
-                }
-
-                fillDetailInfoPanel(lastUsed, selected);
-            }
-        });
-    }
 
     private void fillDetailInfoPanel(final DetailListEntity mentioned, final DetailEntity detailEntity) {
         Window window = FrameUtils.findWindow(this);
@@ -492,7 +440,7 @@ public class EditNoticePanel extends JPanel {
                     detailCountTextField.setText("");
                 }
                 if (detailEntity != null) {
-                    numberComboBox.setSelectedItem(detailEntity); //todo realize numberComboBox filling
+                    //codeComboBox.setSelectedItem(detailEntity); //todo realize codeComboBox filling
 
                     detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
 
@@ -501,6 +449,11 @@ public class EditNoticePanel extends JPanel {
                     if (detailEntity.isUnit()) {
                         finishedWeightTextField.setText("");
                         workpieceWeightTextField.setText("");
+
+                        Border border = new JTextField().getBorder();
+                        detailCountTextField.setBorder(border);
+                        finishedWeightTextField.setBorder(border);
+                        workpieceWeightTextField.setBorder(border);
                     } else {
                         finishedWeightTextField.setText(detailEntity.getFinishedWeight() + "");
                         workpieceWeightTextField.setText(detailEntity.getWorkpieceWeight() + "");
@@ -553,7 +506,7 @@ public class EditNoticePanel extends JPanel {
             if (currentUser != null) {
                 DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
 
-                numberComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                codeComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
                 detailTitleComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
                 createTitleButton.setEnabled(currentUser.isAdmin());
 
@@ -573,7 +526,7 @@ public class EditNoticePanel extends JPanel {
 
                 isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
             } else {
-                numberComboBox.setEnabled(false);
+                codeComboBox.setEnabled(false);
                 detailTitleComboBox.setEnabled(false);
                 createTitleButton.setEnabled(false);
                 unitCheckBox.setEnabled(false);
@@ -597,6 +550,72 @@ public class EditNoticePanel extends JPanel {
         return entity.getUserType().getName().equalsIgnoreCase("Технолог");
     }
 
+
+    private void initCodeComboBox() {
+        /*codeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailEntity) {
+                    DetailEntity entity = (DetailEntity) value;
+                    return super.getListCellRendererComponent(list, entity.getCode(), index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });*/
+
+        codeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailEntity) {
+                    DetailEntity entity = (DetailEntity) value;
+                    return super.getListCellRendererComponent(list, entity.getCode(), index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+    }
+
+    private void fillCodeComboBox() {
+        DefaultComboBoxModel<DetailEntity> model = new DefaultComboBoxModel<>();
+        DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+        final List<DetailEntity> detailEntities = service.listDetails();
+        Collections.sort(detailEntities);
+        for (DetailEntity entity : detailEntities) {
+            model.addElement(entity);
+        }
+        codeComboBox.setModel(model);
+        codeComboBox.setSelectedItem(-1);
+    }
+
+
+    private void initMainTree() {
+        if (detailEntity != null) {
+            fillMainTree();
+        }
+        mainTree.addTreeSelectionListener(e -> {
+            Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
+            if (lastSelectedPathComponent instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) lastSelectedPathComponent;
+                DetailEntity selected = (DetailEntity) node.getUserObject();
+
+                DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+                Object parent = ((DefaultMutableTreeNode) node.getParent()).getUserObject();
+                List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild((DetailEntity) parent, selected);
+
+                DetailListEntity lastUsed = null;
+
+                for (DetailListEntity entity : detailListByParentAndChild) {
+                    if (entity.isActive()) {
+                        lastUsed = entity;
+                    }
+                }
+
+                fillDetailInfoPanel(lastUsed, selected);
+            }
+        });
+    }
 
     private void fillMainTree() {
         if (session != null) {
@@ -665,6 +684,41 @@ public class EditNoticePanel extends JPanel {
         noticeComboBox.setModel(model);
         noticeComboBox.setSelectedItem(-1);
     }
+
+
+    private void initTechProcessComboBox() {
+        techProcessComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof TechProcessEntity) {
+                    TechProcessEntity techProcessEntity = (TechProcessEntity) value;
+                    return super.getListCellRendererComponent(list, techProcessEntity.getProcess(), index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+
+        techProcessComboBox.addActionListener(e -> System.out.println(">>>" + techProcessComboBox.getSelectedItem()));
+    }
+
+    private void fillTechProcessComboBox() {
+        TechProcessService service = new TechProcessServiceImpl(new TechProcessDaoImpl(session));
+        DefaultComboBoxModel<TechProcessEntity> model = new DefaultComboBoxModel<>();
+
+        List<TechProcessEntity> techProcessEntities = service.listTechProcesses();
+
+        techProcessComboBox.removeAllItems();
+
+        for (TechProcessEntity entity : techProcessEntities) {
+            TechProcessEntity current = new TechProcessEntity(entity.getId(), entity.getProcess());
+            model.addElement(current);
+        }
+
+        techProcessComboBox.setModel(model);
+        techProcessComboBox.setSelectedIndex(-1);
+    }
+
 
     private void createUIComponents() {
         mainTree = new DetailJTree();
@@ -774,9 +828,10 @@ public class EditNoticePanel extends JPanel {
         moveItemDownButton.setText("");
         moveItemDownButton.setToolTipText("Опустить вниз (CTRL+ВНИЗ)");
         toolBar1.add(moveItemDownButton);
-        numberComboBox = new JComboBox();
-        numberComboBox.setEditable(true);
-        changePanel.add(numberComboBox, new GridConstraints(0, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        codeComboBox = new JComboBox();
+        codeComboBox.setEditable(true);
+        codeComboBox.setMaximumRowCount(30);
+        changePanel.add(codeComboBox, new GridConstraints(0, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
         changePanel.add(spacer3, new GridConstraints(9, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label6 = new JLabel();
@@ -864,7 +919,7 @@ public class EditNoticePanel extends JPanel {
         panel3.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer5 = new Spacer();
         savePanel.add(spacer5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        label6.setLabelFor(numberComboBox);
+        label6.setLabelFor(codeComboBox);
         label8.setLabelFor(finishedWeightTextField);
         label9.setLabelFor(workpieceWeightTextField);
         label11.setLabelFor(techProcessComboBox);
