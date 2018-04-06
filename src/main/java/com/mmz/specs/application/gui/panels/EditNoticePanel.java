@@ -534,6 +534,7 @@ public class EditNoticePanel extends JPanel {
         }
 
         noticeComboBox.setModel(model);
+        noticeComboBox.setSelectedItem(-1);
     }
 
     private void createUIComponents() {
