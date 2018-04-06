@@ -367,17 +367,11 @@ public class EditNoticePanel extends JPanel {
                 }
                 if (detailEntity != null) {
                     numberComboBox.setSelectedItem(detailEntity); //todo realize numberComboBox filling
-                    numberComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
                     detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
-                    detailTitleComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
-                    createTitleButton.setEnabled(currentUser.isAdmin());
 
                     unitCheckBox.setSelected(detailEntity.isUnit());
-                    unitCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
-
-                    detailCountLabel.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
 
                     if (detailEntity.isUnit()) {
@@ -388,25 +382,60 @@ public class EditNoticePanel extends JPanel {
                         workpieceWeightTextField.setText(detailEntity.getWorkpieceWeight() + "");
                     }
 
-                    finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
-                    workpieceWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
-
-
-                    createMaterialButton.setEnabled(currentUser.isAdmin());
 
                     techProcessComboBox.setSelectedItem(detailEntity.getTechProcessByTechProcessId());
-                    techProcessComboBox.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
 
-                    createTechProcessButton.setEnabled(currentUser.isAdmin());
 
                     isActiveCheckBox.setSelected(!detailEntity.isActive());
-                    isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
                 }
-
+                updatePermissions();
             }
         }
 
+    }
+
+    public void updatePermissions() {
+        Window window = FrameUtils.findWindow(this);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            UsersEntity currentUser = clientMainWindow.getCurrentUser();
+            if (currentUser != null) {
+                DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+
+                numberComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                detailTitleComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                createTitleButton.setEnabled(currentUser.isAdmin());
+
+                unitCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                detailCountLabel.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
+
+                workpieceWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
+
+                createMaterialButton.setEnabled(currentUser.isAdmin());
+
+                techProcessComboBox.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
+
+                createTechProcessButton.setEnabled(currentUser.isAdmin());
+
+                isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+            } else {
+                numberComboBox.setEnabled(false);
+                detailTitleComboBox.setEnabled(false);
+                createTitleButton.setEnabled(false);
+                unitCheckBox.setEnabled(false);
+                detailCountLabel.setEnabled(false);
+                finishedWeightTextField.setEnabled(false);
+                workpieceWeightTextField.setEnabled(false);
+                createMaterialButton.setEnabled(false);
+                techProcessComboBox.setEnabled(false);
+                createTechProcessButton.setEnabled(false);
+                isActiveCheckBox.setEnabled(false);
+            }
+        }
     }
 
 
@@ -416,31 +445,6 @@ public class EditNoticePanel extends JPanel {
 
     private boolean isTechnologist(UsersEntity entity) {
         return entity.getUserType().getName().equalsIgnoreCase("Технолог");
-    }
-
-    public void unlock() {
-        numberComboBox.setEnabled(false);
-
-        detailTitleComboBox.setEnabled(false);
-
-        createTitleButton.setEnabled(false);
-
-        unitCheckBox.setEnabled(false);
-
-        detailCountLabel.setEnabled(false);
-
-
-        finishedWeightTextField.setEnabled(false);
-        workpieceWeightTextField.setEnabled(false);
-
-
-        createMaterialButton.setEnabled(false);
-
-        techProcessComboBox.setEnabled(false);
-
-        createTechProcessButton.setEnabled(false);
-
-        isActiveCheckBox.setEnabled(false);
     }
 
 
