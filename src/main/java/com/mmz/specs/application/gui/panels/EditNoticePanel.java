@@ -180,52 +180,9 @@ public class EditNoticePanel extends JPanel {
             }
         });
 
-        final DocumentListener finishedWeightTextFieldDocumentListener = new DocumentListener() {
-            private final String toolTip = finishedWeightTextField.getToolTipText(); //todo change to generic or someth
+        finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField));
 
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                verifyInput(finishedWeightTextField, toolTip);
-            }
-
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                verifyInput(finishedWeightTextField, toolTip);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                verifyInput(finishedWeightTextField, toolTip);
-            }
-
-
-        };
-
-        finishedWeightTextField.getDocument().addDocumentListener(finishedWeightTextFieldDocumentListener);
-
-        final DocumentListener workpieceWeightTextFieldDocumentListener = new DocumentListener() {
-            private final String toolTip = workpieceWeightTextField.getToolTipText();
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                verifyInput(workpieceWeightTextField, toolTip);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                verifyInput(workpieceWeightTextField, toolTip);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                verifyInput(workpieceWeightTextField, toolTip);
-            }
-
-
-        };
-
-        workpieceWeightTextField.getDocument().addDocumentListener(workpieceWeightTextFieldDocumentListener);
+        workpieceWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(workpieceWeightTextField));
 
         createTitleButton.addActionListener(e -> onCreateNewTitle());
         editMaterialButton.addActionListener(e -> onEditMaterial());
@@ -440,7 +397,7 @@ public class EditNoticePanel extends JPanel {
                     detailCountTextField.setText("");
                 }
                 if (detailEntity != null) {
-                    //codeComboBox.setSelectedItem(detailEntity); //todo realize codeComboBox filling
+                    codeComboBox.setSelectedItem(detailEntity); //todo realize codeComboBox filling
 
                     detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
 
@@ -951,4 +908,33 @@ public class EditNoticePanel extends JPanel {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
+    private class WeightDocumentListener implements DocumentListener {
+        private JTextField textField;
+
+        WeightDocumentListener(JTextField textField) {
+            this.textField = textField;
+        }
+
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            verifyInput(textField, textField.getToolTipText());
+//            removeCommas(textField);
+        }
+
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            verifyInput(textField, textField.getToolTipText());
+//            removeCommas(textField);
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            verifyInput(textField, textField.getToolTipText());
+//            removeCommas(textField);
+        }
+    }
+
 }
