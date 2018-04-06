@@ -357,7 +357,7 @@
                   <text value=""/>
                 </properties>
               </component>
-              <component id="72994" class="javax.swing.JCheckBox" binding="isActive">
+              <component id="72994" class="javax.swing.JCheckBox" binding="isActiveCheckBox">
                 <constraints>
                   <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -376,7 +376,7 @@
                   <text value="Количество:"/>
                 </properties>
               </component>
-              <component id="694df" class="javax.swing.JTextField" binding="detailCount">
+              <component id="694df" class="javax.swing.JTextField" binding="detailCountLabel">
                 <constraints>
                   <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="40" height="-1"/>
@@ -386,7 +386,7 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="d2f5f" class="javax.swing.JButton" binding="setMaterial">
+              <component id="d2f5f" class="javax.swing.JButton" binding="setMaterialButton">
                 <constraints>
                   <grid row="6" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>

@@ -70,12 +70,12 @@ public class EditNoticePanel extends JPanel {
     private JButton createTitleButton;
     private JComboBox<TechProcessEntity> techProcessComboBox;
     private JButton createTechProcessButton;
-    private JCheckBox isActive;
+    private JCheckBox isActiveCheckBox;
     private JPanel changePanel;
     private JPanel noticePanel;
     private JPanel savePanel;
-    private JTextField detailCount;
-    private JButton setMaterial;
+    private JTextField detailCountLabel;
+    private JButton setMaterialButton;
     private JLabel materialLabel;
     private Session session;
     private DetailEntity detailEntity;
@@ -353,13 +353,156 @@ public class EditNoticePanel extends JPanel {
     }
 
     private void fillDetailInfoPanel(DetailListEntity mentioned, DetailEntity detailEntity) {
-        if (mentioned != null) {
-            detailCount.setText(mentioned.getQuantity() + "");
-        } else {
-            detailCount.setText("");
+        Window window = FrameUtils.findWindow(this);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            UsersEntity currentUser = clientMainWindow.getCurrentUser();
+            if (currentUser != null) {
+
+                if (mentioned != null) {
+                    detailCountLabel.setText(mentioned.getQuantity() + "");
+                } else {
+                    detailCountLabel.setText("");
+                }
+                if (detailEntity != null) {
+                    numberComboBox.setSelectedItem(detailEntity); //todo realize numberComboBox filling
+                    numberComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                    detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
+                    detailTitleComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                    createTitleButton.setEnabled(currentUser.isAdmin());
+
+                    unitCheckBox.setSelected(detailEntity.isUnit());
+                    unitCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                    detailCountLabel.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+
+                    if (detailEntity.isUnit()) {
+                        finishedWeightTextField.setText("");
+                        workpieceWeightTextField.setText("");
+                    } else {
+                        finishedWeightTextField.setText(detailEntity.getFinishedWeight() + "");
+                        workpieceWeightTextField.setText(detailEntity.getWorkpieceWeight() + "");
+                    }
+
+                    finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
+                    workpieceWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
+
+
+                    createMaterialButton.setEnabled(currentUser.isAdmin());
+
+                    techProcessComboBox.setSelectedItem(detailEntity.getTechProcessByTechProcessId());
+                    techProcessComboBox.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
+
+                    createTechProcessButton.setEnabled(currentUser.isAdmin());
+
+                    isActiveCheckBox.setSelected(!detailEntity.isActive());
+                    isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                }
+
+            }
         }
-        if (detailEntity != null) {
-            detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
+        //updatePermissionsForUser(); //fixme this overrides
+
+    }
+
+    private void updatePermissionsForUser() {
+        Window window = FrameUtils.findWindow(this);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            UsersEntity currentUser = clientMainWindow.getCurrentUser();
+            if (currentUser != null) {
+                if (currentUser.isActive()) {
+                    if (currentUser.isEditor() || currentUser.isAdmin()) {
+                        if (!currentUser.isAdmin()) {
+                            updateUiPermissionsForConstructors(currentUser);
+                            updateUiPermissionsForTechnologists(currentUser);
+                        } else {
+                            updateUiPermissionsForAdmins(currentUser);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isConstructor(UsersEntity entity) {
+        return entity.getUserType().getName().equalsIgnoreCase("Конструктор");
+    }
+
+    private boolean isTechnologist(UsersEntity entity) {
+        return entity.getUserType().getName().equalsIgnoreCase("Технолог");
+    }
+
+    private void updateUiPermissionsForConstructors(UsersEntity currentUser) {
+        if (currentUser.getUserType().getName().equalsIgnoreCase("Конструктор")) {
+            numberComboBox.setEnabled(true);
+
+            detailTitleComboBox.setEnabled(true);
+            createTitleButton.setEnabled(true);
+
+            unitCheckBox.setSelected(true);
+            detailCountLabel.setEnabled(true);
+
+            finishedWeightTextField.setEnabled(true);
+            workpieceWeightTextField.setEnabled(false);
+
+            setMaterialButton.setEnabled(true);
+            createMaterialButton.setEnabled(true);
+
+            techProcessComboBox.setEnabled(false);
+            createTechProcessButton.setEnabled(false);
+
+            isActiveCheckBox.setEnabled(true);
+        }
+    }
+
+    private void updateUiPermissionsForTechnologists(UsersEntity currentUser) {
+        if (currentUser.getUserType().getName().equalsIgnoreCase("Технолог")) {
+            numberComboBox.setEnabled(false);
+
+            detailTitleComboBox.setEnabled(false);
+            createTitleButton.setEnabled(false);
+
+            unitCheckBox.setSelected(false);
+            detailCountLabel.setEnabled(false);
+
+            finishedWeightTextField.setEnabled(false);
+            workpieceWeightTextField.setEnabled(true);
+
+            setMaterialButton.setEnabled(true);
+            createMaterialButton.setEnabled(true);
+
+            techProcessComboBox.setEnabled(true);
+            createTechProcessButton.setEnabled(true);
+
+            isActiveCheckBox.setEnabled(false);
+        }
+    }
+
+    private void updateUiPermissionsForAdmins(UsersEntity currentUser) {
+        if (currentUser.isAdmin()) {
+            numberComboBox.setEnabled(true);
+
+            detailTitleComboBox.setEnabled(true);
+            createTitleButton.setEnabled(true);
+
+            unitCheckBox.setSelected(true);
+            detailCountLabel.setEnabled(true);
+
+            finishedWeightTextField.setEnabled(true);
+            workpieceWeightTextField.setEnabled(true);
+
+            setMaterialButton.setEnabled(true);
+            createMaterialButton.setEnabled(true);
+
+            techProcessComboBox.setEnabled(true);
+            createTechProcessButton.setEnabled(true);
+
+            isActiveCheckBox.setEnabled(true);
         }
     }
 
@@ -586,23 +729,23 @@ public class EditNoticePanel extends JPanel {
         createTechProcessButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/techprocessNew16.png")));
         createTechProcessButton.setText("");
         changePanel.add(createTechProcessButton, new GridConstraints(7, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        isActive = new JCheckBox();
-        isActive.setHorizontalTextPosition(2);
-        isActive.setSelected(false);
-        isActive.setText("Аннулирована:");
-        isActive.setMnemonic('А');
-        isActive.setDisplayedMnemonicIndex(0);
-        changePanel.add(isActive, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        isActiveCheckBox = new JCheckBox();
+        isActiveCheckBox.setHorizontalTextPosition(2);
+        isActiveCheckBox.setSelected(false);
+        isActiveCheckBox.setText("Аннулирована:");
+        isActiveCheckBox.setMnemonic('А');
+        isActiveCheckBox.setDisplayedMnemonicIndex(0);
+        changePanel.add(isActiveCheckBox, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label12 = new JLabel();
         label12.setText("Количество:");
         changePanel.add(label12, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        detailCount = new JTextField();
-        changePanel.add(detailCount, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(40, -1), new Dimension(40, -1), new Dimension(40, -1), 0, false));
-        setMaterial = new JButton();
-        setMaterial.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
-        setMaterial.setText("");
-        setMaterial.setToolTipText("Добавить материал");
-        changePanel.add(setMaterial, new GridConstraints(6, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailCountLabel = new JTextField();
+        changePanel.add(detailCountLabel, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(40, -1), new Dimension(40, -1), new Dimension(40, -1), 0, false));
+        setMaterialButton = new JButton();
+        setMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
+        setMaterialButton.setText("");
+        setMaterialButton.setToolTipText("Добавить материал");
+        changePanel.add(setMaterialButton, new GridConstraints(6, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         materialLabel = new JLabel();
         materialLabel.setText("нет данных");
         changePanel.add(materialLabel, new GridConstraints(6, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -633,7 +776,7 @@ public class EditNoticePanel extends JPanel {
         label8.setLabelFor(finishedWeightTextField);
         label9.setLabelFor(workpieceWeightTextField);
         label11.setLabelFor(techProcessComboBox);
-        label12.setLabelFor(detailCount);
+        label12.setLabelFor(detailCountLabel);
     }
 
     /**
