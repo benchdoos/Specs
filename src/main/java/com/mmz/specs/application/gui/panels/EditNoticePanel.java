@@ -568,6 +568,7 @@ public class EditNoticePanel extends JPanel {
         createNoticeButton.setToolTipText("Создать новое извещение");
         panel1.add(createNoticeButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         noticeComboBox = new JComboBox();
+        noticeComboBox.setMaximumRowCount(30);
         panel1.add(noticeComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, new Dimension(-1, 150), 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Номер:");

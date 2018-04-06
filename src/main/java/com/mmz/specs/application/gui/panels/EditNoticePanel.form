@@ -57,7 +57,9 @@
                         <maximum-size width="-1" height="150"/>
                       </grid>
                     </constraints>
-                    <properties/>
+                    <properties>
+                      <maximumRowCount value="30"/>
+                    </properties>
                   </component>
                   <component id="d6a13" class="javax.swing.JLabel">
                     <constraints>
