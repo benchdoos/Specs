@@ -469,7 +469,10 @@ public class ClientMainWindow extends JFrame {
         for (Component component : clientMainTabbedPane.getComponents()) {
             if (component instanceof EditNoticePanel) {
                 try {
-                    int componentZOrder = clientMainTabbedPane.indexOfComponent(component);
+                    EditNoticePanel noticePanel = (EditNoticePanel) component;
+                    noticePanel.unlock();
+                    
+                    int componentZOrder = clientMainTabbedPane.indexOfComponent(noticePanel);
                     clientMainTabbedPane.setEnabledAt(componentZOrder, unlock);
                     if (clientMainTabbedPane.getSelectedComponent() instanceof EditNoticePanel) {
                         clientMainTabbedPane.setSelectedIndex(0);

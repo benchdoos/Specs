@@ -293,6 +293,7 @@ public class EditNoticePanel extends JPanel {
 
 
     private void onOK() {
+        System.out.println("onOK not supported yet");
     }
 
     private void onCancel() {
@@ -405,29 +406,9 @@ public class EditNoticePanel extends JPanel {
 
             }
         }
-        //updatePermissionsForUser(); //fixme this overrides
 
     }
 
-    private void updatePermissionsForUser() {
-        Window window = FrameUtils.findWindow(this);
-        if (window instanceof ClientMainWindow) {
-            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
-            UsersEntity currentUser = clientMainWindow.getCurrentUser();
-            if (currentUser != null) {
-                if (currentUser.isActive()) {
-                    if (currentUser.isEditor() || currentUser.isAdmin()) {
-                        if (!currentUser.isAdmin()) {
-                            updateUiPermissionsForConstructors(currentUser);
-                            updateUiPermissionsForTechnologists(currentUser);
-                        } else {
-                            updateUiPermissionsForAdmins(currentUser);
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private boolean isConstructor(UsersEntity entity) {
         return entity.getUserType().getName().equalsIgnoreCase("Конструктор");
@@ -437,74 +418,31 @@ public class EditNoticePanel extends JPanel {
         return entity.getUserType().getName().equalsIgnoreCase("Технолог");
     }
 
-    private void updateUiPermissionsForConstructors(UsersEntity currentUser) {
-        if (currentUser.getUserType().getName().equalsIgnoreCase("Конструктор")) {
-            numberComboBox.setEnabled(true);
+    public void unlock() {
+        numberComboBox.setEnabled(false);
 
-            detailTitleComboBox.setEnabled(true);
-            createTitleButton.setEnabled(true);
+        detailTitleComboBox.setEnabled(false);
 
-            unitCheckBox.setSelected(true);
-            detailCountLabel.setEnabled(true);
+        createTitleButton.setEnabled(false);
 
-            finishedWeightTextField.setEnabled(true);
-            workpieceWeightTextField.setEnabled(false);
+        unitCheckBox.setEnabled(false);
 
-            setMaterialButton.setEnabled(true);
-            createMaterialButton.setEnabled(true);
+        detailCountLabel.setEnabled(false);
 
-            techProcessComboBox.setEnabled(false);
-            createTechProcessButton.setEnabled(false);
 
-            isActiveCheckBox.setEnabled(true);
-        }
+        finishedWeightTextField.setEnabled(false);
+        workpieceWeightTextField.setEnabled(false);
+
+
+        createMaterialButton.setEnabled(false);
+
+        techProcessComboBox.setEnabled(false);
+
+        createTechProcessButton.setEnabled(false);
+
+        isActiveCheckBox.setEnabled(false);
     }
 
-    private void updateUiPermissionsForTechnologists(UsersEntity currentUser) {
-        if (currentUser.getUserType().getName().equalsIgnoreCase("Технолог")) {
-            numberComboBox.setEnabled(false);
-
-            detailTitleComboBox.setEnabled(false);
-            createTitleButton.setEnabled(false);
-
-            unitCheckBox.setSelected(false);
-            detailCountLabel.setEnabled(false);
-
-            finishedWeightTextField.setEnabled(false);
-            workpieceWeightTextField.setEnabled(true);
-
-            setMaterialButton.setEnabled(true);
-            createMaterialButton.setEnabled(true);
-
-            techProcessComboBox.setEnabled(true);
-            createTechProcessButton.setEnabled(true);
-
-            isActiveCheckBox.setEnabled(false);
-        }
-    }
-
-    private void updateUiPermissionsForAdmins(UsersEntity currentUser) {
-        if (currentUser.isAdmin()) {
-            numberComboBox.setEnabled(true);
-
-            detailTitleComboBox.setEnabled(true);
-            createTitleButton.setEnabled(true);
-
-            unitCheckBox.setSelected(true);
-            detailCountLabel.setEnabled(true);
-
-            finishedWeightTextField.setEnabled(true);
-            workpieceWeightTextField.setEnabled(true);
-
-            setMaterialButton.setEnabled(true);
-            createMaterialButton.setEnabled(true);
-
-            techProcessComboBox.setEnabled(true);
-            createTechProcessButton.setEnabled(true);
-
-            isActiveCheckBox.setEnabled(true);
-        }
-    }
 
     private void fillMainTree() {
         if (session != null) {
