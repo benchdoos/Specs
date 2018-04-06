@@ -75,16 +75,12 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DetailTitleEntity that = (DetailTitleEntity) o;
-
-        if (id != that.id) return false;
-        if (title != null ? !title.equals(that.title) : that.title != null) return false;
-        if (active != that.active) return false;
-
-        return true;
+        if (o instanceof DetailTitleEntity) {
+            DetailTitleEntity that = (DetailTitleEntity) o;
+            return this.id == that.getId() && this.title.equalsIgnoreCase(that.getTitle()) && this.active == that.isActive();
+        } else {
+            return false;
+        }
     }
 
     @Override

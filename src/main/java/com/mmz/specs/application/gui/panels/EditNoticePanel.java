@@ -237,8 +237,8 @@ public class EditNoticePanel extends JPanel {
         for (DetailTitleEntity entity : detailTitleEntities) {
             if (entity != null) {
                 if (entity.isActive()) {
-                    DetailTitleEntity current = new DetailTitleEntity(entity.getId(), entity.getTitle(), entity.isActive());
-                    model.addElement(current);
+                    //DetailTitleEntity current = new DetailTitleEntity(entity.getId(), entity.getTitle(), entity.isActive());
+                    model.addElement(entity);
                 }
             }
         }
