@@ -21,6 +21,7 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.CreateNoticeWindow;
+import com.mmz.specs.application.gui.client.EditMaterialListWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -32,6 +33,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
@@ -71,8 +74,8 @@ public class EditNoticePanel extends JPanel {
     private JPanel changePanel;
     private JPanel noticePanel;
     private JPanel savePanel;
-    private JTextField detailCountLabel;
-    private JButton setMaterialButton;
+    private JTextField detailCountTextField;
+    private JButton editMaterialButton;
     private JLabel materialLabel;
     private Session session;
     private DetailEntity detailEntity;
@@ -127,20 +130,76 @@ public class EditNoticePanel extends JPanel {
 
 
     private void initListeners() {
+        createNoticeButton.addActionListener(e -> onCreateNewNotice());
+        editNoticeButton.addActionListener(e -> onEditNotice());
+
+        initEditPanelListeners();
+
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
+    }
 
-        createNoticeButton.addActionListener(e -> onCreateNewNotice());
-
-        editNoticeButton.addActionListener(e -> onEditNotice());
-
+    private void initEditPanelListeners() {
         addItemButton.addActionListener(e -> onAddNewItem());
         removeItemButton.addActionListener(e -> onRemoveItem());
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
         moveItemDownButton.addActionListener(e -> onMoveItemDown());
 
+        detailCountTextField.getDocument().addDocumentListener(new DocumentListener() {
+            final int MAX_VALUE = 1000;
+            private final String toolTip = detailCountTextField.getToolTipText();
+
+            private void verifyInput() {
+                String text = detailCountTextField.getText();
+                try {
+                    Long number = Long.parseLong(text);
+                    if (number < 0) {
+                        showWarning();
+                        return;
+                    }
+
+                    if (number > MAX_VALUE) {
+                        showWarning();
+
+                        return;
+                    }
+
+                    detailCountTextField.setBorder(new JTextField().getBorder());
+                    detailCountTextField.setToolTipText(toolTip);
+                } catch (Throwable throwable) {
+                    showWarning();
+                }
+            }
+
+            private void showWarning() {
+                detailCountTextField.setBorder(BorderFactory.createLineBorder(Color.RED));
+                detailCountTextField.setToolTipText("Количетво должно состоять только из положительных цельных чисел, не должно превышать 1000.");
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                verifyInput();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                verifyInput();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                verifyInput();
+            }
+        });
+
         createTitleButton.addActionListener(e -> onCreateNewTitle());
+        editMaterialButton.addActionListener(e -> onEditMaterial());
+
+    }
+
+    private void onEditMaterial() {
+        EditMaterialListWindow materialListWindow = new EditMaterialListWindow();
     }
 
     private void onCreateNewTitle() {
@@ -358,9 +417,9 @@ public class EditNoticePanel extends JPanel {
             if (currentUser != null) {
 
                 if (mentioned != null) {
-                    detailCountLabel.setText(mentioned.getQuantity() + "");
+                    detailCountTextField.setText(mentioned.getQuantity() + "");
                 } else {
-                    detailCountLabel.setText("");
+                    detailCountTextField.setText("");
                 }
                 if (detailEntity != null) {
                     numberComboBox.setSelectedItem(detailEntity); //todo realize numberComboBox filling
@@ -430,7 +489,7 @@ public class EditNoticePanel extends JPanel {
 
                 unitCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
-                detailCountLabel.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                detailCountTextField.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
                 finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
 
@@ -448,7 +507,7 @@ public class EditNoticePanel extends JPanel {
                 detailTitleComboBox.setEnabled(false);
                 createTitleButton.setEnabled(false);
                 unitCheckBox.setEnabled(false);
-                detailCountLabel.setEnabled(false);
+                detailCountTextField.setEnabled(false);
                 finishedWeightTextField.setEnabled(false);
                 workpieceWeightTextField.setEnabled(false);
                 createMaterialButton.setEnabled(false);
@@ -702,13 +761,13 @@ public class EditNoticePanel extends JPanel {
         final JLabel label12 = new JLabel();
         label12.setText("Количество:");
         changePanel.add(label12, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        detailCountLabel = new JTextField();
-        changePanel.add(detailCountLabel, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(40, -1), new Dimension(40, -1), new Dimension(40, -1), 0, false));
-        setMaterialButton = new JButton();
-        setMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
-        setMaterialButton.setText("");
-        setMaterialButton.setToolTipText("Добавить материал");
-        changePanel.add(setMaterialButton, new GridConstraints(6, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailCountTextField = new JTextField();
+        changePanel.add(detailCountTextField, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(40, -1), new Dimension(40, -1), new Dimension(40, -1), 0, false));
+        editMaterialButton = new JButton();
+        editMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
+        editMaterialButton.setText("");
+        editMaterialButton.setToolTipText("Добавить материал");
+        changePanel.add(editMaterialButton, new GridConstraints(6, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         materialLabel = new JLabel();
         materialLabel.setText("нет данных");
         changePanel.add(materialLabel, new GridConstraints(6, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -739,7 +798,7 @@ public class EditNoticePanel extends JPanel {
         label8.setLabelFor(finishedWeightTextField);
         label9.setLabelFor(workpieceWeightTextField);
         label11.setLabelFor(techProcessComboBox);
-        label12.setLabelFor(detailCountLabel);
+        label12.setLabelFor(detailCountTextField);
     }
 
     /**

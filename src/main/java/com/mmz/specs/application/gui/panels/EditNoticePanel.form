@@ -378,7 +378,7 @@
                   <text value="Количество:"/>
                 </properties>
               </component>
-              <component id="694df" class="javax.swing.JTextField" binding="detailCountLabel">
+              <component id="694df" class="javax.swing.JTextField" binding="detailCountTextField">
                 <constraints>
                   <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="40" height="-1"/>
@@ -388,12 +388,12 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="d2f5f" class="javax.swing.JButton" binding="setMaterialButton">
+              <component id="d2f5f" class="javax.swing.JButton" binding="editMaterialButton">
                 <constraints>
                   <grid row="6" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <icon value="img/gui/edit/add.png"/>
+                  <icon value="img/gui/edit/edit.png"/>
                   <text value=""/>
                   <toolTipText value="Добавить материал"/>
                 </properties>
