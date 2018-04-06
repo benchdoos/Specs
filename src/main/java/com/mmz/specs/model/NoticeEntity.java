@@ -72,17 +72,22 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o instanceof NoticeEntity) {
+            NoticeEntity that = (NoticeEntity) o;
+            if (this.id == that.getId()) {
+                if (this.number.equals(that.getNumber())) {
+                    if (this.date.equals(that.getDate())) {
+                        if (this.description.equals(that.getDescription())) {
+                            return this.usersByProvidedByUserId.equals(that.getUsersByProvidedByUserId());
+                        }
+                    }
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
 
-        NoticeEntity that = (NoticeEntity) o;
-
-        if (id != that.id) return false;
-        if (number != null ? !number.equals(that.number) : that.number != null) return false;
-        if (date != null ? !date.equals(that.date) : that.date != null) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
-
-        return true;
     }
 
     @Override

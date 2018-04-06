@@ -530,9 +530,7 @@ public class EditNoticePanel extends JPanel {
         Collections.sort(list);
 
         for (NoticeEntity entity : list) {
-            NoticeEntity noticeEntity = new NoticeEntity(entity.getId(), entity.getNumber(),
-                    entity.getDate(), entity.getDescription(), entity.getUsersByProvidedByUserId());
-            model.addElement(noticeEntity);
+            model.addElement(entity);
         }
 
         noticeComboBox.setModel(model);

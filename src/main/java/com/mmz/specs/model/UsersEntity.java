@@ -132,26 +132,6 @@ public class UsersEntity {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        UsersEntity that = (UsersEntity) o;
-
-        if (id != that.id) return false;
-        if (admin != that.admin) return false;
-        if (active != that.active) return false;
-        if (editor != that.editor) return false;
-        if (username != null ? !username.equals(that.username) : that.username != null) return false;
-        if (password != null ? !password.equals(that.password) : that.password != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (patronymic != null ? !patronymic.equals(that.patronymic) : that.patronymic != null) return false;
-        if (surname != null ? !surname.equals(that.surname) : that.surname != null) return false;
-
-        return true;
-    }
-
-    @Override
     public int hashCode() {
         int result = id;
         result = 31 * result + (username != null ? username.hashCode() : 0);
@@ -165,14 +145,12 @@ public class UsersEntity {
         return result;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "USER_TYPE_ID", referencedColumnName = "ID")
-    public UserTypeEntity getUserType() {
-        return userType;
-    }
-
-    public void setUserType(UserTypeEntity userTypeEntity) {
-        this.userType = userTypeEntity;
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof UsersEntity)) return false;
+        final UsersEntity that = (UsersEntity) other;
+        return this.username.equals(that.getUsername());
     }
 
     @Override
@@ -189,5 +167,15 @@ public class UsersEntity {
                 .append("isActive", active)
                 .append("userType", userType)
                 .toString();
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "USER_TYPE_ID", referencedColumnName = "ID")
+    public UserTypeEntity getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserTypeEntity userTypeEntity) {
+        this.userType = userTypeEntity;
     }
 }
