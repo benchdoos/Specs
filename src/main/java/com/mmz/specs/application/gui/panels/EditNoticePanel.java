@@ -350,7 +350,7 @@ public class EditNoticePanel extends JPanel {
         });
     }
 
-    private void fillDetailInfoPanel(DetailListEntity mentioned, DetailEntity detailEntity) {
+    private void fillDetailInfoPanel(final DetailListEntity mentioned, final DetailEntity detailEntity) {
         Window window = FrameUtils.findWindow(this);
         if (window instanceof ClientMainWindow) {
             ClientMainWindow clientMainWindow = (ClientMainWindow) window;
