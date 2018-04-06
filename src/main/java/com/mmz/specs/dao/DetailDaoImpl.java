@@ -99,7 +99,7 @@ public class DetailDaoImpl implements DetailDao {
     @Override
     @Transactional
     public List<DetailEntity> listDetails() {
-        List list = session.createQuery("from UsersEntity").list();
+        List list = session.createQuery("from DetailEntity").list();
         List<DetailEntity> result = new ArrayList<>(list.size());
 
         for (Object detailEntity : list) {
