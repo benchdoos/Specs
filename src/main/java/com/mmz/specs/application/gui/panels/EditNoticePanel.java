@@ -193,9 +193,79 @@ public class EditNoticePanel extends JPanel {
             }
         });
 
+        final DocumentListener finishedWeightTextFieldDocumentListener = new DocumentListener() {
+            private final String toolTip = finishedWeightTextField.getToolTipText(); //todo change to generic or someth
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                verifyInput(finishedWeightTextField, toolTip);
+            }
+
+            private void showWarning() {
+                finishedWeightTextField.setBorder(BorderFactory.createLineBorder(Color.RED));
+                finishedWeightTextField.setToolTipText("Масса должна состоять только из положительных чисел.");
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                verifyInput(finishedWeightTextField, toolTip);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                verifyInput(finishedWeightTextField, toolTip);
+            }
+
+
+        };
+        finishedWeightTextField.getDocument().addDocumentListener(finishedWeightTextFieldDocumentListener);
+
+        final DocumentListener workpieceWeightTextFieldDocumentListener = new DocumentListener() {
+            private final String toolTip = workpieceWeightTextField.getToolTipText(); //todo change to generic or someth
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                verifyInput(workpieceWeightTextField, toolTip);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                verifyInput(workpieceWeightTextField, toolTip);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                verifyInput(workpieceWeightTextField, toolTip);
+            }
+
+
+        };
+        workpieceWeightTextField.getDocument().addDocumentListener(workpieceWeightTextFieldDocumentListener);
+
         createTitleButton.addActionListener(e -> onCreateNewTitle());
         editMaterialButton.addActionListener(e -> onEditMaterial());
 
+    }
+
+    private void verifyInput(JTextField textField, String toolTip) {
+        try {
+            String text = textField.getText();
+            text = text.replace(",", ".");
+            if (text.contains("d")) {
+                throw new IllegalArgumentException();
+            }
+
+            double value = Double.parseDouble(text);
+
+            if (value < 0) {
+                throw new IllegalArgumentException();
+            }
+            textField.setBorder(new JTextField().getBorder());
+            textField.setToolTipText(toolTip);
+        } catch (Throwable throwable) {
+            textField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            textField.setToolTipText("Масса должна состоять только из положительных чисел.");
+        }
     }
 
     private void onEditMaterial() {
@@ -321,7 +391,7 @@ public class EditNoticePanel extends JPanel {
     }
 
     private void initKeyBindings() {
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        /*contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);*/
 
         //fixme this doesn't work for some reason
         contentPane.registerKeyboardAction(e -> onAddNewItem(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
