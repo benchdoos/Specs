@@ -78,6 +78,7 @@ public class EditNoticePanel extends JPanel {
     private JTextField detailCountTextField;
     private JButton editMaterialButton;
     private JLabel materialLabel;
+    private JButton editImageButton;
     private Session session;
     private DetailEntity detailEntity;
 
@@ -461,7 +462,8 @@ public class EditNoticePanel extends JPanel {
             ClientMainWindow clientMainWindow = (ClientMainWindow) window;
             UsersEntity currentUser = clientMainWindow.getCurrentUser();
             if (currentUser != null) {
-                DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+                final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
 
                 codeComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
                 detailTitleComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
@@ -469,19 +471,26 @@ public class EditNoticePanel extends JPanel {
 
                 unitCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
-                detailCountTextField.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
+                detailCountTextField.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
 
                 finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
 
                 workpieceWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
 
-                createMaterialButton.setEnabled(currentUser.isAdmin());
+                editMaterialButton.setEnabled(!detailEntity.isUnit());
+
+                createMaterialButton.setEnabled(!detailEntity.isUnit() && currentUser.isAdmin());
 
                 techProcessComboBox.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
+
+                createTechProcessButton.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
 
                 createTechProcessButton.setEnabled(currentUser.isAdmin());
 
                 isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                editImageButton.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
             } else {
                 codeComboBox.setEnabled(false);
                 detailTitleComboBox.setEnabled(false);
@@ -750,10 +759,10 @@ public class EditNoticePanel extends JPanel {
         editNoticeButton.setToolTipText("Редактировать извещение");
         panel1.add(editNoticeButton, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         changePanel = new JPanel();
-        changePanel.setLayout(new GridLayoutManager(11, 7, new Insets(0, 0, 0, 0), -1, -1));
+        changePanel.setLayout(new GridLayoutManager(12, 7, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Изменения", changePanel);
         final JScrollPane scrollPane2 = new JScrollPane();
-        changePanel.add(scrollPane2, new GridConstraints(0, 0, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(150, -1), null, null, 0, false));
+        changePanel.add(scrollPane2, new GridConstraints(0, 0, 11, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(150, -1), null, null, 0, false));
         mainTree.setBackground(new Color(-855310));
         mainTree.setRootVisible(false);
         mainTree.setScrollsOnExpand(true);
@@ -763,7 +772,7 @@ public class EditNoticePanel extends JPanel {
         scrollPane2.setViewportView(mainTree);
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
-        changePanel.add(toolBar1, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        changePanel.add(toolBar1, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         addItemButton = new JButton();
         addItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addItemButton.setText("");
@@ -790,7 +799,7 @@ public class EditNoticePanel extends JPanel {
         codeComboBox.setMaximumRowCount(30);
         changePanel.add(codeComboBox, new GridConstraints(0, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
-        changePanel.add(spacer3, new GridConstraints(9, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        changePanel.add(spacer3, new GridConstraints(9, 6, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label6 = new JLabel();
         label6.setText("Индекс:");
         changePanel.add(label6, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -819,10 +828,12 @@ public class EditNoticePanel extends JPanel {
         createMaterialButton = new JButton();
         createMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/materialNew16.png")));
         createMaterialButton.setText("");
+        createMaterialButton.setToolTipText("Создать новый материал");
         changePanel.add(createMaterialButton, new GridConstraints(6, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         createTitleButton = new JButton();
         createTitleButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/titleNew16.png")));
         createTitleButton.setText("");
+        createTitleButton.setToolTipText("Создать новое наименование");
         changePanel.add(createTitleButton, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label11 = new JLabel();
         label11.setText("Технический процесс:");
@@ -832,6 +843,7 @@ public class EditNoticePanel extends JPanel {
         createTechProcessButton = new JButton();
         createTechProcessButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/techprocessNew16.png")));
         createTechProcessButton.setText("");
+        createTechProcessButton.setToolTipText("Создать новый тех.процесс");
         changePanel.add(createTechProcessButton, new GridConstraints(7, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveCheckBox = new JCheckBox();
         isActiveCheckBox.setHorizontalTextPosition(2);
@@ -857,6 +869,11 @@ public class EditNoticePanel extends JPanel {
         detailTitleComboBox.setMaximumRowCount(30);
         detailTitleComboBox.setToolTipText("Тип пользователя");
         changePanel.add(detailTitleComboBox, new GridConstraints(1, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        editImageButton = new JButton();
+        editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/picture16.png")));
+        editImageButton.setText("");
+        editImageButton.setToolTipText("Редактировать изображение детали");
+        changePanel.add(editImageButton, new GridConstraints(8, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         savePanel = new JPanel();
         savePanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Сохранение", savePanel);
