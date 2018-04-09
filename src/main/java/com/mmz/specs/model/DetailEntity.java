@@ -137,21 +137,11 @@ public class DetailEntity implements Comparable<DetailEntity> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof DetailEntity)) return false;
 
         DetailEntity that = (DetailEntity) o;
 
-        if (id != that.id) return false;
-        if (unit != that.unit) return false;
-        if (code != null ? !code.equals(that.code) : that.code != null) return false;
-        if (finishedWeight != null ? !finishedWeight.equals(that.finishedWeight) : that.finishedWeight != null)
-            return false;
-        if (workpieceWeight != null ? !workpieceWeight.equals(that.workpieceWeight) : that.workpieceWeight != null)
-            return false;
-        if (imagePath != null ? !imagePath.equals(that.imagePath) : that.imagePath != null) return false;
-        if (active != ((DetailEntity) o).active) return false;
-
-        return true;
+        return code != null && that.getCode() != null && code.equals(that.getCode());
     }
 
     @Override

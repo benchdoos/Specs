@@ -398,7 +398,7 @@ public class EditNoticePanel extends JPanel {
                     detailCountTextField.setText("");
                 }
                 if (detailEntity != null) {
-                    codeComboBox.setSelectedItem(detailEntity); //todo realize codeComboBox filling
+                    codeComboBox.setSelectedItem(detailEntity);
 
                     detailTitleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
 
@@ -518,18 +518,6 @@ public class EditNoticePanel extends JPanel {
 
 
     private void initCodeComboBox() {
-        /*codeComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof DetailEntity) {
-                    DetailEntity entity = (DetailEntity) value;
-                    return super.getListCellRendererComponent(list, entity.getCode(), index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        });*/
-
         codeComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -759,10 +747,10 @@ public class EditNoticePanel extends JPanel {
         editNoticeButton.setToolTipText("Редактировать извещение");
         panel1.add(editNoticeButton, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         changePanel = new JPanel();
-        changePanel.setLayout(new GridLayoutManager(12, 7, new Insets(0, 0, 0, 0), -1, -1));
+        changePanel.setLayout(new GridLayoutManager(11, 7, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Изменения", changePanel);
         final JScrollPane scrollPane2 = new JScrollPane();
-        changePanel.add(scrollPane2, new GridConstraints(0, 0, 11, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(150, -1), null, null, 0, false));
+        changePanel.add(scrollPane2, new GridConstraints(0, 0, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(150, -1), null, null, 0, false));
         mainTree.setBackground(new Color(-855310));
         mainTree.setRootVisible(false);
         mainTree.setScrollsOnExpand(true);
@@ -772,7 +760,7 @@ public class EditNoticePanel extends JPanel {
         scrollPane2.setViewportView(mainTree);
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
-        changePanel.add(toolBar1, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        changePanel.add(toolBar1, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         addItemButton = new JButton();
         addItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addItemButton.setText("");
@@ -795,11 +783,10 @@ public class EditNoticePanel extends JPanel {
         moveItemDownButton.setToolTipText("Опустить вниз (CTRL+ВНИЗ)");
         toolBar1.add(moveItemDownButton);
         codeComboBox = new JComboBox();
-        codeComboBox.setEditable(true);
         codeComboBox.setMaximumRowCount(30);
         changePanel.add(codeComboBox, new GridConstraints(0, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
-        changePanel.add(spacer3, new GridConstraints(9, 6, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        changePanel.add(spacer3, new GridConstraints(9, 6, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label6 = new JLabel();
         label6.setText("Индекс:");
         changePanel.add(label6, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -937,20 +924,17 @@ public class EditNoticePanel extends JPanel {
         @Override
         public void insertUpdate(DocumentEvent e) {
             verifyInput(textField, textField.getToolTipText());
-//            removeCommas(textField);
         }
 
 
         @Override
         public void removeUpdate(DocumentEvent e) {
             verifyInput(textField, textField.getToolTipText());
-//            removeCommas(textField);
         }
 
         @Override
         public void changedUpdate(DocumentEvent e) {
             verifyInput(textField, textField.getToolTipText());
-//            removeCommas(textField);
         }
     }
 
