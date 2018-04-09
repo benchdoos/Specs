@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Main-Class: com.mmz.specs.application.core.Main
+Name: Specs
+Implementation-Version: 0.1
+Implementation-URL: https://github.com/benchdoos/Specs
+

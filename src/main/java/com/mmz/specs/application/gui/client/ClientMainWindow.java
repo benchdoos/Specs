@@ -421,7 +421,7 @@ public class ClientMainWindow extends JFrame {
     private void onDisconnectFromFtp() {
         try {
             ftpUtils.disconnect();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Could not disconnect from ftp server: " + ftpUtils, e);
         }
     }

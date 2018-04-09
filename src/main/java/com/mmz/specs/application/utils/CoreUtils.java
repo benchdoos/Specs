@@ -39,9 +39,7 @@ public class CoreUtils {
             log.debug("Got arguments: " + Arrays.toString(args));
             switch (firstArgument) {
                 case ApplicationArgumentsConstants.CLIENT:
-                    log.debug("Argument is for " + ModeManager.MODE.CLIENT);
-
-                    ClientManager clientManager = ClientManager.getInstance();
+                    startClient();
                     break;
                 case ApplicationArgumentsConstants.SERVER:
                     log.debug("Argument is for " + ModeManager.MODE.SERVER);
@@ -57,12 +55,20 @@ public class CoreUtils {
                 default:
                     log.debug("Unknown argument: " + firstArgument);
                     log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
+                    startClient();
                     break;
             }
         } else {
             log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
             ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
+            startClient();
         }
+    }
+
+    private static void startClient() {
+        log.debug("Argument is for " + ModeManager.MODE.CLIENT);
+
+        ClientManager clientManager = ClientManager.getInstance();
     }
 
     private static void loadServerSettings() {

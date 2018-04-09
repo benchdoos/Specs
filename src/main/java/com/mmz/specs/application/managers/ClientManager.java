@@ -32,11 +32,7 @@ public class ClientManager {
     private ClientManager() {
         loadClientSettings();
 
-        Runnable runnable = new Runnable() {
-            public void run() {
-                ClientBackgroundService.getInstance();
-            }
-        };
+        Runnable runnable = ClientBackgroundService::getInstance;
 
         Thread thread = new Thread(runnable);
         thread.start();

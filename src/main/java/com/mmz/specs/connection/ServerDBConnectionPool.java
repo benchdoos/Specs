@@ -40,6 +40,8 @@ public class ServerDBConnectionPool {
     private static ServerDBConnectionPool ourInstance = new ServerDBConnectionPool();
     private static SessionFactory ourSessionFactory = null;
 
+    private static boolean isStarting = false;
+
     private static String dbConnectionUrl;
     private static String connectionUsername;
     private static String connectionPassword;
@@ -54,14 +56,18 @@ public class ServerDBConnectionPool {
 
     private static void createConnection() {
         try {
-            Configuration configuration = new Configuration();
-            configuration.configure(new File("src/main/resources/hibernate/hibernate.cfg.xml"));
-            configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbConnectionUrl);
-            configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, connectionUsername);
-            configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, connectionPassword);
-            log.info("Creating Hibernate connection at: " + dbConnectionUrl
-                    + " username: " + connectionUsername + " password length: " + connectionPassword.length());
-            ourSessionFactory = configuration.buildSessionFactory();
+            log.info("Connection is starting: " + isStarting);
+            if (!isStarting) {
+                Configuration configuration = new Configuration();
+                configuration.configure(new File("src/main/resources/hibernate/hibernate.cfg.xml"));
+                configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbConnectionUrl);
+                configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, connectionUsername);
+                configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, connectionPassword);
+                log.info("Creating Hibernate connection at: " + dbConnectionUrl
+                        + " username: " + connectionUsername + " password length: " + connectionPassword.length());
+                isStarting = true;
+                ourSessionFactory = configuration.buildSessionFactory();
+            }
         } catch (Throwable ex) {
             throw new ExceptionInInitializerError(ex);
         }
