@@ -23,6 +23,7 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.CreateNoticeWindow;
 import com.mmz.specs.application.gui.client.EditMaterialListWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
+import com.mmz.specs.application.gui.common.SelectionDetailWindow;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
@@ -79,6 +80,7 @@ public class EditNoticePanel extends JPanel {
     private JButton editMaterialButton;
     private JLabel materialLabel;
     private JButton editImageButton;
+    private JToolBar treeToolBar;
     private Session session;
     private DetailEntity detailEntity;
 
@@ -129,7 +131,7 @@ public class EditNoticePanel extends JPanel {
     }
 
     private void initEditPanelListeners() {
-        addItemButton.addActionListener(e -> onAddNewItem());
+        addItemButton.addActionListener(e -> onAddNewItemButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
         moveItemDownButton.addActionListener(e -> onMoveItemDown());
@@ -326,15 +328,39 @@ public class EditNoticePanel extends JPanel {
         /*contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);*/
 
         //fixme this doesn't work for some reason
-        contentPane.registerKeyboardAction(e -> onAddNewItem(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onAddNewItemButton(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onRemoveItem(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
     }
 
+    private void onAddNewItemButton() {
+        JPopupMenu jPopupMenu = new JPopupMenu();
+        JMenuItem addExisting = new JMenuItem("Добавить существующую");
+        addExisting.setIcon(new ImageIcon(getClass().getResource("/img/gui/addExistingItem.png")));
+        addExisting.addActionListener(e -> onAddNewItem());
+
+
+        JMenuItem addNew = new JMenuItem("Добавить новую");
+        addNew.setIcon(new ImageIcon(getClass().getResource("/img/gui/addNewItem.png")));
+
+        jPopupMenu.add(addExisting);
+        jPopupMenu.add(addNew);
+        jPopupMenu.show(addItemButton, addItemButton.getBounds().x, addItemButton.getBounds().y
+                + addItemButton.getBounds().height);
+
+    }
+
     private void onAddNewItem() {
-        System.out.println("not supported yet");
+        SelectionDetailWindow selectionDetailWindow = new SelectionDetailWindow();
+        selectionDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+        selectionDetailWindow.setVisible(true);
+
+        DetailEntity entity = selectionDetailWindow.getSelectedEntity();
+        if (entity != null) {
+            System.out.println(">" + entity);
+        }
     }
 
     private void onRemoveItem() {
@@ -758,30 +784,30 @@ public class EditNoticePanel extends JPanel {
         mainTree.setVerifyInputWhenFocusTarget(false);
         mainTree.setVisibleRowCount(2);
         scrollPane2.setViewportView(mainTree);
-        final JToolBar toolBar1 = new JToolBar();
-        toolBar1.setFloatable(false);
-        changePanel.add(toolBar1, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        treeToolBar = new JToolBar();
+        treeToolBar.setFloatable(false);
+        changePanel.add(treeToolBar, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         addItemButton = new JButton();
         addItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addItemButton.setText("");
         addItemButton.setToolTipText("Добавить деталь / узел (CTRL++)");
-        toolBar1.add(addItemButton);
+        treeToolBar.add(addItemButton);
         removeItemButton = new JButton();
         removeItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
         removeItemButton.setText("");
         removeItemButton.setToolTipText("Удалить деталь / узел (CTRL+-)");
-        toolBar1.add(removeItemButton);
+        treeToolBar.add(removeItemButton);
         moveItemUpButton = new JButton();
         moveItemUpButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/upArrow16.png")));
         moveItemUpButton.setText("");
         moveItemUpButton.setToolTipText("Поднять вверх (CTRL+ВВЕРХ)");
-        toolBar1.add(moveItemUpButton);
+        treeToolBar.add(moveItemUpButton);
         moveItemDownButton = new JButton();
         moveItemDownButton.setFocusable(false);
         moveItemDownButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/downArrow16.png")));
         moveItemDownButton.setText("");
         moveItemDownButton.setToolTipText("Опустить вниз (CTRL+ВНИЗ)");
-        toolBar1.add(moveItemDownButton);
+        treeToolBar.add(moveItemDownButton);
         codeComboBox = new JComboBox();
         codeComboBox.setMaximumRowCount(30);
         changePanel.add(codeComboBox, new GridConstraints(0, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
