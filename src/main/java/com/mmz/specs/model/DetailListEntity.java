@@ -21,7 +21,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "DETAIL_LIST")
-public class DetailListEntity {
+public class DetailListEntity implements Comparable<DetailListEntity> {
     private int id;
     private int quantity;
     private boolean isInterchangeableNode;
@@ -132,4 +132,15 @@ public class DetailListEntity {
         this.noticeByNoticeId = noticeByNoticeId;
     }
 
+    @Override
+    public int compareTo(DetailListEntity that) {
+        int result = 0;
+
+        result -= this.getDetailByParentDetailId().compareTo(that.getDetailByParentDetailId());
+        result -= this.getDetailByChildDetailId().compareTo(that.getDetailByChildDetailId());
+        result += this.isActive() == that.isActive() ? 1 : 0;
+        result += this.isInterchangeableNode() == that.isInterchangeableNode() ? 10 : 0;
+
+        return result;
+    }
 }
