@@ -592,6 +592,12 @@ public class EditNoticePanel extends JPanel {
                     }
                 }
 
+                final boolean isRoot = mainTree.getModel().getRoot().equals(node.getParent());
+                addItemButton.setEnabled(!isRoot);
+                removeItemButton.setEnabled(!isRoot);
+                moveItemUpButton.setEnabled(!isRoot);
+                moveItemDownButton.setEnabled(!isRoot);
+
                 fillDetailInfoPanel(lastUsed, selected);
             }
         });
@@ -788,21 +794,25 @@ public class EditNoticePanel extends JPanel {
         treeToolBar.setFloatable(false);
         changePanel.add(treeToolBar, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         addItemButton = new JButton();
+        addItemButton.setEnabled(false);
         addItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addItemButton.setText("");
         addItemButton.setToolTipText("Добавить деталь / узел (CTRL++)");
         treeToolBar.add(addItemButton);
         removeItemButton = new JButton();
+        removeItemButton.setEnabled(false);
         removeItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
         removeItemButton.setText("");
         removeItemButton.setToolTipText("Удалить деталь / узел (CTRL+-)");
         treeToolBar.add(removeItemButton);
         moveItemUpButton = new JButton();
+        moveItemUpButton.setEnabled(false);
         moveItemUpButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/upArrow16.png")));
         moveItemUpButton.setText("");
         moveItemUpButton.setToolTipText("Поднять вверх (CTRL+ВВЕРХ)");
         treeToolBar.add(moveItemUpButton);
         moveItemDownButton = new JButton();
+        moveItemDownButton.setEnabled(false);
         moveItemDownButton.setFocusable(false);
         moveItemDownButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/downArrow16.png")));
         moveItemDownButton.setText("");

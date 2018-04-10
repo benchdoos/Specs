@@ -204,6 +204,7 @@
                   <component id="e2e59" class="javax.swing.JButton" binding="addItemButton">
                     <constraints/>
                     <properties>
+                      <enabled value="false"/>
                       <icon value="img/gui/edit/add.png"/>
                       <text value=""/>
                       <toolTipText value="Добавить деталь / узел (CTRL++)"/>
@@ -212,6 +213,7 @@
                   <component id="b5c5e" class="javax.swing.JButton" binding="removeItemButton">
                     <constraints/>
                     <properties>
+                      <enabled value="false"/>
                       <icon value="img/gui/edit/remove.png"/>
                       <text value=""/>
                       <toolTipText value="Удалить деталь / узел (CTRL+-)"/>
@@ -220,6 +222,7 @@
                   <component id="69fd7" class="javax.swing.JButton" binding="moveItemUpButton">
                     <constraints/>
                     <properties>
+                      <enabled value="false"/>
                       <icon value="img/gui/edit/upArrow16.png"/>
                       <text value=""/>
                       <toolTipText value="Поднять вверх (CTRL+ВВЕРХ)"/>
@@ -228,6 +231,7 @@
                   <component id="91829" class="javax.swing.JButton" binding="moveItemDownButton">
                     <constraints/>
                     <properties>
+                      <enabled value="false"/>
                       <focusable value="false"/>
                       <icon value="img/gui/edit/downArrow16.png"/>
                       <text value=""/>
