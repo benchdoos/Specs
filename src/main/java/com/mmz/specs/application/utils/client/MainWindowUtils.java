@@ -82,7 +82,7 @@ public class MainWindowUtils {
         return result;
     }
 
-    private DefaultMutableTreeNode getChildren(DetailListService service, DetailEntity parent) {
+    public DefaultMutableTreeNode getChildren(DetailListService service, DetailEntity parent) {
         List<DetailEntity> childes = service.listChildren(parent);
         DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         if (childes.size() > 0) {
@@ -154,4 +154,12 @@ public class MainWindowUtils {
         }
         return latest;
     }
+
+    /*public static DefaultMutableTreeNode getTreeNodeFromEntity(DetailEntity entity) {
+        if (entity.isUnit()) {
+
+        } else {
+            return new DefaultMutableTreeNode(entity);
+        }
+    }*/
 }

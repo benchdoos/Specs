@@ -39,6 +39,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -359,8 +360,71 @@ public class EditNoticePanel extends JPanel {
 
         DetailEntity entity = selectionDetailWindow.getSelectedEntity();
         if (entity != null) {
-            System.out.println(">" + entity);
+            final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+            final TreePath selectionPath = mainTree.getSelectionPath();
+
+            if (notContainsEntityInParents(selectionPath, entity)) {
+                if (notContainsEntityInChildren(selectionPath, entity)) {
+                    addItemToTree(selectionPath, entity);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Нельзя добавить деталь / узел "
+                            + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                            "т.к. он(а) уже содержится в узле.", "Ошибка добавления", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Нельзя добавить узел "
+                        + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                        "т.к. он не может содержать самого себя.", "Ошибка добавления", JOptionPane.ERROR_MESSAGE);
+            }
+
+            DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
+
+            /*System.out.println("> " + detailEntity + " " + entity);*/
         }
+    }
+
+    private void addItemToTree(TreePath path, DetailEntity entity) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
+        node.add(new MainWindowUtils(session).getChildren(new DetailListServiceImpl(new DetailListDaoImpl(session)), entity));
+        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+        model.reload(node);
+        System.out.println(">L>>> " + node);
+    }
+
+    private DetailEntity getParent(TreePath selectionPath) {
+        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
+        return (DetailEntity) node.getUserObject();
+    }
+
+    private boolean notContainsEntityInParents(TreePath selectionPath, DetailEntity entity) {
+        for (Object o : selectionPath.getPath()) {
+            if (o != null) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) o;
+                if (node.getUserObject() instanceof DetailEntity) {
+                    DetailEntity current = (DetailEntity) node.getUserObject();
+                    if (current.equals(entity)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean notContainsEntityInChildren(TreePath path, DetailEntity entity) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            final Object child = mainTree.getModel().getChild(node, i);
+            if (child != null) {
+                if (child instanceof DefaultMutableTreeNode) {
+                    DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) child).getUserObject();
+                    if (detailEntity.getId() == entity.getId()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void onRemoveItem() {
