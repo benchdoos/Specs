@@ -130,6 +130,13 @@ public class DetailListPanel extends JPanel {
         searchTextField.registerKeyboardAction(e -> searchTextField.setText(""),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        registerKeyboardAction(e -> {
+                    onEditDetail(true);
+                },
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
     }
 
     private void updateDetailInfoPanel(DetailEntity selectedComponent) {
