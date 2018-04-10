@@ -581,6 +581,14 @@ public class EditNoticePanel extends JPanel {
                 isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
                 editImageButton.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+
+                //----------------------
+
+                addItemButton.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
+                removeItemButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
+                moveItemUpButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
+                moveItemDownButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
+
             } else {
                 codeComboBox.setEnabled(false);
                 detailTitleComboBox.setEnabled(false);
