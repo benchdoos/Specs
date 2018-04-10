@@ -41,6 +41,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
@@ -145,7 +147,7 @@ public class EditNoticePanel extends JPanel {
                 String text = detailCountTextField.getText();
                 try {
                     Long number = Long.parseLong(text);
-                    if (number < 0) {
+                    if (number <= 0) {
                         showWarning();
                         return;
                     }
@@ -184,13 +186,67 @@ public class EditNoticePanel extends JPanel {
             }
         });
 
+        detailCountTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                DetailEntity parent = getParent(mainTree.getSelectionPath());
+                DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+                final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
+                Collections.sort(detailListEntitiesByParentAndChild);
+                for (DetailListEntity entity : detailListEntitiesByParentAndChild) {
+                    if (entity.isActive()) {
+                        String text = detailCountTextField.getText();
+                        try {
+                            int quantity = Integer.parseInt(text);
+                            if (quantity >= 1 && quantity <= 1000) {
+                                entity.setQuantity(quantity);
+                                updateTreeDetail();
+                            }
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
+            }
+        });
+
         finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField));
+        finishedWeightTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+                try {
+                    double weight = Double.parseDouble(finishedWeightTextField.getText());
+                    child.setFinishedWeight(weight);
+                    updateTreeDetail();
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        });
 
         workpieceWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(workpieceWeightTextField));
+        workpieceWeightTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+                try {
+                    double weight = Double.parseDouble(workpieceWeightTextField.getText());
+                    child.setWorkpieceWeight(weight);
+                    updateTreeDetail();
+                } catch (NumberFormatException ignored) {
+
+                }
+            }
+        });
 
         createTitleButton.addActionListener(e -> onCreateNewTitle());
         editMaterialButton.addActionListener(e -> onEditMaterial());
 
+    }
+
+    private void updateTreeDetail() {
+        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+        model.reload(node);
     }
 
     private void verifyInput(JTextField textField, String toolTip) {
