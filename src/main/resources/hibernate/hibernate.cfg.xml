@@ -13,7 +13,7 @@
         </property>
         <property name="hibernate.hikari.minimumIdle">5</property>
         <property name="hibernate.hikari.maximumPoolSize">100</property>
-        <property name="hibernate.hikari.idleTimeout">30000</property>
+        <property name="hibernate.hikari.idleTimeout">5000</property>
 
 
         <mapping resource="hibernate/HibernateMapping.xml"/>

@@ -19,6 +19,7 @@ import com.mmz.specs.application.managers.ClientManager;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.HibernateConstants;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,6 @@ import org.hibernate.query.Query;
 import javax.persistence.metamodel.EntityType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -122,7 +122,7 @@ public class ClientBackgroundService {
             dbAddress = dbAddress.replace("localhost", socket.getInetAddress().getHostAddress());
 
             Configuration configuration = new Configuration();
-            configuration.configure(new File("src/main/resources/hibernate/hibernate.cfg.xml"));
+            configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
             configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbAddress);
             configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, dbUsername);
             configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, dbPassword);
