@@ -25,6 +25,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.util.Calendar;
 import java.util.List;
 
 public class DetailJTree extends JTree {
@@ -37,7 +38,7 @@ public class DetailJTree extends JTree {
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
-
+                long start = Calendar.getInstance().getTimeInMillis();
                 if (selected) {
                     setBackground(backgroundSelectionColor);
                 } else {
@@ -81,16 +82,22 @@ public class DetailJTree extends JTree {
                                         }
 
                                         String value1 = child.getCode() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
+                                        long stop = Calendar.getInstance().getTimeInMillis();
+                                        System.out.println("time: " + (stop - start));
                                         return super.getTreeCellRendererComponent(tree, value1, selected, true, leaf, row, hasFocus);
                                     }
                                 }
                             }
                         }
+                        long stop = Calendar.getInstance().getTimeInMillis();
+                        System.out.println("time: " + (stop - start));
                         return super.getTreeCellRendererComponent(tree,
                                 child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
                         // issue when (detailListEntity.getQuantity()) does not work... fix it some how????
                     }
                 }
+                long stop = Calendar.getInstance().getTimeInMillis();
+                System.out.println("time: " + (stop - start));
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             }
 
