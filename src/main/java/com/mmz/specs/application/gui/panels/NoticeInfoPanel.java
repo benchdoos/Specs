@@ -102,7 +102,7 @@ public class NoticeInfoPanel extends JPanel {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof DetailEntity) {
                     DetailEntity entity = (DetailEntity) value;
-                    return super.getListCellRendererComponent(list, entity.getCode(), index, isSelected, cellHasFocus);
+                    return super.getListCellRendererComponent(list, entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle(), index, isSelected, cellHasFocus);
                 }
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             }
