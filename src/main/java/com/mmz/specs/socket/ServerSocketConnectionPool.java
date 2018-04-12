@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -58,7 +57,7 @@ public class ServerSocketConnectionPool {
         log.info("Starting server if not started. Is started: " + isServerStarted());
 
         if (!isServerStarted()) {
-            server = new ServerSocket(serverSocketPort, 0, InetAddress.getByName(ServerConstants.SERVER_DEFAULT_ADDRESS_BIND));
+            server = new ServerSocket(serverSocketPort);
             log.info("Server successfully started: " + server);
         } else {
             throw new IOException("Server already started: " + server);

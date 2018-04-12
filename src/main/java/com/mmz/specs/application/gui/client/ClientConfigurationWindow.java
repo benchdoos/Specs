@@ -30,7 +30,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
-public class ClientConfigurationWindow extends JFrame {
+public class ClientConfigurationWindow extends JDialog {
     private final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private JPanel contentPane;
@@ -42,6 +42,7 @@ public class ClientConfigurationWindow extends JFrame {
 
     public ClientConfigurationWindow() {
         setContentPane(contentPane);
+        setModal(true);
         getRootPane().setDefaultButton(okButton);
         setTitle("Конфигурация подключения к серверу");
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/networkConnections128.png")));
