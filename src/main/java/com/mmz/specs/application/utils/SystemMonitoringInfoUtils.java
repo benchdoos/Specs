@@ -49,7 +49,11 @@ public class SystemMonitoringInfoUtils {
         double result = operatingSystemMXBean.getSystemCpuLoad();
 
         // returns a percentage value with 6 decimal point precision
-        return ((int) (result * 1000) / 10.00);
+        double v = (int) (result * 1000) / 10.00;
+        if (v < 0) {
+            v = 0.0d;
+        }
+        return v;
     }
 
     public static int getApplicationCurrentThreads() {
