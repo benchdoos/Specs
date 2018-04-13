@@ -74,7 +74,6 @@ public class ServerMainWindow extends JFrame {
     private final long logicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getLogicalProcessorCount();
     private final long physicalProcessorCount = SystemMonitoringInfoUtils.getProcessor().getPhysicalProcessorCount();
     private final long runtimeMaxMemory = getRuntimeMaxMemory();
-    private final long runtimeTotalMemory = getRuntimeTotalMemory();
     private final Date serverStartDate = Calendar.getInstance().getTime();
     private boolean isMonitoringActive = true;
     private JPanel contentPane;
@@ -663,6 +662,7 @@ public class ServerMainWindow extends JFrame {
 
             private void updateUsedJvmMemoryInfoLabel() {
                 final long runtimeUsedMemory = getRuntimeUsedMemory();
+                final long runtimeTotalMemory = getRuntimeTotalMemory();
 
                 String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
 
