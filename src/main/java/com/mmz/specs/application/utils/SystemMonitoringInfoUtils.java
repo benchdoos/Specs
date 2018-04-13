@@ -28,7 +28,7 @@ import java.lang.management.ManagementFactory;
 public class SystemMonitoringInfoUtils {
     private static final Runtime RUNTIME = Runtime.getRuntime();
     private static final SystemInfo SYSTEM_INFO = new SystemInfo();
-    public static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
+    private static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
     public static final OperatingSystem OPERATING_SYSTEM = SYSTEM_INFO.getOperatingSystem();
     private static final int MEGABYTE = 1024 * 1024;
     private static final Sensors SENSORS = HARDWARE_ABSTRACTION_LAYER.getSensors();
@@ -69,7 +69,7 @@ public class SystemMonitoringInfoUtils {
         return result / MEGABYTE;
     }
 
-    public static long getRuntimeFreeMemory() {
+    private static long getRuntimeFreeMemory() {
         long result = RUNTIME.freeMemory();
         return result / MEGABYTE;
     }
@@ -85,14 +85,6 @@ public class SystemMonitoringInfoUtils {
 
     public static double getCpuTemperature() {
         return SENSORS.getCpuTemperature();
-    }
-
-    public static double getCpuVoltage() {
-        return SENSORS.getCpuVoltage();
-    }
-
-    public static int[] getCpuFanSpeeds() {
-        return SENSORS.getFanSpeeds();
     }
 
     public static double getCpuUsageByApplication() {
