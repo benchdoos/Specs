@@ -23,7 +23,9 @@ import com.mmz.specs.socket.ServerSocketDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import java.io.IOException;
+import java.net.BindException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +71,7 @@ public class ServerSocketService {
 
     public void createConnections() throws IOException {
         while (this.isNotClosing) {
-            log.info("Server is waiting for new connection at: " + this.serverSocketConnectionPool.getServerInfo());
+            log.info("Server is creating for new connection at: " + this.serverSocketConnectionPool.getServerInfo());
 
             ClientConnection connection = getClientConnection();
             log.info("Server got a new connection at: " + connection);
@@ -102,10 +104,18 @@ public class ServerSocketService {
                     "Пул socket-соединений сервера успешно запущен",
                     ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         } catch (IOException e) {
-            log.error("Could not start server at: " + this.serverSocketConnectionPool.getServerInfo());
+            log.error("Could not start server at: " + this.serverSocketConnectionPool.getServerInfo(), e);
             ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
                     "Не удалось запустить пул socket-соединений сервера" + e.getLocalizedMessage(),
-                    ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+                    ServerLogMessage.ServerLogMessageLevel.WARN));
+            if (e instanceof BindException) {
+                JOptionPane.showMessageDialog(null,
+                        "Сервер уже запущен, не удалось зарезервировать порт на: localhost:"
+                                + ServerConstants.SERVER_DEFAULT_SOCKET_PORT,
+                        "Ошибка инициализации", JOptionPane.ERROR_MESSAGE);
+                ServerBackgroundService.getInstance().stopServerMainBackgroundService();
+                System.exit(-1);
+            }
         }
 
     }
