@@ -752,7 +752,7 @@ public class EditNoticePanel extends JPanel {
                 if (value instanceof NoticeEntity) {
                     NoticeEntity entity = (NoticeEntity) value;
                     String date = new SimpleDateFormat("dd.MM.yyyy").format(entity.getDate());
-                    String description = CommonUtils.substring(90, entity.getDescription().replace("\n", " "));
+                    String description = CommonUtils.substring(30, entity.getDescription().replace("\n", " "));
 
                     String text = entity.getNumber() + " (посл. изм. " + date + ") " + description;
                     return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
@@ -849,8 +849,10 @@ public class EditNoticePanel extends JPanel {
         createUIComponents();
         contentPane = new JPanel();
         contentPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        final JScrollPane scrollPane1 = new JScrollPane();
+        contentPane.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         mainTabbedPane = new JTabbedPane();
-        contentPane.add(mainTabbedPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
+        scrollPane1.setViewportView(mainTabbedPane);
         noticePanel = new JPanel();
         noticePanel.setLayout(new GridLayoutManager(1, 1, new Insets(5, 5, 5, 5), -1, -1));
         mainTabbedPane.addTab("Извещение", noticePanel);
@@ -877,14 +879,14 @@ public class EditNoticePanel extends JPanel {
         final JLabel label4 = new JLabel();
         label4.setText("Описание:");
         panel1.add(label4, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JScrollPane scrollPane1 = new JScrollPane();
-        panel1.add(scrollPane1, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 100), null, null, 0, false));
+        final JScrollPane scrollPane2 = new JScrollPane();
+        panel1.add(scrollPane2, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 100), null, null, 0, false));
         noticeDescriptionTextArea = new JTextArea();
         noticeDescriptionTextArea.setBackground(new Color(-855310));
         noticeDescriptionTextArea.setEditable(false);
         Font noticeDescriptionTextAreaFont = this.$$$getFont$$$("Consolas", -1, 14, noticeDescriptionTextArea.getFont());
         if (noticeDescriptionTextAreaFont != null) noticeDescriptionTextArea.setFont(noticeDescriptionTextAreaFont);
-        scrollPane1.setViewportView(noticeDescriptionTextArea);
+        scrollPane2.setViewportView(noticeDescriptionTextArea);
         final JLabel label5 = new JLabel();
         label5.setText("Дата:");
         panel1.add(label5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -909,15 +911,15 @@ public class EditNoticePanel extends JPanel {
         changePanel = new JPanel();
         changePanel.setLayout(new GridLayoutManager(11, 7, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Изменения", changePanel);
-        final JScrollPane scrollPane2 = new JScrollPane();
-        changePanel.add(scrollPane2, new GridConstraints(0, 0, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JScrollPane scrollPane3 = new JScrollPane();
+        changePanel.add(scrollPane3, new GridConstraints(0, 0, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         mainTree.setBackground(new Color(-855310));
         mainTree.setRootVisible(false);
         mainTree.setScrollsOnExpand(true);
         mainTree.setShowsRootHandles(true);
         mainTree.setVerifyInputWhenFocusTarget(false);
         mainTree.setVisibleRowCount(2);
-        scrollPane2.setViewportView(mainTree);
+        scrollPane3.setViewportView(mainTree);
         treeToolBar = new JToolBar();
         treeToolBar.setFloatable(false);
         changePanel.add(treeToolBar, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));

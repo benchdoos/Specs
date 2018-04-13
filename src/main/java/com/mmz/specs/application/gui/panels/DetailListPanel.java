@@ -74,7 +74,8 @@ public class DetailListPanel extends JPanel {
     private JButton addButton;
     private Session session;
     private JButton editButton;
-    private JLabel materialLabel;
+    private JLabel materialMarkLabel;
+    private JLabel materialProfileLabel;
 
     public DetailListPanel() {
         $$$setupUI$$$();
@@ -172,7 +173,7 @@ public class DetailListPanel extends JPanel {
             String searchText = "";
             final Timer searchTimer = new Timer(1000, e -> {
                 if (!searchText.isEmpty()) {
-                    searchText = searchText.replace(",", "");
+                    searchText = searchText.replace(",", ".");
                     System.out.println("timer works: " + searchText);
                     fillMainTreeBySearch(searchText);
                 } else {
@@ -341,40 +342,46 @@ public class DetailListPanel extends JPanel {
                 if (entity.isMainMaterial()) {
                     String substringLongMark = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongMark());
                     String substringLongProfile = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongProfile());
-                    String substringDelimiter = CommonWindowUtils.createDelimiter(substringLongMark, substringLongProfile);
-                    String text = "<html> <p style=\"line-height: 0.2em;\">" + substringLongMark + "<br>" + substringDelimiter + "<br>" + substringLongProfile + "</p></html>";
+                    /*String substringDelimiter = CommonWindowUtils.createDelimiter(substringLongMark, substringLongProfile);
+                    String text = "<html> <p style=\"line-height: 0.2em;\">" + substringLongMark + "<br>" + substringDelimiter + "<br>" + substringLongProfile + "</p></html>";*/
 
-                    materialLabel.setText(text);
+                    materialMarkLabel.setText(substringLongMark);
+                    materialProfileLabel.setText(substringLongProfile);
 
                     String longMark = entity.getMaterialByMaterialId().getLongMark();
                     String longProfile = entity.getMaterialByMaterialId().getLongProfile();
                     String delimiter = CommonWindowUtils.createDelimiter(longMark, longProfile);
                     String tooltipText = "<html> <p style=\"line-height: 0.2em;\">" + longMark + "<br>" + delimiter + "<br>" + longProfile + "</p></html>";
-                    materialLabel.setToolTipText(tooltipText);
+                    materialMarkLabel.setToolTipText(tooltipText);
+                    materialProfileLabel.setToolTipText(tooltipText);
                 }
             }
             initMaterialLabelListener(materialList);
         } else {
-            materialLabel.setText("");
+            materialMarkLabel.setText(" ");
+            materialProfileLabel.setText(" ");
             initMaterialLabelListener(null);
         }
 
     }
 
     private void initMaterialLabelListener(List<MaterialListEntity> materialList) {
-        for (MouseListener listener : materialLabel.getMouseListeners()) {
-            materialLabel.removeMouseListener(listener);
+        for (MouseListener listener : materialMarkLabel.getMouseListeners()) {
+            materialMarkLabel.removeMouseListener(listener);
+            materialProfileLabel.removeMouseListener(listener);
         }
 
         if (materialList != null) {
-            materialLabel.addMouseListener(new MouseAdapter() {
+            final MouseAdapter adapter = new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     MaterialListWindow materialListWindow = new MaterialListWindow(materialList);
                     materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), materialListWindow));
                     materialListWindow.setVisible(true);
                 }
-            });
+            };
+            materialMarkLabel.addMouseListener(adapter);
+            materialProfileLabel.addMouseListener(adapter);
         }
     }
 
@@ -429,11 +436,11 @@ public class DetailListPanel extends JPanel {
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         detailListPanel = new JPanel();
-        detailListPanel.setLayout(new GridLayoutManager(12, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.add(detailListPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        detailListPanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.add(detailListPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         detailInfoPanel = new JPanel();
-        detailInfoPanel.setLayout(new GridLayoutManager(14, 6, new Insets(0, 0, 0, 0), -1, -1));
-        detailListPanel.add(detailInfoPanel, new GridConstraints(0, 1, 11, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        detailInfoPanel.setLayout(new GridLayoutManager(15, 6, new Insets(0, 0, 0, 0), -1, -1));
+        detailListPanel.add(detailInfoPanel, new GridConstraints(0, 1, 2, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         searchTextField = new JTextField();
         detailInfoPanel.add(searchTextField, new GridConstraints(1, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label1 = new JLabel();
@@ -456,10 +463,10 @@ public class DetailListPanel extends JPanel {
         detailInfoPanel.add(label6, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label7 = new JLabel();
         label7.setText("Аннулирована:");
-        detailInfoPanel.add(label7, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(label7, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label8 = new JLabel();
         label8.setText("Технический процесс:");
-        detailInfoPanel.add(label8, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(label8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         numberLabel = new JLabel();
         numberLabel.setText("    ");
         detailInfoPanel.add(numberLabel, new GridConstraints(3, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -477,10 +484,10 @@ public class DetailListPanel extends JPanel {
         detailInfoPanel.add(workpieceWeightLabel, new GridConstraints(7, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         techProcessLabel = new JLabel();
         techProcessLabel.setText("     ");
-        detailInfoPanel.add(techProcessLabel, new GridConstraints(9, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(techProcessLabel, new GridConstraints(10, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveLabel = new JLabel();
         isActiveLabel.setText("   ");
-        detailInfoPanel.add(isActiveLabel, new GridConstraints(10, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(isActiveLabel, new GridConstraints(11, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         detailIconLabel = new JLabel();
         detailIconLabel.setForeground(new Color(-3684409));
         detailIconLabel.setHorizontalAlignment(0);
@@ -489,7 +496,7 @@ public class DetailListPanel extends JPanel {
         detailInfoPanel.add(detailIconLabel, new GridConstraints(2, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(128, 128), new Dimension(128, 128), new Dimension(128, 128), 0, false));
         final JLabel label9 = new JLabel();
         label9.setText("Последнее извещение:");
-        detailInfoPanel.add(label9, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(label9, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         noticeInfoButton = new JButton();
         noticeInfoButton.setBorderPainted(false);
         noticeInfoButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/info.png")));
@@ -497,33 +504,36 @@ public class DetailListPanel extends JPanel {
         noticeInfoButton.setMargin(new Insets(2, 2, 2, 2));
         noticeInfoButton.setOpaque(false);
         noticeInfoButton.setText("");
-        detailInfoPanel.add(noticeInfoButton, new GridConstraints(11, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(noticeInfoButton, new GridConstraints(12, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        detailInfoPanel.add(spacer1, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        detailInfoPanel.add(spacer1, new GridConstraints(13, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        detailInfoPanel.add(spacer2, new GridConstraints(3, 5, 11, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        detailInfoPanel.add(spacer2, new GridConstraints(3, 5, 12, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
         detailInfoPanel.add(spacer3, new GridConstraints(0, 1, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JLabel label10 = new JLabel();
         label10.setText("Материал:");
-        detailInfoPanel.add(label10, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        materialLabel = new JLabel();
-        materialLabel.setText("    ");
-        detailInfoPanel.add(materialLabel, new GridConstraints(8, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
-        detailListPanel.add(panel2, new GridConstraints(0, 0, 11, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        detailInfoPanel.add(label10, new GridConstraints(8, 0, 2, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        materialMarkLabel = new JLabel();
+        materialMarkLabel.setText("    ");
+        detailInfoPanel.add(materialMarkLabel, new GridConstraints(8, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        materialProfileLabel = new JLabel();
+        materialProfileLabel.setText("     ");
+        detailInfoPanel.add(materialProfileLabel, new GridConstraints(9, 1, 1, 4, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
-        panel2.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        detailListPanel.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         scrollPane1.setBorder(BorderFactory.createTitledBorder("Узлы"));
         mainTree.setBackground(new Color(-855310));
         mainTree.setFocusable(true);
         mainTree.setRootVisible(false);
         scrollPane1.setViewportView(mainTree);
+        final JPanel panel2 = new JPanel();
+        panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        detailListPanel.add(panel2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
         toolBar1.setOrientation(0);
-        panel2.add(toolBar1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        panel2.add(toolBar1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         refreshSessionButton = new JButton();
         refreshSessionButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         refreshSessionButton.setMargin(new Insets(2, 2, 2, 2));
@@ -542,7 +552,5 @@ public class DetailListPanel extends JPanel {
         editButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editButton.setText("");
         toolBar1.add(editButton);
-        final Spacer spacer4 = new Spacer();
-        detailListPanel.add(spacer4, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
 }
