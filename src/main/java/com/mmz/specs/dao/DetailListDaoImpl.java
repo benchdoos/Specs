@@ -55,7 +55,7 @@ public class DetailListDaoImpl implements DetailListDao {
     public int addDetailList(DetailListEntity detailListEntity) {
         Integer id = (Integer) this.session.save(detailListEntity);
         detailListEntity = getDetailListById(id);
-        log.info("DetailList successfully saved: " + detailListEntity);
+        log.debug("DetailList successfully saved: " + detailListEntity);
         return id;
     }
 
@@ -63,7 +63,7 @@ public class DetailListDaoImpl implements DetailListDao {
     @Transactional
     public void updateDetailList(DetailListEntity detailListEntity) {
         this.session.merge(detailListEntity);
-        log.info("DetailList successfully updated: " + detailListEntity);
+        log.debug("DetailList successfully updated: " + detailListEntity);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class DetailListDaoImpl implements DetailListDao {
         if (detailListEntity != null) {
             this.session.delete(detailListEntity);
         }
-        log.info("DetailList successfully removed: " + detailListEntity);
+        log.debug("DetailList successfully removed: " + detailListEntity);
     }
 
     @Override
     @Transactional
     public DetailListEntity getDetailListById(int id) {
         DetailListEntity detailListEntity = this.session.load(DetailListEntity.class, id);
-        log.info("DetailList found by id:" + id + " " + detailListEntity);
+        log.debug("DetailList found by id:" + id + " " + detailListEntity);
         return detailListEntity;
     }
 
@@ -180,7 +180,7 @@ public class DetailListDaoImpl implements DetailListDao {
         Query query = session.createQuery("from DetailListEntity where detailByParentDetailId = :parent and detailByChildDetailId = :child");
         query.setParameter("parent", parent);
         query.setParameter("child", child);
-        
+
         List list = query.list();
         ArrayList<DetailListEntity> arrayList = new ArrayList<>(list.size());
         arrayList.addAll(list);
@@ -255,7 +255,7 @@ public class DetailListDaoImpl implements DetailListDao {
         for (Object detailListEntity : list) {
             if (detailListEntity instanceof DetailListEntity) {
                 result.add((DetailListEntity) detailListEntity);
-                log.info("DetailList from list: " + detailListEntity);
+                log.debug("DetailList from list: " + detailListEntity);
             } else {
                 log.warn("Not DetailList from list: " + detailListEntity);
             }
@@ -281,7 +281,7 @@ public class DetailListDaoImpl implements DetailListDao {
         for (Object detailListEntity : list) {
             if (detailListEntity instanceof DetailListEntity) {
                 result.add((DetailListEntity) detailListEntity);
-                log.info("DetailList successfully found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
+                log.debug("DetailList successfully found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
             } else {
                 log.warn("Not DetailList found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
             }

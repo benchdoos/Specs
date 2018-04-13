@@ -54,7 +54,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     public int addDetailTitle(DetailTitleEntity detailTitlesEntity) {
         Integer id = (Integer) session.save(detailTitlesEntity);
         detailTitlesEntity = getDetailTitleById(id);
-        log.info("DetailTitle successfully saved: " + detailTitlesEntity);
+        log.debug("DetailTitle successfully saved: " + detailTitlesEntity);
         return id;
     }
 
@@ -62,7 +62,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     @Transactional
     public void updateDetailTitle(DetailTitleEntity detailTitlesEntity) {
         session.merge(detailTitlesEntity);
-        log.info("DetailTitle successfully updated: " + detailTitlesEntity);
+        log.debug("DetailTitle successfully updated: " + detailTitlesEntity);
     }
 
     @Override
@@ -72,14 +72,14 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
         if (detailTitleEntity != null) {
             session.delete(detailTitleEntity);
         }
-        log.info("DetailTitle successfully removed: " + detailTitleEntity);
+        log.debug("DetailTitle successfully removed: " + detailTitleEntity);
     }
 
     @Override
     @Transactional
     public DetailTitleEntity getDetailTitleById(int id) {
         DetailTitleEntity detailTitleEntity = session.load(DetailTitleEntity.class, id);
-        log.info("DetailTitle successfully found by id:" + id + " " + detailTitleEntity);
+        log.debug("DetailTitle successfully found by id:" + id + " " + detailTitleEntity);
         return detailTitleEntity;
     }
 
@@ -90,7 +90,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
         query.setParameter("title", title);
 
         final DetailTitleEntity entity = (DetailTitleEntity) query.uniqueResult();
-        log.info("DetailTitle found by title: " + title + " " + entity);
+        log.debug("DetailTitle found by title: " + title + " " + entity);
         return entity;
     }
 
@@ -103,7 +103,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
         for (Object detailTitleEntity : list) {
             if (detailTitleEntity instanceof DetailTitleEntity) {
                 result.add((DetailTitleEntity) detailTitleEntity);
-                log.info("DetailTitle list: " + detailTitleEntity);
+                log.debug("DetailTitle list: " + detailTitleEntity);
             } else {
                 log.warn("Not DetailTitle from list: " + detailTitleEntity);
             }

@@ -54,7 +54,7 @@ public class DetailDaoImpl implements DetailDao {
     public int addDetail(DetailEntity detailEntity) {
         Integer id = (Integer) session.save(detailEntity);
         detailEntity = getDetailById(id);
-        log.info("Detail successfully saved: " + detailEntity);
+        log.debug("Detail successfully saved: " + detailEntity);
         return id;
 
     }
@@ -63,7 +63,7 @@ public class DetailDaoImpl implements DetailDao {
     @Transactional
     public void updateDetail(DetailEntity detailEntity) {
         session.merge(detailEntity);
-        log.info("Detail successfully updated: " + detailEntity);
+        log.debug("Detail successfully updated: " + detailEntity);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class DetailDaoImpl implements DetailDao {
         if (detailEntity != null) {
             session.delete(detailEntity);
         }
-        log.info("Detail successfully removed: " + detailEntity);
+        log.debug("Detail successfully removed: " + detailEntity);
     }
 
     @Override
     @Transactional
     public DetailEntity getDetailById(int id) {
         DetailEntity detailEntity = session.load(DetailEntity.class, id);
-        log.info("Detail found by id:" + id + " " + detailEntity);
+        log.debug("Detail found by id:" + id + " " + detailEntity);
         return detailEntity;
     }
 
@@ -92,7 +92,7 @@ public class DetailDaoImpl implements DetailDao {
         query.setParameter("code", code);
 
         final DetailEntity entity = (DetailEntity) query.uniqueResult();
-        log.info("Detail found by code: " + code + " " + entity);
+        log.debug("Detail found by code: " + code + " " + entity);
         return entity;
     }
 
@@ -105,7 +105,7 @@ public class DetailDaoImpl implements DetailDao {
         for (Object detailEntity : list) {
             if (detailEntity instanceof DetailEntity) {
                 result.add((DetailEntity) detailEntity);
-                log.info("Detail from list: " + detailEntity);
+                log.debug("Detail from list: " + detailEntity);
             } else {
                 log.warn("Not Detail from list: " + detailEntity);
             }

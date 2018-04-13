@@ -47,7 +47,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
     @Transactional
     public void updateUserType(UserTypeEntity userTypeEntity) {
         session.merge(userTypeEntity);
-        log.info("UserType successfully updated: "+ userTypeEntity);
+        log.debug("UserType successfully updated: " + userTypeEntity);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
     @Transactional
     public UserTypeEntity getUserTypeById(int id) {
         UserTypeEntity userTypeEntity = session.load(UserTypeEntity.class, id);
-        log.info("UserType found by id:" + id + " " + userTypeEntity);
+        log.debug("UserType found by id:" + id + " " + userTypeEntity);
         return userTypeEntity;
     }
 
@@ -72,7 +72,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
         for (Object userTypeEntity : list) {
             if (userTypeEntity instanceof UserTypeEntity) {
                 result.add((UserTypeEntity) userTypeEntity);
-                log.info("UserType from list: " + userTypeEntity);
+                log.debug("UserType from list: " + userTypeEntity);
             } else {
                 log.warn("Not UserType from list: " + userTypeEntity);
             }

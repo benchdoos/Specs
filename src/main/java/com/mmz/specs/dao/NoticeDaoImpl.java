@@ -55,7 +55,7 @@ public class NoticeDaoImpl implements NoticeDao {
     public int addNotice(NoticeEntity noticeEntity) {
         Integer id = (Integer) session.save(noticeEntity);
         noticeEntity = getNoticeById(id);
-        log.info("User successfully saved: " + noticeEntity);
+        log.debug("User successfully saved: " + noticeEntity);
         return id;
     }
 
@@ -63,7 +63,7 @@ public class NoticeDaoImpl implements NoticeDao {
     @Transactional
     public void updateNotice(NoticeEntity noticeEntity) {
         session.merge(noticeEntity);
-        log.info("Notice successfully updated: " + noticeEntity);
+        log.debug("Notice successfully updated: " + noticeEntity);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class NoticeDaoImpl implements NoticeDao {
         if (noticeEntity != null) {
             session.delete(noticeEntity);
         }
-        log.info("Notice successfully removed: " + noticeEntity);
+        log.debug("Notice successfully removed: " + noticeEntity);
     }
 
     @Override
     @Transactional
     public NoticeEntity getNoticeById(int id) {
         NoticeEntity noticeEntity = session.load(NoticeEntity.class, id);
-        log.info("Notice found by id:" + id + " " + noticeEntity);
+        log.debug("Notice found by id:" + id + " " + noticeEntity);
         return noticeEntity;
     }
 
@@ -91,7 +91,7 @@ public class NoticeDaoImpl implements NoticeDao {
         query.setParameter("number", number);
 
         final NoticeEntity entity = (NoticeEntity) query.uniqueResult();
-        log.info("Notice successfully found by number: " + number + " " + entity);
+        log.debug("Notice successfully found by number: " + number + " " + entity);
         return entity;
     }
 
@@ -110,7 +110,7 @@ public class NoticeDaoImpl implements NoticeDao {
         for (Object noticeEntity : list) {
             if (noticeEntity instanceof NoticeEntity) {
                 result.add((NoticeEntity) noticeEntity);
-                log.info("Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
+                log.debug("Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
             } else {
                 log.warn("Not Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
             }
@@ -127,7 +127,7 @@ public class NoticeDaoImpl implements NoticeDao {
         for (Object noticeEntity : list) {
             if (noticeEntity instanceof NoticeEntity) {
                 result.add((NoticeEntity) noticeEntity);
-                log.info("Notice from list: " + noticeEntity);
+                log.debug("Notice from list: " + noticeEntity);
             } else {
                 log.warn("Not Notice from list: " + noticeEntity);
             }

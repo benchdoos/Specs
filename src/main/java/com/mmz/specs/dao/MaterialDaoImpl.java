@@ -56,7 +56,7 @@ public class MaterialDaoImpl implements MaterialDao {
     public int addMaterial(MaterialEntity materialEntity) {
         Integer id = (Integer) session.save(materialEntity);
         materialEntity = getMaterialById(id);
-        log.info("Material successfully saved: " + materialEntity);
+        log.debug("Material successfully saved: " + materialEntity);
         return id;
     }
 
@@ -64,7 +64,7 @@ public class MaterialDaoImpl implements MaterialDao {
     @Transactional
     public void updateMaterial(MaterialEntity materialEntity) {
         session.merge(materialEntity);
-        log.info("Material successfully updated: " + materialEntity);
+        log.debug("Material successfully updated: " + materialEntity);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class MaterialDaoImpl implements MaterialDao {
         if (materialEntity != null) {
             session.delete(materialEntity);
         }
-        log.info("Material successfully removed: " + materialEntity);
+        log.debug("Material successfully removed: " + materialEntity);
     }
 
 
@@ -82,7 +82,7 @@ public class MaterialDaoImpl implements MaterialDao {
     @Transactional
     public MaterialEntity getMaterialById(int id) {
         MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
-        log.info("Material successfully found by id:" + id + " " + materialEntity);
+        log.debug("Material successfully found by id:" + id + " " + materialEntity);
         return materialEntity;
     }
 
@@ -95,7 +95,7 @@ public class MaterialDaoImpl implements MaterialDao {
         query.setParameter("shortProfile", shortProfile);
 
         final MaterialEntity entity = (MaterialEntity) query.uniqueResult();
-        log.info("Material found by short mark and short profile: " + shortMark + " " + shortProfile
+        log.debug("Material found by short mark and short profile: " + shortMark + " " + shortProfile
                 + "; " + entity);
         return entity;
     }
@@ -109,7 +109,7 @@ public class MaterialDaoImpl implements MaterialDao {
         for (Object materialEntity : list) {
             if (materialEntity instanceof MaterialEntity) {
                 result.add((MaterialEntity) materialEntity);
-                log.info("Material from list: " + materialEntity);
+                log.debug("Material from list: " + materialEntity);
             } else {
                 log.warn("Not Material from list: " + materialEntity);
             }

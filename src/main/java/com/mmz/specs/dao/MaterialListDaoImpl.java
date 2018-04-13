@@ -55,7 +55,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     public int addMaterialList(MaterialListEntity materialListEntity) {
         Integer id = (Integer) session.save(materialListEntity);
         materialListEntity = getMaterialListById(id);
-        log.info("MaterialList successfully saved: " + materialListEntity);
+        log.debug("MaterialList successfully saved: " + materialListEntity);
         return id;
     }
 
@@ -63,7 +63,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     @Transactional
     public void updateMaterialList(MaterialListEntity materialListEntity) {
         session.merge(materialListEntity);
-        log.info("MaterialList successfully updated: " + materialListEntity);
+        log.debug("MaterialList successfully updated: " + materialListEntity);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class MaterialListDaoImpl implements MaterialListDao {
         if (materialListEntity != null) {
             session.delete(materialListEntity);
         }
-        log.info("MaterialList successfully removed: " + materialListEntity);
+        log.debug("MaterialList successfully removed: " + materialListEntity);
     }
 
     @Override
     @Transactional
     public MaterialListEntity getMaterialListById(int id) {
         MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
-        log.info("MaterialList found by id:" + id + " " + materialListEntity);
+        log.debug("MaterialList found by id:" + id + " " + materialListEntity);
         return materialListEntity;
     }
 
@@ -95,7 +95,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
         for (Object materialListEntity : list) {
             if (materialListEntity instanceof MaterialListEntity) {
                 result.add((MaterialListEntity) materialListEntity);
-                log.info("MaterialList successfully found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
+                log.debug("MaterialList successfully found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             } else {
                 log.warn("Not MaterialList found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             }
@@ -111,7 +111,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
         for (Object materialListEntity : list) {
             if (materialListEntity instanceof MaterialListEntity) {
                 result.add((MaterialListEntity) materialListEntity);
-                log.info("MaterialList from list: " + materialListEntity);
+                log.debug("MaterialList from list: " + materialListEntity);
             } else {
                 log.warn("Not MaterialList from list: " + materialListEntity);
             }

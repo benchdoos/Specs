@@ -60,7 +60,7 @@ public class UsersDaoImpl implements UsersDao {
     public int addUser(UsersEntity usersEntity) {
         Integer id = (Integer) session.save(usersEntity);
         usersEntity = getUserById(id);
-        log.info("User successfully saved: " + usersEntity);
+        log.debug("User successfully saved: " + usersEntity);
         return id;
     }
 
@@ -68,7 +68,7 @@ public class UsersDaoImpl implements UsersDao {
     @Transactional
     public void updateUser(UsersEntity usersEntity) {
         session.merge(usersEntity);
-        log.info("User successfully updated: " + usersEntity);
+        log.debug("User successfully updated: " + usersEntity);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class UsersDaoImpl implements UsersDao {
         if (usersEntity != null) {
             session.delete(usersEntity);
         }
-        log.info("User successfully removed: " + usersEntity);
+        log.debug("User successfully removed: " + usersEntity);
     }
 
 
@@ -86,7 +86,7 @@ public class UsersDaoImpl implements UsersDao {
     @Transactional
     public UsersEntity getUserById(int id) {
         UsersEntity usersEntity = session.load(UsersEntity.class, id);
-        log.info("User found by id:" + id + " " + usersEntity);
+        log.debug("User found by id:" + id + " " + usersEntity);
         return usersEntity;
     }
 
@@ -97,7 +97,7 @@ public class UsersDaoImpl implements UsersDao {
         query.setParameter("username", username);
 
         final UsersEntity entity = (UsersEntity) query.uniqueResult();
-        log.info("User found by username " + username + ": " + entity);
+        log.debug("User found by username " + username + ": " + entity);
         return entity;
     }
 
@@ -111,7 +111,7 @@ public class UsersDaoImpl implements UsersDao {
         for (Object usersEntity : list) {
             if (usersEntity instanceof UsersEntity) {
                 result.add((UsersEntity) usersEntity);
-                log.info("User from list: " + usersEntity);
+                log.debug("User from list: " + usersEntity);
             } else {
                 log.warn("Not User from list: " + usersEntity);
             }

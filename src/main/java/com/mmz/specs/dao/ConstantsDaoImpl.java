@@ -54,7 +54,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     public int addConstant(ConstantsEntity constantsEntity) {
         Integer id = (Integer) session.save(constantsEntity);
         constantsEntity = getConstantById(id);
-        log.info("Constant successfully saved: " + constantsEntity);
+        log.debug("Constant successfully saved: " + constantsEntity);
         return id;
     }
 
@@ -62,7 +62,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     @Transactional
     public void updateConstant(ConstantsEntity constantsEntity) {
         session.update(constantsEntity);
-        log.info("Constant successfully updated: " + constantsEntity);
+        log.debug("Constant successfully updated: " + constantsEntity);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
         if (constantsEntity != null) {
             session.delete(constantsEntity);
         }
-        log.info("Constant successfully removed: " + constantsEntity);
+        log.debug("Constant successfully removed: " + constantsEntity);
 
     }
 
@@ -80,7 +80,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
     @Transactional
     public ConstantsEntity getConstantById(int id) {
         ConstantsEntity constantsEntity = session.load(ConstantsEntity.class, id);
-        log.info("Constant found by id:" + id + " " + constantsEntity);
+        log.debug("Constant found by id:" + id + " " + constantsEntity);
         return constantsEntity;
     }
 
@@ -92,7 +92,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
         query.setFirstResult(0);
         query.setMaxResults(1);
         final ConstantsEntity entity = (ConstantsEntity) query.getSingleResult();
-        log.info("Constant found by key: " + key + " " + entity);
+        log.debug("Constant found by key: " + key + " " + entity);
         return entity;
 
     }
@@ -106,7 +106,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
         for (Object constantsEntity : list) {
             if (constantsEntity instanceof ConstantsEntity) {
                 result.add((ConstantsEntity) constantsEntity);
-                log.info("Constant from list: " + constantsEntity);
+                log.debug("Constant from list: " + constantsEntity);
             } else {
                 log.warn("Not Constant from list: " + constantsEntity);
             }

@@ -53,7 +53,7 @@ public class TechProcessDaoImpl implements TechProcessDao {
     public int addTechProcess(TechProcessEntity techProcessEntity) {
         Integer id = (Integer) session.save(techProcessEntity);
         techProcessEntity = getTechProcessById(id);
-        log.info("TechProcess successfully saved: " + techProcessEntity);
+        log.debug("TechProcess successfully saved: " + techProcessEntity);
         return id;
     }
 
@@ -61,7 +61,7 @@ public class TechProcessDaoImpl implements TechProcessDao {
     @Transactional
     public void updateTechProcess(TechProcessEntity techProcessEntity) {
         session.merge(techProcessEntity);
-        log.info("User successfully updated: " + techProcessEntity);
+        log.debug("User successfully updated: " + techProcessEntity);
     }
 
     @Override
@@ -71,14 +71,14 @@ public class TechProcessDaoImpl implements TechProcessDao {
         if (techProcessEntity != null) {
             session.delete(techProcessEntity);
         }
-        log.info("TechProcess successfully removed: " + techProcessEntity);
+        log.debug("TechProcess successfully removed: " + techProcessEntity);
     }
 
     @Override
     @Transactional
     public TechProcessEntity getTechProcessById(int id) {
         TechProcessEntity techProcessEntity = session.load(TechProcessEntity.class, id);
-        log.info("TechProcess found by id:" + id + " " + techProcessEntity);
+        log.debug("TechProcess found by id:" + id + " " + techProcessEntity);
         return techProcessEntity;
     }
 
@@ -124,7 +124,7 @@ public class TechProcessDaoImpl implements TechProcessDao {
         for (Object techProcessEntity : list) {
             if (techProcessEntity instanceof TechProcessEntity) {
                 result.add((TechProcessEntity) techProcessEntity);
-                log.info("TechProcess from list: " + techProcessEntity);
+                log.debug("TechProcess from list: " + techProcessEntity);
             } else {
                 log.warn("Not TechProcess from list: " + techProcessEntity);
             }
