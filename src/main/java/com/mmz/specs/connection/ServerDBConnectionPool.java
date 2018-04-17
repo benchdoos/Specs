@@ -15,6 +15,7 @@
 
 package com.mmz.specs.connection;
 
+import com.mmz.specs.application.ApplicationException;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerStartException;
 import com.mmz.specs.application.core.server.service.ServerLogMessage;
@@ -32,6 +33,7 @@ import org.hibernate.query.Query;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
+import javax.swing.*;
 
 public class ServerDBConnectionPool {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -51,7 +53,7 @@ public class ServerDBConnectionPool {
         return ourInstance;
     }
 
-    private static void createConnection() {
+    private static void createConnection() throws ApplicationException {
         try {
             Configuration configuration = new Configuration();
             configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
@@ -65,7 +67,7 @@ public class ServerDBConnectionPool {
                 log.info("Hibernate connection at: " + dbConnectionUrl + " successfully started.");
             }
         } catch (Throwable ex) {
-            throw new ExceptionInInitializerError(ex);
+            throw new ApplicationException(ex);
         }
     }
 
@@ -105,12 +107,21 @@ public class ServerDBConnectionPool {
 
     public Session getSession() throws HibernateException {
         if (ourSessionFactory == null) {
-            createConnection();
-            if (ourSessionFactory == null) {
-                throw new HibernateException("Could not create session factory");
+            try {
+                createConnection();
+                if (ourSessionFactory == null) {
+                    throw new HibernateException("Could not create session factory");
+                }
+                return ourSessionFactory.openSession();
+            } catch (ApplicationException e) {
+                JOptionPane.showMessageDialog(null, "Не удалось создать подключение к БД.",
+                        "Ошибка подключения", JOptionPane.WARNING_MESSAGE);
+                throw new HibernateException("Could not create DB connection pool at: " + dbConnectionUrl
+                        + " username: " + connectionUsername + " password length: " + connectionPassword.length(), e);
             }
+        } else {
+            return ourSessionFactory.openSession();
         }
-        return ourSessionFactory.openSession();
     }
 
     private void createDaoSession() {
