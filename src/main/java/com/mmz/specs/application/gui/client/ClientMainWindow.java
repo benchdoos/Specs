@@ -404,10 +404,12 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onDisconnectFromFtp() {
-        try {
-            ftpUtils.disconnect();
-        } catch (Exception e) {
-            log.warn("Could not disconnect from ftp server: " + ftpUtils, e);
+        if (ftpUtils != null) {
+            try {
+                ftpUtils.disconnect();
+            } catch (Exception e) {
+                log.warn("Could not disconnect from ftp server: " + ftpUtils, e);
+            }
         }
     }
 
