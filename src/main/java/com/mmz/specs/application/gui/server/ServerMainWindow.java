@@ -327,7 +327,11 @@ public class ServerMainWindow extends JFrame {
     private void setWarningMode(JLabel label, boolean value) {
         if (value) {
             label.setForeground(Color.RED);
-            label.setIcon(new ImageIcon(getClass().getResource("/img/gui/warningRed12.png")));
+            try {
+                label.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/warningRed12.png"))));
+            } catch (NullPointerException e) {
+                /*NOP*/
+            }
         } else {
             label.setForeground(Color.BLACK);
             label.setIcon(null);
