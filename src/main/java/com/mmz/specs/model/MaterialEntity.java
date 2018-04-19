@@ -107,11 +107,15 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
         MaterialEntity that = (MaterialEntity) o;
 
         if (id != that.id) return false;
-        if (shortMark != null ? !shortMark.equals(that.shortMark) : that.shortMark != null) return false;
-        if (shortProfile != null ? !shortProfile.equals(that.shortProfile) : that.shortProfile != null) return false;
-        if (longMark != null ? !longMark.equals(that.longMark) : that.longMark != null) return false;
-        if (longProfile != null ? !longProfile.equals(that.longProfile) : that.longProfile != null) return false;
-        if (active == that.active) return false;
+        if (getShortMark() != null ? !getShortMark().equals(that.getShortMark()) : that.getShortMark() != null)
+            return false;
+        if (getShortProfile() != null ? !getShortProfile().equals(that.getShortProfile()) : that.getShortProfile() != null)
+            return false;
+        if (getLongMark() != null ? !getLongMark().equals(that.getLongMark()) : that.getLongMark() != null)
+            return false;
+        if (getLongProfile() != null ? !getLongProfile().equals(that.getLongProfile()) : that.getLongProfile() != null)
+            return false;
+        if (isActive() == that.isActive()) return false;
 
         return true;
     }
