@@ -190,7 +190,9 @@
                     <children>
                       <component id="934ed" class="javax.swing.JList" binding="materialList">
                         <constraints/>
-                        <properties/>
+                        <properties>
+                          <selectionMode value="0"/>
+                        </properties>
                       </component>
                     </children>
                   </scrollpane>

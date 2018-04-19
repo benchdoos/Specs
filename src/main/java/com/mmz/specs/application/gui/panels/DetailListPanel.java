@@ -31,10 +31,7 @@ import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.MaterialListDaoImpl;
-import com.mmz.specs.model.DetailEntity;
-import com.mmz.specs.model.DetailListEntity;
-import com.mmz.specs.model.MaterialListEntity;
-import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.model.*;
 import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -414,8 +411,13 @@ public class DetailListPanel extends JPanel {
             Window window = FrameUtils.findWindow(this);
             if (window instanceof ClientMainWindow) {
                 ClientMainWindow mainWindow = (ClientMainWindow) window;
-                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
+                final UsersEntity currentUser = mainWindow.getCurrentUser();
+                if (currentUser != null) {
+                    if ((currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive()) {
+                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
+                    }
+                }
             }
         }
     }
