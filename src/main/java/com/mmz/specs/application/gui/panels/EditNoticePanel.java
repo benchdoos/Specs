@@ -20,6 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.client.CreateMaterialWindow;
 import com.mmz.specs.application.gui.client.CreateNoticeWindow;
 import com.mmz.specs.application.gui.client.EditMaterialListWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
@@ -240,7 +241,13 @@ public class EditNoticePanel extends JPanel {
 
         createTitleButton.addActionListener(e -> onCreateNewTitle());
         editMaterialButton.addActionListener(e -> onEditMaterial());
+        createMaterialButton.addActionListener(e -> onCreateNewMaterial());
+    }
 
+    private void onCreateNewMaterial() {
+        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
+        createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+        createMaterialWindow.setVisible(true);
     }
 
     private void updateTreeDetail() {
@@ -278,6 +285,8 @@ public class EditNoticePanel extends JPanel {
 
     private void onEditMaterial() {
         EditMaterialListWindow materialListWindow = new EditMaterialListWindow();
+        materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), materialListWindow));
+        materialListWindow.setVisible(true);
     }
 
     private void onCreateNewTitle() {

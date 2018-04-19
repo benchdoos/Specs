@@ -58,7 +58,7 @@
               </grid>
             </constraints>
             <properties>
-              <foreground color="-3684409"/>
+              <foreground color="-10395295"/>
               <horizontalAlignment value="0"/>
               <horizontalTextPosition value="0"/>
               <text value="Нет изображения" noi18n="true"/>

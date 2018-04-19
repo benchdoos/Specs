@@ -181,7 +181,7 @@ public class DetailInfoWindow extends JFrame {
         panel3.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         detailIconLabel = new JLabel();
-        detailIconLabel.setForeground(new Color(-3684409));
+        detailIconLabel.setForeground(new Color(-10395295));
         detailIconLabel.setHorizontalAlignment(0);
         detailIconLabel.setHorizontalTextPosition(0);
         detailIconLabel.setText("Нет изображения");

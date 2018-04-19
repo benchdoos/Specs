@@ -489,7 +489,7 @@ public class DetailListPanel extends JPanel {
         isActiveLabel.setText("   ");
         detailInfoPanel.add(isActiveLabel, new GridConstraints(11, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         detailIconLabel = new JLabel();
-        detailIconLabel.setForeground(new Color(-3684409));
+        detailIconLabel.setForeground(new Color(-10395295));
         detailIconLabel.setHorizontalAlignment(0);
         detailIconLabel.setHorizontalTextPosition(0);
         detailIconLabel.setText("Нет изображения");
