@@ -21,7 +21,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "MATERIAL_LIST", schema = "", catalog = "")
-public class MaterialListEntity {
+public class MaterialListEntity implements Comparable<MaterialListEntity> {
     private long id;
     private boolean isActive;
     private DetailEntity detailByDetailId;
@@ -103,5 +103,16 @@ public class MaterialListEntity {
                 .append("detailByDetailId", detailByDetailId)
                 .append("materialByMaterialId", materialByMaterialId)
                 .toString();
+    }
+
+    @Override
+    public int compareTo(MaterialListEntity that) {
+        int result = 0;
+        result += this.getMaterialByMaterialId().getLongMark().compareTo(that.getMaterialByMaterialId().getLongMark());
+        result += this.getMaterialByMaterialId().getLongProfile().compareTo(that.getMaterialByMaterialId().getLongProfile());
+        result += Boolean.compare(this.isMainMaterial(), that.isMainMaterial());
+        result -= Boolean.compare(this.isActive(), that.isActive());
+        return result;
+
     }
 }

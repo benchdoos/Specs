@@ -284,7 +284,11 @@ public class EditNoticePanel extends JPanel {
     }
 
     private void onEditMaterial() {
-        EditMaterialListWindow materialListWindow = new EditMaterialListWindow();
+        final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+        DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
+
+
+        EditMaterialListWindow materialListWindow = new EditMaterialListWindow(detailEntity);
         materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), materialListWindow));
         materialListWindow.setVisible(true);
     }
@@ -594,7 +598,7 @@ public class EditNoticePanel extends JPanel {
                 for (MaterialListEntity entity : usedMaterials) {
                     if (entity.isActive()) {
                         MaterialEntity materialByMaterialId = entity.getMaterialByMaterialId();
-                        if (materialByMaterialId.getActive()) {
+                        if (materialByMaterialId.isActive()) {
                             result.append(materialByMaterialId.getShortMark()).append(" ").append(materialByMaterialId.getShortProfile()).append(", ");
                         }
                     }

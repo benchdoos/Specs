@@ -47,38 +47,38 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional
     public int addMaterial(MaterialEntity materialEntity) {
-        return materialDao.addMaterial(materialEntity);
+        return this.materialDao.addMaterial(materialEntity);
     }
 
     @Override
     @Transactional
     public void updateMaterial(MaterialEntity materialEntity) {
-
+        this.materialDao.updateMaterial(materialEntity);
     }
 
     @Override
     @Transactional
     public void removeMaterial(int id) {
-
+        this.materialDao.removeMaterial(id);
     }
 
 
     @Override
     @Transactional
     public MaterialEntity getMaterialById(int id) {
-        return null;
+        return this.materialDao.getMaterialById(id);
     }
 
     @Override
     @Transactional
     public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile) {
-        return null;
+        return this.materialDao.getMaterialByShortMarkAndProfile(shortMark, shortProfile);
     }
 
 
     @Override
     @Transactional
     public List<MaterialEntity> listMaterials() {
-        return null;
+        return this.materialDao.listMaterials();
     }
 }

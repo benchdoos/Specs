@@ -21,7 +21,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "MATERIAL")
-public class MaterialEntity {
+public class MaterialEntity implements Comparable<MaterialEntity> {
     private int id;
     private String shortMark;
     private String shortProfile;
@@ -81,7 +81,7 @@ public class MaterialEntity {
 
     @Basic
     @Column(name = "IS_ACTIVE")
-    public boolean getActive() {
+    public boolean isActive() {
         return active;
     }
 
@@ -103,8 +103,7 @@ public class MaterialEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (!(o instanceof MaterialEntity)) return false;
         MaterialEntity that = (MaterialEntity) o;
 
         if (id != that.id) return false;
@@ -127,5 +126,14 @@ public class MaterialEntity {
                 .append("longProfile", longProfile)
                 .append("active", active)
                 .toString();
+    }
+
+    @Override
+    public int compareTo(MaterialEntity that) {
+        int result = 0;
+        result += this.getShortMark().compareTo(that.getShortMark());
+        result += this.getShortProfile().compareTo(that.getShortProfile());
+        result += Boolean.compare(this.isActive(), that.isActive());
+        return result;
     }
 }
