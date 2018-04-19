@@ -245,7 +245,7 @@ public class EditNoticePanel extends JPanel {
     }
 
     private void onCreateNewMaterial() {
-        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
+        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null);
         createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
         createMaterialWindow.setVisible(true);
     }

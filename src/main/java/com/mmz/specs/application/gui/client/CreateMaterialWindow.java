@@ -18,6 +18,7 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.dao.MaterialDaoImpl;
 import com.mmz.specs.model.MaterialEntity;
 import com.mmz.specs.service.MaterialService;
@@ -50,8 +51,8 @@ public class CreateMaterialWindow extends JDialog {
         $$$setupUI$$$();
     }
 
-    public CreateMaterialWindow(Session session, MaterialEntity materialEntity) {
-        this.session = session;
+    public CreateMaterialWindow(MaterialEntity materialEntity) {
+        this.session = ClientBackgroundService.getInstance().getSession();
         this.materialEntity = materialEntity;
 
         initGui();
