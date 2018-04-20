@@ -106,7 +106,7 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
         if (!(o instanceof MaterialEntity)) return false;
         MaterialEntity that = (MaterialEntity) o;
 
-        if (id != that.id) return false;
+        if (getId() != that.getId()) return false;
         if (getShortMark() != null ? !getShortMark().equals(that.getShortMark()) : that.getShortMark() != null)
             return false;
         if (getShortProfile() != null ? !getShortProfile().equals(that.getShortProfile()) : that.getShortProfile() != null)
