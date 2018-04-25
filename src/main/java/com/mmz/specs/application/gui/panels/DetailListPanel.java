@@ -254,11 +254,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         }
     }
 
-    public void enableEditorButtons(boolean enable) {
-        addButton.setEnabled(enable);
-        editButton.setEnabled(enable);
-    }
-
     private List<NoticeEntity> getUniqueNoticeList(List<DetailListEntity> list) {
         List<NoticeEntity> result = new ArrayList<>();
         List<String> noticeList = new ArrayList<>(); //fixme this shit
@@ -430,6 +425,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     @Override
     public AccessPolicyManager getPolicyManager() {
         return new AccessPolicyManager(true, false);
+    }
+
+    @Override
+    public void setUIEnabled(boolean enable) {
+        addButton.setEnabled(enable);
+        editButton.setEnabled(enable);
     }
 
     /**

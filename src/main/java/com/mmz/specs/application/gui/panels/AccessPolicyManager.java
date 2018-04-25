@@ -19,26 +19,35 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class AccessPolicyManager {
     private boolean isAvailableIfConnectionLost;
-    private boolean isAvailableIfAdminOnly;
+    private boolean isAvailableForEditor;
+    private boolean isAvailableOnlyForAdmin;
 
-    AccessPolicyManager(boolean isAvailableForConnectionOnly, boolean isAvailableForAdminOnly) {
+    AccessPolicyManager(boolean isAvailableForConnectionOnly, boolean isAvailableForEditor) {
         this.isAvailableIfConnectionLost = isAvailableForConnectionOnly;
-        this.isAvailableIfAdminOnly = isAvailableForAdminOnly;
+        this.isAvailableForEditor = isAvailableForEditor;
     }
 
     public boolean isAvailableForConnectionOnly() {
         return isAvailableIfConnectionLost;
     }
 
-    public boolean isAvailableForAdminOnly() {
-        return isAvailableIfAdminOnly;
+    public boolean isAvailableForEditor() {
+        return isAvailableForEditor;
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("isAvailableForConnectionOnly", isAvailableIfConnectionLost)
-                .append("isAvailableForAdminOnly", isAvailableIfAdminOnly)
+                .append("isAvailableForEditor", isAvailableForEditor)
                 .toString();
+    }
+
+    public boolean isAvailableOnlyForAdmin() {
+        return isAvailableOnlyForAdmin;
+    }
+
+    public void setAvailableOnlyForAdmin(boolean availableOnlyForAdmin) {
+        isAvailableOnlyForAdmin = availableOnlyForAdmin;
     }
 }

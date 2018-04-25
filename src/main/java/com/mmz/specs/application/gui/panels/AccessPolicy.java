@@ -17,4 +17,6 @@ package com.mmz.specs.application.gui.panels;
 
 public interface AccessPolicy {
     AccessPolicyManager getPolicyManager();
+
+    void setUIEnabled(boolean enable);
 }
