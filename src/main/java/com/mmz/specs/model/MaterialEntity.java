@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -100,14 +101,14 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
         return result;
     }
 
-    @Override
+  /*  @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MaterialEntity)) return false;
         MaterialEntity that = (MaterialEntity) o;
 
         if (getId() != that.getId()) return false;
-        if (getShortMark() != null ? !getShortMark().equals(that.getShortMark()) : that.getShortMark() != null)
+        *//*if (getShortMark() != null ? !getShortMark().equals(that.getShortMark()) : that.getShortMark() != null)
             return false;
         if (getShortProfile() != null ? !getShortProfile().equals(that.getShortProfile()) : that.getShortProfile() != null)
             return false;
@@ -115,9 +116,27 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
             return false;
         if (getLongProfile() != null ? !getLongProfile().equals(that.getLongProfile()) : that.getLongProfile() != null)
             return false;
-        if (isActive() == that.isActive()) return false;
+        if (isActive() == that.isActive()) return false;*//*
 
         return true;
+    }*/
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof MaterialEntity)) return false;
+
+        MaterialEntity that = (MaterialEntity) o;
+
+        return new EqualsBuilder()
+                .append(getId(), that.getId())
+                .append(isActive(), that.isActive())
+                .append(getShortMark(), that.getShortMark())
+                .append(getShortProfile(), that.getShortProfile())
+                .append(getLongMark(), that.getLongMark())
+                .append(getLongProfile(), that.getLongProfile())
+                .isEquals();
     }
 
     @Override

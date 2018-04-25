@@ -171,7 +171,8 @@ public class DetailListPanel extends JPanel {
             final Timer searchTimer = new Timer(1000, e -> {
                 if (!searchText.isEmpty()) {
                     searchText = searchText.replace(",", ".");
-                    System.out.println("timer works: " + searchText);
+                    searchText = searchText.toUpperCase();
+                    log.debug("User is searching for: " + searchText);
                     fillMainTreeBySearch(searchText);
                 } else {
                     fillMainTreeFully();

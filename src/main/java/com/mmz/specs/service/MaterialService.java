@@ -32,6 +32,7 @@ public interface MaterialService {
 
     public void removeMaterial(int id);
 
+    public MaterialEntity migrate(MaterialEntity oldMaterial, MaterialEntity newMaterial);
 
     public MaterialEntity getMaterialById(int id);
 

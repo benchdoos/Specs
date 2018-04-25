@@ -23,6 +23,7 @@ import com.mmz.specs.model.MaterialListEntity;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 
 public class MaterialListWindow extends JDialog {
@@ -37,6 +38,7 @@ public class MaterialListWindow extends JDialog {
 
     public MaterialListWindow(List<MaterialListEntity> rootList) {
         this.rootList = rootList;
+        Collections.sort(this.rootList);
 
         setTitle("Возможные материалы");
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/list64.png")));
@@ -57,7 +59,9 @@ public class MaterialListWindow extends JDialog {
         DefaultListModel<MaterialListEntity> defaultListModel = new DefaultListModel<>();
 
         for (MaterialListEntity materialListEntity : rootList) {
-            defaultListModel.addElement(materialListEntity);
+            if (materialListEntity.isActive()) {
+                defaultListModel.addElement(materialListEntity);
+            }
         }
         materialList.setModel(defaultListModel);
 
@@ -66,7 +70,8 @@ public class MaterialListWindow extends JDialog {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof MaterialListEntity) {
                     MaterialListEntity entity = (MaterialListEntity) value;
-                    String text = entity.getMaterialByMaterialId().getShortMark() + " " + entity.getMaterialByMaterialId().getShortProfile();
+                    final String active = entity.isMainMaterial() && entity.isActive() ? " (Основной)" : "";
+                    String text = entity.getMaterialByMaterialId().getShortMark() + " " + entity.getMaterialByMaterialId().getShortProfile() + active;
                     return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
                 }
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

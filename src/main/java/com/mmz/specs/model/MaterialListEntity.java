@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -22,7 +23,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "MATERIAL_LIST", schema = "", catalog = "")
 public class MaterialListEntity implements Comparable<MaterialListEntity> {
-    private long id;
+    private long id = -1;
     private boolean isActive;
     private DetailEntity detailByDetailId;
     private MaterialEntity materialByMaterialId;
@@ -59,20 +60,30 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        MaterialListEntity that = (MaterialListEntity) o;
-
-        if (id != that.id) return false;
-
-        return true;
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
     }
 
     @Override
-    public int hashCode() {
-        return (int) (id ^ (id >>> 32));
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MaterialListEntity)) return false;
+        MaterialListEntity that = (MaterialListEntity) o;
+
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(id, that.id);
+        return eb.isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("isActive", isActive)
+                .append("isMainMaterial", isMainMaterial)
+                .append("detailByDetailId", detailByDetailId)
+                .append("materialByMaterialId", materialByMaterialId)
+                .toString();
     }
 
     @ManyToOne
@@ -96,21 +107,11 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
     }
 
     @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", id)
-                .append("isActive", isActive)
-                .append("detailByDetailId", detailByDetailId)
-                .append("materialByMaterialId", materialByMaterialId)
-                .toString();
-    }
-
-    @Override
     public int compareTo(MaterialListEntity that) {
         int result = 0;
         result += this.getMaterialByMaterialId().getLongMark().compareTo(that.getMaterialByMaterialId().getLongMark());
         result += this.getMaterialByMaterialId().getLongProfile().compareTo(that.getMaterialByMaterialId().getLongProfile());
-        result += Boolean.compare(this.isMainMaterial(), that.isMainMaterial());
+        result -= Boolean.compare(this.isMainMaterial(), that.isMainMaterial()) * 10;
         result -= Boolean.compare(this.isActive(), that.isActive());
         return result;
 

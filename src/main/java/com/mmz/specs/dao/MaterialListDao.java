@@ -34,10 +34,9 @@ public interface MaterialListDao {
     public void removeMaterialList(int id);
 
 
-    public MaterialListEntity getMaterialListById(int id);
+    public MaterialListEntity getMaterialListById(long id);
 
     public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity);
-
 
 
     public List<MaterialListEntity> listMaterialLists();

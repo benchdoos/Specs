@@ -23,7 +23,7 @@ import com.mmz.specs.model.MaterialListEntity;
 import java.util.List;
 
 public class MaterialListServiceImpl implements MaterialListService {
-   private MaterialListDao materialListDao;
+    private MaterialListDao materialListDao;
 
     public MaterialListServiceImpl() {
         materialListDao = new MaterialListDaoImpl();
@@ -59,7 +59,7 @@ public class MaterialListServiceImpl implements MaterialListService {
     }
 
     @Override
-    public MaterialListEntity getMaterialListById(int id) {
+    public MaterialListEntity getMaterialListById(long id) {
         return materialListDao.getMaterialListById(id);
     }
 

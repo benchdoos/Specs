@@ -15,14 +15,18 @@
 
 package com.mmz.specs.service;
 
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.MaterialDao;
 import com.mmz.specs.dao.MaterialDaoImpl;
 import com.mmz.specs.model.MaterialEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.transaction.Transactional;
 import java.util.List;
 
 public class MaterialServiceImpl implements MaterialService {
+    private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private MaterialDao materialDao;
 
     public MaterialServiceImpl() {
@@ -62,6 +66,16 @@ public class MaterialServiceImpl implements MaterialService {
         this.materialDao.removeMaterial(id);
     }
 
+    @Override
+    public MaterialEntity migrate(MaterialEntity oldEntity, MaterialEntity newEntity) {
+        oldEntity.setLongMark(newEntity.getLongMark());
+        oldEntity.setLongProfile(newEntity.getLongProfile());
+        oldEntity.setShortMark(newEntity.getShortMark());
+        oldEntity.setShortProfile(newEntity.getShortProfile());
+        oldEntity.setActive(newEntity.isActive());
+        log.debug("Merged material: " + oldEntity);
+        return oldEntity;
+    }
 
     @Override
     @Transactional

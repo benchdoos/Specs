@@ -47,8 +47,11 @@ import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static javax.swing.JOptionPane.*;
 
 public class EditNoticePanel extends JPanel {
     private JPanel contentPane;
@@ -291,6 +294,76 @@ public class EditNoticePanel extends JPanel {
         EditMaterialListWindow materialListWindow = new EditMaterialListWindow(detailEntity);
         materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), materialListWindow));
         materialListWindow.setVisible(true);
+
+        ArrayList<MaterialListEntity> materials = (ArrayList<MaterialListEntity>) materialListWindow.getEditedMaterials();
+
+        MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+        final ArrayList<MaterialListEntity> currentDbMaterials = (ArrayList<MaterialListEntity>) service.getMaterialListByDetail(detailEntity);
+
+        //if (!CollectionUtils.isEqualCollection(materials, currentDbMaterials)) { //fixme old has all records, new has only used
+        updateMaterialsForEntity(detailEntity, materials, currentDbMaterials);
+        List<MaterialListEntity> usedMaterials = getUsedMaterials(detailEntity);
+        materialLabel.setText(CommonUtils.substring(25, getUsedMaterialsString(usedMaterials)));
+        materialLabel.setToolTipText(getUsedMaterialsString(usedMaterials));
+        //}
+    }
+
+    private void updateMaterialsForEntity(DetailEntity detailEntity, ArrayList<MaterialListEntity> newMaterialsList, ArrayList<MaterialListEntity> oldMaterialsList) {
+//        final String materialsNames = getMaterialsNames(oldMaterialsList);
+        final String newMaterialsNames = getMaterialsNames(newMaterialsList);
+
+        final int question = showConfirmDialog(this, "Сохранить изменения в базе?\n" +
+                        "деталь: " + detailEntity.getCode() + " "
+                        + CommonUtils.substring(25, detailEntity.getDetailTitleByDetailTitleId().getTitle()) + "\n"
+                      /*  + "были материалы: \n"
+                        + materialsNames
+                        + "стали материалы: \n"*/
+                        + "материалы: \n"
+                        + newMaterialsNames
+                , "Сохранение изменений", JOptionPane.YES_NO_OPTION);
+        if (question == 0) {
+            MaterialListService materialListService = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+            session.getTransaction().begin();
+            for (MaterialListEntity entity : oldMaterialsList) {
+                System.out.println("old>> " + entity);
+                entity.setActive(false);
+                materialListService.updateMaterialList(entity);
+            }
+            session.getTransaction().commit();
+
+
+            session.getTransaction().begin();
+            for (MaterialListEntity entity : newMaterialsList) {
+                System.out.println("new>> " + entity);
+                MaterialListEntity materialListById = materialListService.getMaterialListById(entity.getId());
+                materialListById.setActive(entity.isActive());
+                materialListById.setMainMaterial(entity.isMainMaterial());
+                materialListById.setMaterialByMaterialId(entity.getMaterialByMaterialId());
+                materialListById.setActive(true);
+                materialListService.updateMaterialList(materialListById);
+            }
+            session.getTransaction().commit();
+
+
+        }
+
+    }
+
+    private String getMaterialsNames(ArrayList<MaterialListEntity> listEntities) { //fixme or not me... old list is incorrect and half duplicate new one
+        StringBuilder result = new StringBuilder();
+        for (MaterialListEntity entity : listEntities) {
+            if (entity.isActive()) {
+                final MaterialEntity material = entity.getMaterialByMaterialId();
+                if (material.isActive()) {
+                    result.append(material.getShortMark()).append(" ").append(material.getShortProfile());
+                    if (entity.isMainMaterial()) {
+                        result.append(" (Основной)");
+                    }
+                    result.append("\n\t");
+                }
+            }
+        }
+        return result.toString();
     }
 
     private void onCreateNewTitle() {
@@ -301,11 +374,12 @@ public class EditNoticePanel extends JPanel {
             if (currentUser != null) {
                 if (currentUser.isActive()) {
                     if (currentUser.isAdmin()) {
-                        String result = JOptionPane.showInputDialog(this,
-                                "Введите новое наименование:", "Новое наименование", JOptionPane.PLAIN_MESSAGE);
+                        String result = showInputDialog(this,
+                                "Введите новое наименование:", "Новое наименование", PLAIN_MESSAGE);
                         if (result != null) {
                             if (!result.isEmpty()) {
-                                if (result.length() <= 120) {
+                                final int MAX_TITLE_LENGTH = 120;
+                                if (result.length() <= MAX_TITLE_LENGTH) {
                                     if (currentUser.isAdmin()) {
                                         result = result.replace("\n", " ");
                                         DetailTitleEntity titleEntity = new DetailTitleEntity();
@@ -315,25 +389,25 @@ public class EditNoticePanel extends JPanel {
 
                                         createNewTitle(result, titleEntity, service);
                                     } else {
-                                        JOptionPane.showMessageDialog(this,
+                                        showMessageDialog(this,
                                                 "Вам необходимо быть администратором,\n" +
-                                                        "чтобы проводить изменения.", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
+                                                        "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
                                     }
                                 } else {
-                                    JOptionPane.showMessageDialog(this,
-                                            "Длина наименования не может привышать 120 символов (сейчас: " + result.length() + ")", "Ошибка ввода", JOptionPane.WARNING_MESSAGE);
+                                    showMessageDialog(this,
+                                            "Длина наименования не может привышать 120 символов (сейчас: " + result.length() + ")", "Ошибка ввода", WARNING_MESSAGE);
                                 }
                             }
                         }
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(this,
+                showMessageDialog(this,
                         "Вам необходимо быть администратором,\n" +
-                                "чтобы проводить изменения.", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
+                                "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", JOptionPane.WARNING_MESSAGE);
+                showMessageDialog(this,
+                        "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", WARNING_MESSAGE);
             }
         }
 
@@ -354,9 +428,9 @@ public class EditNoticePanel extends JPanel {
             detailTitleComboBox.setSelectedItem(titleEntity);
 
         } catch (Throwable throwable) {
-            JOptionPane.showMessageDialog(this,
+            showMessageDialog(this,
                     "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
-                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+                    "Ошибка добавления", WARNING_MESSAGE);
         }
     }
 
@@ -436,14 +510,14 @@ public class EditNoticePanel extends JPanel {
                 if (notContainsEntityInChildren(selectionPath, entity)) {
                     addItemToTree(selectionPath, entity);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Нельзя добавить деталь / узел "
+                    showMessageDialog(this, "Нельзя добавить деталь / узел "
                             + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
-                            "т.к. он(а) уже содержится в узле.", "Ошибка добавления", JOptionPane.ERROR_MESSAGE);
+                            "т.к. он(а) уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Нельзя добавить узел "
+                showMessageDialog(this, "Нельзя добавить узел "
                         + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
-                        "т.к. он не может содержать самого себя.", "Ошибка добавления", JOptionPane.ERROR_MESSAGE);
+                        "т.к. он не может содержать самого себя.", "Ошибка добавления", ERROR_MESSAGE);
             }
 
             DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
@@ -457,7 +531,6 @@ public class EditNoticePanel extends JPanel {
         node.add(new MainWindowUtils(session).getChildren(new DetailListServiceImpl(new DetailListDaoImpl(session)), entity));
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
         model.reload(node);
-        System.out.println(">L>>> " + node);
     }
 
     private DetailEntity getParent(TreePath selectionPath) {
@@ -594,6 +667,7 @@ public class EditNoticePanel extends JPanel {
     private String getUsedMaterialsString(List<MaterialListEntity> usedMaterials) {
         if (usedMaterials != null) {
             if (usedMaterials.size() > 0) {
+                Collections.sort(usedMaterials);
                 StringBuilder result = new StringBuilder();
                 for (MaterialListEntity entity : usedMaterials) {
                     if (entity.isActive()) {
@@ -603,7 +677,9 @@ public class EditNoticePanel extends JPanel {
                         }
                     }
                 }
-                result.delete(result.toString().length() - 2, result.toString().length());
+                if (result.toString().length() > 2) {
+                    result.delete(result.toString().length() - 2, result.toString().length());
+                }
                 return result.toString();
             }
         }
@@ -623,14 +699,14 @@ public class EditNoticePanel extends JPanel {
             if (currentUser != null) {
                 final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
                 DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
+                final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
 
-                codeComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                codeComboBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
                 detailTitleComboBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
                 createTitleButton.setEnabled(currentUser.isAdmin());
 
-                unitCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                unitCheckBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
 
-                final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
                 detailCountTextField.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
 
                 finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
@@ -647,7 +723,7 @@ public class EditNoticePanel extends JPanel {
 
                 createTechProcessButton.setEnabled(currentUser.isAdmin());
 
-                isActiveCheckBox.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                isActiveCheckBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
 
                 editImageButton.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
