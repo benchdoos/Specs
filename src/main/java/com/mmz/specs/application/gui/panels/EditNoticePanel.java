@@ -245,6 +245,37 @@ public class EditNoticePanel extends JPanel {
         createTitleButton.addActionListener(e -> onCreateNewTitle());
         editMaterialButton.addActionListener(e -> onEditMaterial());
         createMaterialButton.addActionListener(e -> onCreateNewMaterial());
+        createTechProcessButton.addActionListener(e -> onCreateNewTechProcess());
+    }
+
+    private void onCreateNewTechProcess() {
+        String result = showInputDialog(this,
+                "Введите новый тех.процесс:", "Новый технический процесс", PLAIN_MESSAGE);
+        if (result != null) {
+            if (!result.isEmpty()) {
+                result = result.toUpperCase();
+
+                TechProcessService service = new TechProcessServiceImpl(new TechProcessDaoImpl(session));
+                final TechProcessEntity techProcessByValue = service.getTechProcessByValue(result);
+                if (techProcessByValue == null) {
+                    TechProcessEntity techProcessEntity = new TechProcessEntity();
+                    techProcessEntity.setProcess(result);
+                    session.getTransaction().begin();
+                    final int id = service.addTechProcess(techProcessEntity);
+                    session.getTransaction().commit();
+
+                    fillTechProcessComboBox();
+                    try {
+                        techProcessComboBox.setSelectedItem(service.getTechProcessById(id));
+                    } catch (Throwable ignore) {/*NOP*/}
+                } else {
+                    JOptionPane.showMessageDialog(this, "Тех. процесс " + result + "\n" +
+                            "Уже существует.", "Ошибка добавления", JOptionPane.INFORMATION_MESSAGE);
+                    techProcessComboBox.setSelectedItem(techProcessByValue);
+                }
+
+            }
+        }
     }
 
     private void onCreateNewMaterial() {
@@ -720,8 +751,6 @@ public class EditNoticePanel extends JPanel {
                 techProcessComboBox.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
 
                 createTechProcessButton.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
-
-                createTechProcessButton.setEnabled(currentUser.isAdmin());
 
                 isActiveCheckBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
 

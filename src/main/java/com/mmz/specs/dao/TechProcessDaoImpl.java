@@ -21,6 +21,7 @@ import com.mmz.specs.model.TechProcessEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -36,6 +37,18 @@ public class TechProcessDaoImpl implements TechProcessDao {
 
     public TechProcessDaoImpl(Session session) {
         this.session = session;
+    }
+
+    private List<TechProcessEntity> getTechProcessEntityList(List list, List<TechProcessEntity> result) {
+        for (Object techProcessEntity : list) {
+            if (techProcessEntity instanceof TechProcessEntity) {
+                result.add((TechProcessEntity) techProcessEntity);
+                log.debug("TechProcess from list: " + techProcessEntity);
+            } else {
+                log.warn("Not TechProcess from list: " + techProcessEntity);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -83,6 +96,16 @@ public class TechProcessDaoImpl implements TechProcessDao {
     }
 
     @Override
+    public TechProcessEntity getTechProcessByValue(String value) {
+        final Query query = session.createQuery(" from TechProcessEntity where process  = :value");
+        query.setParameter("value", value);
+
+        TechProcessEntity techProcessEntity = (TechProcessEntity) query.uniqueResult();
+        log.debug("TechProcess found by value:" + value + " " + techProcessEntity);
+        return techProcessEntity;
+    }
+
+    @Override
     @Transactional
     public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString) {
         String[] arr = searchingString.split(" ");
@@ -120,15 +143,5 @@ public class TechProcessDaoImpl implements TechProcessDao {
         return result;
     }
 
-    private List<TechProcessEntity> getTechProcessEntityList(List list, List<TechProcessEntity> result) {
-        for (Object techProcessEntity : list) {
-            if (techProcessEntity instanceof TechProcessEntity) {
-                result.add((TechProcessEntity) techProcessEntity);
-                log.debug("TechProcess from list: " + techProcessEntity);
-            } else {
-                log.warn("Not TechProcess from list: " + techProcessEntity);
-            }
-        }
-        return result;
-    }
+
 }

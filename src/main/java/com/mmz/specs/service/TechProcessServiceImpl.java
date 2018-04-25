@@ -63,6 +63,11 @@ public class TechProcessServiceImpl implements TechProcessService {
     }
 
     @Override
+    public TechProcessEntity getTechProcessByValue(String value) {
+        return techProcessDao.getTechProcessByValue(value);
+    }
+
+    @Override
     public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString) {
         return techProcessDao.getTechProcessByAlikeValue(searchingString);
     }

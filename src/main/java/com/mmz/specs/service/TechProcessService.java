@@ -35,6 +35,8 @@ public interface TechProcessService {
 
     public TechProcessEntity getTechProcessById(int id);
 
+    public TechProcessEntity getTechProcessByValue(String value);
+
     public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString);
 
 
