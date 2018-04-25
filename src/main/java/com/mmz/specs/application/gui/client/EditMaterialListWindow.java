@@ -54,6 +54,32 @@ public class EditMaterialListWindow extends JDialog {
     private JCheckBox activeCheckBox;
     private JCheckBox mainCheckBox;
     private DetailEntity detailEntity;
+    private boolean isCanceled = false;
+
+    public EditMaterialListWindow(DetailEntity detailEntity) {
+        if (detailEntity == null) {
+            throw new IllegalArgumentException("Can not edit material for detail : null");
+        }
+
+        this.detailEntity = detailEntity;
+        this.session = ClientBackgroundService.getInstance().getSession();
+
+        initGui();
+
+        initListeners();
+
+        initKeyBindings();
+
+        initMaterialList();
+
+        fillMaterialList();
+
+        initCheckBoxListeners();
+
+        pack();
+        setMinimumSize(new Dimension(540, getSize().height));
+        setSize(getMinimumSize());
+    }
 
     private void initGui() {
         setContentPane(contentPane);
@@ -77,7 +103,24 @@ public class EditMaterialListWindow extends JDialog {
     }
 
     private void onOK() {
-        dispose();
+        int count = 0;
+        for (int i = 0; i < materialList.getModel().getSize(); i++) {
+            final MaterialListEntity materialListEntity = materialList.getModel().getElementAt(i);
+            if (materialListEntity.isMainMaterial()) {
+                count++;
+            }
+        }
+        if (count == 1) {
+            dispose();
+        } else if (count == 0) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Должен быть основной материал.",
+                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+        } else if (count > 1) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Только один материал может быть основным",
+                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     private void fillMaterialList() {
@@ -113,6 +156,7 @@ public class EditMaterialListWindow extends JDialog {
             entity.setActive(true);
             if (!modelContainsMaterial(model, entity)) {
                 model.addElement(entity);
+                materialList.setSelectedValue(entity, true);
             }
         }
     }
@@ -131,6 +175,7 @@ public class EditMaterialListWindow extends JDialog {
     }
 
     private void onCancel() {
+        isCanceled = true;
         dispose();
     }
 
@@ -175,31 +220,6 @@ public class EditMaterialListWindow extends JDialog {
         CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null);
         createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
         createMaterialWindow.setVisible(true);
-    }
-
-    public EditMaterialListWindow(DetailEntity detailEntity) {
-        if (detailEntity == null) {
-            throw new IllegalArgumentException("Can not edit material for detail : null");
-        }
-
-        this.detailEntity = detailEntity;
-        this.session = ClientBackgroundService.getInstance().getSession();
-
-        initGui();
-
-        initListeners();
-
-        initKeyBindings();
-
-        initMaterialList();
-
-        fillMaterialList();
-
-        initCheckBoxListeners();
-
-        pack();
-        setMinimumSize(new Dimension(540, getSize().height));
-        setSize(getMinimumSize());
     }
 
     private void initCheckBoxListeners() {
@@ -273,14 +293,19 @@ public class EditMaterialListWindow extends JDialog {
     }
 
     public List<MaterialListEntity> getEditedMaterials() {
-        ArrayList<MaterialListEntity> result = new ArrayList<>();
+        ArrayList<MaterialListEntity> result = null;
+        if (!isCanceled) {
+            result = new ArrayList<>();
 
-        final DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+            final DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
 
-        for (int i = 0; i < model.size(); i++) {
-            final MaterialListEntity elementAt = model.getElementAt(i);
-            elementAt.setActive(true);
-            result.add(elementAt);
+            for (int i = 0; i < model.size(); i++) {
+                final MaterialListEntity elementAt = model.getElementAt(i);
+                elementAt.setActive(true);
+                result.add(elementAt);
+            }
+        } else {
+            result = null;
         }
 
         return result;

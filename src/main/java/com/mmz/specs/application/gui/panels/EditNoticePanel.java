@@ -333,13 +333,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), materialListWindow));
         materialListWindow.setVisible(true);
 
-        ArrayList<MaterialListEntity> materials = (ArrayList<MaterialListEntity>) materialListWindow.getEditedMaterials();
+        ArrayList<MaterialListEntity> newMaterials = (ArrayList<MaterialListEntity>) materialListWindow.getEditedMaterials();
 
         MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
         final ArrayList<MaterialListEntity> currentDbMaterials = (ArrayList<MaterialListEntity>) service.getMaterialListByDetail(detailEntity);
 
         //if (!CollectionUtils.isEqualCollection(materials, currentDbMaterials)) { //fixme old has all records, new has only used
-        updateMaterialsForEntity(detailEntity, materials, currentDbMaterials);
+
+        if (newMaterials != null) {
+            updateMaterialsForEntity(detailEntity, newMaterials, currentDbMaterials);
+        }
+
         List<MaterialListEntity> usedMaterials = getUsedMaterials(detailEntity);
         materialLabel.setText(CommonUtils.substring(25, getUsedMaterialsString(usedMaterials)));
         materialLabel.setToolTipText(getUsedMaterialsString(usedMaterials));
