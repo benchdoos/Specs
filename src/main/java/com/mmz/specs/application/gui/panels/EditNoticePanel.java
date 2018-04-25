@@ -255,23 +255,30 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
             if (!result.isEmpty()) {
                 result = result.toUpperCase();
 
-                TechProcessService service = new TechProcessServiceImpl(new TechProcessDaoImpl(session));
-                final TechProcessEntity techProcessByValue = service.getTechProcessByValue(result);
-                if (techProcessByValue == null) {
-                    TechProcessEntity techProcessEntity = new TechProcessEntity();
-                    techProcessEntity.setProcess(result);
-                    session.getTransaction().begin();
-                    final int id = service.addTechProcess(techProcessEntity);
-                    session.getTransaction().commit();
+                int MAX_FIELD_LENGTH = 1000;
+                if (result.length() <= MAX_FIELD_LENGTH) {
+                    TechProcessService service = new TechProcessServiceImpl(new TechProcessDaoImpl(session));
+                    final TechProcessEntity techProcessByValue = service.getTechProcessByValue(result);
+                    if (techProcessByValue == null) {
+                        TechProcessEntity techProcessEntity = new TechProcessEntity();
+                        techProcessEntity.setProcess(result);
+                        session.getTransaction().begin();
+                        final int id = service.addTechProcess(techProcessEntity);
+                        session.getTransaction().commit();
 
-                    fillTechProcessComboBox();
-                    try {
-                        techProcessComboBox.setSelectedItem(service.getTechProcessById(id));
-                    } catch (Throwable ignore) {/*NOP*/}
+                        fillTechProcessComboBox();
+                        try {
+                            techProcessComboBox.setSelectedItem(service.getTechProcessById(id));
+                        } catch (Throwable ignore) {/*NOP*/}
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Тех. процесс " + result + "\n" +
+                                "Уже существует.", "Ошибка добавления", JOptionPane.INFORMATION_MESSAGE);
+                        techProcessComboBox.setSelectedItem(techProcessByValue);
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(this, "Тех. процесс " + result + "\n" +
-                            "Уже существует.", "Ошибка добавления", JOptionPane.INFORMATION_MESSAGE);
-                    techProcessComboBox.setSelectedItem(techProcessByValue);
+                    JOptionPane.showMessageDialog(this, "Длинна тех.процесса не может превышать "
+                                    + MAX_FIELD_LENGTH + " символов (указано " + result.length() + " символов).",
+                            "Ошибка добавления", JOptionPane.INFORMATION_MESSAGE);
                 }
 
             }
@@ -684,7 +691,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                     materialLabel.setText(CommonUtils.substring(25, getUsedMaterialsString(usedMaterials)));
                     materialLabel.setToolTipText(getUsedMaterialsString(usedMaterials));
 
-                    techProcessComboBox.setSelectedItem(detailEntity.getTechProcessByTechProcessId());
+                    final TechProcessEntity techProcessByTechProcessId = detailEntity.getTechProcessByTechProcessId();
+                    if (techProcessByTechProcessId != null) {
+                        techProcessComboBox.setSelectedItem(techProcessByTechProcessId);
+                    } else techProcessComboBox.setSelectedIndex(-1);
 
                     isActiveCheckBox.setSelected(!detailEntity.isActive());
 
@@ -931,7 +941,15 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
             }
         });
 
-        techProcessComboBox.addActionListener(e -> System.out.println(">>>" + techProcessComboBox.getSelectedItem()));
+        techProcessComboBox.addActionListener(e -> {
+            try {
+                DetailEntity selectedEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+                selectedEntity.setTechProcessByTechProcessId((TechProcessEntity) techProcessComboBox.getSelectedItem());
+            } catch (Exception ignore) {/*NOP*/
+            }
+        });
+
+        techProcessComboBox.setSelectedIndex(-1);
     }
 
     private void fillTechProcessComboBox() {
@@ -962,7 +980,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
     }
 
     @Override
-    public void setUIEnabled(boolean enable) {
+    public void setUIEnabled(boolean ignore) {
         /*NOP*/
     }
 
