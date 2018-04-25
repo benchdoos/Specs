@@ -50,7 +50,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DetailListPanel extends JPanel {
+public class DetailListPanel extends JPanel implements AccessPolicy {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
 
@@ -425,6 +425,11 @@ public class DetailListPanel extends JPanel {
 
     private void createUIComponents() {
         mainTree = new DetailJTree();
+    }
+
+    @Override
+    public AccessPolicyManager getPolicyManager() {
+        return new AccessPolicyManager(true, false);
     }
 
     /**

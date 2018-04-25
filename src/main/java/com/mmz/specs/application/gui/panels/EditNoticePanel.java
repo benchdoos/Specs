@@ -53,7 +53,7 @@ import java.util.List;
 
 import static javax.swing.JOptionPane.*;
 
-public class EditNoticePanel extends JPanel {
+public class EditNoticePanel extends JPanel implements AccessPolicy {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -954,6 +954,11 @@ public class EditNoticePanel extends JPanel {
 
     private void createUIComponents() {
         mainTree = new DetailJTree();
+    }
+
+    @Override
+    public AccessPolicyManager getPolicyManager() {
+        return new AccessPolicyManager(true, true);
     }
 
     /**

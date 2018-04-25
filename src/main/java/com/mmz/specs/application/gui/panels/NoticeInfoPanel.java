@@ -32,7 +32,7 @@ import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class NoticeInfoPanel extends JPanel {
+public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     private JPanel contentPane;
     private JList<NoticeEntity> noticeList;
     private JTextArea descriptionTextArea;
@@ -150,6 +150,11 @@ public class NoticeInfoPanel extends JPanel {
     private void onOK() {
         // add your code here
         //close this?
+    }
+
+    @Override
+    public AccessPolicyManager getPolicyManager() {
+        return new AccessPolicyManager(false, false);
     }
 
     {
