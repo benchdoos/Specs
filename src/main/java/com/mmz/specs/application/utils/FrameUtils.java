@@ -20,10 +20,7 @@ import hu.kazocsaba.imageviewer.ResizeStrategy;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseWheelEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 public class FrameUtils {
@@ -215,5 +212,11 @@ public class FrameUtils {
         });
 
         imageFrame.setVisible(true);
+    }
+
+    public static void removeAllComponentListeners(Component component) {
+        for (MouseListener l : component.getMouseListeners()) {
+            component.removeMouseListener(l);
+        }
     }
 }

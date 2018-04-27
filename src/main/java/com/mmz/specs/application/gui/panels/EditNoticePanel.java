@@ -19,10 +19,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
-import com.mmz.specs.application.gui.client.ClientMainWindow;
-import com.mmz.specs.application.gui.client.CreateMaterialWindow;
-import com.mmz.specs.application.gui.client.CreateNoticeWindow;
-import com.mmz.specs.application.gui.client.EditMaterialListWindow;
+import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.SelectionDetailWindow;
 import com.mmz.specs.application.utils.CommonUtils;
@@ -246,6 +243,18 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         editMaterialButton.addActionListener(e -> onEditMaterial());
         createMaterialButton.addActionListener(e -> onCreateNewMaterial());
         createTechProcessButton.addActionListener(e -> onCreateNewTechProcess());
+
+        editImageButton.addActionListener(e -> onEditDetailImage());
+    }
+
+    private void onEditDetailImage() {
+        DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+
+        if (detailEntity != null) {
+            EditImageWindow editImageWindow = new EditImageWindow(detailEntity);
+            editImageWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), editImageWindow));
+            editImageWindow.setVisible(true);
+        }
     }
 
     private void onCreateNewTechProcess() {
