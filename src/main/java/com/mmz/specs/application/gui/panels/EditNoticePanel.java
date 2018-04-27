@@ -90,6 +90,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
     private JLabel materialLabel;
     private JButton editImageButton;
     private JToolBar treeToolBar;
+    private JCheckBox isInterchangeableCheckBox;
     private Session session;
     private DetailEntity detailEntity;
 
@@ -239,7 +240,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                     child.setWorkpieceWeight(weight);
                     updateTreeDetail();
                 } catch (NumberFormatException ignored) {
-
                 }
             }
         });
@@ -257,6 +257,19 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                 updateTreeDetail();
             } catch (Exception ex) {
                 log.warn("Could not set detail activity", e);
+            }
+        });
+
+        isInterchangeableCheckBox.addActionListener(e -> {
+            DetailEntity parent = getParent(mainTree.getSelectionPath());
+            DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+            final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
+            Collections.sort(detailListEntitiesByParentAndChild);
+            for (DetailListEntity entity : detailListEntitiesByParentAndChild) {
+                if (entity.isActive()) {
+                    entity.setInterchangeableNode(isInterchangeableCheckBox.isSelected());
+                    updateTreeDetail();
+                }
             }
         });
 
@@ -693,8 +706,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
 
                 if (mentioned != null) {
                     detailCountTextField.setText(mentioned.getQuantity() + "");
+                    isInterchangeableCheckBox.setSelected(mentioned.isInterchangeableNode());
                 } else {
                     detailCountTextField.setText("");
+                    isInterchangeableCheckBox.setSelected(false);
                 }
                 if (detailEntity != null) {
                     codeComboBox.setSelectedItem(detailEntity);
@@ -753,7 +768,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                 return result.toString();
             }
         }
-        return "";
+        return "нет данных";
     }
 
     private List<MaterialListEntity> getUsedMaterials(DetailEntity detailEntity) {
@@ -761,7 +776,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         return service.getMaterialListByDetail(detailEntity);
     }
 
-    public void updatePermissions() {
+    private void updatePermissions() {
         Window window = FrameUtils.findWindow(this);
         if (window instanceof ClientMainWindow) {
             ClientMainWindow clientMainWindow = (ClientMainWindow) window;
@@ -792,6 +807,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                 createTechProcessButton.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
 
                 isActiveCheckBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
+
+                isInterchangeableCheckBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
 
                 editImageButton.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
 
@@ -1202,6 +1219,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         editImageButton.setText("");
         editImageButton.setToolTipText("Редактировать изображение детали");
         changePanel.add(editImageButton, new GridConstraints(8, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        isInterchangeableCheckBox = new JCheckBox();
+        isInterchangeableCheckBox.setHorizontalTextPosition(2);
+        isInterchangeableCheckBox.setText("Замена (прим. в замен):");
+        changePanel.add(isInterchangeableCheckBox, new GridConstraints(8, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         savePanel = new JPanel();
         savePanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Сохранение", savePanel);

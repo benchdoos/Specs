@@ -433,6 +433,15 @@
                       <toolTipText value="Редактировать изображение детали"/>
                     </properties>
                   </component>
+                  <component id="dd6e7" class="javax.swing.JCheckBox" binding="isInterchangeableCheckBox">
+                    <constraints>
+                      <grid row="8" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <horizontalTextPosition value="2"/>
+                      <text value="Замена (прим. в замен):"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <grid id="f5a2e" binding="savePanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

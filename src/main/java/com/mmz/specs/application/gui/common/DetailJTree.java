@@ -30,7 +30,6 @@ import java.util.List;
 public class DetailJTree extends JTree {
     public DetailJTree() {
         final Color backgroundSelectionColor = new Color(0, 120, 215);
-        //final Color backgroundNonSelectionColor = new Color(242, 242, 242);
         final Color backgroundNonSelectionColor = new JPanel().getBackground();
 
         setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
@@ -67,7 +66,7 @@ public class DetailJTree extends JTree {
                                             if (!selected) {
                                                 setBackground(Color.GRAY.brighter());
                                             } else {
-                                                setBackground(backgroundSelectionColor);
+                                                setBackground(Color.GRAY);
                                             }
                                             setToolTipText("Взаимозаменяемая деталь");
                                         }
