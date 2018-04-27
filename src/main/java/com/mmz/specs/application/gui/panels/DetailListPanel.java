@@ -299,23 +299,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         fillDetailMaterialInfo(selectedComponent);
 
 
-        FtpUtils ftp = FtpUtils.getInstance();
-        BufferedImage image = ftp.getImage(selectedComponent.getId());
-
-        if (image != null) {
-            BufferedImage scaledImage = Scalr.resize(image, 128);
-            detailIconLabel.setIcon(new ImageIcon(scaledImage));
-            detailIconLabel.setText("");
-            detailIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), image, "Изображение " + selectedComponent.getCode()); //testme does it works????
-                }
-            });
-        } else {
-            detailIconLabel.setIcon(null);
-            detailIconLabel.setText("Нет изображения");
-        }
+        updateDetailImage(selectedComponent);
 
         if (selectedComponent.getTechProcessByTechProcessId() != null) {
             String process = selectedComponent.getTechProcessByTechProcessId().getProcess();
@@ -327,6 +311,34 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 .replace("false", "нет").replace("true", "да"));
     }
 
+    private void updateDetailImage(final DetailEntity selectedComponent) {
+        Runnable runnable = () -> {
+            detailIconLabel.setText("Загрузка...");
+
+
+            FtpUtils ftp = FtpUtils.getInstance();
+            BufferedImage image = ftp.getImage(selectedComponent.getId());
+
+            if (image != null) {
+                BufferedImage scaledImage = Scalr.resize(image, 128);
+                detailIconLabel.setIcon(new ImageIcon(scaledImage));
+                detailIconLabel.setText("");
+                detailIconLabel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), image, "Изображение " + selectedComponent.getCode()); //testme does it works????
+                    }
+                });
+            } else {
+                detailIconLabel.setIcon(null);
+                detailIconLabel.setText("Нет изображения");
+            }
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+
     private void fillDetailMaterialInfo(DetailEntity selectedComponent) {
         MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
         List<MaterialListEntity> materialList = service.getMaterialListByDetail(selectedComponent);
@@ -335,8 +347,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 if (entity.isMainMaterial()) {
                     String substringLongMark = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongMark());
                     String substringLongProfile = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongProfile());
-                    /*String substringDelimiter = CommonWindowUtils.createDelimiter(substringLongMark, substringLongProfile);
-                    String text = "<html> <p style=\"line-height: 0.2em;\">" + substringLongMark + "<br>" + substringDelimiter + "<br>" + substringLongProfile + "</p></html>";*/
 
                     materialMarkLabel.setText(substringLongMark);
                     materialProfileLabel.setText(substringLongProfile);
