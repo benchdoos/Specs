@@ -24,10 +24,13 @@ import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.SelectionDetailWindow;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.*;
 import com.mmz.specs.model.*;
 import com.mmz.specs.service.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -51,6 +54,8 @@ import java.util.List;
 import static javax.swing.JOptionPane.*;
 
 public class EditNoticePanel extends JPanel implements AccessPolicy {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -243,6 +248,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         editMaterialButton.addActionListener(e -> onEditMaterial());
         createMaterialButton.addActionListener(e -> onCreateNewMaterial());
         createTechProcessButton.addActionListener(e -> onCreateNewTechProcess());
+
+        isActiveCheckBox.addActionListener(e -> {
+            try {
+                DetailEntity selectedEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+                final boolean selected = isActiveCheckBox.isSelected();
+                selectedEntity.setActive(!selected);
+                updateTreeDetail();
+            } catch (Exception ex) {
+                log.warn("Could not set detail activity", e);
+            }
+        });
 
         editImageButton.addActionListener(e -> onEditDetailImage());
     }
