@@ -68,7 +68,6 @@ public class DetailJTree extends JTree {
                                             } else {
                                                 setBackground(Color.GRAY);
                                             }
-                                            setToolTipText("Взаимозаменяемая деталь");
                                         }
 
                                         if (!detailListEntity.getDetailByChildDetailId().isActive()) {
