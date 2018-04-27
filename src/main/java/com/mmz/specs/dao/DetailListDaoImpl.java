@@ -183,7 +183,9 @@ public class DetailListDaoImpl implements DetailListDao {
 
         List list = query.list();
         ArrayList<DetailListEntity> arrayList = new ArrayList<>(list.size());
-        arrayList.addAll(list);
+        for (Object o : list) {
+            arrayList.add((DetailListEntity) o);
+        }
 
         ArrayList<DetailListEntity> result = new ArrayList<>();
         for (DetailListEntity e : arrayList) {
@@ -255,7 +257,6 @@ public class DetailListDaoImpl implements DetailListDao {
         for (Object detailListEntity : list) {
             if (detailListEntity instanceof DetailListEntity) {
                 result.add((DetailListEntity) detailListEntity);
-                log.debug("DetailList from list: " + detailListEntity);
             } else {
                 log.warn("Not DetailList from list: " + detailListEntity);
             }
@@ -281,7 +282,6 @@ public class DetailListDaoImpl implements DetailListDao {
         for (Object detailListEntity : list) {
             if (detailListEntity instanceof DetailListEntity) {
                 result.add((DetailListEntity) detailListEntity);
-                log.debug("DetailList successfully found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
             } else {
                 log.warn("Not DetailList found by detail index: " + entity.getCode() + " DetailList:" + detailListEntity);
             }
