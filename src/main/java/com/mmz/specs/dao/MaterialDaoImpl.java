@@ -109,7 +109,6 @@ public class MaterialDaoImpl implements MaterialDao {
         for (Object materialEntity : list) {
             if (materialEntity instanceof MaterialEntity) {
                 result.add((MaterialEntity) materialEntity);
-                log.debug("Material from list: " + materialEntity);
             } else {
                 log.warn("Not Material from list: " + materialEntity);
             }

@@ -110,7 +110,6 @@ public class NoticeDaoImpl implements NoticeDao {
         for (Object noticeEntity : list) {
             if (noticeEntity instanceof NoticeEntity) {
                 result.add((NoticeEntity) noticeEntity);
-                log.debug("Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
             } else {
                 log.warn("Not Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
             }
@@ -127,7 +126,6 @@ public class NoticeDaoImpl implements NoticeDao {
         for (Object noticeEntity : list) {
             if (noticeEntity instanceof NoticeEntity) {
                 result.add((NoticeEntity) noticeEntity);
-                log.debug("Notice from list: " + noticeEntity);
             } else {
                 log.warn("Not Notice from list: " + noticeEntity);
             }

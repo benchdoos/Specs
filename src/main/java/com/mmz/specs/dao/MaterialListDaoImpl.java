@@ -95,7 +95,6 @@ public class MaterialListDaoImpl implements MaterialListDao {
         for (Object materialListEntity : list) {
             if (materialListEntity instanceof MaterialListEntity) {
                 result.add((MaterialListEntity) materialListEntity);
-                log.debug("MaterialList successfully found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             } else {
                 log.warn("Not MaterialList found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             }
@@ -111,7 +110,6 @@ public class MaterialListDaoImpl implements MaterialListDao {
         for (Object materialListEntity : list) {
             if (materialListEntity instanceof MaterialListEntity) {
                 result.add((MaterialListEntity) materialListEntity);
-                log.debug("MaterialList from list: " + materialListEntity);
             } else {
                 log.warn("Not MaterialList from list: " + materialListEntity);
             }

@@ -106,7 +106,6 @@ public class ConstantsDaoImpl implements ConstantsDao {
         for (Object constantsEntity : list) {
             if (constantsEntity instanceof ConstantsEntity) {
                 result.add((ConstantsEntity) constantsEntity);
-                log.debug("Constant from list: " + constantsEntity);
             } else {
                 log.warn("Not Constant from list: " + constantsEntity);
             }

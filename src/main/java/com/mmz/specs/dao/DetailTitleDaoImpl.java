@@ -103,7 +103,6 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
         for (Object detailTitleEntity : list) {
             if (detailTitleEntity instanceof DetailTitleEntity) {
                 result.add((DetailTitleEntity) detailTitleEntity);
-                log.debug("DetailTitle list: " + detailTitleEntity);
             } else {
                 log.warn("Not DetailTitle from list: " + detailTitleEntity);
             }

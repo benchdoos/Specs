@@ -111,7 +111,6 @@ public class UsersDaoImpl implements UsersDao {
         for (Object usersEntity : list) {
             if (usersEntity instanceof UsersEntity) {
                 result.add((UsersEntity) usersEntity);
-                log.debug("User from list: " + usersEntity);
             } else {
                 log.warn("Not User from list: " + usersEntity);
             }

@@ -43,7 +43,6 @@ public class TechProcessDaoImpl implements TechProcessDao {
         for (Object techProcessEntity : list) {
             if (techProcessEntity instanceof TechProcessEntity) {
                 result.add((TechProcessEntity) techProcessEntity);
-                log.debug("TechProcess from list: " + techProcessEntity);
             } else {
                 log.warn("Not TechProcess from list: " + techProcessEntity);
             }

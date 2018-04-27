@@ -105,7 +105,6 @@ public class DetailDaoImpl implements DetailDao {
         for (Object detailEntity : list) {
             if (detailEntity instanceof DetailEntity) {
                 result.add((DetailEntity) detailEntity);
-                log.debug("Detail from list: " + detailEntity);
             } else {
                 log.warn("Not Detail from list: " + detailEntity);
             }

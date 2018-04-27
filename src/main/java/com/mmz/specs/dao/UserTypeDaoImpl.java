@@ -72,7 +72,6 @@ public class UserTypeDaoImpl implements UserTypeDao {
         for (Object userTypeEntity : list) {
             if (userTypeEntity instanceof UserTypeEntity) {
                 result.add((UserTypeEntity) userTypeEntity);
-                log.debug("UserType from list: " + userTypeEntity);
             } else {
                 log.warn("Not UserType from list: " + userTypeEntity);
             }
