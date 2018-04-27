@@ -67,10 +67,11 @@ public class FtpUtils {
             }
             boolean success = ftpClient.login(username, password);
             if (!success) {
-                log.warn("Could not login to the server");
-                return;
+                log.warn("Could not login to FTP at " + connectionUrl
+                        + " by " + username + " with password length: " + password.length());
             } else {
-                log.info("Logged in to ftp server: " + connectionUrl);
+                log.info("Logged in to ftp server: " + connectionUrl
+                        + " by " + username + " with password length: " + password.length());
                 ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
                 ftpClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
@@ -103,6 +104,7 @@ public class FtpUtils {
             if (!ftpClient.isConnected()) return null;
             try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 
+                log.debug("Loading image at path: " + connectionUrl + postfix + id + DEFAULT_IMAGE_EXTENSION);
                 ftpClient.retrieveFile(postfix + id + DEFAULT_IMAGE_EXTENSION, output);
                 byte[] data = output.toByteArray();
                 ByteArrayInputStream input = new ByteArrayInputStream(data);

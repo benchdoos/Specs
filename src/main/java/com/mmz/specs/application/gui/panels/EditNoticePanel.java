@@ -1215,7 +1215,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         detailTitleComboBox.setToolTipText("Тип пользователя");
         changePanel.add(detailTitleComboBox, new GridConstraints(1, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         editImageButton = new JButton();
-        editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/picture16.png")));
+        editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
         editImageButton.setText("");
         editImageButton.setToolTipText("Редактировать изображение детали");
         changePanel.add(editImageButton, new GridConstraints(8, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

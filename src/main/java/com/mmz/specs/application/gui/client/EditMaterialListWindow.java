@@ -51,7 +51,6 @@ public class EditMaterialListWindow extends JDialog {
     private JButton removeMaterial;
     private JButton createNewMaterialButton;
     private JButton editMaterialButton;
-    private JCheckBox activeCheckBox;
     private JCheckBox mainCheckBox;
     private DetailEntity detailEntity;
     private boolean isCanceled = false;
@@ -293,7 +292,7 @@ public class EditMaterialListWindow extends JDialog {
     }
 
     public List<MaterialListEntity> getEditedMaterials() {
-        ArrayList<MaterialListEntity> result = null;
+        ArrayList<MaterialListEntity> result;
         if (!isCanceled) {
             result = new ArrayList<>();
 
