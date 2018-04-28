@@ -54,7 +54,6 @@ import java.util.List;
 
 public class ClientMainWindow extends JFrame {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final int STATUS_IMAGE_SIZE = 6;
 
     private UsersEntity currentUser;
     private FtpUtils ftpUtils;
@@ -62,11 +61,10 @@ public class ClientMainWindow extends JFrame {
     private JPanel contentPane;
     private JTabbedPane clientMainTabbedPane;
     private JPanel mainPanel;
-    private JLabel serverStatusLabel;
+    private JLabel statusLabel;
     private JButton viewDetailListButton;
     private JButton loginButton;
     private JLabel usernameLabel;
-    private JLabel dbStatusLabel;
     private JButton editDataButton;
     private JButton noticeListViewButton;
     private JButton adminButton;
@@ -107,10 +105,8 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initConnectionLabels() {
-        serverStatusLabel.setIcon(getResizedStatusImage(ConnectionStatus.UNKNOWN));
-        serverStatusLabel.setToolTipText("Соединение с сервером не установлено");
-        dbStatusLabel.setIcon(getResizedStatusImage(ConnectionStatus.UNKNOWN));
-        dbStatusLabel.setToolTipText("Соединение с базой данных не установлено");
+        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+        statusLabel.setToolTipText("Соединение с сервером и БД не установлено");
     }
 
     private void initMainMenuBar() {
@@ -213,16 +209,20 @@ public class ClientMainWindow extends JFrame {
 
     private void updateUserInterface() {
         if (ClientBackgroundService.getInstance().isConnected()) {
-            serverStatusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
-            serverStatusLabel.setToolTipText("Сервер подключен");
+            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
+            statusLabel.setToolTipText("Сервер подключен");
 
             if (session == null) {
                 session = ClientBackgroundService.getInstance().getSession();
                 SwingUtilities.invokeLater(this::initFtp);
             } else {
                 if (session.isConnected()) {
-                    dbStatusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
-                    dbStatusLabel.setToolTipText("БД подключена");
+                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
+                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД подключена");
+                } else {
+                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
+                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД не подключена");
+
                 }
             }
 
@@ -231,16 +231,16 @@ public class ClientMainWindow extends JFrame {
 //            setTabsEnabled(true);
 
         } else {
-            serverStatusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-            serverStatusLabel.setToolTipText("Сервер отключен");
+            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+            statusLabel.setToolTipText("Сервер отключен");
 
             if (session != null) {
                 if (session.isConnected()) {
                     session.disconnect();
                     session = null;
 
-                    dbStatusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-                    dbStatusLabel.setToolTipText("БД отключена");
+                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
                 }
             }
 
@@ -298,25 +298,6 @@ public class ClientMainWindow extends JFrame {
             clientMainTabbedPane.setSelectedIndex(0);
         }
     }
-
-    /*private void setTabsEnabled(boolean enabled) {
-        for (Component component : clientMainTabbedPane.getComponents()) {
-            if (component instanceof DetailListPanel) {
-                try {
-                    int componentZOrder = clientMainTabbedPane.indexOfComponent(component);
-                    clientMainTabbedPane.setEnabledAt(componentZOrder, enabled);
-                } catch (Exception ignore) {
-                    *//*NOP*//*
-                }
-            }
-        }
-
-        if (!enabled) {
-            if (clientMainTabbedPane.getSelectedComponent() instanceof DetailListPanel) {
-                clientMainTabbedPane.setSelectedIndex(0);
-            }
-        }
-    }*/
 
     private void unlockTabs() {
         for (int i = 0; i < clientMainTabbedPane.getTabCount(); i++) {
@@ -478,15 +459,6 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    /*private void unlockDetailLists(boolean unlock) {
-        for (Component component : clientMainTabbedPane.getComponents()) {
-            if (component instanceof DetailListPanel) {
-                DetailListPanel panel = (DetailListPanel) component;
-                panel.enableEditorButtons(unlock);
-            }
-        }
-    }*/
-
     public void notifyConnectionError() {
         JOptionPane.showMessageDialog(this,
                 "Не установлена связь с сервером, ошибка. Звоните фиксикам.",
@@ -522,6 +494,8 @@ public class ClientMainWindow extends JFrame {
             switch (status) {
                 case UNKNOWN:
                     return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/gray12.png")));
+                case PARTLY_CONNECTED:
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/orange12.png")));
                 case CONNECTED:
                     return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/green12.png")));
                 case DISCONNECTED:
@@ -661,15 +635,11 @@ public class ClientMainWindow extends JFrame {
         final Spacer spacer3 = new Spacer();
         panel2.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(1, 2, new Insets(0, 4, 0, 0), -1, -1));
+        panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 4, 0, 0), -1, -1));
         panel2.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        dbStatusLabel = new JLabel();
-        dbStatusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red12.png")));
-        dbStatusLabel.setText("");
-        panel3.add(dbStatusLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        serverStatusLabel = new JLabel();
-        serverStatusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red12.png")));
-        panel3.add(serverStatusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        statusLabel = new JLabel();
+        statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red12.png")));
+        panel3.add(statusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel4, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -716,6 +686,6 @@ public class ClientMainWindow extends JFrame {
     }
 
     enum ConnectionStatus {
-        UNKNOWN, CONNECTED, DISCONNECTED
+        UNKNOWN, PARTLY_CONNECTED, CONNECTED, DISCONNECTED
     }
 }
