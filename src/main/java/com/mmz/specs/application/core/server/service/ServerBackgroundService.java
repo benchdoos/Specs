@@ -47,13 +47,23 @@ public class ServerBackgroundService {
     }
 
     private void startServerMainBackgroundService() {
-        startServerMonitoring();
+        try {
+            startServerMonitoring();
+        } catch (Exception e) {
+            log.warn("Could not establish monitoring service", e);
+            new ServerLogMessage("Не удалось запустить мониторинг сервера" + e.getLocalizedMessage(), ServerLogMessage.ServerLogMessageLevel.WARN);
+        }
 
-        startServerDBConnectionPool();
+        try {
+            startServerDBConnectionPool();
 
-        startServerSocketService();
+            startServerSocketService();
 
-        createConnections();
+            createConnections();
+        } catch (Throwable e) {
+            log.warn("Could not establish connections", e);
+            new ServerLogMessage("Не удалось создать подключения " + e.getLocalizedMessage(), ServerLogMessage.ServerLogMessageLevel.WARN);
+        }
     }
 
     private void startServerMonitoring() {
@@ -150,11 +160,5 @@ public class ServerBackgroundService {
         if (this.serverSocketService != null) {
             return this.serverSocketService.getConnectedClientsList();
         } else return null;
-    }
-
-    public int getServerPort() {
-        if (this.serverSocketService != null) {
-            return this.serverSocketService.getServerPort();
-        } else return 0;
     }
 }

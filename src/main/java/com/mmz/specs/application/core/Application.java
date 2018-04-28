@@ -16,11 +16,20 @@
 package com.mmz.specs.application.core;
 
 import com.mmz.specs.application.utils.CoreUtils;
+import com.mmz.specs.application.utils.Logging;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Application {
-    public void initApplication(final String[] args){
-        CoreUtils.enableLookAndFeel();
-        CoreUtils.localizeFileChooser();
-        CoreUtils.manageArguments(args);
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
+    public void initApplication(final String[] args) {
+        try {
+            CoreUtils.enableLookAndFeel();
+            CoreUtils.localizeFileChooser();
+            CoreUtils.manageArguments(args);
+        } catch (Throwable throwable) {
+            log.warn("Got exception in application: " + throwable.getLocalizedMessage(), throwable);
+        }
     }
 }
