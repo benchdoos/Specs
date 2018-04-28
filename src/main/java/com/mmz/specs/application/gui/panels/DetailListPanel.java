@@ -314,7 +314,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void updateDetailImage(final DetailEntity selectedComponent) {
         Runnable runnable = () -> {
             detailIconLabel.setText("Загрузка...");
-
+            FrameUtils.removeAllComponentListeners(detailIconLabel);
 
             FtpUtils ftp = FtpUtils.getInstance();
             BufferedImage image = ftp.getImage(selectedComponent.getId());
