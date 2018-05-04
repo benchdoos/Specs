@@ -98,7 +98,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initTimer() {
-        uiUpdateTimer = new Timer(1000, e -> updateUserInterface());
+        uiUpdateTimer = new Timer(1000, e -> updateStatusLabel());
         if (!uiUpdateTimer.isRunning()) {
             uiUpdateTimer.start();
         }
@@ -207,7 +207,7 @@ public class ClientMainWindow extends JFrame {
         return menu;
     }
 
-    private void updateUserInterface() {
+    private void updateStatusLabel() {
         if (ClientBackgroundService.getInstance().isConnected()) {
             statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
             statusLabel.setToolTipText("Сервер подключен");
