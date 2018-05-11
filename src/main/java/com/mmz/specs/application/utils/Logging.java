@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.Calendar;
 
 import static com.mmz.specs.application.core.ApplicationConstants.LOG_PREFIX_CLIENT;
 import static com.mmz.specs.application.core.ApplicationConstants.LOG_PREFIX_SERVER;
@@ -42,8 +43,8 @@ public class Logging {
                     return LOG_PREFIX_SERVER;
                 case ApplicationArgumentsConstants.CLIENT:
                     return LOG_PREFIX_CLIENT;
-                    default:
-                        return LOG_PREFIX_CLIENT;
+                default:
+                    return LOG_PREFIX_CLIENT;
             }
         } else return LOG_PREFIX_CLIENT;
     }
@@ -67,10 +68,10 @@ public class Logging {
      * Warning! Run this before any log implementation.
      */
     private void startLogging(String prefix) {
-        System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER + prefix );
+        System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER + prefix);
         System.out.println("Logging starting at: " + LOG_FOLDER);
         Logger log = LogManager.getLogger(getCurrentClassName());
-        log.info("Logging started at: " + LOG_FOLDER);
+        log.info("Logging started on: " + Calendar.getInstance().getTime() + " at: " + LOG_FOLDER);
     }
 
 }
