@@ -77,11 +77,9 @@ public class ServerDBConnectionPool {
         final Metamodel metamodel = session.getSessionFactory().getMetamodel();
         for (EntityType<?> entityType : metamodel.getEntities()) {
             final String entityName = entityType.getName();
-            final Query query = session.createQuery("from " + entityName);
-            System.out.println("executing: " + query.getQueryString());
-            for (Object o : query.list()) {
-                System.out.println("  " + o.toString());
-            }
+            Query query = session.createQuery("select count(*) from " + entityName);
+            long count = ((Long) query.uniqueResult()).intValue();
+            System.out.println("executing: " + query.getQueryString() + " Row count: " + count);
         }
         ServerLogMessage message = new ServerLogMessage("Пул подключений к БД успешно запущен",
                 ServerLogMessage.ServerLogMessageLevel.SUCCESS);
