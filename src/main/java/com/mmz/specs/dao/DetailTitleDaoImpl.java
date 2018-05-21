@@ -86,7 +86,7 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     @Override
     @Transactional
     public DetailTitleEntity getDetailTitleByTitle(String title) {
-        Query query = session.createQuery("from UsersEntity where username = :title");
+        Query query = session.createQuery("from DetailTitleEntity where title = :title");
         query.setParameter("title", title);
 
         final DetailTitleEntity entity = (DetailTitleEntity) query.uniqueResult();
