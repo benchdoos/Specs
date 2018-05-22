@@ -2,12 +2,12 @@
 <Configuration>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d %p %C{1.} [%t] %m():%L - %msg%n"/>
+            <PatternLayout pattern="%d %p %C{1.}:%L [%t] - %msg%n"/>
         </Console>
         <RollingFile name="Trace" fileName="${sys:com.mmz.specs:log.folder}trace.log"
                      filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
-                <pattern>%d %p %C{1.} [%t] %m():%L - %msg%n</pattern>
+                <pattern>%d %p %C{1.}:%L [%t] - %msg%n</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="7 MB"/>
@@ -18,7 +18,7 @@
         <RollingFile name="Debug" fileName="${sys:com.mmz.specs:log.folder}debug.log"
                      filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
-                <pattern>%d %p %C{1.} [%t] %m():%L - %msg%n</pattern>
+                <pattern>%d %p %C{1.}:%L [%t] - %msg%n</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="5 MB"/>
@@ -29,7 +29,7 @@
         <RollingFile name="Important" fileName="${sys:com.mmz.specs:log.folder}application.log"
                      filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
-                <pattern>%d %p %C{1.} [%t] %m():%L - %msg%n</pattern>
+                <pattern>%d %p %C{1.}:%L [%t] - %msg%n</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="2 MB"/>
