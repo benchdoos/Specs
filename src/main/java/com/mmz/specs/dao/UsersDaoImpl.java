@@ -23,6 +23,9 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +63,7 @@ public class UsersDaoImpl implements UsersDao {
     public int addUser(UsersEntity usersEntity) {
         Integer id = (Integer) session.save(usersEntity);
         usersEntity = getUserById(id);
-        log.debug("User successfully saved: " + usersEntity);
+        log.info("User successfully saved: " + usersEntity);
         return id;
     }
 
@@ -68,7 +71,7 @@ public class UsersDaoImpl implements UsersDao {
     @Transactional
     public void updateUser(UsersEntity usersEntity) {
         session.merge(usersEntity);
-        log.debug("User successfully updated: " + usersEntity);
+        log.info("User successfully updated: " + usersEntity);
     }
 
     @Override
@@ -78,7 +81,7 @@ public class UsersDaoImpl implements UsersDao {
         if (usersEntity != null) {
             session.delete(usersEntity);
         }
-        log.debug("User successfully removed: " + usersEntity);
+        log.info("User successfully removed: " + usersEntity);
     }
 
 
@@ -92,11 +95,22 @@ public class UsersDaoImpl implements UsersDao {
 
     @Override
     @Transactional
-    public UsersEntity getUserByUsername(String username) {
-        Query query = session.createQuery("from UsersEntity where username = :username");
-        query.setParameter("username", username);
+    public UsersEntity getUserByUsername(String username) { //todo use criterias allover the code.
+       /* Query criteriaQuery = session.createQuery("from UsersEntity where username = :username");
+        criteriaQuery.setParameter("username", username);
 
-        final UsersEntity entity = (UsersEntity) query.uniqueResult();
+        final UsersEntity entity = (UsersEntity) criteriaQuery.uniqueResult();
+        log.debug("User found by username " + username + ": " + entity);
+        return entity;
+*/
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<UsersEntity> criteriaQuery = builder.createQuery(UsersEntity.class);
+        Root<UsersEntity> root = criteriaQuery.from(UsersEntity.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(builder.equal(root.get("username"), username));
+        Query<UsersEntity> q = session.createQuery(criteriaQuery);
+        final UsersEntity entity = q.uniqueResult();
         log.debug("User found by username " + username + ": " + entity);
         return entity;
     }

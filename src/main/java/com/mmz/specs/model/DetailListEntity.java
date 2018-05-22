@@ -102,7 +102,7 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
                 .toString();
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "PARENT_DETAIL_ID", referencedColumnName = "ID", nullable = false)
     public DetailEntity getDetailByParentDetailId() {
         return detailByParentDetailId;
@@ -112,7 +112,7 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
         this.detailByParentDetailId = detailByParentDetailId;
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "CHILD_DETAIL_ID", referencedColumnName = "ID", nullable = false)
     public DetailEntity getDetailByChildDetailId() {
         return detailByChildDetailId;
@@ -122,7 +122,7 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
         this.detailByChildDetailId = detailByChildDetailId;
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "NOTICE_ID", referencedColumnName = "ID", nullable = false)
     public NoticeEntity getNoticeByNoticeId() {
         return noticeByNoticeId;

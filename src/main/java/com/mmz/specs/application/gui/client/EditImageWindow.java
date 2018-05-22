@@ -32,7 +32,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+
+import static com.mmz.specs.application.utils.FtpUtils.MAX_IMAGE_FILE_SIZE;
 
 public class EditImageWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -137,7 +140,24 @@ public class EditImageWindow extends JDialog {
                     if (image != null) {
                         ftp.deleteImage(detailEntity.getId());
                     }
-                    ftp.uploadImage(detailEntity.getId(), chooser.getSelectedFile().getAbsolutePath());
+                    String chosenImageAbsolutePath = chooser.getSelectedFile().getAbsolutePath();
+
+                    long length = new File(chosenImageAbsolutePath).length();
+                    System.out.println("file size: " + length);
+                    if (length <= MAX_IMAGE_FILE_SIZE) {
+                        boolean imageUploaded = ftp.uploadImage(detailEntity.getId(), chosenImageAbsolutePath);
+                        if (imageUploaded) {
+                            log.info("Image for " + detailEntity.getId() + " was successfully updated with image: " + chosenImageAbsolutePath);
+                        } else {
+                            log.warn("Could not upload image for detail: " + detailEntity.getId() + " and image: " + chosenImageAbsolutePath);
+                        }
+                    } else {
+                        log.warn("Could not upload image for detail: " + detailEntity.getId() + " file length > maximum ( " + length + " , max: " + MAX_IMAGE_FILE_SIZE + ")");
+
+                        JOptionPane.showMessageDialog(this, "Не удалось загрузить изображение:\n" +
+                                chooser.getSelectedFile().getAbsolutePath() + "\n" +
+                                "Размер изображения больше чем 5МБ.", "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
+                    }
                 } catch (IOException e) {
                     log.warn("Could not upload image for detail: " + detailEntity, e);
 

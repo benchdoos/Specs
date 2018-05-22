@@ -102,7 +102,7 @@ public class DetailEntity implements Comparable<DetailEntity> {
         this.active = active;
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "TECH_PROCESS_ID", referencedColumnName = "ID")
     public TechProcessEntity getTechProcessByTechProcessId() {
         return techProcessByTechProcessId;
@@ -112,7 +112,7 @@ public class DetailEntity implements Comparable<DetailEntity> {
         this.techProcessByTechProcessId = techProcessByTechProcessId;
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "TITLE_ID", referencedColumnName = "ID")
     public DetailTitleEntity getDetailTitleByDetailTitleId() {
         return detailTitleByDetailTitleId;
@@ -163,7 +163,7 @@ public class DetailEntity implements Comparable<DetailEntity> {
     public int compareTo(DetailEntity that) {
         int result = 0;
         result -= that.getCode().compareTo(this.getCode());
-        result += (that.isActive() == this.isActive()) ? 1 : 0;
+        /*result += (that.isActive() == this.isActive()) ? 1 : 0;*/
         return result;
 
     }

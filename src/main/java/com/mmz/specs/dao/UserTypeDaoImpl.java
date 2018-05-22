@@ -47,7 +47,7 @@ public class UserTypeDaoImpl implements UserTypeDao {
     @Transactional
     public void updateUserType(UserTypeEntity userTypeEntity) {
         session.merge(userTypeEntity);
-        log.debug("UserType successfully updated: " + userTypeEntity);
+        log.info("UserType successfully updated: " + userTypeEntity);
     }
 
     @Override

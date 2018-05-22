@@ -24,6 +24,8 @@ import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
+
 public class ClientManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final ClientManager ourInstance = new ClientManager();
@@ -37,10 +39,12 @@ public class ClientManager {
         Thread thread = new Thread(runnable);
         thread.start();
 
-        /*clientBackgroundService.createConnection();*/
-
         clientMainWindow = new ClientMainWindow();
-        clientMainWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientMainWindow));
+        if (ClientSettingsManager.getInstance().getClientMainWindowLocation().equals(new Point(-1, -1))) {
+            clientMainWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientMainWindow));
+        } else {
+            clientMainWindow.setLocation(ClientSettingsManager.getInstance().getClientMainWindowLocation());
+        }
         clientMainWindow.setVisible(true);
     }
 

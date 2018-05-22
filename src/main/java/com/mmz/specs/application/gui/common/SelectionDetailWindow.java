@@ -116,7 +116,9 @@ public class SelectionDetailWindow extends JDialog {
         DefaultComboBoxModel<DetailEntity> model = new DefaultComboBoxModel<>();
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
         final List<DetailEntity> detailEntities = service.listDetails();
+
         Collections.sort(detailEntities);
+
         for (DetailEntity entity : detailEntities) {
             model.addElement(entity);
         }

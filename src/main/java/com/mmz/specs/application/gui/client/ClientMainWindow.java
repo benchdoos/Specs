@@ -19,6 +19,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
+import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.ButtonTabComponent;
 import com.mmz.specs.application.gui.common.LoginWindow;
@@ -27,6 +28,7 @@ import com.mmz.specs.application.gui.panels.AccessPolicy;
 import com.mmz.specs.application.gui.panels.AccessPolicyManager;
 import com.mmz.specs.application.gui.panels.DetailListPanel;
 import com.mmz.specs.application.gui.panels.NoticeInfoPanel;
+import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -43,10 +45,7 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -81,6 +80,7 @@ public class ClientMainWindow extends JFrame {
 
         pack();
 
+        setSize(ClientSettingsManager.getInstance().getClientMainWindowDimension());
     }
 
     private void initKeyBindings() {
@@ -126,6 +126,19 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initListeners() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    ClientSettingsManager.getInstance().setClientMainWindowLocation(getLocation());
+                    ClientSettingsManager.getInstance().setClientMainWindowDimension(getSize());
+                    log.debug("Successfully saved client window location and dimension");
+                } catch (IOException e1) {
+                    log.warn("Could not save client window location or dimension", e);
+                }
+            }
+        });
+
         viewDetailListButton.addActionListener(e -> onViewDetailList(true));
         viewDetailListButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -209,45 +222,49 @@ public class ClientMainWindow extends JFrame {
 
     private void updateStatusLabel() {
         if (ClientBackgroundService.getInstance().isConnected()) {
-            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
-            statusLabel.setToolTipText("Сервер подключен");
+            Runnable runnable = () -> {
+                statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
+                statusLabel.setToolTipText("Сервер подключен");
 
-            if (session == null) {
-                session = ClientBackgroundService.getInstance().getSession();
-                SwingUtilities.invokeLater(this::initFtp);
-            } else {
-                if (session.isConnected()) {
-                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
-                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД подключена");
+                if (session == null) {
+                    Runnable getSessionRunnable = () -> {
+                        session = ClientBackgroundService.getInstance().getSession();
+                        initFtp();
+                    };
+                    SwingUtilities.invokeLater(getSessionRunnable);
                 } else {
-                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
-                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД не подключена");
-
+                    if (session.isConnected()) {
+                        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
+                        statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД подключена");
+                    } else {
+                        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
+                        statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД не подключена");
+                    }
                 }
-            }
 
-            setButtonsEnabled(true);
-            unlockTabs();
-//            setTabsEnabled(true);
-
+                setButtonsEnabled(true);
+                unlockTabs();
+            };
+            SwingUtilities.invokeLater(runnable);
         } else {
-            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-            statusLabel.setToolTipText("Сервер отключен");
+            Runnable runnable = () -> {
+                statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+                statusLabel.setToolTipText("Сервер отключен");
 
-            if (session != null) {
-                if (session.isConnected()) {
-                    session.disconnect();
-                    session = null;
+                if (session != null) {
+                    if (session.isConnected()) {
+                        session.disconnect();
+                        session = null;
 
-                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
+                        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+                        statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
+                    }
                 }
-            }
 
-            setButtonsEnabled(false);
-            unlockTabs();
-
-//            setTabsEnabled(false);
+                setButtonsEnabled(false);
+                unlockTabs();
+            };
+            SwingUtilities.invokeLater(runnable);
         }
 
 
@@ -382,7 +399,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initGui() {
-        setMinimumSize(new Dimension(1024, 640));
+        setMinimumSize(ClientConstants.MAIN_WINDOW_DEFAULT_DIMENSION); //new Dimension(830, 480)
 
         initHomeTab();
         initConnectionLabels();
@@ -403,7 +420,7 @@ public class ClientMainWindow extends JFrame {
 
     private void onRestoreFromDb() {
         ClientBackgroundService.getInstance().refreshSession();
-        //todo refresh all GUIs
+        //todo refresh all GUIs //use interface to update data for each panel
     }
 
     private void onConnectionSettings() {

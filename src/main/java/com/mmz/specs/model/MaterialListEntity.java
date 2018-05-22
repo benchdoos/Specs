@@ -49,7 +49,7 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
         isActive = active;
     }
 
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.ALL})
     @JoinColumn(name = "IS_MAIN_MATERIAL", nullable = false)
     public boolean isMainMaterial() {
         return isMainMaterial;
@@ -86,7 +86,7 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
                 .toString();
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "DETAIL_ID", referencedColumnName = "ID", nullable = false)
     public DetailEntity getDetailByDetailId() {
         return detailByDetailId;
@@ -96,7 +96,7 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
         this.detailByDetailId = detailByDetailId;
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "MATERIAL_ID", referencedColumnName = "ID", nullable = false)
     public MaterialEntity getMaterialByMaterialId() {
         return materialByMaterialId;

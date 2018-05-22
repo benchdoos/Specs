@@ -36,7 +36,7 @@ public class ServerBackgroundService {
     private boolean isServerShuttingDown = false;
 
     private ServerBackgroundService() {
-        Runnable runnable = this::startServerMainBackgroundService;
+        Runnable runnable = () -> startServerMainBackgroundService();
 
         serverBackGroundThread = new Thread(runnable);
         serverBackGroundThread.start();

@@ -22,6 +22,7 @@ import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -105,5 +106,61 @@ public class ClientSettingsManager {
 
     public Properties getProperties() {
         return CLIENT_SETTINGS;
+    }
+
+    public Dimension getClientMainWindowDimension() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_DIMENSION);
+            String[] strings = property.split(",");
+            if (strings.length == 2) {
+                try {
+                    int x = Integer.parseInt(strings[0]);
+                    int y = Integer.parseInt(strings[1]);
+                    log.debug("dimension: {},{}", x, y);
+                    if ((x > 0 && y > 0) && (x < Integer.MAX_VALUE && y < Integer.MAX_VALUE)) {
+                        return new Dimension(x, y);
+                    }
+                } catch (NumberFormatException ignore) {/*NOP*/}
+            }
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.MAIN_WINDOW_DEFAULT_DIMENSION;
+    }
+
+    public void setClientMainWindowDimension(Dimension dimension) throws IOException {
+        String value = dimension.width + "," + dimension.height;
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_DIMENSION, value);
+        updateSettingsFile();
+    }
+
+    Point getClientMainWindowLocation() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_POSITION);
+            String[] strings = property.split(",");
+            if (strings.length == 2) {
+                try {
+                    int x = Integer.parseInt(strings[0]);
+                    int y = Integer.parseInt(strings[1]);
+
+                    GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+                    int width = gd.getDisplayMode().getWidth();
+                    int height = gd.getDisplayMode().getHeight();
+
+                    if ((x > 0 && y > 0) && (x < width && y < height)) {
+                        return new Point(x, y);
+                    }
+                } catch (NumberFormatException ignore) {/*NOP*/}
+            }
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return new Point(-1, -1);
+    }
+
+    public void setClientMainWindowLocation(Point point) throws IOException {
+        String value = point.x + "," + point.y;
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_POSITION, value);
+        updateSettingsFile();
     }
 }

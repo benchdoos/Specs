@@ -2,23 +2,42 @@
 <Configuration>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %M():%L  - %msg%n"/>
+            <PatternLayout pattern="%d %p %C{1.} [%t] %m():%L - %msg%n"/>
         </Console>
-        <File name="Trace" fileName="${sys:com.mmz.specs:log.folder}trace.log" immediateFlush="true" append="true">
-            <PatternLayout charset="UTF-8" pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %M():%L - %msg%n"
-                           header="${java:runtime} - ${java:vm} - ${java:os}"/>
-        </File>
-        <File name="Debug" fileName="${sys:com.mmz.specs:log.folder}debug.log" immediateFlush="true" append="true">
-            <PatternLayout charset="UTF-8" pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %M():%L - %msg%n"
-                           header="${java:runtime} - ${java:vm} - ${java:os}"/>
-        </File>
-        <File name="Important" fileName="${sys:com.mmz.specs:log.folder}application.log" immediateFlush="true"
-              append="true">
-            <PatternLayout charset="UTF-8" pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %M():%L - %msg%n"
-                           header="${java:runtime} - ${java:vm} - ${java:os}"/>
-        </File>
+        <RollingFile name="Trace" fileName="${sys:com.mmz.specs:log.folder}trace.log"
+                     filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
+                <pattern>%d %p %C{1.} [%t] %m():%L - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="7 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
 
+        <RollingFile name="Debug" fileName="${sys:com.mmz.specs:log.folder}debug.log"
+                     filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
+                <pattern>%d %p %C{1.} [%t] %m():%L - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
+        <RollingFile name="Important" fileName="${sys:com.mmz.specs:log.folder}application.log"
+                     filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
+                <pattern>%d %p %C{1.} [%t] %m():%L - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="2 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
     </Appenders>
+
     <Loggers>
         <Logger name="com.mmz.specs" level="trace" additivity="true"/>
 

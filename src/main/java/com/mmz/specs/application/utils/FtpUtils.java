@@ -23,12 +23,10 @@ import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class FtpUtils {
+    public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
 
@@ -124,13 +122,32 @@ public class FtpUtils {
     }
 
 
-    public void uploadImage(int id, String path) throws IOException {
+    public boolean uploadImage(int id, String path) throws IOException {
+        /*log.debug("Uploading image from path: " + path + " by id: " + id);
         final FileInputStream local = new FileInputStream(path);
-        ftpClient.storeFile(postfix + id + DEFAULT_IMAGE_EXTENSION, local);
+        boolean result = ftpClient.storeFile(postfix + id + DEFAULT_IMAGE_EXTENSION, local);
         local.close();
+        return result;*/
+
+        File localFile = new File(path);
+        String remoteFile = postfix + id + DEFAULT_IMAGE_EXTENSION;
+
+        log.debug("Uploading image for id:{} exists:{} with path:{} ", id, localFile.exists(), path);
+        byte[] bytesIn = new byte[4096];
+        int read = 0;
+
+        try (InputStream inputStream = new FileInputStream(localFile);
+             OutputStream outputStream = ftpClient.storeFileStream(remoteFile)) {
+            while ((read = inputStream.read(bytesIn)) != -1) {
+                outputStream.write(bytesIn, 0, read);
+            }
+        }
+        return ftpClient.completePendingCommand();
     }
 
     public void deleteImage(int id) throws IOException {
+        log.debug("Removing image by id: {}" + id);
         ftpClient.deleteFile(postfix + id + DEFAULT_IMAGE_EXTENSION);
+        log.info("Image was successfully removed: " + postfix + id + DEFAULT_IMAGE_EXTENSION);
     }
 }

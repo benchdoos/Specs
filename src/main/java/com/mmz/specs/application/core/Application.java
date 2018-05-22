@@ -20,6 +20,8 @@ import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
+
 public class Application {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
@@ -29,7 +31,12 @@ public class Application {
             CoreUtils.localizeFileChooser();
             CoreUtils.manageArguments(args);
         } catch (Throwable throwable) {
-            log.warn("Got exception in application: " + throwable.getLocalizedMessage(), throwable);
+            JOptionPane.showMessageDialog(null,
+                    "Фатальная ошибка приложения.\n" + throwable.getLocalizedMessage(), "Ошибка",
+                    JOptionPane.ERROR_MESSAGE);
+            log.fatal("Got exception in application: " + throwable.getLocalizedMessage(), throwable);
+            log.fatal("Exiting application with exception: " + throwable.getLocalizedMessage());
+            System.exit(-1); //fixme this should not exit like this...
         }
     }
 }

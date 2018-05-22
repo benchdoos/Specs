@@ -15,22 +15,50 @@
 
 package com.mmz.specs.application.utils.client;
 
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
+import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.DetailListDaoImpl;
+import com.mmz.specs.dao.DetailTitleDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
+import com.mmz.specs.model.DetailTitleEntity;
+import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.DetailListServiceImpl;
+import com.mmz.specs.service.DetailTitleService;
+import com.mmz.specs.service.DetailTitleServiceImpl;
+import org.apache.commons.text.WordUtils;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static javax.swing.JOptionPane.*;
 
 public class CommonWindowUtils {
     private Session session;
 
     public CommonWindowUtils(Session session) {
         this.session = session;
+    }
+
+    public static String createDelimiter(String longMark, String longProfile) {
+        if (longMark.length() > longProfile.length()) {
+            return getDelimiter(longMark.length());
+        } else return getDelimiter(longProfile.length());
+    }
+
+    private static String getDelimiter(int size) {
+        size = (int) (size * 1.4);
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            result.append("-");
+        }
+        return result.toString();
     }
 
     public DefaultListModel<DetailEntity> getEffectList(int id) {
@@ -70,18 +98,78 @@ public class CommonWindowUtils {
         return result;
     }
 
-    public static String createDelimiter(String longMark, String longProfile) {
-        if (longMark.length() > longProfile.length()) {
-            return getDelimiter(longMark.length());
-        } else return getDelimiter(longProfile.length());
+    public DetailTitleEntity onCreateNewTitle(Component component) {
+        Window window = FrameUtils.findWindow(component);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            UsersEntity currentUser = clientMainWindow.getCurrentUser();
+            if (currentUser != null) {
+                if (currentUser.isActive()) {
+                    if (currentUser.isAdmin()) {
+                        String result = showInputDialog(component,
+                                "Введите новое наименование:", "Новое наименование", PLAIN_MESSAGE);
+                        if (result != null) {
+                            if (!result.isEmpty()) {
+                                final int MAX_TITLE_LENGTH = 120;
+                                if (result.length() <= MAX_TITLE_LENGTH) {
+                                    result = result.replace("\n", " ");
+                                    result = WordUtils.capitalizeFully(result);
+
+                                    DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+                                    DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
+
+                                    if (detailTitleByTitle == null) {
+                                        DetailTitleEntity titleEntity = new DetailTitleEntity();
+                                        titleEntity.setActive(true);
+                                        titleEntity.setTitle(result);
+                                        DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+
+                                        return createNewTitle(component, result, titleEntity, service);
+                                    } else {
+                                        showMessageDialog(component,
+                                                "Наименование " + result +
+                                                        "\nУже существует.", "Ошибка добавления", WARNING_MESSAGE);
+                                    }
+                                } else {
+                                    showMessageDialog(component,
+                                            "Длина наименования не может привышать 120 символов (сейчас: "
+                                                    + result.length() + ")",
+                                            "Ошибка ввода", WARNING_MESSAGE);
+                                }
+                            }
+                        }
+                    } else {
+                        showMessageDialog(component,
+                                "Вам необходимо быть администратором,\n" +
+                                        "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
+                    }
+                } else {
+                    showMessageDialog(component,
+                            "Пользователь не активен,\n" +
+                                    "обратитесь к администратору для продолжения.", "Ошибка доступа", WARNING_MESSAGE);
+                }
+            } else {
+                showMessageDialog(component,
+                        "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", WARNING_MESSAGE);
+            }
+        }
+        return null;
     }
 
-    private static String getDelimiter(int size) {
-        size = (int) (size * 1.4);
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            result.append("-");
+    private DetailTitleEntity createNewTitle(Component component, String result, DetailTitleEntity titleEntity, DetailTitleService service) {
+        try {
+            Transaction transaction = session.getTransaction();
+            transaction.begin();
+            service.addDetailTitle(titleEntity);
+            transaction.commit();
+
+            ClientBackgroundService.getInstance().refreshSession();
+            return titleEntity;
+        } catch (Throwable throwable) {
+            showMessageDialog(component,
+                    "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
+                    "Ошибка добавления", WARNING_MESSAGE);
+            return null;
         }
-        return result.toString();
     }
 }

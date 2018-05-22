@@ -14,6 +14,11 @@
         <property name="hibernate.hikari.minimumIdle">5</property>
         <property name="hibernate.hikari.maximumPoolSize">100</property>
         <property name="hibernate.hikari.idleTimeout">5000</property>
+        <!-- DB schema will be updated if needed -->
+        <!-- <property name="hbm2ddl.auto">update</property> -->
+
+        <!--Hibernate shows sql info-->
+        <!--<property name="show_sql">true</property>-->
 
 
         <mapping resource="hibernate/HibernateMapping.xml"/>
@@ -28,8 +33,5 @@
         <mapping class="com.mmz.specs.model.UserTypeEntity"/>
         <mapping class="com.mmz.specs.model.ConstantsEntity"/>
 
-
-        <!-- DB schema will be updated if needed -->
-        <!-- <property name="hbm2ddl.auto">update</property> -->
     </session-factory>
 </hibernate-configuration>
