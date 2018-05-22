@@ -243,7 +243,7 @@ public class ClientMainWindow extends JFrame {
                 }
 
                 setButtonsEnabled(true);
-                unlockTabs();
+                unlockTabsAndUIs();
             };
             SwingUtilities.invokeLater(runnable);
         } else {
@@ -262,7 +262,7 @@ public class ClientMainWindow extends JFrame {
                 }
 
                 setButtonsEnabled(false);
-                unlockTabs();
+                unlockTabsAndUIs();
             };
             SwingUtilities.invokeLater(runnable);
         }
@@ -281,7 +281,7 @@ public class ClientMainWindow extends JFrame {
                     if (user.isEditor() || user.isAdmin()) {
                         currentUser = user;
                         unlockButtonIconUpdate(true);
-                        unlockTabs();
+                        unlockTabsAndUIs();
                     } else {
                         JOptionPane.showMessageDialog(this, "Вы должны быть администратором или редактором.",
                                 "Доступ запрещен", JOptionPane.WARNING_MESSAGE);
@@ -299,12 +299,12 @@ public class ClientMainWindow extends JFrame {
             } else {
                 unlockButtonIconUpdate(false);
                 unlockAdminTools(false);
-                unlockTabs();
+                unlockTabsAndUIs();
             }
         } else {
             unlockButtonIconUpdate(false);
             unlockAdminTools(false);
-            unlockTabs();
+            unlockTabsAndUIs();
             currentUser = null;
         }
     }
@@ -314,6 +314,29 @@ public class ClientMainWindow extends JFrame {
         if (clientMainTabbedPane.getSelectedIndex() == i && !enabled) {
             clientMainTabbedPane.setSelectedIndex(0);
         }
+    }
+
+    private void unlockTabsAndUIs() {
+        unlockTabs();
+        unlockUIsForAdmins();
+    }
+
+    private void unlockUIsForAdmins() {
+        boolean isConnected = ClientBackgroundService.getInstance().isConnected();
+        if (isConnected) {
+            if (currentUser != null) {
+                setEnabledUis(currentUser.isActive() && currentUser.isAdmin());
+            } else {
+                setEnabledUis(false);
+            }
+        } else {
+            setEnabledUis(false);
+        }
+    }
+
+    private void setEnabledUis(boolean unlock) {
+        editDataButton.setEnabled(unlock);
+        adminButton.setEnabled(unlock);
     }
 
     private void unlockTabs() {
@@ -377,7 +400,6 @@ public class ClientMainWindow extends JFrame {
                 policyTab.setUIEnabled(isEditor || isAdmin);
             } catch (Exception ignore) {/*NOP*/}
         }
-
     }
 
     private void onUsernameInfo() {
@@ -553,12 +575,12 @@ public class ClientMainWindow extends JFrame {
 
         if (currentUser != null) {
             if (currentUser.isActive()) {
-                unlockTabs();
+                unlockTabsAndUIs();
             } else {
                 unlockButtonIconUpdate(false);
             }
         } else {
-            unlockTabs();
+            unlockTabsAndUIs();
         }
     }
 
