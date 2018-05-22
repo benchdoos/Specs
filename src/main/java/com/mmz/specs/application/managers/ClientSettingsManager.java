@@ -88,7 +88,6 @@ public class ClientSettingsManager {
                 try {
                     int x = Integer.parseInt(strings[0]);
                     int y = Integer.parseInt(strings[1]);
-                    log.debug("dimension: {},{}", x, y);
                     if ((x > 0 && y > 0) && (x < Integer.MAX_VALUE && y < Integer.MAX_VALUE)) {
                         return new Dimension(x, y);
                     }

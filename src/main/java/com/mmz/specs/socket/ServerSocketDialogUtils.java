@@ -27,13 +27,13 @@ import java.net.Socket;
 
 import static com.mmz.specs.socket.SocketConstants.USER_PC_NAME;
 
-public class ServerSocketDialogUtils {
+class ServerSocketDialogUtils {
 
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private final Socket client;
 
-    public ServerSocketDialogUtils(Socket client) {
+    ServerSocketDialogUtils(Socket client) {
         this.client = client;
     }
 
@@ -43,7 +43,6 @@ public class ServerSocketDialogUtils {
             DataInputStream in = new DataInputStream(client.getInputStream());
             out.writeUTF(USER_PC_NAME);
             return in.readUTF();
-
         } catch (IOException e) {
             /*NOP*/
             log.info("Could not ask client PC name", e);
@@ -52,7 +51,7 @@ public class ServerSocketDialogUtils {
         return "Unknown";
     }
 
-    public void sendSessionInfo() {
+    void sendSessionInfo() {
         try {
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
             String serverDbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
@@ -63,5 +62,15 @@ public class ServerSocketDialogUtils {
         } catch (IOException e) {
             log.warn("Could not send session info for client");
         }
+    }
+
+    String getUserName() {
+        try {
+            DataInputStream in = new DataInputStream(client.getInputStream());
+            return in.readUTF();
+        } catch (IOException e) {
+            log.info("Could not read client's username", e);
+        }
+        return "Unknown";
     }
 }

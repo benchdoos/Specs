@@ -1054,7 +1054,7 @@ public class ServerMainWindow extends JFrame {
         if (ServerMainWindow.isUnlocked) {
             setUnlocked(false);
             ServerMonitoringBackgroundService.getInstance().addMessage(
-                    new ServerLogMessage("Администратор вышел из системы",
+                    new ServerLogMessage("Администратор вышел из системы сервера",
                             ServerLogMessage.ServerLogMessageLevel.SUCCESS));
         } else {
             LoginWindow loginWindow = new LoginWindow(ServerDBConnectionPool.getInstance().getSession());
@@ -1070,7 +1070,7 @@ public class ServerMainWindow extends JFrame {
                         setUnlocked(user.isAdmin());
                         ServerMonitoringBackgroundService.getInstance().addMessage(
                                 new ServerLogMessage("Администратор " + user.getUsername()
-                                        + " (" + user.getName() + " " + user.getSurname() + ") успешно выполнил вход.",
+                                        + " (" + user.getName() + " " + user.getSurname() + ") успешно выполнил вход на сервере",
                                         ServerLogMessage.ServerLogMessageLevel.SUCCESS));
 
                     } else {

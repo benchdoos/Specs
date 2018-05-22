@@ -22,6 +22,7 @@ import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.HibernateConstants;
 import com.mmz.specs.connection.ServerDBConnectionPool;
+import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -169,6 +170,21 @@ public class ClientBackgroundService {
             socket.close();
         }
         log.info("Connection to server successfully closed");
+    }
+
+    public void userLogin(UsersEntity usersEntity) throws IOException {
+        if (isConnected()) {
+            log.info("Writing to server that user {} is connected.", usersEntity.getUsername());
+            outputStream.writeUTF(SocketConstants.USER_LOGIN);
+            outputStream.writeUTF(usersEntity.getUsername());
+        }
+    }
+
+    public void userLogout(UsersEntity usersEntity) throws IOException {
+        if (isConnected()) {
+            log.info("Writing to server that user {} is disconnected.", usersEntity.getUsername());
+            outputStream.writeUTF(SocketConstants.USER_LOGOUT);
+        }
     }
 
     public Socket getSocket() {

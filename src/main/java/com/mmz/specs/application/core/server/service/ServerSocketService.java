@@ -29,15 +29,11 @@ import java.net.BindException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerSocketService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final ServerSocketService ourInstance = new ServerSocketService();
-
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(ServerConstants.SERVER_SOCKED_THREAD_POOL_SIZE);
     private final HashMap<ClientConnection, Thread> connections = new HashMap<>();
     /*private static LinkedList<ClientConnection> connections = new LinkedList<>();
     private static LinkedList<Runnable> threads = new LinkedList<>();*/
@@ -52,11 +48,11 @@ public class ServerSocketService {
         return ourInstance;
     }
 
-    public void startSocketService() {
+    void startSocketService() {
         startServerSocketConnectionPool();
     }
 
-    public void stopSocketService() {
+    void stopSocketService() {
         stopServerSocketConnections();
     }
 
@@ -69,7 +65,7 @@ public class ServerSocketService {
     }
 
 
-    public void createConnections() throws IOException {
+    void createConnections() throws IOException {
         while (this.isNotClosing) {
             log.info("Server is creating for new connection at: " + this.serverSocketConnectionPool.getServerInfo());
 
@@ -80,7 +76,7 @@ public class ServerSocketService {
                     ServerLogMessage.ServerLogMessageLevel.INFO));
 
             ServerSocketDialog dialog = new ServerSocketDialog(connection);
-            Thread thread = new Thread(dialog, "Thread-" + this.genThreadId + " for Client connection with socket: " + connection.getSocket());
+            Thread thread = new Thread(dialog, "Thread-" + this.genThreadId + " for client connection from: " + connection.getSocket().getInetAddress());
             registerClientConnection(connection, thread);
             thread.start();
             this.genThreadId++;
@@ -155,8 +151,13 @@ public class ServerSocketService {
 
     public void closeClientConnection(ClientConnection connection) throws IOException {
         log.debug("Trying to close connection: " + connection);
+        String username = "";
+        if (connection.getUserEntity() != null) {
+            username = connection.getUserEntity().getUsername() + " ";
+        }
+
         ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
-                "Отключаем пользователя: " + connection.getSocket().getInetAddress(),
+                "Отключаем пользователя: " + username + "(" + connection.getSocket().getInetAddress() + ")",
                 ServerLogMessage.ServerLogMessageLevel.INFO));
         unregisterClientConnection(connection);
         connection.close();
@@ -196,12 +197,6 @@ public class ServerSocketService {
                     "Отключено пользователей: " + connectionsCount + " из: " + totalConnectionsCount,
                     ServerLogMessage.ServerLogMessageLevel.WARN));
         }
-    }
-
-    public int getServerPort() {
-        if (this.serverSocketConnectionPool != null) {
-            return this.serverSocketConnectionPool.getServerPort();
-        } else return 0;
     }
 
     public int getConnectedClientsCount() {

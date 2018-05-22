@@ -22,4 +22,7 @@ public interface SocketConstants {
 
     String USER_PC_NAME = "user.pc.name";
     String GIVE_SESSION = "give_session";
+
+    String USER_LOGIN = "user.login";
+    String USER_LOGOUT = "user.logout";
 }

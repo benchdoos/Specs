@@ -19,8 +19,8 @@ import java.awt.*;
 
 public class ClientConstants {
     public static final String CLIENT_SERVER_ADDRESS_KEY = "server.address";
-    public static final String CLIENT_SERVER_PORT_KEY = "server.port";
     public static final String MAIN_WINDOW_DIMENSION = "window.dimension";
-    public static final Dimension MAIN_WINDOW_DEFAULT_DIMENSION = new Dimension(830, 480);
     public static final String MAIN_WINDOW_POSITION = "window.position";
+
+    public static final Dimension MAIN_WINDOW_DEFAULT_DIMENSION = new Dimension(830, 480);
 }

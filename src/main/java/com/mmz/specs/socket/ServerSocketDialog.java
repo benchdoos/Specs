@@ -20,6 +20,9 @@ import com.mmz.specs.application.core.server.service.ServerLogMessage;
 import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
 import com.mmz.specs.application.core.server.service.ServerSocketService;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.model.UsersEntity;
+import com.mmz.specs.service.UsersService;
+import com.mmz.specs.service.UsersServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -82,18 +85,49 @@ public class ServerSocketDialog implements Runnable {
         switch (command) {
             case TESTING_CONNECTION_COMMAND:
                 break;
+
             case HELLO_COMMAND:
                 String name = new ServerSocketDialogUtils(client).getPcName();
                 log.info("User connected: " + name + " Command: " + command); // TODO manage this to server somewhere
                 break;
+
             case GIVE_SESSION:
                 log.info("User asking Session, giving it. Command: " + command);
                 new ServerSocketDialogUtils(client).sendSessionInfo();
                 break;
+
+            case USER_LOGIN:
+                log.info("User {} is logged in.", client);
+                String userName = new ServerSocketDialogUtils(client).getUserName();
+                UsersService usersService = new UsersServiceImpl();
+                UsersEntity userByUsername = usersService.getUserByUsername(userName);
+                if (userByUsername != null) {
+                    connection.setUserEntity(userByUsername);
+                    log.info("User {} is logged in as: {}", client, userName);
+                    ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                            "Пользователь " + userByUsername.getUsername()
+                                    + " (" + userByUsername.getName() + " " + userByUsername.getSurname() + ")" +
+                                    " вошел в систему с компьютера: " + client.getInetAddress(),
+                            ServerLogMessage.ServerLogMessageLevel.INFO));
+                }
+                break;
+
+
+            case USER_LOGOUT:
+                log.info("User {} is logged out.", connection.getUserEntity().getUsername());
+                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                        "Пользователь " + connection.getUserEntity().getUsername()
+                                + " (" + connection.getUserEntity().getName() + " "
+                                + connection.getUserEntity().getSurname() + ")" +
+                                " вышел из системы с компьютера: " + client.getInetAddress(),
+                        ServerLogMessage.ServerLogMessageLevel.INFO));
+                connection.setUserEntity(null);
+                break;
             case QUIT_COMMAND:
-                log.info("Quiting connection for client: " + client + " Command: " + command);
+                log.info("Quiting connection for client: " + connection + " Command: " + command);
                 onQuitCommand();
                 break;
+
             default:
                 log.warn("Unknown command: " + command);
                 break;
