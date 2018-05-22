@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.core.client.service;
 
+import com.mmz.specs.application.core.server.ServerConstants;
 import com.mmz.specs.application.managers.ClientManager;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.FtpUtils;
@@ -49,6 +50,10 @@ public class ClientBackgroundService {
 
     private ClientBackgroundService() {
         createConnection();
+    }
+
+    public static ClientBackgroundService getInstance() {
+        return ourInstance;
     }
 
     public void createConnection() {
@@ -95,7 +100,7 @@ public class ClientBackgroundService {
 
     private void createNewServerConnection() {
         serverAddress = ClientSettingsManager.getInstance().getServerAddress();
-        serverPort = ClientSettingsManager.getInstance().getServerPort();
+        serverPort = ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
         Runnable runnable = () -> {
             log.info("Trying to connect to " + serverAddress + ":" + serverPort);
             try {
@@ -118,10 +123,6 @@ public class ClientBackgroundService {
         thread.start();
     }
 
-    public static ClientBackgroundService getInstance() {
-        return ourInstance;
-    }
-
     public Session getSession() {
         if (session != null) {
             return session;
@@ -133,7 +134,7 @@ public class ClientBackgroundService {
         }
     }
 
-    public Session getSessionFromServer() {
+    private Session getSessionFromServer() {
         try {
             outputStream.writeUTF(SocketConstants.GIVE_SESSION);
             String dbAddress = dataInputStream.readUTF();
@@ -185,5 +186,22 @@ public class ClientBackgroundService {
                 }
             }
         }
+    }
+
+    public boolean testConnection(String address, int port) {
+        boolean result = false;
+        try (Socket testingSocket = new Socket(address, port)) {
+            if (testingSocket.isConnected()) {
+                if (!testingSocket.isClosed()) {
+                    try (DataOutputStream dataOutputStream = new DataOutputStream(testingSocket.getOutputStream())) {
+                        dataOutputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
+                        result = true;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            /*NOP*/
+        }
+        return result;
     }
 }

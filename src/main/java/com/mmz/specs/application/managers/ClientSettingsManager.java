@@ -43,34 +43,17 @@ public class ClientSettingsManager {
         return ourInstance;
     }
 
-    public void loadSettingsFile() throws IOException {
+    void loadSettingsFile() throws IOException {
         log.info("Trying to load settings file: " + connectionFileLocation);
         CLIENT_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));
         log.info("Settings file successfully loaded: " + connectionFileLocation);
     }
 
-    public boolean isSettingsFileCorrect() {
+    boolean isSettingsFileCorrect() {
         String serverAddress = CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY);
         if (serverAddress == null) {
             return false;
-        } else if (serverAddress.isEmpty()) {
-            return false;
-        }
-
-        String serverPort = CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_PORT_KEY);
-
-        if (serverPort == null) {
-            return false;
-        } else if (serverPort.isEmpty()) {
-            return false;
-        } else {
-            try {
-                int i = Integer.parseInt(serverPort);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return true;
+        } else return !serverAddress.isEmpty();
     }
 
     public String getServerAddress() {
@@ -90,18 +73,7 @@ public class ClientSettingsManager {
     }
 
     public int getServerPort() {
-        String property = CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_PORT_KEY);
-        int port = ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
-        try {
-            port = Integer.parseInt(property);
-        } catch (NumberFormatException e) {/*NOP*/}
-
-        return port;
-    }
-
-    public void setServerPort(int port) throws IOException {
-        CLIENT_SETTINGS.setProperty(ClientConstants.CLIENT_SERVER_PORT_KEY, port + "");
-        updateSettingsFile();
+        return ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
     }
 
     public Properties getProperties() {
