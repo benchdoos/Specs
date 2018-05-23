@@ -89,7 +89,7 @@ public class AddDetailWindow extends JDialog {
     }
 
     private void onCreateTitle() {
-
+        //todo init this!
     }
 
     private void initKeyBindings() {
@@ -176,6 +176,7 @@ public class AddDetailWindow extends JDialog {
         codeTextField = new JTextField();
         panel3.add(codeTextField, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         titleComboBox = new JComboBox();
+        titleComboBox.setMaximumRowCount(30);
         panel3.add(titleComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Наименование:");

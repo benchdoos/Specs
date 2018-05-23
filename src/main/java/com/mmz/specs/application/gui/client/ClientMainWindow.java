@@ -365,8 +365,7 @@ public class ClientMainWindow extends JFrame {
 
     private void onUsernameInfo() {
         if (currentUser != null) {
-            UserInfoWindow userInfoWindow = new UserInfoWindow();
-            userInfoWindow.setUsersEntity(currentUser);
+            UserInfoWindow userInfoWindow = new UserInfoWindow(currentUser);
             userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
             userInfoWindow.pack();
             userInfoWindow.setVisible(true);

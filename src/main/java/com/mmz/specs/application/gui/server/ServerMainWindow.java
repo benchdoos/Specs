@@ -1106,7 +1106,7 @@ public class ServerMainWindow extends JFrame {
     }
 
     private UsersEntity onResetPasswordButton(UsersEntity usersEntity) {
-        PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity);
+        PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, ServerDBConnectionPool.getInstance().getSession());
         passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
         passwordChangeWindow.setVisible(true);
         return passwordChangeWindow.getUserWithNewPassword();
@@ -1166,8 +1166,11 @@ public class ServerMainWindow extends JFrame {
 
     private void onUserInfoButton() {
         if (onlineUserList.getSelectedIndex() >= 0) {
-            UserInfoWindow userInfoWindow = new UserInfoWindow();
-            userInfoWindow.setClientConnection((ClientConnection) onlineUserList.getSelectedValue());
+            ClientConnection connection = (ClientConnection) onlineUserList.getSelectedValue();
+            UserInfoWindow userInfoWindow = new UserInfoWindow(connection.getUserEntity());
+            if (connection.getUserEntity() == null) {
+                userInfoWindow.setClientConnection(connection);
+            }
             userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
             userInfoWindow.pack();
             userInfoWindow.setVisible(true);

@@ -18,7 +18,9 @@ package com.mmz.specs.application.gui.common;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.core.server.service.ClientConnection;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.model.UsersEntity;
 
 import javax.swing.*;
@@ -29,7 +31,6 @@ import java.awt.event.WindowEvent;
 
 public class UserInfoWindow extends JDialog {
     private JPanel contentPane;
-    private JButton buttonOK;
     private JLabel usernameLabel;
     private JLabel userTypeLabel;
     private JLabel connectionAddressLabel;
@@ -38,64 +39,82 @@ public class UserInfoWindow extends JDialog {
     private JCheckBox isEditorCheckBox;
     private JCheckBox isAdminCheckBox;
     private JCheckBox isActiveCheckBox;
-    private JLabel patronomycLabel;
+    private JLabel patronymicLabel;
     private JLabel userIconLabel;
-    private ClientConnection clientConnection;
+    private JButton resetPasswordButton;
     private UsersEntity usersEntity;
+    private ClientConnection clientConnection;
 
-    public UserInfoWindow() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+    public UserInfoWindow(UsersEntity usersEntity) {
+        this.usersEntity = usersEntity;
 
-        initGui();
+        if (usersEntity != null) {
+            initGui();
 
-        initListeners();
+            initListeners();
 
-        // call onCancel() when cross is clicked
+            initKeyBindings();
+
+            fillUserInformation(usersEntity);
+
+        }
+        initResetPasswordButton();
+    }
+
+    private void initKeyBindings() {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                onOK();
+                dispose();
             }
         });
 
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(e -> onOK(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        pack();
-        setResizable(false);
-    }
-
-    public void setClientConnection(ClientConnection clientConnection) {
-        this.clientConnection = clientConnection;
-        initGui();
-
+        contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-
-
-    }
-
-    private void onOK() {
-        // add your code here
-        dispose();
+        resetPasswordButton.addActionListener(e -> onResetPassword());
     }
 
     private void initGui() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user16.png")));
+        setContentPane(contentPane);
+        setModal(true);
 
-        updateUserIcon(null);
         updateTitle();
         updateClientConnectionAddressLabel();
-        /*updateUserData();*/
+
+        setResizable(false);
+
+    }
+
+    private void initResetPasswordButton() {
+        if (usersEntity == null) {
+            resetPasswordButton.setVisible(false);
+        }
+    }
+
+    private void onResetPassword() {
+        LoginWindow loginWindow = new LoginWindow(ClientBackgroundService.getInstance().getSession());
+        loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+        loginWindow.setVisible(true);
+        UsersEntity user = loginWindow.getAuthorizedUser();
+        if (user != null) {
+            if (user.equals(usersEntity) || (user.isAdmin() && user.isActive())) {
+                PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, ClientBackgroundService.getInstance().getSession());
+                passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
+                passwordChangeWindow.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Необходимо войти как пользователь " + usersEntity.getUsername() + "\n" +
+                                "или как администратор", "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void updateUserIcon(UsersEntity entity) {
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user128.png")));
-        if (usersEntity != null) {
+        if (entity != null) {
             updateIcon(icon);
 
             if (entity.isAdmin()) {
@@ -145,16 +164,13 @@ public class UserInfoWindow extends JDialog {
         }
     }
 
-    private boolean isUserEntityAvailable() {
-        return clientConnection != null && clientConnection.getUserEntity() != null;
+    public void setClientConnection(ClientConnection clientConnection) {
+        this.clientConnection = clientConnection;
+        initGui();
     }
 
-    @Override
-    public void setVisible(boolean b) {
-        if (usersEntity != null) {
-            fillUserInformation(usersEntity);
-        }
-        super.setVisible(b);
+    private boolean isUserEntityAvailable() {
+        return clientConnection != null && clientConnection.getUserEntity() != null;
     }
 
     private void fillUserInformation(UsersEntity entity) {
@@ -162,15 +178,11 @@ public class UserInfoWindow extends JDialog {
         usernameLabel.setText(entity.getUsername() == null ? "Нет данных" : entity.getUsername());
         surnameLabel.setText(entity.getSurname() == null ? "Нет данных" : entity.getSurname());
         nameLabel.setText(entity.getName() == null ? "Нет данных" : entity.getName());
-        patronomycLabel.setText(entity.getPatronymic() == null ? "Нет данных" : entity.getPatronymic());
+        patronymicLabel.setText(entity.getPatronymic() == null ? "Нет данных" : entity.getPatronymic());
         userTypeLabel.setText(entity.getUserType().getName() == null ? "Нет данных" : entity.getUserType().getName());
         isEditorCheckBox.setSelected(entity.isEditor());
         isAdminCheckBox.setSelected(entity.isAdmin());
         isActiveCheckBox.setSelected(entity.isActive());
-    }
-
-    public void setUsersEntity(UsersEntity usersEntity) {
-        this.usersEntity = usersEntity;
     }
 
     {
@@ -193,68 +205,66 @@ public class UserInfoWindow extends JDialog {
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
+        resetPasswordButton = new JButton();
+        resetPasswordButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/warningOrange16.png")));
+        resetPasswordButton.setIconTextGap(2);
+        resetPasswordButton.setMargin(new Insets(2, 5, 2, 5));
+        resetPasswordButton.setText("Сбросить пароль");
+        resetPasswordButton.setMnemonic('С');
+        resetPasswordButton.setDisplayedMnemonicIndex(0);
+        panel1.add(resetPasswordButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel1.add(spacer1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        buttonOK = new JButton();
-        buttonOK.setText("OK");
-        buttonOK.setMnemonic('O');
-        buttonOK.setDisplayedMnemonicIndex(0);
-        panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(13, 3, new Insets(0, 0, 0, 0), -1, -1));
-        contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel2.setLayout(new GridLayoutManager(13, 2, new Insets(0, 0, 0, 0), -1, -1));
+        contentPane.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         label1.setText("Имя пользователя:");
-        panel3.add(label1, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label1, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        panel3.add(spacer2, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        panel3.add(spacer3, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel2.add(spacer2, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         usernameLabel = new JLabel();
         usernameLabel.setText("Не известно");
-        panel3.add(usernameLabel, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(usernameLabel, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         userTypeLabel = new JLabel();
         userTypeLabel.setText("Не известно");
-        panel3.add(userTypeLabel, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(userTypeLabel, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Тип пользователя");
-        panel3.add(label2, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label2, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label3 = new JLabel();
         label3.setText("Имя:");
-        panel3.add(label3, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label3, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         nameLabel = new JLabel();
         nameLabel.setText("Не известно");
-        panel3.add(nameLabel, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(nameLabel, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label4 = new JLabel();
         label4.setText("Отчество:");
-        panel3.add(label4, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        patronomycLabel = new JLabel();
-        patronomycLabel.setText("Не известно");
-        panel3.add(patronomycLabel, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label4, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        patronymicLabel = new JLabel();
+        patronymicLabel.setText("Не известно");
+        panel2.add(patronymicLabel, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label5 = new JLabel();
         label5.setText("Адрес подключения:");
-        panel3.add(label5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         connectionAddressLabel = new JLabel();
         connectionAddressLabel.setText("Не известно");
-        panel3.add(connectionAddressLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(connectionAddressLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label6 = new JLabel();
         label6.setText("Фамилия:");
-        panel3.add(label6, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label6, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         surnameLabel = new JLabel();
         surnameLabel.setText("Не известно");
-        panel3.add(surnameLabel, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(surnameLabel, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator1 = new JSeparator();
-        panel3.add(separator1, new GridConstraints(8, 0, 1, 3, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel2.add(separator1, new GridConstraints(8, 0, 1, 2, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         userIconLabel = new JLabel();
         userIconLabel.setHorizontalAlignment(0);
         userIconLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/user128.png")));
         userIconLabel.setText("");
-        panel3.add(userIconLabel, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(userIconLabel, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator2 = new JSeparator();
-        panel3.add(separator2, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel2.add(separator2, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         isEditorCheckBox = new JCheckBox();
         isEditorCheckBox.setBorderPainted(false);
         isEditorCheckBox.setBorderPaintedFlat(false);
@@ -264,27 +274,27 @@ public class UserInfoWindow extends JDialog {
         isEditorCheckBox.setHorizontalTextPosition(2);
         isEditorCheckBox.setRolloverEnabled(true);
         isEditorCheckBox.setText("");
-        panel3.add(isEditorCheckBox, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(isEditorCheckBox, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isAdminCheckBox = new JCheckBox();
         isAdminCheckBox.setEnabled(false);
         isAdminCheckBox.setHorizontalTextPosition(2);
         isAdminCheckBox.setOpaque(true);
         isAdminCheckBox.setText("");
-        panel3.add(isAdminCheckBox, new GridConstraints(10, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(isAdminCheckBox, new GridConstraints(10, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveCheckBox = new JCheckBox();
         isActiveCheckBox.setEnabled(false);
         isActiveCheckBox.setHorizontalTextPosition(2);
         isActiveCheckBox.setText("");
-        panel3.add(isActiveCheckBox, new GridConstraints(11, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(isActiveCheckBox, new GridConstraints(11, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label7 = new JLabel();
         label7.setText("Редактор:");
-        panel3.add(label7, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label7, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label8 = new JLabel();
         label8.setText("Администратор:");
-        panel3.add(label8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label9 = new JLabel();
         label9.setText("Действующий:");
-        panel3.add(label9, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label9, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

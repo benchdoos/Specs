@@ -187,10 +187,6 @@ public class ClientBackgroundService {
         }
     }
 
-    public Socket getSocket() {
-        return socket;
-    }
-
     public void refreshSession() {
         if (session != null) {
             final Metamodel metamodel = session.getSessionFactory().getMetamodel();
