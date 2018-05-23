@@ -15,6 +15,10 @@
 
 package com.mmz.specs.application.utils;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 public class CommonUtils {
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
@@ -37,5 +41,20 @@ public class CommonUtils {
             return text.substring(0, length - 3) + "...";
         } else return text;
 
+    }
+
+    public static Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
+    public static Image iconToImage(Icon icon) {
+        return ((ImageIcon) icon).getImage();
     }
 }

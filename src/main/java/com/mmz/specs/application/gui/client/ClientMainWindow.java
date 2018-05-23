@@ -29,6 +29,7 @@ import com.mmz.specs.application.gui.panels.AccessPolicyManager;
 import com.mmz.specs.application.gui.panels.DetailListPanel;
 import com.mmz.specs.application.gui.panels.NoticeInfoPanel;
 import com.mmz.specs.application.managers.ClientSettingsManager;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -94,7 +95,7 @@ public class ClientMainWindow extends JFrame {
 
     private void initHomeTab() {
         clientMainTabbedPane.setIconAt(0,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/home16.png"))));
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/home12.png"))));
     }
 
     private void initTimer() {
@@ -280,6 +281,11 @@ public class ClientMainWindow extends JFrame {
     private void unlockTabsAndUIs() {
         unlockTabs();
         unlockUIsForAdmins();
+        unlockUIsForConnection();
+    }
+
+    private void unlockUIsForConnection() {
+        //-----------------
     }
 
     private void unlockUIsForAdmins() {
@@ -465,7 +471,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     public void addTab(String title, Icon icon, JPanel panel, boolean select) {
-        clientMainTabbedPane.addTab(title, icon, panel);
+        clientMainTabbedPane.addTab(title, new ImageIcon(CommonUtils.getScaledImage(CommonUtils.iconToImage(icon), 12, 12)), panel);
         int index = clientMainTabbedPane.getTabCount() - 1;
         clientMainTabbedPane.setTabComponentAt(index, new ButtonTabComponent(clientMainTabbedPane));
         if (select) {
