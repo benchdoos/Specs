@@ -157,7 +157,8 @@ public class ServerDBConnectionPool {
         checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbPassword(), "Could not find DB Password. Set correct value at settings file: ");
     }
 
-    public void stopDBConnectionPool() { //TODO test it....
+    public void stopDBConnectionPool() {
         ourSessionFactory.close();
+        ourSessionFactory = null;
     }
 }
