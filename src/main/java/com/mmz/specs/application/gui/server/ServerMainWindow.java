@@ -103,7 +103,6 @@ public class ServerMainWindow extends JFrame {
     private JButton addUserButton;
     private JPanel adminUsersPanel;
     private JButton buttonUserInfo;
-    private JButton restartServerButton;
     private JButton openLogFolderButton;
     private JLabel userIdLabel;
     private JLabel onlineUsersCount2;
@@ -1602,13 +1601,8 @@ public class ServerMainWindow extends JFrame {
         powerServerButton.setDisplayedMnemonicIndex(0);
         powerServerButton.setToolTipText("Выключить сервер (CTRL+Q)");
         panel11.add(powerServerButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        restartServerButton = new JButton();
-        restartServerButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/reboot.png")));
-        restartServerButton.setText("Перезапустить");
-        restartServerButton.setToolTipText("Перезапустить сервер");
-        panel11.add(restartServerButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer15 = new Spacer();
-        panel11.add(spacer15, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel11.add(spacer15, new GridConstraints(0, 1, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel12 = new JPanel();
         panel12.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel11.add(panel12, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
