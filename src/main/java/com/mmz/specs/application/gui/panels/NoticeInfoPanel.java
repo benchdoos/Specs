@@ -147,11 +147,6 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         }
     }
 
-    private void onOK() {
-        // add your code here
-        //close this?
-    }
-
     @Override
     public AccessPolicyManager getPolicyManager() {
         return new AccessPolicyManager(false, false);
