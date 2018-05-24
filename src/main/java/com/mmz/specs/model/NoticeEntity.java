@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -113,11 +114,14 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
 
     @Override
     public int compareTo(NoticeEntity that) {
-        int result = 0;
-        result += that.getDate().compareTo(this.getDate());
-        result += that.getNumber().compareTo(this.getNumber());
-        return result;
-
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compare(that.getDate(), this.getDate())
+                    .compare(that.getNumber(), this.getNumber())
+                    .result();
+        } else {
+            return -1;
+        }
     }
 
     @Basic
