@@ -28,20 +28,31 @@ import java.awt.*;
 import java.util.List;
 
 public class DetailJTree extends JTree {
-    private final Color backgroundSelectionColor = new Color(0, 120, 215);
-    private final Color backgroundNonSelectionColor = new JPanel().getBackground();
+    private static final Color BACKGROUND_SELECTION_COLOR = new Color(0, 120, 215);
+    private static final Color BACKGROUND_NON_SELECTION_COLOR = new JPanel().getBackground();
 
     public DetailJTree() {
         setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
 
-        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
+        DefaultTreeCellRenderer renderer = getRenderer();
 
+        initIcons(renderer);
+
+        renderer.setBackgroundSelectionColor(BACKGROUND_SELECTION_COLOR);
+        renderer.setBackgroundNonSelectionColor(BACKGROUND_NON_SELECTION_COLOR);
+
+        setCellRenderer(renderer);
+
+    }
+
+    private DefaultTreeCellRenderer getRenderer() {
+        return new DefaultTreeCellRenderer() {
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
                 if (selected) {
-                    setBackground(backgroundSelectionColor);
+                    this.setBackgroundSelectionColor(BACKGROUND_SELECTION_COLOR);
                 } else {
-                    setBackground(backgroundNonSelectionColor);
+                    this.setBackgroundNonSelectionColor(BACKGROUND_NON_SELECTION_COLOR);
                 }
 
                 if (value instanceof DefaultMutableTreeNode) {
@@ -59,35 +70,34 @@ public class DetailJTree extends JTree {
 
                                     List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesByParentAndChild(parent, child);
 
-                                    setOpaque(true);
-
                                     if (result.size() > 0) {
                                         DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);
+
+                                        String data = child.getCode() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
+                                        Component treeCellRendererComponent = super.getTreeCellRendererComponent(tree, data, selected, true, leaf, row, hasFocus);
+
                                         if (detailListEntity.isInterchangeableNode()) {
                                             if (!selected) {
-                                                setBackground(Color.GRAY.brighter());
+                                                this.setBackgroundNonSelectionColor(Color.GRAY.brighter());
                                             } else {
-                                                setBackground(Color.GRAY);
+                                                this.setBackgroundSelectionColor(Color.GRAY);
                                             }
                                         }
 
                                         if (!detailListEntity.getDetailByChildDetailId().isActive()) {
                                             if (!selected) {
-                                                setBackground(Color.RED);
+                                                this.setBackgroundNonSelectionColor(Color.RED);
                                             } else {
-                                                setBackground(Color.RED.darker());
+                                                this.setBackgroundSelectionColor(Color.RED.darker());
                                             }
                                         }
-
-                                        String value1 = child.getCode() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
-                                        return super.getTreeCellRendererComponent(tree, value1, selected, true, leaf, row, hasFocus);
+                                        return treeCellRendererComponent;
                                     }
                                 }
                             }
                         }
                         return super.getTreeCellRendererComponent(tree,
-                                child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus); //spaces fixes
-                        // issue when (detailListEntity.getQuantity()) does not work... fix it some how????
+                                child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle(), selected, expanded, leaf, row, hasFocus);
                     }
                 }
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
@@ -108,14 +118,6 @@ public class DetailJTree extends JTree {
                 return dim;
             }
         };
-
-        initIcons(renderer);
-
-        renderer.setBackgroundSelectionColor(backgroundSelectionColor);
-        renderer.setBackgroundNonSelectionColor(backgroundNonSelectionColor);
-
-        setCellRenderer(renderer);
-
     }
 
     private void initIcons(DefaultTreeCellRenderer renderer) {
