@@ -264,6 +264,10 @@ public class ClientMainWindow extends JFrame {
 
                 setButtonsEnabled(false);
                 unlockTabsAndUIs();
+                unlockAdminTools(false);
+                if (currentUser != null) {
+                    onLogin();
+                }
             };
             SwingUtilities.invokeLater(runnable);
         }
@@ -645,6 +649,7 @@ public class ClientMainWindow extends JFrame {
         editDataButton.setAutoscrolls(false);
         editDataButton.setBorderPainted(false);
         editDataButton.setContentAreaFilled(true);
+        editDataButton.setEnabled(false);
         editDataButton.setForeground(new Color(-16765749));
         editDataButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/securityShield16.png")));
         editDataButton.setMargin(new Insets(0, 0, 0, 0));
@@ -660,6 +665,7 @@ public class ClientMainWindow extends JFrame {
         adminButton.setAutoscrolls(false);
         adminButton.setBorderPainted(false);
         adminButton.setContentAreaFilled(true);
+        adminButton.setEnabled(false);
         adminButton.setForeground(new Color(-16765749));
         adminButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/securityShield16.png")));
         adminButton.setMargin(new Insets(0, 0, 0, 0));
