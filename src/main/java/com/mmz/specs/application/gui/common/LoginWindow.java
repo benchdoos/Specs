@@ -43,15 +43,18 @@ public class LoginWindow extends JDialog {
     public LoginWindow(Session session) {
         this.session = session;
 
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/securityOn16.png")));
-        setTitle("Вход");
+        initGui();
 
         initListeners();
 
-        // call onCancel() when cross is clicked
+        initKeyBindings();
+
+        pack();
+        setMinimumSize(getSize());
+        setResizable(false);
+    }
+
+    private void initKeyBindings() {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -59,12 +62,15 @@ public class LoginWindow extends JDialog {
             }
         });
 
-        // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
 
-        pack();
-        setMinimumSize(getSize());
-        setResizable(false);
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/securityOn16.png")));
+        setTitle("Вход");
     }
 
     public void initListeners() {
@@ -115,9 +121,7 @@ public class LoginWindow extends JDialog {
         try {
             String login = loginTextField.getText().toLowerCase();
 
-            usersService.getUsersDao().getSession().getTransaction().begin();
             UsersEntity usersEntity = usersService.getUserByUsername(login);
-            usersService.getUsersDao().getSession().getTransaction().commit();
 
             String password = Arrays.toString(passwordField.getPassword());
 
@@ -134,7 +138,6 @@ public class LoginWindow extends JDialog {
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
 
