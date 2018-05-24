@@ -28,11 +28,12 @@ import java.awt.*;
 import java.util.List;
 
 public class DetailJTree extends JTree {
-    public DetailJTree() {
-        final Color backgroundSelectionColor = new Color(0, 120, 215);
-        final Color backgroundNonSelectionColor = new JPanel().getBackground();
+    private final Color backgroundSelectionColor = new Color(0, 120, 215);
+    private final Color backgroundNonSelectionColor = new JPanel().getBackground();
 
+    public DetailJTree() {
         setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
+
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
 
             @Override
@@ -107,17 +108,22 @@ public class DetailJTree extends JTree {
                 return dim;
             }
         };
-        Icon closedIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
-        Icon openIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
-        Icon leafIcon = new ImageIcon(getClass().getResource("/img/gui/tree/detail.png"));
-        renderer.setClosedIcon(closedIcon);
-        renderer.setOpenIcon(openIcon);
-        renderer.setLeafIcon(leafIcon);
+
+        initIcons(renderer);
 
         renderer.setBackgroundSelectionColor(backgroundSelectionColor);
         renderer.setBackgroundNonSelectionColor(backgroundNonSelectionColor);
 
         setCellRenderer(renderer);
 
+    }
+
+    private void initIcons(DefaultTreeCellRenderer renderer) {
+        Icon closedIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
+        Icon openIcon = new ImageIcon(getClass().getResource("/img/gui/tree/unitOpened.png"));
+        Icon leafIcon = new ImageIcon(getClass().getResource("/img/gui/tree/detail.png"));
+        renderer.setClosedIcon(closedIcon);
+        renderer.setOpenIcon(openIcon);
+        renderer.setLeafIcon(leafIcon);
     }
 }
