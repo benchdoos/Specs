@@ -15,6 +15,8 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
+import com.sun.istack.NotNull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -22,7 +24,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "USERS",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"USERNAME"})})
-public class UsersEntity {
+public class UsersEntity implements Comparable<UsersEntity> {
     private int id;
     private String username;
     private String password;
@@ -177,5 +179,18 @@ public class UsersEntity {
 
     public void setUserType(UserTypeEntity userTypeEntity) {
         this.userType = userTypeEntity;
+    }
+
+    @Override
+    public int compareTo(@NotNull UsersEntity that) {
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compareTrueFirst(this.isActive(), that.active)
+                    .compare(this.getUsername(), that.getUsername())
+                    .result();
+        } else {
+            return -1;
+        }
+
     }
 }

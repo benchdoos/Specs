@@ -46,6 +46,7 @@ import oshi.software.os.NetworkParams;
 
 import javax.persistence.OptimisticLockException;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
@@ -58,9 +59,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 
 import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
@@ -303,6 +302,8 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void initGui() {
+        updateUserTypeComboBox();
+
         createLockerTimer();
 
         updateSystemInfoLabel();
@@ -317,10 +318,54 @@ public class ServerMainWindow extends JFrame {
         updateAdminRegisteredUsersPanel();
         clearCurrentUserPanel();
 
-
-        updateUserTypeComboBox();
+        initOnlineUsersList();
 
         initListeners();
+
+    }
+
+    private void initOnlineUsersList() {
+        DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                setOpaque(true);
+                if (value instanceof ClientConnection) {
+                    ClientConnection client = (ClientConnection) value;
+                    String username;
+                    UsersEntity userEntity = client.getUserEntity();
+
+                    if (userEntity != null) {
+                        if (!userEntity.getUsername().isEmpty()) {
+                            username = userEntity.getUsername();
+                            if (isSelected) {
+                                setBackground(Color.GREEN.brighter().brighter());
+                            } else {
+                                setBackground(Color.GREEN.darker().darker());
+                            }
+                        } else {
+                            username = "Some incorrect user, id: " + userEntity.getId();
+                            if (isSelected) {
+                                setBackground(Color.RED.brighter().brighter());
+                            } else {
+                                setBackground(Color.RED.darker().darker());
+                            }
+                        }
+                    } else {
+                        username = client.getSocket().getInetAddress().getHostName() + ":" + client.getSocket().getPort();
+                        if (isSelected) {
+                            setBackground(Color.DARK_GRAY.brighter().brighter());
+                        } else {
+                            setBackground(Color.DARK_GRAY.darker().darker());
+                        }
+                    }
+                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        };
+        onlineUserList.setCellRenderer(cellRenderer);
     }
 
     private void updateServerSocketPortInfoLabel() {
@@ -376,11 +421,16 @@ public class ServerMainWindow extends JFrame {
         DefaultListModel<UsersEntity> model = new DefaultListModel<>();
         UsersService usersService = new UsersServiceImpl();
         List<UsersEntity> usersEntityList = usersService.listUsers();
+
+        Collections.sort(usersEntityList);
+
         for (UsersEntity user : usersEntityList) {
             model.addElement(user);
         }
         registeredUserList.setModel(model);
         registeredUserList.setCellRenderer(new DefaultListCellRenderer() {
+            private String newUserTitle = "новый пользователь";
+
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof UsersEntity) {
@@ -389,15 +439,27 @@ public class ServerMainWindow extends JFrame {
                     if (usersEntity.getUsername() != null) {
                         if (!usersEntity.getUsername().isEmpty()) {
                             username = usersEntity.getUsername();
+                        } else {
+                            username = newUserTitle;
                         }
+                    } else {
+                        username = newUserTitle;
                     }
                     Component listCellRendererComponent = super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
                     try {
                         if (usersEntity.getId() < 0) {
                             if (isSelected) {
-                                setForeground(Color.GREEN.brighter().brighter());
+                                listCellRendererComponent.setForeground(Color.GREEN.brighter().brighter());
                             } else {
-                                setForeground(Color.GREEN.darker().darker());
+                                listCellRendererComponent.setForeground(Color.GREEN.darker().darker());
+                            }
+                        } else {
+                            if (!usersEntity.isActive()) {
+                                if (isSelected) {
+                                    listCellRendererComponent.setBackground(Color.DARK_GRAY);
+                                } else {
+                                    listCellRendererComponent.setBackground(Color.GRAY);
+                                }
                             }
                         }
                     } catch (NullPointerException e) {
@@ -1171,8 +1233,8 @@ public class ServerMainWindow extends JFrame {
             if (connection.getUserEntity() == null) {
                 userInfoWindow.setClientConnection(connection);
             }
-            userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
             userInfoWindow.pack();
+            userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
             userInfoWindow.setVisible(true);
         }
     }
@@ -1184,7 +1246,6 @@ public class ServerMainWindow extends JFrame {
         }
         UsersEntity usersEntity = new UsersEntity();
         usersEntity.setId(-1);
-        usersEntity.setUsername("<new user>");
         usersEntity.setUserType(new UserTypeServiceImpl().getUserTypeById(1));
         model.addElement(usersEntity);
         registeredUserList.setModel(model);
@@ -1252,45 +1313,6 @@ public class ServerMainWindow extends JFrame {
 
 
         int selectedIndex = onlineUserList.getSelectedIndex();
-        DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof ClientConnection) {
-                    ClientConnection client = (ClientConnection) value;
-                    String username;
-                    UsersEntity userEntity = client.getUserEntity();
-                    if (userEntity != null) {
-                        if (!userEntity.getUsername().isEmpty()) {
-                            username = userEntity.getUsername();
-                            if (isSelected) {
-                                setForeground(Color.GREEN.brighter().brighter());
-                            } else {
-                                setForeground(Color.GREEN.darker().darker());
-                            }
-                        } else {
-                            username = "Some incorrect user, id: " + userEntity.getId();
-                            if (isSelected) {
-                                setForeground(Color.RED.brighter().brighter());
-                            } else {
-                                setForeground(Color.RED.darker().darker());
-                            }
-                        }
-                    } else {
-                        username = client.getSocket().getInetAddress().getHostName() + ":" + client.getSocket().getPort();
-                        if (isSelected) {
-                            setForeground(Color.DARK_GRAY.brighter().brighter());
-                        } else {
-                            setForeground(Color.DARK_GRAY.darker().darker());
-                        }
-                    }
-
-                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        };
-        onlineUserList.setCellRenderer(cellRenderer);
         onlineUserList.setModel(model);
 
         if (selectedIndex >= 0) {

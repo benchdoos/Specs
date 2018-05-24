@@ -115,7 +115,7 @@ public class ClientBackgroundService {
                 System.out.println("answer is :" + answer);
                 outputStream.writeUTF("Client id: " + Thread.currentThread().getId() + " address:" + InetAddress.getLocalHost().getHostAddress());
                 log.info("Successfully connected to server: " + socket);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.warn("Could not establish connection", e);
                 ClientManager.getInstance().notifyClientMainWindow(ClientManager.ClientConnectionStatus.CONNECTION_REFUSED);
             }

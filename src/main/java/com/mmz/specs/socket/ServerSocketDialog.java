@@ -114,14 +114,16 @@ public class ServerSocketDialog implements Runnable {
 
 
             case USER_LOGOUT:
-                log.info("User {} is logged out.", connection.getUserEntity().getUsername());
-                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
-                        "Пользователь " + connection.getUserEntity().getUsername()
-                                + " (" + connection.getUserEntity().getName() + " "
-                                + connection.getUserEntity().getSurname() + ")" +
-                                " вышел из системы с компьютера: " + client.getInetAddress(),
-                        ServerLogMessage.ServerLogMessageLevel.INFO));
-                connection.setUserEntity(null);
+                if (connection.getUserEntity() != null) {
+                    log.info("User {} is logged out.", connection.getUserEntity().getUsername());
+                    ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                            "Пользователь " + connection.getUserEntity().getUsername()
+                                    + " (" + connection.getUserEntity().getName() + " "
+                                    + connection.getUserEntity().getSurname() + ")" +
+                                    " вышел из системы с компьютера: " + client.getInetAddress(),
+                            ServerLogMessage.ServerLogMessageLevel.INFO));
+                    connection.setUserEntity(null);
+                }
                 break;
             case QUIT_COMMAND:
                 log.info("Quiting connection for client: " + connection + " Command: " + command);
