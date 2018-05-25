@@ -48,8 +48,8 @@
           </grid>
         </constraints>
         <properties>
-          <dividerLocation value="128"/>
-          <lastDividerLocation value="128"/>
+          <dividerLocation value="200"/>
+          <lastDividerLocation value="200"/>
         </properties>
         <border type="none"/>
         <children>
@@ -97,7 +97,7 @@
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="     "/>
+                  <text value="нет данных"/>
                 </properties>
               </component>
               <hspacer id="919f6">
@@ -110,7 +110,7 @@
                   <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="     "/>
+                  <text value="нет данных"/>
                 </properties>
               </component>
               <component id="65be2" class="javax.swing.JLabel">
@@ -126,7 +126,7 @@
                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="     "/>
+                  <text value="нет данных"/>
                 </properties>
               </component>
               <component id="f0c4b" class="javax.swing.JLabel">
@@ -142,7 +142,7 @@
                   <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="     "/>
+                  <text value="нет данных"/>
                 </properties>
               </component>
             </children>

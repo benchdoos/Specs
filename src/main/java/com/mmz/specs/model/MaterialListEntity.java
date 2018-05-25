@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -108,12 +109,15 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
 
     @Override
     public int compareTo(MaterialListEntity that) {
-        int result = 0;
-        result += this.getMaterialByMaterialId().getLongMark().compareTo(that.getMaterialByMaterialId().getLongMark());
-        result += this.getMaterialByMaterialId().getLongProfile().compareTo(that.getMaterialByMaterialId().getLongProfile());
-        result -= Boolean.compare(this.isMainMaterial(), that.isMainMaterial()) * 10;
-        result -= Boolean.compare(this.isActive(), that.isActive());
-        return result;
-
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compare(this.getMaterialByMaterialId().getLongMark(), that.getMaterialByMaterialId().getLongMark())
+                    .compare(this.getMaterialByMaterialId().getLongProfile(), that.getMaterialByMaterialId().getLongProfile())
+                    .compareFalseFirst(this.isMainMaterial(), that.isMainMaterial())
+                    .compareFalseFirst(this.isActive(), that.isActive())
+                    .result();
+        } else {
+            return -1;
+        }
     }
 }
