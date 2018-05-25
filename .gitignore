@@ -6,6 +6,8 @@ db
 *.lnk
 mvnw*
 
+buildNumber.properties
+
 
 
 ### STS ###
