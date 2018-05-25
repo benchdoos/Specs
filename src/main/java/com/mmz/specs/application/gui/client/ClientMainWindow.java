@@ -113,19 +113,19 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initMainMenuBar() {
-        MenuBar mainMenuBar = new MenuBar();
+        JMenuBar mainMenuBar = new JMenuBar();
 
-        Menu fileMenu = getFileMenu();
+        JMenu fileMenu = getFileMenu();
 
         mainMenuBar.add(fileMenu);
 
-        Menu editMenu = getEditMenu();
+        JMenu editMenu = getEditMenu();
         mainMenuBar.add(editMenu);
 
-        Menu connectionMenu = getConnectionMenu();
+        JMenu connectionMenu = getConnectionMenu();
         mainMenuBar.add(connectionMenu);
 
-        setMenuBar(mainMenuBar);
+        setJMenuBar(mainMenuBar);
     }
 
     private void initListeners() {
@@ -181,23 +181,23 @@ public class ClientMainWindow extends JFrame {
         usernameLabel.setText(status ? (currentUser != null ? currentUser.getUsername() : "") : "");
     }
 
-    private Menu getFileMenu() {
-        Menu menu = new Menu("Файл");
+    private JMenu getFileMenu() {
+        JMenu menu = new JMenu("Файл");
 
-        MenuItem openFileMenu = new MenuItem("Открыть");
+        JMenuItem openFileMenu = new JMenuItem("Открыть");
         openFileMenu.addActionListener(e -> onOpenFileMenu());
         menu.add(openFileMenu);
 
-        MenuItem saveFileMenu = new MenuItem("Сохранить");
+        JMenuItem saveFileMenu = new JMenuItem("Сохранить");
         saveFileMenu.addActionListener(e -> onSaveFileMenu());
         menu.add(saveFileMenu);
 
         return menu;
     }
 
-    private Menu getEditMenu() {
-        Menu menu = new Menu("Правка");
-        MenuItem restoreFromDb = new MenuItem("Восстановить с базы данных");
+    private JMenu getEditMenu() {
+        JMenu menu = new JMenu("Правка");
+        JMenuItem restoreFromDb = new JMenuItem("Восстановить с базы данных");
         restoreFromDb.addActionListener(e -> onRestoreFromDb());
 
         menu.add(restoreFromDb);
@@ -205,21 +205,27 @@ public class ClientMainWindow extends JFrame {
         return menu;
     }
 
-    private Menu getConnectionMenu() {
-        Menu menu = new Menu("Подключение");
+    private JMenu getConnectionMenu() {
+        JMenu menu = new JMenu("Подключение");
 
-        MenuItem connectionSettings = new MenuItem("Настройки подключения");
+        JMenuItem connectionSettings = new JMenuItem("Настройки подключения");
+        connectionSettings.setIconTextGap(0);
         connectionSettings.addActionListener(e -> onConnectionSettings());
         menu.add(connectionSettings);
 
-        MenuItem connectServer = new MenuItem("Подключение к серверу", new MenuShortcut(KeyEvent.VK_C, true));
+        JMenuItem connectServer = new JMenuItem("Подключение к серверу");
+        connectServer.setAccelerator(KeyStroke.getKeyStroke("control shift C")); //KeyEvent.VK_C, true
         connectServer.addActionListener(e -> onConnectToServer());
+        connectServer.setIconTextGap(0);
         menu.add(connectServer);
 
-        MenuItem disconnectServer = new MenuItem("Отключение от сервера", new MenuShortcut(KeyEvent.VK_D, true));
+        JMenuItem disconnectServer = new JMenuItem("Отключение от сервера");
         disconnectServer.addActionListener(e -> onDisconnectFromServer());
+        disconnectServer.setAccelerator(KeyStroke.getKeyStroke("control shift D")); //KeyEvent.VK_D, true
+        disconnectServer.setIconTextGap(0);
         menu.add(disconnectServer);
 
+        menu.setIconTextGap(0);
         return menu;
     }
 
@@ -292,6 +298,15 @@ public class ClientMainWindow extends JFrame {
 
     private void unlockUIsForConnection() {
         //-----------------
+        boolean isConnected = ClientBackgroundService.getInstance().isConnected();
+        unlockRestoreFromDBjMenuItem(isConnected);
+    }
+
+    private void unlockRestoreFromDBjMenuItem(boolean isConnected) {
+        JMenuBar jMenuBar = getJMenuBar();
+        JMenu menu = jMenuBar.getMenu(1);
+        JMenuItem item = menu.getItem(0);
+        item.setEnabled(isConnected);
     }
 
     private void unlockUIsForAdmins() {
@@ -708,7 +723,7 @@ public class ClientMainWindow extends JFrame {
         applicationVersionTextField.setBackground(new Color(-855310));
         applicationVersionTextField.setEditable(false);
         applicationVersionTextField.setForeground(new Color(-7697782));
-        panel3.add(applicationVersionTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(250, -1), null, 0, false));
+        panel3.add(applicationVersionTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(280, -1), null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel4, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

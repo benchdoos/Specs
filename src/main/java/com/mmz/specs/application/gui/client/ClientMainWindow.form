@@ -153,7 +153,7 @@
               <component id="4cb74" class="javax.swing.JTextField" binding="applicationVersionTextField">
                 <constraints>
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="250" height="-1"/>
+                    <preferred-size width="280" height="-1"/>
                   </grid>
                 </constraints>
                 <properties>

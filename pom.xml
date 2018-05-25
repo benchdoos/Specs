@@ -51,10 +51,11 @@
                     <doUpdate>false</doUpdate>
                     <revisionOnScmFailure>true</revisionOnScmFailure>
                     <shortRevisionLength>10</shortRevisionLength>
-                    <format>{0,date,yyyy-MM-dd HH:mm:ss}.{1}</format>
+                    <format>{0,date,yyyy-MM-dd HH:mm:ss}.{1} b.{2}</format>
                     <items>
                         <item>timestamp</item>
                         <item>scmVersion</item>
+                        <item>buildNumber</item>
                     </items>
                 </configuration>
             </plugin>
