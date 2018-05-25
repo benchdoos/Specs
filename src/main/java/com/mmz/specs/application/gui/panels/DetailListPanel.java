@@ -340,11 +340,13 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void fillDetailMaterialInfo(DetailEntity selectedComponent) {
+        clearDetailMaterialInfo();
+
         MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
         List<MaterialListEntity> materialList = service.getMaterialListByDetail(selectedComponent);
         if (!materialList.isEmpty()) {
             for (MaterialListEntity entity : materialList) {
-                if (entity.isMainMaterial()) {
+                if (entity.isMainMaterial() && entity.isActive()) {
                     String substringLongMark = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongMark());
                     String substringLongProfile = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongProfile());
 
@@ -360,12 +362,13 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
             initMaterialLabelListener(materialList);
-        } else {
-            materialMarkLabel.setText(" ");
-            materialProfileLabel.setText(" ");
-            initMaterialLabelListener(null);
         }
+    }
 
+    private void clearDetailMaterialInfo() {
+        materialMarkLabel.setText(" ");
+        materialProfileLabel.setText(" ");
+        initMaterialLabelListener(null);
     }
 
     private void initMaterialLabelListener(List<MaterialListEntity> materialList) {
