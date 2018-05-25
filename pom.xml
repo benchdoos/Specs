@@ -12,8 +12,53 @@
     <name>Specs</name>
     <description>Specs for MMZ</description>
 
+    <scm>
+        <connection>scm:git:https://github.com/benchdoos/specs.git
+        </connection>
+        <developerConnection>scm:git:https://github.com/benchdoos/specs.git
+        </developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/benchdoos/specs.git
+        </url>
+        <!--<connection>scm:svn:http://none</connection>
+        <developerConnection>scm:svn:https://none</developerConnection>
+        <url>scm:svn:https://none</url>-->
+    </scm>
+
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources/</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <revisionOnScmFailure>true</revisionOnScmFailure>
+                    <shortRevisionLength>10</shortRevisionLength>
+                    <format>{0,date,yyyy-MM-dd HH:mm:ss}.{1}</format>
+                    <items>
+                        <item>timestamp</item>
+                        <item>scmVersion</item>
+                    </items>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
