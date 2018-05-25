@@ -18,6 +18,7 @@ package com.mmz.specs.application.utils.client;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.DetailTitleDaoImpl;
 import com.mmz.specs.model.DetailEntity;
@@ -28,6 +29,8 @@ import com.mmz.specs.service.DetailListServiceImpl;
 import com.mmz.specs.service.DetailTitleService;
 import com.mmz.specs.service.DetailTitleServiceImpl;
 import org.apache.commons.text.WordUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -36,10 +39,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import static javax.swing.JOptionPane.*;
 
 public class CommonWindowUtils {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private Session session;
 
     public CommonWindowUtils(Session session) {
@@ -170,6 +176,26 @@ public class CommonWindowUtils {
                     "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
                     "Ошибка добавления", WARNING_MESSAGE);
             return null;
+        }
+    }
+
+    public static void initApplicationVersionArea(JTextField textField) {
+        textField.setBorder(BorderFactory.createEmptyBorder());
+        textField.setBackground(new JPanel().getBackground());
+        Properties properties = new Properties();
+        try {
+            properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
+            String name = properties.getProperty("application.name");
+            String version = properties.getProperty("application.version");
+            String build = properties.getProperty("application.build");
+            if (version != null && build != null) {
+                textField.setText(name + " v." + version + " (" + build + ")");
+            } else {
+                textField.setText(null);
+                textField.setVisible(false);
+            }
+        } catch (Exception e) {
+            log.warn("Could not load application version info", e);
         }
     }
 }

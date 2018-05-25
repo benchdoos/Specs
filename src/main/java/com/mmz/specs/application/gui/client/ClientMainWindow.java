@@ -33,6 +33,7 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.connection.DaoConstants;
 import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.dao.NoticeDaoImpl;
@@ -50,7 +51,6 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 
 public class ClientMainWindow extends JFrame {
@@ -69,7 +69,7 @@ public class ClientMainWindow extends JFrame {
     private JButton editDataButton;
     private JButton noticeListViewButton;
     private JButton adminButton;
-    private JTextField applicationVersionArea;
+    private JTextField applicationVersionTextField;
     private Timer uiUpdateTimer;
 
     public ClientMainWindow() {
@@ -403,27 +403,9 @@ public class ClientMainWindow extends JFrame {
         initKeyBindings();
         unlockButtonIconUpdate(false);
 
-        initApplicationVersionArea();
+        CommonWindowUtils.initApplicationVersionArea(applicationVersionTextField);
     }
 
-    private void initApplicationVersionArea() {
-        applicationVersionArea.setBorder(BorderFactory.createEmptyBorder());
-        Properties properties = new Properties();
-        try {
-            properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
-            String name = properties.getProperty("application.name");
-            String version = properties.getProperty("application.version");
-            String build = properties.getProperty("application.build");
-            if (version != null && build != null) {
-                applicationVersionArea.setText(name + " v." + version + " (" + build + ")");
-            } else {
-                applicationVersionArea.setText(null);
-                applicationVersionArea.setVisible(false);
-            }
-        } catch (Exception e) {
-            log.warn("Could not load application version info", e);
-        }
-    }
 
     private void onOpenFileMenu() {
         System.out.println("Open file menu is not supported yet");
@@ -722,11 +704,11 @@ public class ClientMainWindow extends JFrame {
         statusLabel = new JLabel();
         statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red12.png")));
         panel3.add(statusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        applicationVersionArea = new JTextField();
-        applicationVersionArea.setBackground(new Color(-855310));
-        applicationVersionArea.setEditable(false);
-        applicationVersionArea.setForeground(new Color(-7697782));
-        panel3.add(applicationVersionArea, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(250, -1), null, 0, false));
+        applicationVersionTextField = new JTextField();
+        applicationVersionTextField.setBackground(new Color(-855310));
+        applicationVersionTextField.setEditable(false);
+        applicationVersionTextField.setForeground(new Color(-7697782));
+        panel3.add(applicationVersionTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(250, -1), null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel4, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
