@@ -86,8 +86,12 @@ public class ClientMainWindow extends JFrame {
         setTitle(ApplicationConstants.APPLICATION_NAME + ApplicationConstants.APPLICATION_NAME_POSTFIX_CLIENT);
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/application/clientLogo.png")));
 
-        initGui();
-        initTimer();
+        try {
+            initGui();
+            initTimer();
+        } catch (Throwable e) {
+            log.warn("Could not init gui or timer", e);
+        }
 
         pack();
 
@@ -141,6 +145,7 @@ public class ClientMainWindow extends JFrame {
             @Override
             public void windowClosed(WindowEvent e) {
                 try {
+                    log.debug("Closing client window, saving location and dimension");
                     ClientSettingsManager.getInstance().setClientMainWindowLocation(getLocation());
                     ClientSettingsManager.getInstance().setClientMainWindowDimension(getSize());
                     log.debug("Successfully saved client window location and dimension");
@@ -578,16 +583,21 @@ public class ClientMainWindow extends JFrame {
 
     private void onViewDetailList(boolean select) {
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
-        addTab("Просмотр вложенности", icon, new DetailListPanel(), select);
+        log.debug("Adding ViewDetailList tab");
+        try {
+            addTab("Просмотр вложенности", icon, new DetailListPanel(), select);
 
-        if (currentUser != null) {
-            if (currentUser.isActive()) {
-                unlockTabsAndUIs();
+            if (currentUser != null) {
+                if (currentUser.isActive()) {
+                    unlockTabsAndUIs();
+                } else {
+                    unlockButtonIconUpdate(false);
+                }
             } else {
-                unlockButtonIconUpdate(false);
+                unlockTabsAndUIs();
             }
-        } else {
-            unlockTabsAndUIs();
+        } catch (Throwable e) {
+            log.warn("Could not add ViewDetailList tab", e);
         }
     }
 
@@ -626,11 +636,13 @@ public class ClientMainWindow extends JFrame {
                             "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
+                log.debug("Locking UI, authorized user is null");
                 unlockButtonIconUpdate(false);
                 unlockAdminTools(false);
                 unlockTabsAndUIs();
             }
         } else {
+            log.debug("User called locking UI, {} login out.", currentUser.getUsername());
             unlockButtonIconUpdate(false);
             unlockAdminTools(false);
             unlockTabsAndUIs();
