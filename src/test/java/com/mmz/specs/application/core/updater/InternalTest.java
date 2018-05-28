@@ -13,10 +13,19 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.application.core;
+package com.mmz.specs.application.core.updater;
 
-public class ApplicationArgumentsConstants {
-    public static final String CLIENT = "-client";
-    public static final String SERVER = "-server";
-    public static final String UPDATE = "-update";
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class InternalTest {
+
+    @Test
+    public void versionCompare() {
+        assertEquals(Internal.versionCompare("0.1-b.21", "0.1-b.24"), -1);
+        assertEquals(Internal.versionCompare("0.1-b.21", "0.1-b.20"), 1);
+        assertEquals(Internal.versionCompare("0.1-b.21", "0.2-b.20"), -1);
+        assertEquals(Internal.versionCompare("0.1-b.21", "0.1.3-b.5"), -1);
+    }
 }

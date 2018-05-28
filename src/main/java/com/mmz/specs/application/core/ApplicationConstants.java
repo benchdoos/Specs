@@ -26,6 +26,8 @@ public class ApplicationConstants {
     public static final String APPLICATION_SETTINGS_FOLDER_LOCATION = System
             .getProperty("user.home") + File.separator + INTERNAL_FULL_NAME + File.separator;
 
+    public static final String APPLICATION_FINAL_NAME = "Specs.jar";
+
 
     public static final String LOG_FOLDER = APPLICATION_SETTINGS_FOLDER_LOCATION + "logs";
     public static final String APP_LOG_PROPERTY_KEY = "com.mmz.specs:log.folder";
