@@ -110,9 +110,10 @@ public class ClientBackgroundService {
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
 
+                log.debug("Writing to server command: " + SocketConstants.HELLO_COMMAND);
                 outputStream.writeUTF(SocketConstants.HELLO_COMMAND);
                 String answer = dataInputStream.readUTF();
-                System.out.println("answer is :" + answer);
+                log.debug("Server gave answer :" + answer);
                 outputStream.writeUTF("Client id: " + Thread.currentThread().getId() + " address:" + InetAddress.getLocalHost().getHostAddress());
                 log.info("Successfully connected to server: " + socket);
             } catch (Exception e) {
@@ -137,14 +138,20 @@ public class ClientBackgroundService {
 
     private Session getSessionFromServer() {
         try {
+            log.info("Asking server for session, command: " + SocketConstants.GIVE_SESSION);
             outputStream.writeUTF(SocketConstants.GIVE_SESSION);
-            String dbAddress = dataInputStream.readUTF();
+            String dbAddress = dataInputStream.readUTF(); //todo replace with json???
             String dbUsername = dataInputStream.readUTF();
             String dbPassword = dataInputStream.readUTF();
             dbAddress = dbAddress.replace("localhost", socket.getInetAddress().getHostAddress());
 
+            log.info("Got configuration from server: {} {} ({})", dbAddress, dbUsername, dbPassword.length());
+            log.info("Creating configuration");
             Configuration configuration = new Configuration();
+            log.info("Loading hibernate configuration file");
             configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
+            log.info("Configuration file successfully loaded");
+            log.info("Setting hibernate connection configuration from server");
             configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbAddress);
             configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, dbUsername);
             configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, dbPassword);
@@ -155,7 +162,7 @@ public class ClientBackgroundService {
             Session session = factory.openSession();
             this.session = session;
             return session;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.warn("Could not ask server for session", e);
         }
 

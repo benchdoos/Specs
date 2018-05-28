@@ -22,21 +22,21 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 
-public class Application {
+class Application {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    public void initApplication(final String[] args) {
+    void initApplication(final String[] args) {
         try {
             CoreUtils.enableLookAndFeel();
             CoreUtils.localizeFileChooser();
             CoreUtils.manageArguments(args);
         } catch (Throwable throwable) {
+            log.fatal("Got exception in application: " + throwable.getLocalizedMessage(), throwable);
             JOptionPane.showMessageDialog(null,
                     "Фатальная ошибка приложения.\n" + throwable.getLocalizedMessage(), "Ошибка",
                     JOptionPane.ERROR_MESSAGE);
-            log.fatal("Got exception in application: " + throwable.getLocalizedMessage(), throwable);
             log.fatal("Exiting application with exception: " + throwable.getLocalizedMessage());
-            System.exit(-1); //fixme this should not exit like this...
+            System.exit(-1);
         }
     }
 }
