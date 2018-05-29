@@ -17,6 +17,7 @@ package com.mmz.specs.application.utils.client;
 
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
@@ -67,6 +68,26 @@ public class CommonWindowUtils {
         return result.toString();
     }
 
+    public static void initApplicationVersionArea(JTextField textField) {
+        textField.setBorder(BorderFactory.createEmptyBorder());
+        textField.setBackground(new JPanel().getBackground());
+        Properties properties = new Properties();
+        try {
+            properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
+            String name = properties.getProperty("application.name");
+            String version = properties.getProperty("application.version");
+            String build = properties.getProperty("application.build");
+            if (version != null && build != null) {
+                textField.setText(name + " v." + version + " (" + build + ")");
+            } else {
+                textField.setText(null);
+                textField.setVisible(false);
+            }
+        } catch (Exception e) {
+            log.warn("Could not load application version info", e);
+        }
+    }
+
     public DefaultListModel<DetailEntity> getEffectList(int id) {
         DefaultListModel<DetailEntity> model = new DefaultListModel<>();
 
@@ -91,7 +112,7 @@ public class CommonWindowUtils {
         return model;
     }
 
-    public DefaultListModel<DetailEntity> sortModel(ArrayList<String> unique, DefaultListModel<DetailEntity> model) {
+    private DefaultListModel<DetailEntity> sortModel(ArrayList<String> unique, DefaultListModel<DetailEntity> model) {
         DefaultListModel<DetailEntity> result = new DefaultListModel<>();
         for (String name : unique) {
             for (int i = 0; i < model.getSize(); i++) {
@@ -109,54 +130,72 @@ public class CommonWindowUtils {
         if (window instanceof ClientMainWindow) {
             ClientMainWindow clientMainWindow = (ClientMainWindow) window;
             UsersEntity currentUser = clientMainWindow.getCurrentUser();
-            if (currentUser != null) {
-                if (currentUser.isActive()) {
-                    if (currentUser.isAdmin()) {
-                        String result = showInputDialog(component,
-                                "Введите новое наименование:", "Новое наименование", PLAIN_MESSAGE);
-                        if (result != null) {
-                            if (!result.isEmpty()) {
-                                final int MAX_TITLE_LENGTH = 120;
-                                if (result.length() <= MAX_TITLE_LENGTH) {
-                                    result = result.replace("\n", " ");
-                                    result = WordUtils.capitalizeFully(result);
 
-                                    DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
-                                    DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
+            if (addTitle(component, currentUser)) return addNewTitle(component);
+        } else {
+            LoginWindow loginWindow = new LoginWindow(session);
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), loginWindow));
+            loginWindow.setVisible(true);
+            UsersEntity user = loginWindow.getAuthorizedUser();
 
-                                    if (detailTitleByTitle == null) {
-                                        DetailTitleEntity titleEntity = new DetailTitleEntity();
-                                        titleEntity.setActive(true);
-                                        titleEntity.setTitle(result);
-                                        DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+            if (addTitle(component, user)) return addNewTitle(component);
+        }
+        return null;
+    }
 
-                                        return createNewTitle(component, result, titleEntity, service);
-                                    } else {
-                                        showMessageDialog(component,
-                                                "Наименование " + result +
-                                                        "\nУже существует.", "Ошибка добавления", WARNING_MESSAGE);
-                                    }
-                                } else {
-                                    showMessageDialog(component,
-                                            "Длина наименования не может привышать 120 символов (сейчас: "
-                                                    + result.length() + ")",
-                                            "Ошибка ввода", WARNING_MESSAGE);
-                                }
-                            }
-                        }
-                    } else {
-                        showMessageDialog(component,
-                                "Вам необходимо быть администратором,\n" +
-                                        "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
-                    }
+    private boolean addTitle(Component component, UsersEntity user) {
+        if (user != null) {
+            if (user.isActive()) {
+                if (user.isAdmin()) {
+                    return true;
                 } else {
                     showMessageDialog(component,
-                            "Пользователь не активен,\n" +
-                                    "обратитесь к администратору для продолжения.", "Ошибка доступа", WARNING_MESSAGE);
+                            "Вам необходимо быть администратором,\n" +
+                                    "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
                 }
             } else {
                 showMessageDialog(component,
-                        "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", WARNING_MESSAGE);
+                        "Пользователь не активен,\n" +
+                                "обратитесь к администратору для продолжения.", "Ошибка доступа", WARNING_MESSAGE);
+            }
+        } else {
+            showMessageDialog(component,
+                    "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", WARNING_MESSAGE);
+        }
+        return false;
+    }
+
+    private DetailTitleEntity addNewTitle(Component component) {
+        String result = showInputDialog(component,
+                "Введите новое наименование:", "Новое наименование", PLAIN_MESSAGE);
+        if (result != null) {
+            if (!result.isEmpty()) {
+                final int MAX_TITLE_LENGTH = 120;
+                if (result.length() <= MAX_TITLE_LENGTH) {
+                    result = result.replace("\n", " ");
+                    result = WordUtils.capitalizeFully(result);
+
+                    DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+                    DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
+
+                    if (detailTitleByTitle == null) {
+                        DetailTitleEntity titleEntity = new DetailTitleEntity();
+                        titleEntity.setActive(true);
+                        titleEntity.setTitle(result);
+                        DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+
+                        return createNewTitle(component, result, titleEntity, service);
+                    } else {
+                        showMessageDialog(component,
+                                "Наименование " + result +
+                                        "\nУже существует.", "Ошибка добавления", WARNING_MESSAGE);
+                    }
+                } else {
+                    showMessageDialog(component,
+                            "Длина наименования не может привышать 120 символов (сейчас: "
+                                    + result.length() + ")",
+                            "Ошибка ввода", WARNING_MESSAGE);
+                }
             }
         }
         return null;
@@ -176,26 +215,6 @@ public class CommonWindowUtils {
                     "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
                     "Ошибка добавления", WARNING_MESSAGE);
             return null;
-        }
-    }
-
-    public static void initApplicationVersionArea(JTextField textField) {
-        textField.setBorder(BorderFactory.createEmptyBorder());
-        textField.setBackground(new JPanel().getBackground());
-        Properties properties = new Properties();
-        try {
-            properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
-            String name = properties.getProperty("application.name");
-            String version = properties.getProperty("application.version");
-            String build = properties.getProperty("application.build");
-            if (version != null && build != null) {
-                textField.setText(name + " v." + version + " (" + build + ")");
-            } else {
-                textField.setText(null);
-                textField.setVisible(false);
-            }
-        } catch (Exception e) {
-            log.warn("Could not load application version info", e);
         }
     }
 }
