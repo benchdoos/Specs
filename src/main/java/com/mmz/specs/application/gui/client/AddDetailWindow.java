@@ -136,13 +136,18 @@ public class AddDetailWindow extends JDialog {
                             + dbDetail.getDetailTitleByDetailTitleId().getTitle(),
                     "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
         } else {
-            DetailEntity detailEntity = new DetailEntity();
-            detailEntity.setCode(fixedCode);
-            detailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
-            detailEntity.setUnit(unitCheckBox.isSelected());
-            log.debug("Added new detail: " + detailEntity);
-            this.detailEntity = detailEntity;
-            dispose();
+            if (!fixedCode.isEmpty()) {
+                DetailEntity detailEntity = new DetailEntity();
+                detailEntity.setCode(fixedCode);
+                detailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                detailEntity.setUnit(unitCheckBox.isSelected());
+                log.debug("Added new detail: " + detailEntity);
+                this.detailEntity = detailEntity;
+                dispose();
+            } else {
+                log.debug("User tried to add detail with empty index.");
+                FrameUtils.shakeFrame(this);
+            }
         }
     }
 
