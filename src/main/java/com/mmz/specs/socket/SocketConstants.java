@@ -17,7 +17,6 @@ package com.mmz.specs.socket;
 
 public interface SocketConstants {
     String TESTING_CONNECTION_COMMAND = "testing";
-    String HELLO_COMMAND = "hello";
     String QUIT_COMMAND = "quit";
 
     String USER_PC_NAME = "user.pc.name";

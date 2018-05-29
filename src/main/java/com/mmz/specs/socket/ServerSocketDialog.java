@@ -86,11 +86,6 @@ public class ServerSocketDialog implements Runnable {
             case TESTING_CONNECTION_COMMAND:
                 break;
 
-            case HELLO_COMMAND:
-                String name = new ServerSocketDialogUtils(client).getPcName();
-                log.info("User connected: " + name + " Command: " + command); // TODO manage this to server somewhere
-                break;
-
             case GIVE_SESSION:
                 log.info("User asking Session, giving it. Command: " + command);
                 new ServerSocketDialogUtils(client).sendSessionInfo();

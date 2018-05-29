@@ -36,7 +36,6 @@ import javax.persistence.metamodel.EntityType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 
 public class ClientBackgroundService {
@@ -109,13 +108,6 @@ public class ClientBackgroundService {
                 socket.setSoTimeout(3000);
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
-
-                log.debug("Writing to server command: " + SocketConstants.HELLO_COMMAND);
-                outputStream.writeUTF(SocketConstants.HELLO_COMMAND);
-                String answer = dataInputStream.readUTF();
-                log.debug("Server gave answer :" + answer);
-                outputStream.writeUTF("Client id: " + Thread.currentThread().getId() + " address:" + InetAddress.getLocalHost().getHostAddress());
-                log.info("Successfully connected to server: " + socket);
             } catch (Exception e) {
                 log.warn("Could not establish connection", e);
                 ClientManager.getInstance().notifyClientMainWindow(ClientManager.ClientConnectionStatus.CONNECTION_REFUSED);
