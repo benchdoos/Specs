@@ -55,6 +55,9 @@ public class SelectionDetailWindow extends JDialog {
 
         fillDetailsComboBox();
 
+        pack();
+        setMinimumSize(new Dimension(300, getSize().height)); //new Dimension(300, 100)
+
     }
 
     private void initDetailsComboBox() {
@@ -63,7 +66,7 @@ public class SelectionDetailWindow extends JDialog {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof DetailEntity) {
                     DetailEntity detailEntity = (DetailEntity) value;
-                    final String result = detailEntity.getCode() + " " + CommonUtils.substring(25, detailEntity.getDetailTitleByDetailTitleId().getTitle());
+                    final String result = detailEntity.getCode() + " " + CommonUtils.substring(detailsComboBox.getSize().width / 10, detailEntity.getDetailTitleByDetailTitleId().getTitle());
                     return super.getListCellRendererComponent(list, result, index, isSelected, cellHasFocus);
                 }
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -108,8 +111,6 @@ public class SelectionDetailWindow extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
         setTitle("Выбор существующей детали");
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/addExistingItem.png")));
-        pack();
-        setMinimumSize(new Dimension(300, 100));
     }
 
     private void fillDetailsComboBox() {
