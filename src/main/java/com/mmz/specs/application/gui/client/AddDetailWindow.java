@@ -21,11 +21,15 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.CommonComboBoxUtils;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailTitleEntity;
 import com.mmz.specs.service.DetailService;
 import com.mmz.specs.service.DetailServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -35,6 +39,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class AddDetailWindow extends JDialog {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -89,7 +95,13 @@ public class AddDetailWindow extends JDialog {
     }
 
     private void onCreateTitle() {
-        //todo init this!
+        DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
+        if (titleEntity != null) {
+            titleComboBox.removeAllItems();
+            fillComboBox();
+
+            titleComboBox.setSelectedItem(titleEntity);
+        }
     }
 
     private void initKeyBindings() {
@@ -104,9 +116,20 @@ public class AddDetailWindow extends JDialog {
     }
 
     private void onOK() {
+        String fixedCode = codeTextField.getText().toUpperCase()
+                .replace(",", ".")
+                .replace("/", ".")
+                .replace(" ", "");
+        //todo test this
+       /*String latinChars = "qwertyuiop[]asdfghjkl;'zxcvbnm";
+        String cyrillicChars = "йцукенгшщзхъфывапролджэячсмить";
+        fixedCode = StringUtils.replaceChars(fixedCode, latinChars, cyrillicChars);
+        fixedCode = StringUtils.replaceChars(fixedCode, latinChars.toUpperCase(), cyrillicChars.toUpperCase());*/
+
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
-        DetailEntity dbDetail = service.getDetailByIndex(codeTextField.getText());
+        DetailEntity dbDetail = service.getDetailByIndex(fixedCode);
         if (dbDetail != null) {
+            log.debug("User tried to add existing detail: {}, existing: {}", fixedCode, dbDetail);
             FrameUtils.shakeFrame(this);
             JOptionPane.showMessageDialog(this,
                     "Деталь с таким индексом уже существует: " + dbDetail.getCode() + " "
@@ -114,10 +137,10 @@ public class AddDetailWindow extends JDialog {
                     "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
         } else {
             DetailEntity detailEntity = new DetailEntity();
-            String fixedCode = codeTextField.getText().toUpperCase().replace(",", ".").replace(" ", "");
             detailEntity.setCode(fixedCode);
             detailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
             detailEntity.setUnit(unitCheckBox.isSelected());
+            log.debug("Added new detail: " + detailEntity);
             this.detailEntity = detailEntity;
             dispose();
         }
