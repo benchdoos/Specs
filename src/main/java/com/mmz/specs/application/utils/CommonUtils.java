@@ -38,7 +38,11 @@ public class CommonUtils {
         }
 
         if (text.length() > length) {
-            return text.substring(0, length - 3) + "...";
+            if (length >= 3) {
+                return text.substring(0, length - 3) + "...";
+            } else {
+                return text.substring(0, 0) + "...";
+            }
         } else return text;
 
     }
