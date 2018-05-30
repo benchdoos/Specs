@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -101,26 +102,6 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
         return result;
     }
 
-  /*  @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MaterialEntity)) return false;
-        MaterialEntity that = (MaterialEntity) o;
-
-        if (getId() != that.getId()) return false;
-        *//*if (getShortMark() != null ? !getShortMark().equals(that.getShortMark()) : that.getShortMark() != null)
-            return false;
-        if (getShortProfile() != null ? !getShortProfile().equals(that.getShortProfile()) : that.getShortProfile() != null)
-            return false;
-        if (getLongMark() != null ? !getLongMark().equals(that.getLongMark()) : that.getLongMark() != null)
-            return false;
-        if (getLongProfile() != null ? !getLongProfile().equals(that.getLongProfile()) : that.getLongProfile() != null)
-            return false;
-        if (isActive() == that.isActive()) return false;*//*
-
-        return true;
-    }*/
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -153,10 +134,14 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
 
     @Override
     public int compareTo(MaterialEntity that) {
-        int result = 0;
-        result += this.getShortMark().compareTo(that.getShortMark());
-        result += this.getShortProfile().compareTo(that.getShortProfile());
-        result += Boolean.compare(this.isActive(), that.isActive());
-        return result;
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compare(this.getShortMark(), that.getShortMark())
+                    .compare(this.getLongMark(), that.getLongMark())
+                    .compareTrueFirst(this.isActive(), that.isActive())
+                    .result();
+        } else {
+            return -1;
+        }
     }
 }

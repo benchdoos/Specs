@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -94,9 +95,13 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
 
     @Override
     public int compareTo(DetailTitleEntity that) {
-        int result = 0;
-        result -= that.getTitle().compareTo(this.getTitle());
-        result += that.isActive() == this.isActive() ? 1 : -1;
-        return result;
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compare(this.getTitle(), that.getTitle())
+                    .compareTrueFirst(this.isActive(), that.isActive())
+                    .result();
+        } else {
+            return -1;
+        }
     }
 }

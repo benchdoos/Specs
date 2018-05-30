@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -136,8 +137,9 @@ public class DetailEntity implements Comparable<DetailEntity> {
 
     @Override
     public boolean equals(Object o) {
+        if (o == null) return false;
         if (this == o) return true;
-        if (o == null || !(o instanceof DetailEntity)) return false;
+        if (!(o instanceof DetailEntity)) return false;
 
         DetailEntity that = (DetailEntity) o;
 
@@ -161,10 +163,16 @@ public class DetailEntity implements Comparable<DetailEntity> {
 
     @Override
     public int compareTo(DetailEntity that) {
-        int result = 0;
-        result -= that.getCode().compareTo(this.getCode());
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compare(this.getCode(), that.getCode())
+                    .result();
+        } else {
+            return -1;
+        }
+//        result -= that.getCode().compareTo(this.getCode());
         /*result += (that.isActive() == this.isActive()) ? 1 : 0;*/
-        return result;
+//        return result;
 
     }
 }

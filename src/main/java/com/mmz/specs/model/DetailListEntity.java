@@ -15,6 +15,7 @@
 
 package com.mmz.specs.model;
 
+import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -135,13 +136,16 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
 
     @Override
     public int compareTo(DetailListEntity that) {
-        int result = 0;
+        if (that != null) {
+            return ComparisonChain.start()
+                    .compare(this.getDetailByParentDetailId(), that.getDetailByParentDetailId())
+                    .compare(this.getDetailByChildDetailId(), that.getDetailByChildDetailId())
+                    .compareTrueFirst(this.isActive(), that.isActive())
+                    .compareTrueFirst(this.isInterchangeableNode(), that.isInterchangeableNode())
+                    .result();
+        } else {
+            return -1;
+        }
 
-        result -= this.getDetailByParentDetailId().compareTo(that.getDetailByParentDetailId());
-        result -= this.getDetailByChildDetailId().compareTo(that.getDetailByChildDetailId());
-        result += this.isActive() == that.isActive() ? 1 : 0;
-        result += this.isInterchangeableNode() == that.isInterchangeableNode() ? 10 : 0;
-
-        return result;
     }
 }
