@@ -22,7 +22,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "DETAIL_LIST")
 public class DetailListEntity implements Comparable<DetailListEntity> {
-    private int id;
+    private int id = -1;
     private int quantity;
     private boolean isInterchangeableNode;
     private boolean isActive;
@@ -99,6 +99,7 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
                 .append("isActive", isActive)
                 .append("detailByParentDetailId", detailByParentDetailId)
                 .append("detailByChildDetailId", detailByChildDetailId)
+                .append("noticeByNoticeId", noticeByNoticeId)
                 .toString();
     }
 
