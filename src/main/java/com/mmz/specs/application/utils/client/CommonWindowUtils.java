@@ -54,9 +54,11 @@ public class CommonWindowUtils {
     }
 
     public static String createDelimiter(String longMark, String longProfile) {
-        if (longMark.length() > longProfile.length()) {
-            return getDelimiter(longMark.length());
-        } else return getDelimiter(longProfile.length());
+        if (longMark != null && longProfile != null) {
+            if (longMark.length() > longProfile.length()) {
+                return getDelimiter(longMark.length());
+            } else return getDelimiter(longProfile.length());
+        } else return "";
     }
 
     private static String getDelimiter(int size) {
