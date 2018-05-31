@@ -34,7 +34,7 @@ public class DetailJTree extends JTree {
     public DetailJTree() {
         setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
 
-        setBackground(new JPanel().getBackground());
+        setBackground(BACKGROUND_NON_SELECTION_COLOR);
 
         DefaultTreeCellRenderer renderer = getRenderer();
 
