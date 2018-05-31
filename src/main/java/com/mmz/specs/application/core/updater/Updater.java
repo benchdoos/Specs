@@ -163,7 +163,7 @@ public class Updater {
             serverVersion.setDownloadUrl(userObject.get(browser_download_url).getAsString());
             serverVersion.setSize(userObject.get(size).getAsLong());
         }
-        log.info("Server application version is: {}", serverVersion);
+        log.info("Server application version is: {}", serverVersion.toString().replaceAll("\n", " "));
     }
 
     private void createConnection() {
