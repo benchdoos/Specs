@@ -260,9 +260,11 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         for (DetailListEntity entity : list) {
             NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
 
-            if (!noticeList.contains(noticeEntity.getNumber())) {
-                noticeList.add(noticeEntity.getNumber());
-                result.add(noticeEntity);
+            if (noticeEntity != null) { //testme
+                if (!noticeList.contains(noticeEntity.getNumber())) {
+                    noticeList.add(noticeEntity.getNumber());
+                    result.add(noticeEntity);
+                }
             }
         }
         Collections.sort(result);
