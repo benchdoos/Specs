@@ -24,6 +24,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.util.List;
 
@@ -45,6 +46,9 @@ public class DetailJTree extends JTree {
 
         setCellRenderer(renderer);
 
+        //setToggleClickCount(1);
+
+        getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     }
 
     private DefaultTreeCellRenderer getRenderer() {
