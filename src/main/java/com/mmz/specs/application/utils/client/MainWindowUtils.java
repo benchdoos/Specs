@@ -154,12 +154,4 @@ public class MainWindowUtils {
         }
         return latest;
     }
-
-    /*public static DefaultMutableTreeNode getTreeNodeFromEntity(DetailEntity entity) {
-        if (entity.isUnit()) {
-
-        } else {
-            return new DefaultMutableTreeNode(entity);
-        }
-    }*/
 }
