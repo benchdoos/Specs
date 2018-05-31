@@ -24,10 +24,7 @@ import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.ButtonTabComponent;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.UserInfoWindow;
-import com.mmz.specs.application.gui.panels.AccessPolicy;
-import com.mmz.specs.application.gui.panels.AccessPolicyManager;
-import com.mmz.specs.application.gui.panels.DetailListPanel;
-import com.mmz.specs.application.gui.panels.NoticeInfoPanel;
+import com.mmz.specs.application.gui.panels.*;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -518,17 +515,21 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initFtp() {
-        if (session != null) {
-            ftpUtils = FtpUtils.getInstance();
+        try {
+            if (session != null) {
+                ftpUtils = FtpUtils.getInstance();
 
-            String url = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_CONNECTION_URL_KEY).getValue();
-            String username = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_USERNAME_KEY).getValue();
-            String password = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_PASSWORD_KEY).getValue();
-            String postfix = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_LOCATION_POSTFIX_KEY).getValue();
-            log.info("Creating ftp connection at: " + url + " user: " + username + " password: " + password.length() + " postfix: " + postfix);
-            ftpUtils.connect(url, username, password);
+                String url = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_CONNECTION_URL_KEY).getValue();
+                String username = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_USERNAME_KEY).getValue();
+                String password = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_PASSWORD_KEY).getValue();
+                String postfix = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_LOCATION_POSTFIX_KEY).getValue();
+                log.info("Creating ftp connection at: " + url + " user: " + username + " password: " + password.length() + " postfix: " + postfix);
+                ftpUtils.connect(url, username, password);
 
-            ftpUtils.setPostfix(postfix);
+                ftpUtils.setPostfix(postfix);
+            }
+        } catch (Exception e) {
+            log.warn("Can not init ftp again", e);
         }
     }
 
@@ -567,8 +568,23 @@ public class ClientMainWindow extends JFrame {
     private void closeCurrentTab() {
         int selectedIndex = clientMainTabbedPane.getSelectedIndex();
         if (selectedIndex > 0) {
-            clientMainTabbedPane.remove(selectedIndex);
+
+            try {
+                Transactional transactional = (Transactional) clientMainTabbedPane.getComponentAt(selectedIndex);
+                transactional.rollbackTransaction();
+            } catch (ClassCastException e) {
+                /*NOP*/
+                clientMainTabbedPane.remove(selectedIndex);
+            } catch (Exception e) {
+                log.warn("Could not close tab at: {} and close transaction", selectedIndex);
+                clientMainTabbedPane.remove(selectedIndex);
+            }
+
         }
+    }
+
+    public void closeTab(Component component) {
+        clientMainTabbedPane.remove(component);
     }
 
     private void unlockAdminTools(boolean unlock) {

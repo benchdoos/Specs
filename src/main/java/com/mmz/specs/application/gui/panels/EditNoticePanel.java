@@ -54,7 +54,7 @@ import java.util.List;
 
 import static javax.swing.JOptionPane.*;
 
-public class EditNoticePanel extends JPanel implements AccessPolicy {
+public class EditNoticePanel extends JPanel implements AccessPolicy, Transactional {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private JPanel contentPane;
@@ -99,6 +99,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
         this.session = ClientBackgroundService.getInstance().getSession();
+
+        session.getTransaction().begin();
+
         initGui();
     }
 
@@ -201,20 +204,37 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                 DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
                 final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
                 Collections.sort(detailListEntitiesByParentAndChild);
-                for (DetailListEntity entity : detailListEntitiesByParentAndChild) {
-                    if (entity.isActive()) {
-                        String text = detailCountTextField.getText();
-                        try {
-                            int quantity = Integer.parseInt(text);
-                            if (quantity >= 1 && quantity <= 1000) {
-                                entity.setQuantity(quantity);
-                                updateTreeDetail();
+                log.debug("Parent: {}, Child: {}.", parent, child);
+                if (detailListEntitiesByParentAndChild.size() > 0) {
+                    for (DetailListEntity entity : detailListEntitiesByParentAndChild) {
+                        log.debug("Current entity: " + entity);
+                        if (entity.isActive()) {
+                            String text = detailCountTextField.getText();
+                            try {
+                                int quantity = Integer.parseInt(text);
+                                if (quantity >= 1 && quantity <= 1000) {
+                                    entity.setQuantity(quantity);
+                                    log.debug("Added quantity: {}", quantity);
+                                    updateTreeDetail();
+                                }
+                            } catch (NumberFormatException ignored) {
+                                String parentInfo = entity.getDetailByParentDetailId().getCode() + entity.getDetailByParentDetailId().getDetailTitleByDetailTitleId().getTitle();
+                                String childInfo = entity.getDetailByChildDetailId().getCode() + entity.getDetailByChildDetailId().getDetailTitleByDetailTitleId().getTitle();
+                                log.warn("Could not set quantity: {}, for entity: (parent: {}, child: {})", detailCountTextField.getText(), parentInfo, childInfo);
                             }
-                        } catch (NumberFormatException ignored) {
                         }
                     }
+                } else {
+                    log.debug("What to do here??? parent: {}, child: {}", parent, child);
                 }
             }
+        });
+
+
+        unitCheckBox.addActionListener(e -> {
+            DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+            child.setUnit(unitCheckBox.isSelected());
+            updateTreeDetail();
         });
 
         finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField));
@@ -245,15 +265,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
             }
         });
 
-        createTitleButton.addActionListener(e -> {
-            DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
-            if (titleEntity != null) {
-                detailTitleComboBox.removeAllItems();
-                fillDetailTitleComboBox();
-
-                detailTitleComboBox.setSelectedItem(titleEntity);
-            }
-        });
+        createTitleButton.addActionListener(e -> onCreateNewTitle());
         editMaterialButton.addActionListener(e -> onEditMaterial());
         createMaterialButton.addActionListener(e -> onCreateNewMaterial());
         createTechProcessButton.addActionListener(e -> onCreateNewTechProcess());
@@ -283,6 +295,16 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         });
 
         editImageButton.addActionListener(e -> onEditDetailImage());
+    }
+
+    private void onCreateNewTitle() {
+        DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
+        if (titleEntity != null) {
+            detailTitleComboBox.removeAllItems();
+            fillDetailTitleComboBox();
+
+            detailTitleComboBox.setSelectedItem(titleEntity);
+        }
     }
 
     private void onEditDetailImage() {
@@ -468,26 +490,29 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         DetailEntity entity = addDetailWindow.getDetailEntity();
 
         if (entity != null) {
-            final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+            /*final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();*/
             final TreePath selectionPath = mainTree.getSelectionPath();
-
             addTreeNode(entity, selectionPath);
         }
     }
 
     private void addTreeNode(DetailEntity entity, TreePath selectionPath) {
-        if (notContainsEntityInParents(selectionPath, entity)) {
-            if (notContainsEntityInChildren(selectionPath, entity)) {
-                addItemToTree(selectionPath, entity);
+        if (selectionPath != null) {
+            if (notContainsEntityInParents(selectionPath, entity)) {
+                if (notContainsEntityInChildren(selectionPath, entity)) {
+                    addItemToTree(selectionPath, entity);
+                } else {
+                    showMessageDialog(this, "Нельзя добавить деталь / узел "
+                            + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                            "т.к. он(а) уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
+                }
             } else {
-                showMessageDialog(this, "Нельзя добавить деталь / узел "
+                showMessageDialog(this, "Нельзя добавить узел "
                         + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
-                        "т.к. он(а) уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
+                        "т.к. он не может содержать самого себя.", "Ошибка добавления", ERROR_MESSAGE);
             }
         } else {
-            showMessageDialog(this, "Нельзя добавить узел "
-                    + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
-                    "т.к. он не может содержать самого себя.", "Ошибка добавления", ERROR_MESSAGE);
+            showMessageDialog(this, "Укажите сначала, куда необходимо добавить деталь", "Ошибка добавления", ERROR_MESSAGE);
         }
     }
 
@@ -507,15 +532,57 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         }
     }
 
-    private void addItemToTree(TreePath path, DetailEntity entity) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
+    private void addItemToTree(TreePath path, DetailEntity entity) { //TESTME all of this code should be tested! MUST be tested!
+        log.debug(">> path is: {}, component is: {}, parent component is: {}", path, path.getLastPathComponent(), path.getParentPath().getLastPathComponent());
+
+        DefaultMutableTreeNode detailNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+        DefaultMutableTreeNode node;
+        DetailEntity detail = (DetailEntity) detailNode.getUserObject();
+        if (detail.isUnit()) {
+            node = (DefaultMutableTreeNode) path.getLastPathComponent();
+        } else {
+            node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
+        }
+
+//        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
+
         try {
-            node.add(new MainWindowUtils(session).getChildren(new DetailListServiceImpl(new DetailListDaoImpl(session)), entity));
-        } catch (Exception e) {
-           /* DetailListEntity detailListEntity = new DetailListEntity();
+            DetailListEntity detailListEntity = new DetailListEntity();
             detailListEntity.setQuantity(1);
             detailListEntity.setActive(true);
-            detailListEntity.setDetailByChildDetailId(entity);*/
+            detailListEntity.setDetailByParentDetailId((DetailEntity) node.getUserObject()); //todo check this...
+            detailListEntity.setDetailByChildDetailId(entity);
+            detailListEntity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
+            String parentInfo = detailListEntity.getDetailByParentDetailId().getCode() + " " + detailListEntity.getDetailByParentDetailId().getDetailTitleByDetailTitleId().getTitle();
+            String childInfo = detailListEntity.getDetailByChildDetailId().getCode() + " " + detailListEntity.getDetailByChildDetailId().getDetailTitleByDetailTitleId().getTitle();
+            log.debug(">>> new detailListEntity parent: {} and child: {} and quantity: {}", parentInfo, childInfo, detailListEntity.getQuantity());
+
+            DefaultMutableTreeNode fullNode = new MainWindowUtils(session).getChildren(new DetailListServiceImpl(new DetailListDaoImpl(session)), entity);
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(ClientBackgroundService.getInstance().getSession()));
+            service.addDetailList(detailListEntity);
+
+            node.add(fullNode);
+
+        } catch (Exception e) {
+            log.debug("Can not find entity: {}, adding new one", entity);
+            //TODO ALLELUIA
+            DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+            entity.setActive(true);
+            detailService.addDetail(entity);
+
+            DetailListEntity detailListEntity = new DetailListEntity();
+            detailListEntity.setQuantity(1);
+            detailListEntity.setActive(true);
+            detailListEntity.setDetailByParentDetailId((DetailEntity) node.getUserObject()); //todo check this...
+            detailListEntity.setDetailByChildDetailId(entity);
+            detailListEntity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
+            String parentInfo = detailListEntity.getDetailByParentDetailId().getCode() + " " + detailListEntity.getDetailByParentDetailId().getDetailTitleByDetailTitleId().getTitle();
+            String childInfo = detailListEntity.getDetailByChildDetailId().getCode() + " " + detailListEntity.getDetailByChildDetailId().getDetailTitleByDetailTitleId().getTitle();
+            log.debug(">>> new detailListEntity parent: {} and child: {} and quantity: {}", parentInfo, childInfo, detailListEntity.getQuantity());
+
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(ClientBackgroundService.getInstance().getSession()));
+            service.addDetailList(detailListEntity);
+
             node.add(new DefaultMutableTreeNode(entity));
         }
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
@@ -561,7 +628,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
     }
 
     private void onRemoveItem() {
-        System.out.println("not supported yet");
+        System.out.println("remove item >> " + mainTree.getLastSelectedPathComponent());
     }
 
     private void onMoveItemUp() {
@@ -574,11 +641,44 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
 
 
     private void onOK() {
-        System.out.println("onOK not supported yet");
+        int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите сохранить изменения в базе данных?\n" +
+                        "Введенные вами данные будут сохранены в базе и появятся у всех пользователей.\n" +
+                        "Также все проведённые изменения будут закреплены за вами, \n" +
+                        "и в случае вопросов, будут обращаться к вам.\n" +
+                        "Провести изменения?", "Подтверждение изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/upload.png"))));
+        log.debug("User wanted to commit changes, user's choice is: " + result);
+        if (result == 0) {
+            try {
+                //todo update info about notice!!!!
+                session.getTransaction().commit();
+                log.info("New state of db is commited");
+
+                Window parentWindow = FrameUtils.findWindow(this);
+                if (parentWindow instanceof ClientMainWindow) {
+                    ClientMainWindow clientMainWindow = (ClientMainWindow) parentWindow;
+                    clientMainWindow.closeTab(this);
+                }
+            } catch (Exception e) {
+                log.warn("Could not call commit for transaction", e);
+            }
+        }
     }
 
     private void onCancel() {
-        System.out.println("onCancel not supported yet");
+        int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите отменить изменения?\n" +
+                "В случае подтверждения все изменения не сохранятся и никак\n" +
+                "не повлияют на базу данных.\n" +
+                "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        log.debug("User wanted to rollback changes, user's choice is: " + result);
+        if (result == 0) {
+            session.getTransaction().rollback();
+            Window parentWindow = FrameUtils.findWindow(this);
+            if (parentWindow instanceof ClientMainWindow) {
+                ClientMainWindow clientMainWindow = (ClientMainWindow) parentWindow;
+                clientMainWindow.closeTab(this);
+            }
+        }
     }
 
     private void onEditNotice() {
@@ -588,13 +688,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
             CreateNoticeWindow noticeWindow = new CreateNoticeWindow(entity);
             noticeWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), noticeWindow));
             noticeWindow.setVisible(true);
-            ClientBackgroundService.getInstance().refreshSession();
+            NoticeEntity noticeEntity = noticeWindow.getNoticeEntity();
+            noticeComboBox.removeAllItems();
+            fillNoticeComboBox();
+            noticeComboBox.setSelectedItem(noticeEntity);
+            /*ClientBackgroundService.getInstance().refreshSession();
             Object selectedObject = noticeComboBox.getSelectedItem();
             noticeComboBox.removeAllItems();
             fillNoticeComboBox();
             if (selectedObject != null) {
                 noticeComboBox.setSelectedItem(selectedObject);
-            }
+            }*/
         }
     }
 
@@ -602,9 +706,14 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         CreateNoticeWindow noticeWindow = new CreateNoticeWindow(null);
         noticeWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), noticeWindow));
         noticeWindow.setVisible(true);
-        ClientBackgroundService.getInstance().refreshSession();
+        NoticeEntity noticeEntity = noticeWindow.getNoticeEntity();
         noticeComboBox.removeAllItems();
         fillNoticeComboBox();
+        noticeComboBox.setSelectedItem(noticeEntity);
+
+        /*ClientBackgroundService.getInstance().refreshSession();
+        noticeComboBox.removeAllItems();
+        fillNoticeComboBox();*/
     }
 
 
@@ -638,8 +747,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                         finishedWeightTextField.setBorder(border);
                         workpieceWeightTextField.setBorder(border);
                     } else {
-                        finishedWeightTextField.setText(detailEntity.getFinishedWeight() + "");
-                        workpieceWeightTextField.setText(detailEntity.getWorkpieceWeight() + "");
+                        String fixedFinishedWeight = detailEntity.getFinishedWeight() + "";
+                        fixedFinishedWeight = fixedFinishedWeight.replace("null", "0");
+                        finishedWeightTextField.setText(fixedFinishedWeight);
+                        String fixedWorkpieceWeight = detailEntity.getWorkpieceWeight() + "";
+                        fixedWorkpieceWeight = fixedWorkpieceWeight.replace("null", "0");
+                        workpieceWeightTextField.setText(fixedWorkpieceWeight);
                     }
 
                     if (detailEntity.getId() != 0) {
@@ -727,8 +840,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
 
                 //----------------------
 
-                addItemButton.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
-                removeItemButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
+                addItemButton.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)));
+//                addItemButton.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
+                removeItemButton.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+//                removeItemButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
                 moveItemUpButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
                 moveItemDownButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
 
@@ -844,7 +959,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                 if (value instanceof NoticeEntity) {
                     NoticeEntity entity = (NoticeEntity) value;
                     String date = new SimpleDateFormat("dd.MM.yyyy").format(entity.getDate());
-                    String description = CommonUtils.substring(30, entity.getDescription().replace("\n", " "));
+                    String description = CommonUtils.substring(noticeComboBox.getSize().width / 10, entity.getDescription().replaceAll("\n", " "));
 
                     String text = entity.getNumber() + " (посл. изм. " + date + ") " + description;
                     return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
@@ -869,11 +984,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
                 noticeDescriptionTextArea.setText("");
             }
         });
-
-        if (noticeComboBox.getModel().getSize() > 0) {
-            noticeComboBox.setSelectedIndex(0);
-        }
-
     }
 
     private void fillNoticeComboBox() {
@@ -888,7 +998,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         }
 
         noticeComboBox.setModel(model);
-        noticeComboBox.setSelectedItem(-1);
+        noticeComboBox.setSelectedIndex(-1);
     }
 
 
@@ -946,6 +1056,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
     @Override
     public void setUIEnabled(boolean ignore) {
         /*NOP*/
+    }
+
+    @Override
+    public void rollbackTransaction() {
+        onCancel();
     }
 
     /**
@@ -1026,7 +1141,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         changePanel.add(panel2, new GridConstraints(1, 0, 13, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane2 = new JScrollPane();
         panel2.add(scrollPane2, new GridConstraints(0, 0, 12, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        mainTree.setBackground(new Color(-855310));
         mainTree.setRootVisible(false);
         mainTree.setScrollsOnExpand(true);
         mainTree.setShowsRootHandles(true);
@@ -1053,6 +1167,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         moveItemUpButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/upArrow16.png")));
         moveItemUpButton.setText("");
         moveItemUpButton.setToolTipText("Поднять вверх (CTRL+ВВЕРХ)");
+        moveItemUpButton.setVisible(false);
         treeToolBar.add(moveItemUpButton);
         moveItemDownButton = new JButton();
         moveItemDownButton.setEnabled(false);
@@ -1060,6 +1175,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         moveItemDownButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/downArrow16.png")));
         moveItemDownButton.setText("");
         moveItemDownButton.setToolTipText("Опустить вниз (CTRL+ВНИЗ)");
+        moveItemDownButton.setVisible(false);
         treeToolBar.add(moveItemDownButton);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 0), -1, -1));
@@ -1207,7 +1323,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy {
         private void verifyInput(JTextField textField, String toolTip) {
             try {
                 String text = textField.getText();
-                text = text.replace(",", ".");
+                text = text.replaceAll(",", ".");
                 if (text.contains("d")) {
                     throw new IllegalArgumentException();
                 }

@@ -424,7 +424,13 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 if (currentUser != null) {
                     if ((currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive()) {
                         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
+                        try {
+                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
+                        } catch (IllegalStateException e) {
+                            log.warn("Tab with transaction is already active");
+                            JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                                    "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                        }
                     }
                 }
             }
@@ -437,7 +443,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     @Override
     public AccessPolicyManager getPolicyManager() {
-        return new AccessPolicyManager(true, false);
+        return new AccessPolicyManager(false, false);
+        //return new AccessPolicyManager(true, false);
     }
 
     @Override

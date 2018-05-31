@@ -114,9 +114,11 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    DetailInfoWindow detailInfoWindow = new DetailInfoWindow(detailEffectedList.getSelectedValue(), session);
-                    detailInfoWindow.setLocation(FrameUtils.getFrameOnCenter(detailInfoWindow.getOwner(), detailInfoWindow));
-                    detailInfoWindow.setVisible(true);
+                    if (detailEffectedList.getSelectedValue() != null) {
+                        DetailInfoWindow detailInfoWindow = new DetailInfoWindow(detailEffectedList.getSelectedValue(), session);
+                        detailInfoWindow.setLocation(FrameUtils.getFrameOnCenter(detailInfoWindow.getOwner(), detailInfoWindow));
+                        detailInfoWindow.setVisible(true);
+                    }
                 }
             }
         });

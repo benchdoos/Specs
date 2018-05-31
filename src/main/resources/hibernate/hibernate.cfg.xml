@@ -14,6 +14,10 @@
         <property name="hibernate.hikari.minimumIdle">5</property>
         <property name="hibernate.hikari.maximumPoolSize">100</property>
         <property name="hibernate.hikari.idleTimeout">5000</property>
+        <!--<property name="hibernate.connection.release_mode">after_statement</property>-->
+        <!--TODO Calling rollback() in auto-commit mode is not allowed // FIND THIS-->
+        <property name="hibernate.connection.autocommit">false</property>
+
         <!-- DB schema will be updated if needed -->
         <!-- <property name="hbm2ddl.auto">update</property> -->
 

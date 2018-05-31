@@ -107,10 +107,7 @@ public class CreateNoticeWindow extends JDialog {
         UsersEntity user = loginWindow.getAuthorizedUser();
         if (user != null) {
             if (user.isActive()) {
-                if (user.isAdmin() || (user.isEditor() &&
-                        (user.getUserType().getId() == 1
-                                || user.getUserType().getId() == 3
-                                || user.getUserType().getId() == 4))) {
+                if (user.isAdmin() || user.isEditor()) {
                     NoticeService service = new NoticeServiceImpl(new NoticeDaoImpl(session));
 
                     NoticeEntity entity;
@@ -124,13 +121,13 @@ public class CreateNoticeWindow extends JDialog {
                     entity.setDescription(noticeDescriptionTextArea.getText());
                     entity.setUsersByProvidedByUserId(user);
 
-                    session.beginTransaction();
                     if (noticeEntity != null) {
                         service.updateNotice(entity);
+                        noticeEntity = entity;
                     } else {
-                        service.addNotice(entity);
+                        int i = service.addNotice(entity);
+                        noticeEntity = service.getNoticeById(i);
                     }
-                    session.getTransaction().commit();
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Пользователь должен быть администратором или редактором (конструктором).",
@@ -221,6 +218,10 @@ public class CreateNoticeWindow extends JDialog {
 
 
         });
+    }
+
+    public NoticeEntity getNoticeEntity() {
+        return noticeEntity;
     }
 
     {

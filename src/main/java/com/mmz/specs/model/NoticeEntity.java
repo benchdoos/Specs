@@ -97,7 +97,7 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
                 .append("id", id)
                 .append("number", number)
                 .append("date", date)
-                .append("description", description)
+                .append("description", description.replaceAll("\n", " "))
                 .append("usersByProvidedByUserId", usersByProvidedByUserId)
                 .toString();
     }

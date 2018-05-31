@@ -32,6 +32,11 @@
 package com.mmz.specs.application.gui.common;
 
 
+import com.mmz.specs.application.gui.panels.Transactional;
+import com.mmz.specs.application.utils.Logging;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
@@ -44,6 +49,8 @@ import java.awt.event.ActionListener;
  * a JButton to close the tab it belongs to
  */
 public class ButtonTabComponent extends JPanel {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private final static Image grayCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleGray12.png"));
     private final static Image redDarkCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleRedDarker12.png"));
     private final static Image redCircle = Toolkit.getDefaultToolkit().getImage(ButtonTabComponent.class.getResource("/img/gui/circleRed12.png"));
@@ -89,6 +96,11 @@ public class ButtonTabComponent extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
     }
 
+    private void manageTransactions(int i) {
+        Transactional transactional = (Transactional) pane.getComponentAt(i);
+        transactional.rollbackTransaction();
+    }
+
     private class TabButton extends JButton implements ActionListener {
         TabButton() {
             int size = 10;
@@ -113,7 +125,14 @@ public class ButtonTabComponent extends JPanel {
             int i = pane.indexOfTabComponent(ButtonTabComponent.this);
             if (i != -1) {
                 if (pane.isEnabledAt(i)) {
-                    pane.remove(i);
+                    try {
+                        manageTransactions(i);
+                    } catch (ClassCastException ex) {
+                        pane.remove(i);
+                    } catch (Exception ex) {
+                        log.warn("Could not rollback transaction for tab: {}", i, ex);
+                        pane.remove(i);
+                    }
                 }
             }
         }

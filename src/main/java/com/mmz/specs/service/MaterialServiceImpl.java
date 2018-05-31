@@ -22,7 +22,6 @@ import com.mmz.specs.model.MaterialEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 public class MaterialServiceImpl implements MaterialService {
@@ -49,19 +48,19 @@ public class MaterialServiceImpl implements MaterialService {
 
 
     @Override
-    @Transactional
+
     public int addMaterial(MaterialEntity materialEntity) {
         return this.materialDao.addMaterial(materialEntity);
     }
 
     @Override
-    @Transactional
+
     public void updateMaterial(MaterialEntity materialEntity) {
         this.materialDao.updateMaterial(materialEntity);
     }
 
     @Override
-    @Transactional
+
     public void removeMaterial(int id) {
         this.materialDao.removeMaterial(id);
     }
@@ -78,20 +77,20 @@ public class MaterialServiceImpl implements MaterialService {
     }
 
     @Override
-    @Transactional
+
     public MaterialEntity getMaterialById(int id) {
         return this.materialDao.getMaterialById(id);
     }
 
     @Override
-    @Transactional
+
     public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile) {
         return this.materialDao.getMaterialByShortMarkAndProfile(shortMark, shortProfile);
     }
 
 
     @Override
-    @Transactional
+
     public List<MaterialEntity> listMaterials() {
         return this.materialDao.listMaterials();
     }
