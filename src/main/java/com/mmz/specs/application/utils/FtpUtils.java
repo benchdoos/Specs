@@ -76,7 +76,7 @@ public class FtpUtils {
 
                 ftpClient.enterLocalPassiveMode();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Could not establish FTP connection to " + connectionUrl
                     + " for " + username + " with password length: " + password.length(), e);
         }
