@@ -104,7 +104,7 @@ public class MainWindowUtils {
                             Collections.sort(notices);
 
                             if (notices.size() > 0) {
-                                lastNotice = notices.get(notices.size() - 1);
+                                lastNotice = getLatestNoticeFromNoticeList(notices);
                                 String entityInfo = entity.getId() + " " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle();
                                 log.trace(">>> latest notice for " + entityInfo + " is: " + lastNotice);
                             }
@@ -112,7 +112,8 @@ public class MainWindowUtils {
                     }
                 }
 
-//                List<DetailListEntity> detailListEntitiesByParentAndChild = getDetailListEntitiesByParentAndChild(parent, entity);
+
+                log.trace("Latest notice finally is: {}", lastNotice);
                 List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, entity);
                 DetailListEntity lastDetailListEntity = null;
                 for (DetailListEntity e : detailListByParentAndChild) {
@@ -122,6 +123,13 @@ public class MainWindowUtils {
                         if (id >= lastNotice.getId()) {
                             lastNotice = e.getNoticeByNoticeId();
                             lastDetailListEntity = e;
+                        }
+                    } else {
+                        if (lastNotice != null) {
+                            if (e.getNoticeByNoticeId().getDate().after(lastNotice.getDate())) {
+                                lastNotice = e.getNoticeByNoticeId();
+                                lastDetailListEntity = e;
+                            }
                         }
                     }
                 }
@@ -141,6 +149,30 @@ public class MainWindowUtils {
         }
         result.setAllowsChildren(parent.isUnit());
         result.setUserObject(parent);
+        return result;
+    }
+
+    private NoticeEntity getLatestNoticeFromNoticeList(ArrayList<NoticeEntity> notices) {
+        NoticeEntity result = null;
+        for (NoticeEntity entity : notices) {
+            if (result != null) {
+                if (result.getDate().equals(entity.getDate())) {
+                    int i = result.getNumber().compareTo(entity.getNumber());
+                    if (i == 0) {
+                        int j = Integer.compare(result.getId(), entity.getId());
+                        if (j < 0) {
+                            result = entity;
+                        }
+                    } else if (i < 0) {
+                        result = entity;
+                    }
+                } else if (result.getDate().before(entity.getDate())) {
+                    result = entity;
+                }
+            } else {
+                result = entity;
+            }
+        }
         return result;
     }
 
