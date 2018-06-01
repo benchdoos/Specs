@@ -150,6 +150,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
         moveItemDownButton.addActionListener(e -> onMoveItemDown());
 
+        codeComboBox.addItemListener(e -> {
+            log.debug(">>> " + codeComboBox.getSelectedItem());
+        });
+
+
         detailCountTextField.getDocument().addDocumentListener(new DocumentListener() {
             final int MAX_VALUE = 1000;
             private final String toolTip = detailCountTextField.getToolTipText();
@@ -393,36 +398,31 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void updateMaterialsForEntity(DetailEntity detailEntity, ArrayList<MaterialListEntity> newMaterialsList, ArrayList<MaterialListEntity> oldMaterialsList) {
         final String newMaterialsNames = getMaterialsNames(newMaterialsList);
 
-        final int question = showConfirmDialog(this, "Сохранить изменения в базе?\n" +
-                        "деталь: " + detailEntity.getCode() + " "
-                        + CommonUtils.substring(25, detailEntity.getDetailTitleByDetailTitleId().getTitle()) + "\n"
-                        + "материалы: \n"
-                        + newMaterialsNames
-                , "Сохранение изменений", JOptionPane.YES_NO_OPTION);
-        if (question == 0) {
-            MaterialListService materialListService = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
-            session.getTransaction().begin();
-            for (MaterialListEntity entity : oldMaterialsList) {
-                System.out.println("old>> " + entity);
-                entity.setActive(false);
-                materialListService.updateMaterialList(entity);
+        MaterialListService materialListService = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+        for (MaterialListEntity entity : oldMaterialsList) {
+            System.out.println("old>> " + entity);
+            entity.setActive(false);
+            materialListService.updateMaterialList(entity);
+        }
+
+        for (MaterialListEntity entity : newMaterialsList) {
+            System.out.println("new>> " + entity);
+            MaterialListEntity materialListById = null;
+            if (entity.getId() != -1) {
+                materialListById = materialListService.getMaterialListById(entity.getId());
+            } else {
+                materialListById = new MaterialListEntity();
             }
-            session.getTransaction().commit();
-
-
-            session.getTransaction().begin();
-            for (MaterialListEntity entity : newMaterialsList) {
-                System.out.println("new>> " + entity);
-                MaterialListEntity materialListById = materialListService.getMaterialListById(entity.getId());
-                materialListById.setActive(entity.isActive());
-                materialListById.setMainMaterial(entity.isMainMaterial());
-                materialListById.setMaterialByMaterialId(entity.getMaterialByMaterialId());
-                materialListById.setActive(true);
+            materialListById.setDetailByDetailId(detailEntity);
+            materialListById.setActive(entity.isActive());
+            materialListById.setMainMaterial(entity.isMainMaterial());
+            materialListById.setMaterialByMaterialId(entity.getMaterialByMaterialId());
+            materialListById.setActive(true);
+            if (entity.getId() == -1) {
                 materialListService.updateMaterialList(materialListById);
+            } else {
+                materialListService.addMaterialList(materialListById);
             }
-            session.getTransaction().commit();
-
-
         }
 
     }
@@ -627,8 +627,44 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         return true;
     }
 
-    private void onRemoveItem() {
-        System.out.println("remove item >> " + mainTree.getLastSelectedPathComponent());
+    private void onRemoveItem() { //Testme need several tests
+        DefaultMutableTreeNode selectedPath = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+
+        DetailEntity selected = (DetailEntity) selectedPath.getUserObject();
+        TreePath parentPath = mainTree.getSelectionPath().getParentPath();
+
+        DetailEntity parent = (DetailEntity) (((DefaultMutableTreeNode) parentPath.getLastPathComponent()).getUserObject());
+        log.debug("Class: {}, {} ", selected.getClass().getName(), parent.getClass().getName());
+        log.debug("User want to remove item: {}, its parent: {}", selected, parent);
+        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+        List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild(parent, selected);
+        ArrayList<DetailListEntity> lastUsed = new ArrayList<>();
+
+        for (DetailListEntity entity : detailListByParentAndChild) {
+            if (entity.isActive()) {
+                lastUsed.add(entity);
+            }
+        }
+
+        if (!lastUsed.isEmpty()) {
+            for (DetailListEntity entity : lastUsed) {
+                if (entity.isActive()) {
+                    entity.setActive(false);
+                    service.updateDetailList(entity);
+                    log.debug("DetailList {} successfully was marked as not active", entity);
+                }
+            }
+        }
+
+        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parentPath.getLastPathComponent();
+        parentNode.remove(selectedPath);
+
+        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+        model.reload(selectedPath);
+
+        mainTree.expandPath(parentPath);
+
+//        updateTreeDetail();
     }
 
     private void onMoveItemUp() {
@@ -651,6 +687,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         if (result == 0) {
             try {
                 //todo update info about notice!!!!
+                log.debug("Transaction status: {}", session.getTransaction().getStatus());
                 session.getTransaction().commit();
                 log.info("New state of db is commited");
 
@@ -661,6 +698,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 }
             } catch (Exception e) {
                 log.warn("Could not call commit for transaction", e);
+                JOptionPane.showMessageDialog(this,
+                        "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
+                        JOptionPane.WARNING_MESSAGE);
             }
         }
     }
@@ -840,9 +880,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                 //----------------------
 
-                addItemButton.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)));
+                addItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
 //                addItemButton.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
-                removeItemButton.setEnabled(currentUser.isAdmin() || isConstructor(currentUser));
+                removeItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
 //                removeItemButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
                 moveItemUpButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
                 moveItemDownButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));

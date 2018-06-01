@@ -33,7 +33,6 @@ import org.apache.commons.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -205,10 +204,7 @@ public class CommonWindowUtils {
 
     private DetailTitleEntity createNewTitle(Component component, String result, DetailTitleEntity titleEntity, DetailTitleService service) {
         try {
-            Transaction transaction = session.getTransaction();
-            transaction.begin();
             service.addDetailTitle(titleEntity);
-            transaction.commit();
 
             ClientBackgroundService.getInstance().refreshSession();
             return titleEntity;
