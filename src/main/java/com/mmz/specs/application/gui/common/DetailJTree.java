@@ -17,8 +17,11 @@ package com.mmz.specs.application.gui.common;
 
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
+import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
+import com.mmz.specs.service.DetailListService;
+import com.mmz.specs.service.DetailListServiceImpl;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -74,7 +77,9 @@ public class DetailJTree extends JTree {
 
                                     MainWindowUtils mainWindowUtils = new MainWindowUtils(ClientBackgroundService.getInstance().getSession());
 
-                                    List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesByParentAndChild(parent, child);
+//                                    List<DetailListEntity> result = mainWindowUtils.getDetailListEntitiesByParentAndChild(parent, child);
+                                    DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(ClientBackgroundService.getInstance().getSession()));
+                                    List<DetailListEntity> result = service.getDetailListByParentAndChild(parent, child);
 
                                     if (result.size() > 0) {
                                         DetailListEntity detailListEntity = mainWindowUtils.getLatestDetailListEntity(result);

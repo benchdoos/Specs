@@ -15,12 +15,15 @@
 
 package com.mmz.specs.application.utils.client;
 
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -29,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class MainWindowUtils {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private Session session;
 
@@ -89,9 +93,9 @@ public class MainWindowUtils {
             for (DetailEntity entity : childes) {
 
                 List<DetailListEntity> detailListEntities = service.getDetailListByParent(parent);
+                NoticeEntity lastNotice = null;
                 for (DetailListEntity detailListEntity : detailListEntities) {
                     if (entity != null) {
-                        NoticeEntity lastNotice = null;
                         ArrayList<NoticeEntity> notices = new ArrayList<>();
 
                         if (detailListEntity.getDetailByChildDetailId().getId() == entity.getId()) {
@@ -100,20 +104,36 @@ public class MainWindowUtils {
                             Collections.sort(notices);
 
                             if (notices.size() > 0) {
-                                lastNotice = notices.get(0);
-                            }
-
-                            if (lastNotice != null) { //todo test this properly
-                                if (!detailListEntity.isActive()) {
-                                    entity = null;
-                                }
+                                lastNotice = notices.get(notices.size() - 1);
+                                String entityInfo = entity.getId() + " " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle();
+                                log.trace(">>> latest notice for " + entityInfo + " is: " + lastNotice);
                             }
                         }
                     }
                 }
+
+//                List<DetailListEntity> detailListEntitiesByParentAndChild = getDetailListEntitiesByParentAndChild(parent, entity);
+                List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, entity);
+                DetailListEntity lastDetailListEntity = null;
+                for (DetailListEntity e : detailListByParentAndChild) {
+                    if (e.getNoticeByNoticeId().equals(lastNotice)) {
+                        log.trace("Got equal notices, current: {}, last: {}", e, lastNotice);
+                        int id = e.getNoticeByNoticeId().getId();
+                        if (id >= lastNotice.getId()) {
+                            lastNotice = e.getNoticeByNoticeId();
+                            lastDetailListEntity = e;
+                        }
+                    }
+                }
+
+                log.trace("Finally got params: entity: {}, lastDetailListForEntity: {}", entity, lastDetailListEntity);
                 if (entity != null) {
-                    if (entity.isActive()) {
-                        result.add(getChildren(service, entity));
+                    if (lastDetailListEntity != null) {
+                        if (lastDetailListEntity.isActive()) {
+                            if (entity.isActive()) {
+                                result.add(getChildren(service, entity));
+                            }
+                        }
                     }
                 }
 
@@ -124,7 +144,7 @@ public class MainWindowUtils {
         return result;
     }
 
-    public List<DetailListEntity> getDetailListEntitiesByParentAndChild(DetailEntity parent, DetailEntity child) {
+   /* public List<DetailListEntity> getDetailListEntitiesByParentAndChild(DetailEntity parent, DetailEntity child) {
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
         List<DetailListEntity> list = service.listDetailLists();
         List<DetailListEntity> result = new ArrayList<>();
@@ -137,21 +157,27 @@ public class MainWindowUtils {
             }
         }
         return result;
-    }
+    }*/
 
 
     public DetailListEntity getLatestDetailListEntity(List<DetailListEntity> result) {
         DetailListEntity latest = null;
+        log.trace("Getting latest result from :" + result);
         for (DetailListEntity entity : result) {
             if (latest != null) {
-                if (latest.getNoticeByNoticeId().getDate().before(entity.getNoticeByNoticeId().getDate())
-                        || latest.getNoticeByNoticeId().getDate().equals(entity.getNoticeByNoticeId().getDate())) {
+                boolean before = latest.getNoticeByNoticeId().getDate().before(entity.getNoticeByNoticeId().getDate());
+                boolean equals = latest.getNoticeByNoticeId().getDate().equals(entity.getNoticeByNoticeId().getDate());
+                log.trace("Comparing latest " + latest + " and current" + entity);
+                log.trace("Latest is before current: " + before + " latest date equals current: " + equals);
+                if (before || equals) {
+                    log.trace("Changing latest from " + latest + " to " + entity);
                     latest = entity;
                 }
             } else {
                 latest = entity;
             }
         }
+        log.trace("Latest entity: " + latest + " from " + result);
         return latest;
     }
 }

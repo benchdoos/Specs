@@ -207,7 +207,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             public void focusLost(FocusEvent e) {
                 DetailEntity parent = getParent(mainTree.getSelectionPath());
                 DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
-                final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
+//                final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
+                List<DetailListEntity> detailListEntitiesByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
                 Collections.sort(detailListEntitiesByParentAndChild);
                 log.debug("Parent: {}, Child: {}.", parent, child);
                 if (detailListEntitiesByParentAndChild.size() > 0) {
@@ -310,9 +311,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         isInterchangeableCheckBox.addActionListener(e -> {
             DetailEntity parent = getParent(mainTree.getSelectionPath());
             DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
-            final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
-            Collections.sort(detailListEntitiesByParentAndChild);
-            for (DetailListEntity entity : detailListEntitiesByParentAndChild) {
+//            final List<DetailListEntity> detailListByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
+            List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
+            Collections.sort(detailListByParentAndChild);
+            for (DetailListEntity entity : detailListByParentAndChild) {
                 if (entity.isActive()) {
                     entity.setInterchangeableNode(isInterchangeableCheckBox.isSelected());
                     updateTreeDetail();
