@@ -27,7 +27,7 @@ public interface MaterialListDao {
     public Session getSession();
 
 
-    public int addMaterialList(MaterialListEntity materialListEntity);
+    public long addMaterialList(MaterialListEntity materialListEntity);
 
     public void updateMaterialList(MaterialListEntity materialListEntity);
 

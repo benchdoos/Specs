@@ -52,8 +52,8 @@ public class MaterialListDaoImpl implements MaterialListDao {
 
     @Override
     @Transactional
-    public int addMaterialList(MaterialListEntity materialListEntity) {
-        Integer id = (Integer) session.save(materialListEntity);
+    public long addMaterialList(MaterialListEntity materialListEntity) {
+        Long id = (Long) session.save(materialListEntity);
         materialListEntity = getMaterialListById(id);
         log.debug("MaterialList successfully saved: " + materialListEntity);
         return id;

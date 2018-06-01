@@ -44,7 +44,7 @@ public class MaterialListServiceImpl implements MaterialListService {
     }
 
     @Override
-    public int addMaterialList(MaterialListEntity materialListEntity) {
+    public long addMaterialList(MaterialListEntity materialListEntity) {
         return materialListDao.addMaterialList(materialListEntity);
     }
 

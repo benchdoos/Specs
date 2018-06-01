@@ -27,7 +27,7 @@ public interface MaterialListService {
     public MaterialListDao getMaterialListDao();
 
 
-    public int addMaterialList(MaterialListEntity materialListEntity);
+    public long addMaterialList(MaterialListEntity materialListEntity);
 
     public void updateMaterialList(MaterialListEntity materialListEntity);
 
