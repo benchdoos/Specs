@@ -2,11 +2,11 @@
 <Configuration>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d %p %C{1.}:%L [%t] - %msg%n"/>
+            <PatternLayout pattern="%d %p %C{1.}:%L [%t] - %msg%n" charset="UTF-8"/>
         </Console>
         <RollingFile name="Trace" fileName="${sys:com.mmz.specs:log.folder}trace.log"
                      filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
-            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
+            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}" charset="UTF-8">
                 <pattern>%d %p %C{1.}:%L [%t] - %msg%n</pattern>
             </PatternLayout>
             <Policies>
@@ -17,7 +17,7 @@
 
         <RollingFile name="Debug" fileName="${sys:com.mmz.specs:log.folder}debug.log"
                      filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
-            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
+            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}" charset="UTF-8">
                 <pattern>%d %p %C{1.}:%L [%t] - %msg%n</pattern>
             </PatternLayout>
             <Policies>
@@ -28,7 +28,7 @@
 
         <RollingFile name="Important" fileName="${sys:com.mmz.specs:log.folder}application.log"
                      filePattern="${sys:com.mmz.specs:log.folder}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
-            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}">
+            <PatternLayout header="${java:runtime} - ${java:vm} - ${java:os}" charset="UTF-8">
                 <pattern>%d %p %C{1.}:%L [%t] - %msg%n</pattern>
             </PatternLayout>
             <Policies>
@@ -42,7 +42,7 @@
         <Logger name="com.mmz.specs" level="trace" additivity="true"/>
 
         <Root level="error">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Console" level="debug"/>
             <appender-ref ref="Trace" level="trace"/>
             <appender-ref ref="Debug" level="debug"/>
             <appender-ref ref="Important" level="info"/>
