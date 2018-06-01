@@ -22,6 +22,7 @@ import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
+import com.sun.istack.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -152,7 +153,7 @@ public class MainWindowUtils {
         return result;
     }
 
-    private NoticeEntity getLatestNoticeFromNoticeList(ArrayList<NoticeEntity> notices) {
+    private NoticeEntity getLatestNoticeFromNoticeList(@NotNull ArrayList<NoticeEntity> notices) {
         NoticeEntity result = null;
         for (NoticeEntity entity : notices) {
             if (result != null) {
