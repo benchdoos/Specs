@@ -16,6 +16,7 @@
 package com.mmz.specs.model;
 
 import com.google.common.collect.ComparisonChain;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -72,9 +73,9 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof NoticeEntity) {
-            NoticeEntity that = (NoticeEntity) o;
+    public boolean equals(Object obj) {
+        /*if (obj instanceof NoticeEntity) {
+            NoticeEntity that = (NoticeEntity) obj;
             if (this.id == that.getId()) {
                 if (this.number.equals(that.getNumber())) {
                     if (this.date.equals(that.getDate())) {
@@ -87,7 +88,23 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
             return false;
         } else {
             return false;
+        }*/
+
+
+        if (obj == null) {
+            return false;
         }
+        if (!(obj instanceof NoticeEntity)) {
+            return false;
+        }
+
+        NoticeEntity that = (NoticeEntity) obj;
+        return new EqualsBuilder()
+                .append(getId(), that.getId())
+                .append(getNumber(), that.getNumber())
+                .append(getDate(), that.getDate())
+                .append(getDescription(), that.getDescription())
+                .isEquals();
 
     }
 
