@@ -237,9 +237,30 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
 
         unitCheckBox.addActionListener(e -> {
-            DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
-            child.setUnit(unitCheckBox.isSelected());
+            //todo check if DetailListEntity does not have detailEntity as a parent (not a unit, otherwise - notify user)
+            DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
+
+            DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
+//            ArrayList<DetailListEntity> detailListByParent = (ArrayList<DetailListEntity>) detailListService.getDetailListByParent(detailEntity);
+
+            detailEntity.setUnit(unitCheckBox.isSelected());
+            DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+            service.updateDetail(detailEntity);
             updateTreeDetail();
+
+           /* DetailListEntity latestEntity = null;
+            if (!detailListByParent.isEmpty()) {
+                latestEntity = detailListByParent.get(detailListByParent.size() - 1);
+            }*/
+            /*if (detailListByParent.isEmpty()) {
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Невозможно указать узел " + detailEntity.getCode() + " как деталь,\n" +
+                                "т.к. он содержит в себе детали / узлы", "Ошибка изменения", JOptionPane.WARNING_MESSAGE);
+                unitCheckBox.setSelected(true);
+            }*/
+
         });
 
         finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField));
