@@ -129,6 +129,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
         addDetailWindow.setVisible(true);
         DetailEntity entity = addDetailWindow.getDetailEntity();
+        entity.setActive(true);
         Window window = FrameUtils.findWindow(this);
         if (window instanceof ClientMainWindow) {
             ClientMainWindow mainWindow = (ClientMainWindow) window;
