@@ -16,5 +16,5 @@
 package com.mmz.specs.application.gui.panels;
 
 public interface Transactional {
-    public void rollbackTransaction();
+    void rollbackTransaction();
 }
