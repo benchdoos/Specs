@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.gui.common;
 
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.dao.DetailTitleDaoImpl;
 import com.mmz.specs.model.DetailTitleEntity;
 import com.mmz.specs.service.DetailTitleService;
@@ -39,7 +40,8 @@ public class CommonComboBoxUtils {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof DetailTitleEntity) {
                     DetailTitleEntity detailTitleEntity = (DetailTitleEntity) value;
-                    return super.getListCellRendererComponent(list, detailTitleEntity.getTitle(), index, isSelected, cellHasFocus);
+                    String title = detailTitleEntity.getTitle();
+                    return super.getListCellRendererComponent(list, CommonUtils.substring(35, title), index, isSelected, cellHasFocus);
                 } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }

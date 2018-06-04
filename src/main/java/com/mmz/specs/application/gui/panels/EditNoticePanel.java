@@ -1103,7 +1103,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof TechProcessEntity) {
                     TechProcessEntity techProcessEntity = (TechProcessEntity) value;
-                    return super.getListCellRendererComponent(list, techProcessEntity.getProcess(), index, isSelected, cellHasFocus);
+                    String process = techProcessEntity.getProcess();
+                    return super.getListCellRendererComponent(list, CommonUtils.substring(35, process), index, isSelected, cellHasFocus);
                 } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
