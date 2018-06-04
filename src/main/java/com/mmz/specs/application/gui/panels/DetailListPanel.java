@@ -151,7 +151,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        registerKeyboardAction(e -> onEditDetail(true),
+        registerKeyboardAction(e -> {
+                    onEditDetail(true);
+                },
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -239,21 +241,23 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
         if (lastSelectedPathComponent != null) {
             if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
-                DetailEntity entityFromTree = (DetailEntity) lastSelectedPathComponent.getUserObject();
+                DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
 
                 DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
                 List<DetailListEntity> list;
 
-                if (detailListService.getDetailListByParent(entityFromTree).size() > 0) {
-                    list = detailListService.getDetailListByParent(entityFromTree);
+                if (detailListService.getDetailListByParent(detailEntity).size() > 0) {
+                    list = detailListService.getDetailListByParent(detailEntity);
                 } else {
-                    list = detailListService.getDetailListByChild(entityFromTree);
+                    list = detailListService.getDetailListByChild(detailEntity);
 
                 }
                 if (list != null) {
                     if (list.size() > 0) {
                         List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
                         NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
+                        noticeInfoPanel.setDetailEntity(detailEntity);
+
                         ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
                         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
                         clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);

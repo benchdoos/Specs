@@ -40,8 +40,10 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     private JLabel numberLabel;
     private JLabel dateLabel;
     private JLabel userLabel;
+    private JLabel detailInfoLabel;
     private Session session;
     private List<NoticeEntity> noticeEntities;
+    private DetailEntity detailEntity;
 
     public NoticeInfoPanel(Session session, List<NoticeEntity> noticeEntities) {
 
@@ -52,6 +54,11 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
 
     }
 
+
+    public void setDetailEntity(DetailEntity detailEntity) {
+        this.detailEntity = detailEntity;
+    }
+
     private void initGui() {
         setLayout(new GridLayout());
         add(contentPane);
@@ -60,6 +67,12 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         initDetailEffectedList();
 
         initListeners();
+    }
+
+    private void initDetailInfoLabel() {
+        if (detailEntity != null) {
+            detailInfoLabel.setText("Извещения, которые затрагивают " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+        } else detailInfoLabel.setVisible(false);
     }
 
     private void updateNoticeList() {
@@ -150,6 +163,12 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     }
 
     @Override
+    public void setVisible(boolean aFlag) {
+        initDetailInfoLabel();
+        super.setVisible(aFlag);
+    }
+
+    @Override
     public AccessPolicyManager getPolicyManager() {
         return new AccessPolicyManager(false, false);
     }
@@ -175,17 +194,17 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
      */
     private void $$$setupUI$$$() {
         contentPane = new JPanel();
-        contentPane.setLayout(new GridLayoutManager(1, 1, new Insets(5, 5, 5, 5), -1, -1));
+        contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
         final JSplitPane splitPane1 = new JSplitPane();
-        splitPane1.setDividerLocation(128);
+        splitPane1.setDividerLocation(158);
         splitPane1.setLastDividerLocation(128);
-        contentPane.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
+        contentPane.add(splitPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane1.setLeftComponent(panel1);
         panel1.setBorder(BorderFactory.createTitledBorder("Список извещений:"));
         final JScrollPane scrollPane1 = new JScrollPane();
-        panel1.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(64, -1), null, null, 0, false));
+        panel1.add(scrollPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(64, -1), null, null, 0, false));
         noticeList = new JList();
         scrollPane1.setViewportView(noticeList);
         final JPanel panel2 = new JPanel();
@@ -242,6 +261,9 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         panel5.add(scrollPane3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         detailEffectedList = new JList();
         scrollPane3.setViewportView(detailEffectedList);
+        detailInfoLabel = new JLabel();
+        detailInfoLabel.setText("Извещения, которые затрагивают");
+        contentPane.add(detailInfoLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
