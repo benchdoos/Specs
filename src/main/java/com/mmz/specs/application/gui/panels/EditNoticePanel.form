@@ -443,7 +443,7 @@
                       <text value="Количество:"/>
                     </properties>
                   </component>
-                  <component id="694df" class="javax.swing.JTextField" binding="detailCountTextField">
+                  <component id="694df" class="javax.swing.JTextField" binding="detailQuantityTextField">
                     <constraints>
                       <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
                         <minimum-size width="40" height="-1"/>
