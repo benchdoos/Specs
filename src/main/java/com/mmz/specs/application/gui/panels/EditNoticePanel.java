@@ -37,14 +37,13 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
@@ -167,47 +166,27 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         showWarning();
                         return;
                     }
-
                     if (number > MAX_VALUE) {
                         showWarning();
-
                         return;
                     }
 
                     detailCountTextField.setBorder(new JTextField().getBorder());
                     detailCountTextField.setToolTipText(toolTip);
+                    updateEntity();
                 } catch (Throwable throwable) {
                     showWarning();
                 }
             }
 
             private void showWarning() {
-                detailCountTextField.setBorder(BorderFactory.createLineBorder(Color.RED));
+                detailCountTextField.setBorder(new LineBorder(Color.RED));
                 detailCountTextField.setToolTipText("Количетво должно состоять только из положительных цельных чисел, не должно превышать 1000.");
             }
 
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                verifyInput();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                verifyInput();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                verifyInput();
-            }
-        });
-
-        detailCountTextField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
+            private void updateEntity() {
                 DetailEntity parent = getParent(mainTree.getSelectionPath());
                 DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
-//                final List<DetailListEntity> detailListEntitiesByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
                 List<DetailListEntity> detailListEntitiesByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
                 Collections.sort(detailListEntitiesByParentAndChild);
                 log.debug("Parent: {}, Child: {}.", parent, child);
@@ -233,6 +212,21 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 } else {
                     log.debug("What to do here??? parent: {}, child: {}", parent, child);
                 }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                verifyInput();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                verifyInput();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                verifyInput();
             }
         });
 
@@ -264,10 +258,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         });
 
-        finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField));
-        finishedWeightTextField.addFocusListener(new FocusAdapter() {
+        finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField) {
             @Override
-            public void focusLost(FocusEvent e) {
+            public void updateEntity() {
                 DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
                 try {
                     double weight = Double.parseDouble(finishedWeightTextField.getText());
@@ -278,10 +271,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
         });
 
-        workpieceWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(workpieceWeightTextField));
-        workpieceWeightTextField.addFocusListener(new FocusAdapter() {
+        workpieceWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(workpieceWeightTextField) {
             @Override
-            public void focusLost(FocusEvent e) {
+            public void updateEntity() {
                 DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
                 try {
                     double weight = Double.parseDouble(workpieceWeightTextField.getText());
@@ -311,7 +303,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         isInterchangeableCheckBox.addActionListener(e -> {
             DetailEntity parent = getParent(mainTree.getSelectionPath());
             DetailEntity child = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
-//            final List<DetailListEntity> detailListByParentAndChild = new MainWindowUtils(session).getDetailListEntitiesByParentAndChild(parent, child);
             List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
             Collections.sort(detailListByParentAndChild);
             for (DetailListEntity entity : detailListByParentAndChild) {
@@ -480,7 +471,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
 
     private void initKeyBindings() {
-        /*contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);*/
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         //fixme this doesn't work for some reason
         contentPane.registerKeyboardAction(e -> onAddNewItemButton(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -701,6 +692,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
 
+    @javax.transaction.Transactional
     private void onOK() {
         int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите сохранить изменения в базе данных?\n" +
                         "Введенные вами данные будут сохранены в базе и появятся у всех пользователей.\n" +
@@ -1378,53 +1370,60 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         return contentPane;
     }
 
-    private class WeightDocumentListener implements DocumentListener {
+    private abstract class WeightDocumentListener implements DocumentListener {
+        private final String defaultTooltipText;
         private JTextField textField;
 
         WeightDocumentListener(JTextField textField) {
             this.textField = textField;
+            this.defaultTooltipText = textField.getToolTipText();
         }
 
-        private void verifyInput(JTextField textField, String toolTip) {
+        private void verifyInput(JTextField textField) {
             try {
                 String text = textField.getText();
+                log.info("Hello, " + text);
                 text = text.replaceAll(",", ".");
                 if (text.contains("d")) {
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("This textfield can not have d (double thing): " + text);
                 }
 
                 double value = Double.parseDouble(text);
 
                 if (value < 0) {
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Value is < 0, value is: " + value);
                 }
-                textField.setBackground(new JTextField().getBackground());
-                textField.setToolTipText(toolTip);
+                textField.setBorder(new JTextField().getBorder());
+                textField.setToolTipText(defaultTooltipText);
+                updateEntity();
             } catch (Throwable throwable) {
+                log.warn("Value is incorrect", throwable);
                 DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
                 if (!detailEntity.isUnit()) {
-                    textField.setBackground(Color.RED);
+                    textField.setBorder(new LineBorder(Color.RED));
                     textField.setToolTipText("Масса должна состоять только из положительных чисел.");
                 } else {
-                    textField.setBackground(new JTextField().getBackground());
-                    textField.setToolTipText(toolTip);
+                    textField.setBorder(new LineBorder(Color.RED));
+                    textField.setToolTipText(defaultTooltipText);
                 }
             }
         }
 
+        public abstract void updateEntity();
+
         @Override
         public void insertUpdate(DocumentEvent e) {
-            verifyInput(textField, textField.getToolTipText());
+            verifyInput(textField);
         }
 
         @Override
         public void removeUpdate(DocumentEvent e) {
-            verifyInput(textField, textField.getToolTipText());
+            verifyInput(textField);
         }
 
         @Override
         public void changedUpdate(DocumentEvent e) {
-            verifyInput(textField, textField.getToolTipText());
+            verifyInput(textField);
         }
     }
 
