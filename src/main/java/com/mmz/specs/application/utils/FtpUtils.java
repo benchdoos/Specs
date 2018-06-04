@@ -121,17 +121,7 @@ public class FtpUtils {
         } else return null;
     }
 
-
-    public boolean uploadImage(int id, String path) throws IOException {
-        /*log.debug("Uploading image from path: " + path + " by id: " + id);
-        final FileInputStream local = new FileInputStream(path);
-        boolean result = ftpClient.storeFile(postfix + id + DEFAULT_IMAGE_EXTENSION, local);
-        local.close();
-        return result;*/
-        return uploadImage(id, new File(path));
-    }
-
-    public boolean uploadImage(int id, File localFile) throws IOException {
+    public void uploadImage(int id, File localFile) throws IOException {
         if (!localFile.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
             throw new IOException("Uploading image should have " + DEFAULT_IMAGE_EXTENSION + " extension");
         }
@@ -140,7 +130,7 @@ public class FtpUtils {
 
         log.debug("Uploading image for id:{} exists:{} with path:{} ", id, localFile.exists(), localFile);
         byte[] bytesIn = new byte[4096];
-        int read = 0;
+        int read;
 
         try (InputStream inputStream = new FileInputStream(localFile);
              OutputStream outputStream = ftpClient.storeFileStream(remoteFile)) {
@@ -148,7 +138,7 @@ public class FtpUtils {
                 outputStream.write(bytesIn, 0, read);
             }
         }
-        return ftpClient.completePendingCommand();
+        ftpClient.completePendingCommand();
     }
 
     public void deleteImage(int id) throws IOException {
