@@ -128,11 +128,17 @@ public class FtpUtils {
         boolean result = ftpClient.storeFile(postfix + id + DEFAULT_IMAGE_EXTENSION, local);
         local.close();
         return result;*/
+        return uploadImage(id, new File(path));
+    }
 
-        File localFile = new File(path);
+    public boolean uploadImage(int id, File localFile) throws IOException {
+        if (!localFile.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
+            throw new IOException("Uploading image should have " + DEFAULT_IMAGE_EXTENSION + " extension");
+        }
+
         String remoteFile = postfix + id + DEFAULT_IMAGE_EXTENSION;
 
-        log.debug("Uploading image for id:{} exists:{} with path:{} ", id, localFile.exists(), path);
+        log.debug("Uploading image for id:{} exists:{} with path:{} ", id, localFile.exists(), localFile);
         byte[] bytesIn = new byte[4096];
         int read = 0;
 

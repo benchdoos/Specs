@@ -25,6 +25,7 @@ import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.SelectionDetailWindow;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
@@ -47,6 +48,8 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -746,6 +749,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         log.debug("User wanted to commit changes, user's choice is: " + result);
         if (result == 0) {
             try {
+                uploadImages();
+
                 //todo update info about notice!!!!
                 log.debug("Transaction status: {}", session.getTransaction().getStatus());
                 session.getTransaction().commit();
@@ -761,6 +766,32 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 JOptionPane.showMessageDialog(this,
                         "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
                         JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void uploadImages() {
+        DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+        List<DetailEntity> detailEntities = service.listDetails();
+        for (DetailEntity entity : detailEntities) {
+            if (entity.getImagePath() != null) {
+                if (!entity.getImagePath().isEmpty()) {
+                    File file = new File(entity.getImagePath());
+                    if (file.exists()) {
+                        try {
+                            final FtpUtils ftpUtils = FtpUtils.getInstance();
+                            ftpUtils.uploadImage(entity.getId(), file);
+                        } catch (IOException e) {
+                            log.warn("Could not upload image for entity: {}", entity, e);
+                        }
+                    } else {
+                        log.warn("Could not find file for entity: {}, file: {}", entity, file);
+                    }
+                    entity.setImagePath(null);
+                } else {
+                    entity.setImagePath(null);
+                    service.updateDetail(entity);
+                }
             }
         }
     }
