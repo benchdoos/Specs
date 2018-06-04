@@ -34,6 +34,8 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -91,6 +93,27 @@ public class AddDetailWindow extends JDialog {
     private void initListeners() {
         createTitleButton.addActionListener(e -> onCreateTitle());
         ((SmartJTextField) codeTextField).setChildComboBox(titleComboBox);
+
+        codeTextField.getDocument().addDocumentListener(new DocumentListener() {
+            private void updateStatus() {
+                ((SmartJTextField) codeTextField).setStatus(SmartJTextField.STATUS.NORMAL);
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateStatus();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateStatus();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateStatus();
+            }
+        });
 
         buttonOK.addActionListener(e -> onOK());
 
@@ -150,6 +173,7 @@ public class AddDetailWindow extends JDialog {
             } else {
                 log.debug("User tried to add detail with empty index.");
                 FrameUtils.shakeFrame(this);
+                ((SmartJTextField) codeTextField).setStatus(SmartJTextField.STATUS.WARNING);
             }
         }
     }

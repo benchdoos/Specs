@@ -16,7 +16,9 @@
 package com.mmz.specs.application.gui.common;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.text.Document;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -62,4 +64,13 @@ public class SmartJTextField extends JTextField {
         this.comboBox = comboBox;
     }
 
+    public void setStatus(STATUS status) {
+        if (status == STATUS.WARNING) {
+            setBorder(new LineBorder(Color.RED));
+        } else if (status == STATUS.NORMAL) {
+            setBorder(new JTextField().getBorder());
+        }
+    }
+
+    public enum STATUS {WARNING, NORMAL}
 }
