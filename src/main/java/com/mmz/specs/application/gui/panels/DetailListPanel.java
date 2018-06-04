@@ -255,13 +255,13 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private List<NoticeEntity> getUniqueNoticeList(List<DetailListEntity> list) {
         List<NoticeEntity> result = new ArrayList<>();
-        List<String> noticeList = new ArrayList<>(); //fixme this shit
+        List<NoticeEntity> noticeList = new ArrayList<>();
         for (DetailListEntity entity : list) {
             NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
 
-            if (noticeEntity != null) { //testme
-                if (!noticeList.contains(noticeEntity.getNumber())) {
-                    noticeList.add(noticeEntity.getNumber());
+            if (noticeEntity != null) {
+                if (!noticeList.contains(noticeEntity)) {
+                    noticeList.add(noticeEntity);
                     result.add(noticeEntity);
                 }
             }
