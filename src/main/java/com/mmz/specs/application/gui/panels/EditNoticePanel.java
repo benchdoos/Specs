@@ -389,9 +389,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void updateTreeDetail() {
+        TreePath selectionPath = mainTree.getSelectionPath();
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
         model.reload(node);
+        mainTree.expandPath(selectionPath);
     }
 
 

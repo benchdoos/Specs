@@ -43,6 +43,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -246,11 +247,14 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onRefreshSession() {
-        //todo add expansion for selected path
         if (ClientBackgroundService.getInstance().isConnected()) {
+            TreePath selectionPath = mainTree.getAnchorSelectionPath();
             ClientBackgroundService.getInstance().refreshSession();
-            fillMainTreeFully();
-            searchTextField.setText("");
+            DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getModel().getRoot();
+            model.reload(node);
+
+            mainTree.expandPath(selectionPath);
         }
     }
 
