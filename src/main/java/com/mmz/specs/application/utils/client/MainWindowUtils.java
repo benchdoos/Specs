@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -198,13 +199,24 @@ public class MainWindowUtils {
         log.trace("Getting latest result from :" + result);
         for (DetailListEntity entity : result) {
             if (latest != null) {
-                boolean before = latest.getNoticeByNoticeId().getDate().before(entity.getNoticeByNoticeId().getDate());
-                boolean equals = latest.getNoticeByNoticeId().getDate().equals(entity.getNoticeByNoticeId().getDate());
-                log.trace("Comparing latest " + latest + " and current" + entity);
-                log.trace("Latest is before current: " + before + " latest date equals current: " + equals);
-                if (before || equals) {
-                    log.trace("Changing latest from " + latest + " to " + entity);
-                    latest = entity;
+                if (latest.getNoticeByNoticeId() != null) {
+                    Date date = latest.getNoticeByNoticeId().getDate();
+                    if (date != null) {
+                        NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
+                        if (noticeEntity != null) {
+                            Date noticeDate = noticeEntity.getDate();
+                            if (noticeDate != null) {
+                                boolean before = date.before(noticeDate);
+                                boolean equals = date.equals(noticeDate);
+                                log.trace("Comparing latest " + latest + " and current" + entity);
+                                log.trace("Latest is before current: " + before + " latest date equals current: " + equals);
+                                if (before || equals) {
+                                    log.trace("Changing latest from " + latest + " to " + entity);
+                                    latest = entity;
+                                }
+                            }
+                        }
+                    }
                 }
             } else {
                 latest = entity;

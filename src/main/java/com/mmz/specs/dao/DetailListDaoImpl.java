@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +50,6 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public int addDetailList(DetailListEntity detailListEntity) {
         Integer id = (Integer) this.session.save(detailListEntity);
         detailListEntity = getDetailListById(id);
@@ -60,14 +58,12 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public void updateDetailList(DetailListEntity detailListEntity) {
         this.session.merge(detailListEntity);
         log.debug("DetailList successfully updated: " + detailListEntity);
     }
 
     @Override
-    @Transactional
     public void removeDetailList(int id) {
         DetailListEntity detailListEntity = this.session.load(DetailListEntity.class, id);
         if (detailListEntity != null) {
@@ -77,7 +73,6 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public DetailListEntity getDetailListById(int id) {
         DetailListEntity detailListEntity = this.session.load(DetailListEntity.class, id);
         log.debug("DetailList found by id:" + id + " " + detailListEntity);
@@ -85,7 +80,6 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public List<DetailListEntity> getDetailListByParent(DetailEntity parent) {
         Query query = this.session.createQuery("from DetailListEntity where detailByParentDetailId= :parent");
         query.setParameter("parent", parent);
@@ -95,7 +89,6 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public List<DetailListEntity> getDetailListByChild(DetailEntity child) {
         Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
         query.setParameter("child", child);
@@ -105,7 +98,6 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public List<DetailListEntity> getDetailListByParent(String detailEntityIndex) {
         DetailDao detailDao = new DetailDaoImpl(session);
         DetailEntity parent = detailDao.getDetailByIndex(detailEntityIndex);
@@ -119,7 +111,6 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
     public List<DetailListEntity> getDetailListByChild(String detailEntityIndex) {
 
         DetailDao detailDao = new DetailDaoImpl(this.session);
@@ -249,7 +240,7 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    @Transactional
+
     public List<DetailListEntity> listDetailLists() {
         List list = this.session.createQuery("from DetailListEntity").list();
         List<DetailListEntity> result = new ArrayList<>(list.size());

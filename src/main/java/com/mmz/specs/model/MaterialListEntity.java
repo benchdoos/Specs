@@ -24,7 +24,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "MATERIAL_LIST", schema = "", catalog = "")
 public class MaterialListEntity implements Comparable<MaterialListEntity> {
-    private long id = -1;
+    private long id;
     private boolean isActive;
     private DetailEntity detailByDetailId;
     private MaterialEntity materialByMaterialId;

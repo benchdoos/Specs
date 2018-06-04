@@ -23,7 +23,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "DETAIL")
 public class DetailEntity implements Comparable<DetailEntity> {
-    private int id = -1;
+    private int id;
     private String code;
     private boolean unit;
     private Double finishedWeight;

@@ -191,9 +191,6 @@
                         <properties>
                           <rootVisible value="false"/>
                           <scrollsOnExpand value="true"/>
-                          <showsRootHandles value="true"/>
-                          <verifyInputWhenFocusTarget value="false"/>
-                          <visibleRowCount value="2"/>
                         </properties>
                       </component>
                     </children>
