@@ -125,6 +125,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         initMainTree();
 
+        fillMainTree();
+
+
         initDetailTitleComboBox();
 
         fillDetailTitleComboBox();
@@ -153,9 +156,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
         moveItemDownButton.addActionListener(e -> onMoveItemDown());
 
-        codeComboBox.addItemListener(e -> {
-            log.debug(">>> " + codeComboBox.getSelectedItem());
-        });
+        codeComboBox.addItemListener(e -> log.debug(">>> " + codeComboBox.getSelectedItem()));
 
 
         detailQuantityTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -426,7 +427,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         for (MaterialListEntity entity : newMaterialsList) {
             System.out.println("new>> " + entity);
-            MaterialListEntity materialListById = null;
+            MaterialListEntity materialListById;
             /*if (entity.getId() != -1) {
                 materialListById = materialListService.getMaterialListById(entity.getId());
             } else {
@@ -1029,9 +1030,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
 
     private void initMainTree() {
-        if (detailEntity != null) {
-            fillMainTree();
-        }
         mainTree.addTreeSelectionListener(e -> {
             Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
             if (lastSelectedPathComponent instanceof DefaultMutableTreeNode) {
@@ -1052,7 +1050,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         }
                     }
                 } catch (Exception ignore) {
-                    //to prevent exceptions if new detail added
                     fillEmptyDetailInfoPanel();
                 }
 
@@ -1069,14 +1066,29 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void fillMainTree() {
         if (session != null) {
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            if (!detailEntity.isUnit()) {
-                DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-                DefaultMutableTreeNode detail = new DefaultMutableTreeNode(detailEntity, false);
-                root.add(detail);
-                mainTree.setModel(new DefaultTreeModel(root));
-            } else {
-                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByDetailList(service.getDetailListByParent(detailEntity.getCode()))));
+            if (detailEntity != null) {
+                DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
+                if (!detailEntity.isUnit()) {
+                    DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                    DefaultMutableTreeNode detail = new DefaultMutableTreeNode(detailEntity, false);
+                    root.add(detail);
+                    mainTree.setModel(new DefaultTreeModel(root));
+                } else {
+                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getDetailListTreeByDetailList(detailListService.getDetailListByParent(detailEntity.getCode()));
+                    if (detailListTreeByDetailList.children().hasMoreElements()) {
+                        mainTree.setModel(new DefaultTreeModel(detailListTreeByDetailList));
+                    } else {
+                        if (detailEntity != null) {
+                            DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                            DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                            DefaultMutableTreeNode newChild = new DefaultMutableTreeNode();
+                            newChild.setUserObject(detailEntity);
+                            root.add(newChild);
+                            mainTree.setModel(new DefaultTreeModel(root));
+                        }
+                    }
+                }
             }
         }
     }
@@ -1470,13 +1482,16 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 if (!(throwable instanceof NumberFormatException && throwable.getMessage().equals("empty String"))) {
                     log.warn("Value is incorrect", throwable);
                 }
-                DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent()).getUserObject();
-                if (!detailEntity.isUnit()) {
-                    textField.setBorder(new LineBorder(Color.RED));
-                    textField.setToolTipText("Масса должна состоять только из положительных чисел.");
-                } else {
-                    textField.setBorder(new LineBorder(Color.RED));
-                    textField.setToolTipText(defaultTooltipText);
+                Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
+                if (lastSelectedPathComponent != null) {
+                    DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) lastSelectedPathComponent).getUserObject();
+                    if (!detailEntity.isUnit()) {
+                        textField.setBorder(new LineBorder(Color.RED));
+                        textField.setToolTipText("Масса должна состоять только из положительных чисел.");
+                    } else {
+                        textField.setBorder(new LineBorder(Color.RED));
+                        textField.setToolTipText(defaultTooltipText);
+                    }
                 }
             }
         }

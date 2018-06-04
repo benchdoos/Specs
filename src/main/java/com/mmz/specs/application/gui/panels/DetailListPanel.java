@@ -20,6 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.client.CreateDetailWindow;
 import com.mmz.specs.application.gui.client.MaterialListWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.utils.CommonUtils;
@@ -110,6 +111,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         initSearchTextFieldKeysBindings();
 
 
+        addButton.addActionListener(e -> onAddNewItem());
+
         editButton.addActionListener(e -> onEditDetail(true));
         editButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -121,6 +124,25 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         });
     }
 
+    private void onAddNewItem() {
+        CreateDetailWindow addDetailWindow = new CreateDetailWindow();
+        addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
+        addDetailWindow.setVisible(true);
+        DetailEntity entity = addDetailWindow.getDetailEntity();
+        Window window = FrameUtils.findWindow(this);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow mainWindow = (ClientMainWindow) window;
+            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+            try {
+                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity), true);
+            } catch (IllegalStateException e) {
+                log.warn("Tab with transaction is already active");
+                JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                        "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
     private void initSearchTextFieldKeysBindings() {
         registerKeyboardAction(e -> searchTextField.requestFocus(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK, false),
@@ -129,9 +151,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        registerKeyboardAction(e -> {
-                    onEditDetail(true);
-                },
+        registerKeyboardAction(e -> onEditDetail(true),
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
