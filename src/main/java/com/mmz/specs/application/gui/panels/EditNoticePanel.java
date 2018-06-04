@@ -56,6 +56,7 @@ import static javax.swing.JOptionPane.*;
 
 public class EditNoticePanel extends JPanel implements AccessPolicy, Transactional {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final int MAXIMUM_STRING_LENGTH = 35;
 
     private JPanel contentPane;
     private JButton buttonOK;
@@ -790,13 +791,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             noticeComboBox.removeAllItems();
             fillNoticeComboBox();
             noticeComboBox.setSelectedItem(noticeEntity);
-            /*ClientBackgroundService.getInstance().refreshSession();
-            Object selectedObject = noticeComboBox.getSelectedItem();
-            noticeComboBox.removeAllItems();
-            fillNoticeComboBox();
-            if (selectedObject != null) {
-                noticeComboBox.setSelectedItem(selectedObject);
-            }*/
         }
     }
 
@@ -1012,7 +1006,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof DetailEntity) {
                     DetailEntity entity = (DetailEntity) value;
-                    return super.getListCellRendererComponent(list, entity.getCode(), index, isSelected, cellHasFocus);
+                    String code = entity.getCode();
+                    return super.getListCellRendererComponent(list, CommonUtils.substring(MAXIMUM_STRING_LENGTH, code), index, isSelected, cellHasFocus);
                 } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
@@ -1143,7 +1138,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 if (value instanceof TechProcessEntity) {
                     TechProcessEntity techProcessEntity = (TechProcessEntity) value;
                     String process = techProcessEntity.getProcess();
-                    return super.getListCellRendererComponent(list, CommonUtils.substring(35, process), index, isSelected, cellHasFocus);
+                    return super.getListCellRendererComponent(list, CommonUtils.substring(MAXIMUM_STRING_LENGTH, process), index, isSelected, cellHasFocus);
                 } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
