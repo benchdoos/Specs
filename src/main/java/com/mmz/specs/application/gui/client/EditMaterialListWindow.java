@@ -69,6 +69,8 @@ public class EditMaterialListWindow extends JDialog {
 
         initKeyBindings();
 
+        fillEmptyMaterialInfo();
+
         initMaterialList();
 
         fillMaterialList();
@@ -275,20 +277,23 @@ public class EditMaterialListWindow extends JDialog {
                 mainCheckBox.setEnabled(true);
 
             } else {
-                longMarkLabel.setText("Нет данных");
-                longProfileLabel.setText("Нет данных");
-                shortMarkLabel.setText("Нет данных");
-                shortProfileLabel.setText("Нет данных");
+                fillEmptyMaterialInfo();
+            }
+        });
+
+    }
+
+    private void fillEmptyMaterialInfo() {
+        longMarkLabel.setText("Нет данных");
+        longProfileLabel.setText("Нет данных");
+        shortMarkLabel.setText("Нет данных");
+        shortProfileLabel.setText("Нет данных");
 
                /* activeCheckBox.setSelected(false);
                 activeCheckBox.setEnabled(false);*/
 
-                mainCheckBox.setSelected(false);
-                mainCheckBox.setEnabled(false);
-
-            }
-        });
-
+        mainCheckBox.setSelected(false);
+        mainCheckBox.setEnabled(false);
     }
 
     public List<MaterialListEntity> getEditedMaterials() {

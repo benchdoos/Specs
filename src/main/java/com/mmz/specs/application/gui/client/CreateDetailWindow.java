@@ -41,7 +41,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class AddDetailWindow extends JDialog {
+public class CreateDetailWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private JPanel contentPane;
@@ -55,7 +55,7 @@ public class AddDetailWindow extends JDialog {
     private DetailEntity detailEntity;
     private Session session;
 
-    public AddDetailWindow() {
+    public CreateDetailWindow() {
         $$$setupUI$$$();
         session = ClientBackgroundService.getInstance().getSession();
 

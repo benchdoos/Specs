@@ -513,7 +513,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void onAddNewItem() {
-        AddDetailWindow addDetailWindow = new AddDetailWindow();
+        CreateDetailWindow addDetailWindow = new CreateDetailWindow();
         addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
         addDetailWindow.setVisible(true);
         DetailEntity entity = addDetailWindow.getDetailEntity();
