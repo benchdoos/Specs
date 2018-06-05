@@ -20,6 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.LoginWindow;
+import com.mmz.specs.application.utils.DateLabelFormatter;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.NoticeDaoImpl;
 import com.mmz.specs.dao.UsersDaoImpl;
@@ -43,8 +44,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Properties;
@@ -471,25 +470,4 @@ public class CreateNoticeWindow extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
-}
-
-class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
-    private String datePattern = "dd.MM.yyyy";
-    private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
-
-    @Override
-    public Object stringToValue(String text) throws ParseException {
-        return dateFormatter.parseObject(text);
-    }
-
-    @Override
-    public String valueToString(Object value) {
-        if (value != null) {
-            Calendar cal = (Calendar) value;
-            return dateFormatter.format(cal.getTime());
-        }
-
-        return "";
-    }
-
 }
