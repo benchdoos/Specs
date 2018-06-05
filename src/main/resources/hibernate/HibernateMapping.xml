@@ -77,6 +77,10 @@
         <many-to-one name="usersByProvidedByUserId" class="com.mmz.specs.model.UsersEntity">
             <column name="PROVIDED_BY_USER_ID" not-null="true"/>
         </many-to-one>
+        <many-to-one name="authorByUserId" class="com.mmz.specs.model.UsersEntity">
+            <column name="AUTHOR_USER_ID" not-null="false"/>
+        </many-to-one>
+        <property name="creationDate" column="`CREATION_DATE`"/>
     </class>
     <class name="com.mmz.specs.model.TechProcessEntity" table="TECH_PROCESS" schema="">
         <id name="id" column="ID">

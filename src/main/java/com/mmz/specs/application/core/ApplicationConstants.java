@@ -16,6 +16,7 @@
 package com.mmz.specs.application.core;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 public class ApplicationConstants {
     public static final String INTERNAL_FULL_NAME = "com.mmz.specs";
@@ -44,5 +45,8 @@ public class ApplicationConstants {
     public static final String specsNoticeFileExtension = "nspecs"; //извещение
     public static final String specsDetailFileExtension = "dspecs"; //детали
     public static final String specsUnitFileExtension = "uspecs"; //Узлы
+
+    public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
 
 }

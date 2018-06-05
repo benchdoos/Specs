@@ -22,11 +22,18 @@ import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.NoticeDaoImpl;
+import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.NoticeService;
 import com.mmz.specs.service.NoticeServiceImpl;
+import com.mmz.specs.service.UsersService;
+import com.mmz.specs.service.UsersServiceImpl;
 import org.hibernate.Session;
+import org.jdatepicker.DateModel;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -36,11 +43,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Properties;
+
+import static com.mmz.specs.application.core.ApplicationConstants.DEFAULT_DATE_FORMAT;
 
 public class CreateNoticeWindow extends JDialog {
-    private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     private final Session session;
     private JPanel contentPane;
     private JButton buttonOK;
@@ -48,13 +59,83 @@ public class CreateNoticeWindow extends JDialog {
     private JTextArea noticeDescriptionTextArea;
     private JTextField numberTextField;
     private JLabel noticeDateLabel;
+    private JComboBox<UsersEntity> authorComboBox;
+    private JDatePickerImpl createdDatePicker;
     private NoticeEntity noticeEntity;
 
     public CreateNoticeWindow(NoticeEntity noticeEntity) {
+        $$$setupUI$$$();
         this.noticeEntity = noticeEntity;
         this.session = ClientBackgroundService.getInstance().getSession();
 
         initGui();
+
+        fillFieldsIfNoticeEntityNotEmpty(noticeEntity);
+
+        initAuthorComboBox();
+
+        fillAuthorComboBox();
+
+        initCreatedDatePicker();
+    }
+
+    private void initAuthorComboBox() {
+        authorComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof UsersEntity) {
+                    UsersEntity usersEntity = (UsersEntity) value;
+                    String username = usersEntity.getName() + " " + usersEntity.getSurname();
+                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+    }
+
+    private void initCreatedDatePicker() {
+        if (noticeEntity == null) {
+            updateDatePickerModel(new Date(Calendar.getInstance().getTimeInMillis()));
+            createdDatePicker.setEnabled(true);
+        } else {
+            createdDatePicker.setEnabled(false);
+            Date creationDate = noticeEntity.getCreationDate();
+            if (creationDate != null) {
+                updateDatePickerModel(creationDate);
+            }
+        }
+    }
+
+    private void updateDatePickerModel(Date date) {
+        Calendar instance = Calendar.getInstance();
+        instance.setTime(date);
+
+        DateModel<?> model = createdDatePicker.getModel();
+        model.setYear(instance.get(Calendar.YEAR));
+        model.setMonth(instance.get(Calendar.MONTH));
+        model.setDay(instance.get(Calendar.DAY_OF_MONTH));
+        model.setSelected(true);
+    }
+
+    private void fillAuthorComboBox() {
+        UsersService service = new UsersServiceImpl(new UsersDaoImpl(session));
+        ArrayList<UsersEntity> usersEntities = (ArrayList<UsersEntity>) service.listUsers();
+        DefaultComboBoxModel<UsersEntity> model = new DefaultComboBoxModel<>();
+        for (UsersEntity entity : usersEntities) {
+            if (entity.isActive()) {
+                model.addElement(entity);
+            }
+        }
+        authorComboBox.setModel(model);
+
+        if (noticeEntity == null) {
+            authorComboBox.setEnabled(true);
+            authorComboBox.setSelectedItem(null);
+        } else {
+            authorComboBox.setEnabled(false);
+            authorComboBox.setSelectedItem(noticeEntity.getAuthorByUserId());
+        }
     }
 
     private void initGui() {
@@ -71,8 +152,6 @@ public class CreateNoticeWindow extends JDialog {
         initListeners();
 
         initKeyBindings();
-
-        fillFieldsIfNoticeEntityNotEmpty(noticeEntity);
 
         pack();
         setMinimumSize(getSize());
@@ -106,7 +185,11 @@ public class CreateNoticeWindow extends JDialog {
     }
 
     private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
+        buttonOK.addActionListener(e -> {
+            if (verifyNotice()) {
+                onOK();
+            }
+        });
 
         buttonCancel.addActionListener(e -> onCancel());
 
@@ -178,6 +261,30 @@ public class CreateNoticeWindow extends JDialog {
         });
     }
 
+    private boolean verifyNotice() {
+        if (numberTextField.getText().isEmpty()) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Номер извещения не указан",
+                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        if (authorComboBox.getSelectedItem() == null && noticeEntity == null) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Не указан автор извещения",
+                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        if (getDateFromPicker() == null && noticeEntity == null) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Не указана дата выпуска извещения",
+                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
     private void onOK() {
         LoginWindow loginWindow = new LoginWindow(session);
         loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
@@ -198,6 +305,8 @@ public class CreateNoticeWindow extends JDialog {
                     entity.setDate(new Date(Calendar.getInstance().getTime().getTime()));
                     entity.setDescription(noticeDescriptionTextArea.getText());
                     entity.setUsersByProvidedByUserId(user);
+                    entity.setAuthorByUserId((UsersEntity) authorComboBox.getSelectedItem());
+                    entity.setCreationDate(getDateFromPicker());
 
                     if (noticeEntity != null) {
                         service.updateNotice(entity);
@@ -221,28 +330,52 @@ public class CreateNoticeWindow extends JDialog {
 
                     }
                 } else {
+                    FrameUtils.shakeFrame(this);
                     JOptionPane.showMessageDialog(this, "Пользователь должен быть администратором или редактором (конструктором).",
                             "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
                 }
             } else {
+                FrameUtils.shakeFrame(this);
                 JOptionPane.showMessageDialog(this, "Пользователь должен быть действующим!",
                         "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
             }
         } else {
+            FrameUtils.shakeFrame(this);
             JOptionPane.showMessageDialog(this, "Чтобы продолжить, необходимо выполнить вход.",
                     "Ошибка входа", JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    private Date getDateFromPicker() {
+        java.util.Date selectedDate = (java.util.Date) createdDatePicker.getModel().getValue();
+        System.out.println(">>>> " + selectedDate);
+        if (selectedDate != null) {
+            return new Date(selectedDate.getTime());
+        } else return null;
+    }
+
+    private JDatePickerImpl getDatePicker() {
+        UtilDateModel model = new UtilDateModel();
+        Properties properties = new Properties();
+        properties.put("text.today", "Сегодня");
+        properties.put("text.month", "Месяц");
+        properties.put("text.year", "Год");
+        JDatePanelImpl jDatePanel = new JDatePanelImpl(model, properties);
+        return new JDatePickerImpl(jDatePanel, new DateLabelFormatter()) {
+            @Override
+            public void setEnabled(boolean enabled) {
+                getComponent(1).setEnabled(enabled);
+            }
+        };
     }
 
     public NoticeEntity getNoticeEntity() {
         return noticeEntity;
     }
 
-    {
-// GUI initializer generated by IntelliJ IDEA GUI Designer
-// >>> IMPORTANT!! <<<
-// DO NOT EDIT OR ADD ANY CODE HERE!
-        $$$setupUI$$$();
+
+    private void createUIComponents() {
+        createdDatePicker = getDatePicker();
     }
 
     /**
@@ -253,6 +386,7 @@ public class CreateNoticeWindow extends JDialog {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
+        createUIComponents();
         contentPane = new JPanel();
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
         final JPanel panel1 = new JPanel();
@@ -270,13 +404,13 @@ public class CreateNoticeWindow extends JDialog {
         buttonCancel.setText("Отмена");
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel3.setLayout(new GridLayoutManager(6, 3, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         label1.setText("Номер:");
         panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        panel3.add(spacer2, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel3.add(spacer2, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Дата:");
         panel3.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -296,6 +430,20 @@ public class CreateNoticeWindow extends JDialog {
         panel3.add(numberTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer3 = new Spacer();
         panel3.add(spacer3, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setText("Автор извещения:");
+        panel3.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        authorComboBox = new JComboBox();
+        panel3.add(authorComboBox, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("Дата выпуска:");
+        panel3.add(label5, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        createdDatePicker.setBackground(new Color(-986419));
+        panel3.add(createdDatePicker, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        label1.setLabelFor(numberTextField);
+        label3.setLabelFor(noticeDescriptionTextArea);
+        label4.setLabelFor(authorComboBox);
+        label5.setLabelFor(createdDatePicker);
     }
 
     /**
@@ -323,4 +471,25 @@ public class CreateNoticeWindow extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+}
+
+class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
+    private String datePattern = "dd.MM.yyyy";
+    private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+
+    @Override
+    public Object stringToValue(String text) throws ParseException {
+        return dateFormatter.parseObject(text);
+    }
+
+    @Override
+    public String valueToString(Object value) {
+        if (value != null) {
+            Calendar cal = (Calendar) value;
+            return dateFormatter.format(cal.getTime());
+        }
+
+        return "";
+    }
+
 }

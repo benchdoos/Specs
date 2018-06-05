@@ -18,6 +18,7 @@ package com.mmz.specs.application.gui.panels;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.client.DetailInfoWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
@@ -29,7 +30,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class NoticeInfoPanel extends JPanel implements AccessPolicy {
@@ -41,9 +41,12 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     private JLabel dateLabel;
     private JLabel userLabel;
     private JLabel detailInfoLabel;
+    private JLabel noticeCreatedByUserLabel;
+    private JLabel noticeCreationDateLabel;
     private Session session;
     private List<NoticeEntity> noticeEntities;
     private DetailEntity detailEntity;
+
 
     public NoticeInfoPanel(Session session, List<NoticeEntity> noticeEntities) {
 
@@ -53,7 +56,6 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         initGui();
 
     }
-
 
     public void setDetailEntity(DetailEntity detailEntity) {
         this.detailEntity = detailEntity;
@@ -138,13 +140,27 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     }
 
     private void updateNoticeInfo(NoticeEntity selectedValue) {
+        final String NO_DATA_STRING = "нет данных";
+
         if (selectedValue != null) {
             numberLabel.setText(selectedValue.getNumber());
-            dateLabel.setText(new SimpleDateFormat("dd.MM.yyyy").format(selectedValue.getDate()));
+
+            dateLabel.setText(selectedValue.getDate() != null ?
+                    ApplicationConstants.DEFAULT_DATE_FORMAT.format(selectedValue.getDate()) : NO_DATA_STRING);
+
             userLabel.setText(selectedValue.getUsersByProvidedByUserId().getName()
                     + " " + selectedValue.getUsersByProvidedByUserId().getSurname());
+
             descriptionTextArea.setText(selectedValue.getDescription());
             descriptionTextArea.setCaretPosition(0);
+
+            noticeCreatedByUserLabel.setText(
+                    selectedValue.getAuthorByUserId() == null ? NO_DATA_STRING :
+                            selectedValue.getAuthorByUserId().getName() + " " + selectedValue.getAuthorByUserId().getSurname());
+
+            noticeCreationDateLabel.setText(selectedValue.getCreationDate() != null ?
+                    ApplicationConstants.DEFAULT_DATE_FORMAT.format(selectedValue.getCreationDate()) : NO_DATA_STRING);
+
 
             ListModel<DetailEntity> effectList = new CommonWindowUtils(session).getEffectList(selectedValue.getId());
 
@@ -154,10 +170,13 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
                 detailEffectedList.setModel(new DefaultListModel<>());
             }
         } else {
-            numberLabel.setText("Нет данных");
-            dateLabel.setText("Нет данных");
-            userLabel.setText("Нет данных");
-            descriptionTextArea.setText("Нет данных");
+            numberLabel.setText(NO_DATA_STRING);
+            dateLabel.setText(NO_DATA_STRING);
+            userLabel.setText(NO_DATA_STRING);
+            descriptionTextArea.setText(NO_DATA_STRING);
+            noticeCreatedByUserLabel.setText(NO_DATA_STRING);
+            noticeCreationDateLabel.setText(NO_DATA_STRING);
+
             detailEffectedList.setModel(new DefaultListModel<>());
         }
     }
@@ -200,11 +219,11 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         splitPane1.setLastDividerLocation(128);
         contentPane.add(splitPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane1.setLeftComponent(panel1);
         panel1.setBorder(BorderFactory.createTitledBorder("Список извещений:"));
         final JScrollPane scrollPane1 = new JScrollPane();
-        panel1.add(scrollPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(64, -1), null, null, 0, false));
+        panel1.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(64, -1), null, null, 0, false));
         noticeList = new JList();
         scrollPane1.setViewportView(noticeList);
         final JPanel panel2 = new JPanel();
@@ -214,23 +233,24 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         splitPane2.setOrientation(0);
         panel2.add(splitPane2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(5, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panel3.setLayout(new GridLayoutManager(7, 3, new Insets(0, 0, 0, 0), -1, -1));
         splitPane2.setLeftComponent(panel3);
         panel3.setBorder(BorderFactory.createTitledBorder("Информация о измещении:"));
         final JLabel label1 = new JLabel();
         label1.setText("Номер:");
         panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        label2.setText("Дата:");
+        label2.setText("Дата изменения:");
+        label2.setToolTipText("Дата последнего изменения");
         panel3.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label3 = new JLabel();
         label3.setText("Описание:");
-        panel3.add(label3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(label3, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label4 = new JLabel();
-        label4.setText("Внес пользователь:");
+        label4.setText("Изменил:");
         panel3.add(label4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane2 = new JScrollPane();
-        panel3.add(scrollPane2, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 70), null, null, 0, false));
+        panel3.add(scrollPane2, new GridConstraints(6, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 70), null, null, 0, false));
         descriptionTextArea = new JTextArea();
         descriptionTextArea.setBackground(new Color(-855310));
         descriptionTextArea.setEditable(false);
@@ -238,21 +258,31 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         if (descriptionTextAreaFont != null) descriptionTextArea.setFont(descriptionTextAreaFont);
         scrollPane2.setViewportView(descriptionTextArea);
         final Spacer spacer1 = new Spacer();
-        panel3.add(spacer1, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel3.add(spacer1, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("Дата выпуска:");
+        panel3.add(label5, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setText("Выпустил:");
+        panel3.add(label6, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
-        panel3.add(panel4, new GridConstraints(0, 1, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel4.setLayout(new GridLayoutManager(5, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel3.add(panel4, new GridConstraints(0, 1, 5, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        userLabel = new JLabel();
+        userLabel.setText("нет данных");
+        panel4.add(userLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         numberLabel = new JLabel();
-        numberLabel.setText("Нет данных");
+        numberLabel.setText("нет данных");
         panel4.add(numberLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         dateLabel = new JLabel();
-        dateLabel.setText("Нет данных");
+        dateLabel.setText("нет данных");
         panel4.add(dateLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        userLabel = new JLabel();
-        userLabel.setText("Нет данных");
-        panel4.add(userLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        panel3.add(spacer2, new GridConstraints(1, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        noticeCreatedByUserLabel = new JLabel();
+        noticeCreatedByUserLabel.setText("нет данных");
+        panel4.add(noticeCreatedByUserLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        noticeCreationDateLabel = new JLabel();
+        noticeCreationDateLabel.setText("нет данных");
+        panel4.add(noticeCreationDateLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane2.setRightComponent(panel5);
@@ -264,6 +294,7 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         detailInfoLabel = new JLabel();
         detailInfoLabel.setText("Извещения, которые затрагивают");
         contentPane.add(detailInfoLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label3.setLabelFor(descriptionTextArea);
     }
 
     /**
