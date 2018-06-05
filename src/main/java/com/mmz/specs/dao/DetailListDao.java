@@ -26,14 +26,14 @@ public interface DetailListDao {
 
     public void setSession(Session session);
 
-    public int addDetailList(DetailListEntity detailListEntity);
+    public long addDetailList(DetailListEntity detailListEntity);
 
     public void updateDetailList(DetailListEntity detailListEntity);
 
-    public void removeDetailList(int id);
+    public void removeDetailList(long id);
 
 
-    public DetailListEntity getDetailListById(int id);
+    public DetailListEntity getDetailListById(long id);
 
 
     public List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity);

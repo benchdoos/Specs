@@ -44,7 +44,7 @@ public class DetailListServiceImpl implements DetailListService {
     }
 
     @Override
-    public int addDetailList(DetailListEntity detailListEntity) {
+    public long addDetailList(DetailListEntity detailListEntity) {
         return this.detailListDao.addDetailList(detailListEntity);
     }
 
@@ -54,12 +54,12 @@ public class DetailListServiceImpl implements DetailListService {
     }
 
     @Override
-    public void removeDetailList(int id) {
+    public void removeDetailList(long id) {
         this.detailListDao.removeDetailList(id);
     }
 
     @Override
-    public DetailListEntity getDetailListById(int id) {
+    public DetailListEntity getDetailListById(long id) {
         return this.detailListDao.getDetailListById(id);
     }
 

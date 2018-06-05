@@ -431,11 +431,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         for (MaterialListEntity entity : newMaterialsList) {
             System.out.println("new>> " + entity);
             MaterialListEntity materialListById;
-            /*if (entity.getId() != -1) {
-                materialListById = materialListService.getMaterialListById(entity.getId());
-            } else {
-                materialListById = new MaterialListEntity();
-            }*/
 
             try {
                 materialListById = materialListService.getMaterialListById(entity.getId());
@@ -448,11 +443,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             materialListById.setMainMaterial(entity.isMainMaterial());
             materialListById.setMaterialByMaterialId(entity.getMaterialByMaterialId());
             materialListById.setActive(true);
-            /*if (entity.getId() == -1) {
-                materialListService.updateMaterialList(materialListById);
-            } else {
-                materialListService.addMaterialList(materialListById);
-            }*/
 
             try {
                 materialListService.updateMaterialList(materialListById);

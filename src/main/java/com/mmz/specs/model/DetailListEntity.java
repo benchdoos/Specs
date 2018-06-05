@@ -16,6 +16,8 @@
 package com.mmz.specs.model;
 
 import com.google.common.collect.ComparisonChain;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -23,7 +25,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "DETAIL_LIST")
 public class DetailListEntity implements Comparable<DetailListEntity> {
-    private int id = -1;
+    private long id;
     private int quantity;
     private boolean isInterchangeableNode;
     private boolean isActive;
@@ -33,11 +35,11 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
 
     @Id
     @Column(name = "ID")
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -73,9 +75,35 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + quantity;
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(quantity)
+                .append(isInterchangeableNode)
+                .append(isActive)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DetailListEntity that = (DetailListEntity) o;
+
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .append(quantity, that.quantity)
+                .append(isInterchangeableNode, that.isInterchangeableNode)
+                .append(isActive, that.isActive)
+                .isEquals();
+    }
+
+
+
+    /*@Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     @Override
@@ -89,7 +117,7 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
         if (quantity != that.quantity) return false;
 
         return true;
-    }
+    }*/
 
     @Override
     public String toString() {

@@ -50,8 +50,8 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    public int addDetailList(DetailListEntity detailListEntity) {
-        Integer id = (Integer) this.session.save(detailListEntity);
+    public long addDetailList(DetailListEntity detailListEntity) {
+        Long id = (Long) this.session.save(detailListEntity);
         detailListEntity = getDetailListById(id);
         log.debug("DetailList successfully saved: " + detailListEntity);
         return id;
@@ -64,7 +64,7 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    public void removeDetailList(int id) {
+    public void removeDetailList(long id) {
         DetailListEntity detailListEntity = this.session.load(DetailListEntity.class, id);
         if (detailListEntity != null) {
             this.session.delete(detailListEntity);
@@ -73,7 +73,7 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
-    public DetailListEntity getDetailListById(int id) {
+    public DetailListEntity getDetailListById(long id) {
         DetailListEntity detailListEntity = this.session.load(DetailListEntity.class, id);
         log.debug("DetailList found by id:" + id + " " + detailListEntity);
         return detailListEntity;
