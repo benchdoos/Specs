@@ -748,17 +748,14 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         if (result == 0) {
             try {
                 uploadImages();
+                updateNotice();
 
                 //todo update info about notice!!!!
                 log.debug("Transaction status: {}", session.getTransaction().getStatus());
                 session.getTransaction().commit();
                 log.info("New state of db is commited");
 
-                Window parentWindow = FrameUtils.findWindow(this);
-                if (parentWindow instanceof ClientMainWindow) {
-                    ClientMainWindow clientMainWindow = (ClientMainWindow) parentWindow;
-                    clientMainWindow.closeTab(this);
-                }
+                closeTab();
             } catch (Exception e) {
                 log.warn("Could not call commit for transaction", e);
                 JOptionPane.showMessageDialog(this,
@@ -766,6 +763,34 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         JOptionPane.WARNING_MESSAGE);
             }
         }
+    }
+
+    private void updateNotice() {
+        NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+        if (selectedItem != null) {
+            ClientMainWindow clientMainWindow = getClientMainWindow();
+            if (clientMainWindow != null) {
+                UsersEntity currentUser = clientMainWindow.getCurrentUser();
+                if (currentUser != null) {
+                    selectedItem.setUsersByProvidedByUserId(currentUser);
+                }
+            }
+        }
+    }
+
+    private void closeTab() {
+        ClientMainWindow clientMainWindow = getClientMainWindow();
+        if (clientMainWindow != null) {
+            clientMainWindow.closeTab(this);
+        }
+    }
+
+    private ClientMainWindow getClientMainWindow() {
+        Window parentWindow = FrameUtils.findWindow(this);
+        if (parentWindow instanceof ClientMainWindow) {
+            return (ClientMainWindow) parentWindow;
+        }
+        return null;
     }
 
     private void uploadImages() {
@@ -802,11 +827,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         log.debug("User wanted to rollback changes, user's choice is: " + result);
         if (result == 0) {
             session.getTransaction().rollback();
-            Window parentWindow = FrameUtils.findWindow(this);
-            if (parentWindow instanceof ClientMainWindow) {
-                ClientMainWindow clientMainWindow = (ClientMainWindow) parentWindow;
-                clientMainWindow.closeTab(this);
-            }
+            closeTab();
         }
     }
 
