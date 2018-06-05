@@ -595,7 +595,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         }
         DetailListEntity detailListEntity = getFilledEntity(entity, node);
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(ClientBackgroundService.getInstance().getSession()));
-        detailListEntity = service.getDetailListById(service.addDetailList(detailListEntity));
+        service.getDetailListById(service.addDetailList(detailListEntity));
         DefaultMutableTreeNode fullNode = new MainWindowUtils(session).getChildren(new DetailListServiceImpl(new DetailListDaoImpl(session)), entity);
         node.add(fullNode);
 
@@ -725,8 +725,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         model.reload(selectedPath);
 
         mainTree.expandPath(parentPath);
-
-//        updateTreeDetail();
     }
 
     private void onMoveItemUp() {
