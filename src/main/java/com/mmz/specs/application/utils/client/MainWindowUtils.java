@@ -119,18 +119,20 @@ public class MainWindowUtils {
                 List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, entity);
                 DetailListEntity lastDetailListEntity = null;
                 for (DetailListEntity e : detailListByParentAndChild) {
-                    if (e.getNoticeByNoticeId().equals(lastNotice)) {
-                        log.trace("Got equal notices, current: {}, last: {}", e, lastNotice);
-                        int id = e.getNoticeByNoticeId().getId();
-                        if (id >= lastNotice.getId()) {
-                            lastNotice = e.getNoticeByNoticeId();
-                            lastDetailListEntity = e;
-                        }
-                    } else {
-                        if (lastNotice != null) {
-                            if (e.getNoticeByNoticeId().getDate().after(lastNotice.getDate())) {
+                    if (e.getNoticeByNoticeId() != null) {
+                        if (e.getNoticeByNoticeId().equals(lastNotice)) {
+                            log.trace("Got equal notices, current: {}, last: {}", e, lastNotice);
+                            int id = e.getNoticeByNoticeId().getId();
+                            if (id >= lastNotice.getId()) {
                                 lastNotice = e.getNoticeByNoticeId();
                                 lastDetailListEntity = e;
+                            }
+                        } else {
+                            if (lastNotice != null) {
+                                if (e.getNoticeByNoticeId().getDate().after(lastNotice.getDate())) {
+                                    lastNotice = e.getNoticeByNoticeId();
+                                    lastDetailListEntity = e;
+                                }
                             }
                         }
                     }
