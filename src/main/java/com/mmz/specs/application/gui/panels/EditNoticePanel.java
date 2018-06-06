@@ -50,7 +50,6 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -789,24 +788,28 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
         List<DetailEntity> detailEntities = service.listDetails();
         for (DetailEntity entity : detailEntities) {
-            if (entity.getImagePath() != null) {
-                if (!entity.getImagePath().isEmpty()) {
-                    File file = new File(entity.getImagePath());
-                    if (file.exists()) {
-                        try {
-                            final FtpUtils ftpUtils = FtpUtils.getInstance();
-                            ftpUtils.uploadImage(entity.getId(), file);
-                        } catch (IOException e) {
-                            log.warn("Could not upload image for entity: {}", entity, e);
+            try {
+                if (entity.getImagePath() != null) {
+                    if (!entity.getImagePath().isEmpty()) {
+                        File file = new File(entity.getImagePath());
+                        if (file.exists()) {
+                            try {
+                                final FtpUtils ftpUtils = FtpUtils.getInstance();
+                                ftpUtils.uploadImage(entity.getId(), file);
+                            } catch (Exception e) {
+                                log.warn("Could not upload image for entity: {}", entity, e);
+                            }
+                        } else {
+                            log.warn("Could not find file for entity: {}, file: {}", entity, file);
                         }
+                        entity.setImagePath(null);
                     } else {
-                        log.warn("Could not find file for entity: {}, file: {}", entity, file);
+                        entity.setImagePath(null);
+                        service.updateDetail(entity);
                     }
-                    entity.setImagePath(null);
-                } else {
-                    entity.setImagePath(null);
-                    service.updateDetail(entity);
                 }
+            } catch (Exception e) {
+                log.warn("Can not upload image for detail: {}", entity, e);
             }
         }
     }

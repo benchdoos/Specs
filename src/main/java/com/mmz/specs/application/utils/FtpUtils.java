@@ -122,6 +122,9 @@ public class FtpUtils {
     }
 
     public void uploadImage(int id, File localFile) throws IOException {
+        if (localFile == null) {
+            throw new IllegalArgumentException("Uploading local file can not be null");
+        }
         if (!localFile.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
             throw new IOException("Uploading image should have " + DEFAULT_IMAGE_EXTENSION + " extension");
         }
