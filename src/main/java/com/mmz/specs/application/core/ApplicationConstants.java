@@ -48,5 +48,7 @@ public class ApplicationConstants {
 
     public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
+    public static final String NO_DATA_STRING = "нет данных";
+
 
 }

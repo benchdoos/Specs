@@ -125,21 +125,23 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onAddNewItem() {
-        CreateDetailWindow addDetailWindow = new CreateDetailWindow();
+        CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
         addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
         addDetailWindow.setVisible(true);
         DetailEntity entity = addDetailWindow.getDetailEntity();
-        entity.setActive(true);
-        Window window = FrameUtils.findWindow(this);
-        if (window instanceof ClientMainWindow) {
-            ClientMainWindow mainWindow = (ClientMainWindow) window;
-            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-            try {
-                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity), true);
-            } catch (IllegalStateException e) {
-                log.warn("Tab with transaction is already active");
-                JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
-                        "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+        if (entity != null) {
+            entity.setActive(true);
+            Window window = FrameUtils.findWindow(this);
+            if (window instanceof ClientMainWindow) {
+                ClientMainWindow mainWindow = (ClientMainWindow) window;
+                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                try {
+                    mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity), true);
+                } catch (IllegalStateException e) {
+                    log.warn("Tab with transaction is already active");
+                    JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                            "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                }
             }
         }
     }
@@ -523,25 +525,25 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         label8.setText("Технический процесс:");
         detailInfoPanel.add(label8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         numberLabel = new JLabel();
-        numberLabel.setText("    ");
-        detailInfoPanel.add(numberLabel, new GridConstraints(3, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        numberLabel.setText("нет данных");
+        detailInfoPanel.add(numberLabel, new GridConstraints(3, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(210, -1), null, 0, false));
         titleLabel = new JLabel();
-        titleLabel.setText("    ");
+        titleLabel.setText("нет данных");
         detailInfoPanel.add(titleLabel, new GridConstraints(4, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         unitLabel = new JLabel();
-        unitLabel.setText("    ");
+        unitLabel.setText("нет данных");
         detailInfoPanel.add(unitLabel, new GridConstraints(5, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         finishedWeightLabel = new JLabel();
-        finishedWeightLabel.setText("    ");
+        finishedWeightLabel.setText("нет данных");
         detailInfoPanel.add(finishedWeightLabel, new GridConstraints(6, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         workpieceWeightLabel = new JLabel();
-        workpieceWeightLabel.setText("    ");
+        workpieceWeightLabel.setText("нет данных");
         detailInfoPanel.add(workpieceWeightLabel, new GridConstraints(7, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         techProcessLabel = new JLabel();
-        techProcessLabel.setText("     ");
+        techProcessLabel.setText("нет данных");
         detailInfoPanel.add(techProcessLabel, new GridConstraints(10, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveLabel = new JLabel();
-        isActiveLabel.setText("   ");
+        isActiveLabel.setText("нет данных");
         detailInfoPanel.add(isActiveLabel, new GridConstraints(11, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         detailIconLabel = new JLabel();
         detailIconLabel.setForeground(new Color(-10395295));

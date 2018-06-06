@@ -32,6 +32,7 @@ import com.mmz.specs.service.DetailServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -43,6 +44,7 @@ import java.awt.event.WindowEvent;
 
 public class CreateDetailWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final int MAXIMUM_STRING_LENGTH = 35;
 
     private JPanel contentPane;
     private JButton buttonOK;
@@ -55,8 +57,9 @@ public class CreateDetailWindow extends JDialog {
     private DetailEntity detailEntity;
     private Session session;
 
-    public CreateDetailWindow() {
+    public CreateDetailWindow(DetailEntity detailEntity) {
         $$$setupUI$$$();
+        this.detailEntity = detailEntity;
         session = ClientBackgroundService.getInstance().getSession();
 
         initGui();
@@ -72,14 +75,49 @@ public class CreateDetailWindow extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
 
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/addNewItem.png")));
-        setTitle("Добавление новой детали / узла");
+        if (detailEntity == null) {
+            setTitle("Добавление новой детали / узла");
+        } else {
+            setTitle("Изменение " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+        }
 
         initComboBox();
 
         fillComboBox();
 
+        initUnitCheckBox();
+
+        initCreateNewTitleButton();
+
+        fillDetailInfo();
+
         pack();
         setMinimumSize(getSize());
+    }
+
+    private void initCreateNewTitleButton() {
+        final boolean b = session.getTransaction().getStatus() == TransactionStatus.NOT_ACTIVE;
+        createTitleButton.setEnabled(!b);
+        if (b) {
+            createTitleButton.setToolTipText("Создание нового наименования доступно в режиме \"Изменение извещения\"");
+        }
+    }
+
+    private void fillDetailInfo() {
+        log.debug("Filling detail info: {}", detailEntity);
+        if (detailEntity != null) {
+            codeTextField.setText(detailEntity.getCode());
+            if (detailEntity.getDetailTitleByDetailTitleId() != null) {
+                titleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
+            }
+        }
+    }
+
+    private void initUnitCheckBox() {
+        if (detailEntity != null) {
+            unitCheckBox.setEnabled(false);
+            unitCheckBox.setSelected(detailEntity.isUnit());
+        }
     }
 
     private void fillComboBox() {
@@ -146,14 +184,68 @@ public class CreateDetailWindow extends JDialog {
                 .replace(",", ".")
                 .replace("/", ".")
                 .replace(" ", "");
-        //todo test this
-       /*String latinChars = "qwertyuiop[]asdfghjkl;'zxcvbnm";
-        String cyrillicChars = "йцукенгшщзхъфывапролджэячсмить";
-        fixedCode = StringUtils.replaceChars(fixedCode, latinChars, cyrillicChars);
-        fixedCode = StringUtils.replaceChars(fixedCode, latinChars.toUpperCase(), cyrillicChars.toUpperCase());*/
-
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
-        DetailEntity dbDetail = service.getDetailByIndex(fixedCode);
+        DetailEntity dbDetail;
+        try {
+            dbDetail = service.getDetailByIndex(fixedCode);
+        } catch (Exception e) {
+            dbDetail = null;
+        }
+
+        if (detailEntity == null) {
+            onNewDetailSave(fixedCode, dbDetail);
+        } else {
+            onEditDetailSave(fixedCode, dbDetail);
+        }
+    }
+
+    private void onEditDetailSave(String fixedCode, DetailEntity dbDetail) {
+        DetailEntity maybeNewDetail = new DetailEntity();
+        maybeNewDetail.setCode(fixedCode);
+        maybeNewDetail.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+
+        if (dbDetail != null) {
+            if (detailEntity.getId() == dbDetail.getId()) {
+                if (verifyInput(maybeNewDetail)) {
+                    updateDetail(fixedCode);
+                }
+            } else {
+                FrameUtils.shakeFrame(this);
+                JOptionPane.showMessageDialog(this,
+                        "Вы указали существующий индекс другой детали: \n"
+                                + dbDetail.getCode() + " "
+                                + dbDetail.getDetailTitleByDetailTitleId().getTitle());
+                log.warn("User tried to change code for entity: {}, but he chose code: {}, that has another entity: {}",
+                        detailEntity, fixedCode, dbDetail);
+            }
+        } else {
+            if (verifyInput(maybeNewDetail)) {
+                updateDetail(fixedCode);
+            }
+        }
+    }
+
+    private void updateDetail(String fixedCode) {
+        log.debug("Updating detail: ");
+        final DetailTitleEntity selectedTitle = (DetailTitleEntity) titleComboBox.getSelectedItem();
+        if (selectedTitle != null) {
+            final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
+                    + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
+                    "на: " + fixedCode + " " + selectedTitle.getTitle());
+            if (i == 0) { // confirm
+                detailEntity.setCode(fixedCode);
+                detailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                dispose();
+            }
+
+        } else {
+            log.warn("User tried to save detail with null title for entity: {}", detailEntity);
+            JOptionPane.showMessageDialog(this,
+                    "Необходимо указать наименование для детали", "Ошибка изменения", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void onNewDetailSave(String fixedCode, DetailEntity dbDetail) {
         if (dbDetail != null) {
             log.debug("User tried to add existing detail: {}, existing: {}", fixedCode, dbDetail);
             FrameUtils.shakeFrame(this);
@@ -167,15 +259,52 @@ public class CreateDetailWindow extends JDialog {
                 detailEntity.setCode(fixedCode);
                 detailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
                 detailEntity.setUnit(unitCheckBox.isSelected());
-                log.debug("Added new detail: " + detailEntity);
-                this.detailEntity = detailEntity;
-                dispose();
+                if (verifyInput(detailEntity)) {
+                    log.debug("Added new detail: " + detailEntity);
+                    this.detailEntity = detailEntity;
+                    dispose();
+                }
             } else {
                 log.debug("User tried to add detail with empty index.");
                 FrameUtils.shakeFrame(this);
                 ((SmartJTextField) codeTextField).setStatus(SmartJTextField.STATUS.WARNING);
             }
         }
+    }
+
+    private boolean verifyInput(DetailEntity entity) {
+        final String ERROR_TITLE = "Ошибка верификации";
+        log.debug("Verifying entity: {}", entity);
+        if (entity == null) {
+            log.warn("Can not verify null entity");
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Не могу проверить корректность ввода",
+                    ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        try {
+            if (entity.getCode().isEmpty() || entity.getCode().length() > 30) {
+                throw new IllegalArgumentException("Code length can not be 0 or >30, code is: "
+                        + entity.getCode() + " " + entity.getCode().length());
+            }
+        } catch (Exception e) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this,
+                    "Длинна индекса детали должна быть в диапазоне: [0;30]", ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+            log.warn("Could not verify code for detail: {}", entity, e);
+            return false;
+        }
+
+        if (titleComboBox.getSelectedItem() == null) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Необходимо указать наименование детали",
+                    ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        log.debug("Verification for entity {} successfully finished", entity);
+        return true;
     }
 
     private void onCancel() {

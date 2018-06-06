@@ -32,6 +32,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
+
 public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     private JPanel contentPane;
     private JList<NoticeEntity> noticeList;
@@ -140,8 +142,6 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     }
 
     private void updateNoticeInfo(NoticeEntity selectedValue) {
-        final String NO_DATA_STRING = "нет данных";
-
         if (selectedValue != null) {
             numberLabel.setText(selectedValue.getNumber());
 

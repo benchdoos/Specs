@@ -293,20 +293,11 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="fede" class="javax.swing.JComboBox" binding="codeComboBox">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <maximumRowCount value="30"/>
-                    </properties>
-                  </component>
                   <component id="7e483" class="javax.swing.JLabel">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <labelFor value="fede"/>
                       <text value="Индекс:"/>
                     </properties>
                   </component>
@@ -379,16 +370,6 @@
                       <toolTipText value="Создать новый материал"/>
                     </properties>
                   </component>
-                  <component id="74e86" class="javax.swing.JButton" binding="createTitleButton">
-                    <constraints>
-                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <icon value="img/gui/titleNew16.png"/>
-                      <text value=""/>
-                      <toolTipText value="Создать новое наименование"/>
-                    </properties>
-                  </component>
                   <component id="456d5" class="javax.swing.JLabel">
                     <constraints>
                       <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -430,15 +411,6 @@
                     </constraints>
                     <properties>
                       <text value="нет данных"/>
-                    </properties>
-                  </component>
-                  <component id="e7b38" class="javax.swing.JComboBox" binding="detailTitleComboBox">
-                    <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <maximumRowCount value="30"/>
-                      <toolTipText value="Тип пользователя" noi18n="true"/>
                     </properties>
                   </component>
                   <component id="9ae05" class="javax.swing.JButton" binding="editImageButton">
@@ -488,6 +460,31 @@
                       </grid>
                     </constraints>
                     <properties/>
+                  </component>
+                  <component id="a41f" class="javax.swing.JLabel" binding="detailCodeLabel">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="нет данных"/>
+                    </properties>
+                  </component>
+                  <component id="b167d" class="javax.swing.JLabel" binding="detailTitleLabel">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="нет данных"/>
+                    </properties>
+                  </component>
+                  <component id="ea937" class="javax.swing.JButton" binding="editDetailInfoButton">
+                    <constraints>
+                      <grid row="0" column="3" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <icon value="img/gui/edit/edit.png"/>
+                      <text value=""/>
+                    </properties>
                   </component>
                 </children>
               </grid>
