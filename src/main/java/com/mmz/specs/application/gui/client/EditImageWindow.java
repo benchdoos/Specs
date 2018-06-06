@@ -37,6 +37,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import static com.mmz.specs.application.utils.FtpUtils.DEFAULT_IMAGE_EXTENSION;
+
 public class EditImageWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private JPanel contentPane;
@@ -142,11 +144,11 @@ public class EditImageWindow extends JDialog {
 
     private void onUpload() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Выберете изображение (jpg)");
+        chooser.setDialogTitle("Выберете изображение (" + DEFAULT_IMAGE_EXTENSION + ")");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
 
-        FileFilter fileFilter = new FileNameExtensionFilter("Изображение png", "jpg");
+        FileFilter fileFilter = new FileNameExtensionFilter("Изображение " + DEFAULT_IMAGE_EXTENSION, DEFAULT_IMAGE_EXTENSION);
         chooser.setFileFilter(fileFilter);
         int returnValue = chooser.showDialog(this, "OK");
         if (returnValue == JFileChooser.APPROVE_OPTION) {

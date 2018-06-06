@@ -32,7 +32,7 @@ public class FtpUtils {
 
     private static final FtpUtils ourInstance = new FtpUtils();
     private static final int FTP_PORT = 21;
-    private static final String DEFAULT_IMAGE_EXTENSION = ".jpg";
+    public static final String DEFAULT_IMAGE_EXTENSION = ".jpg";
     private static int getImageCounter = 0;
     private final FTPClient ftpClient = new FTPClient();
     private String postfix;
