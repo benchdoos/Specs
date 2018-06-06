@@ -131,7 +131,8 @@ public class DetailInfoWindow extends JFrame {
             detailIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    FrameUtils.onShowImage(DetailInfoWindow.super.getOwner(), image, "Изображение " + detailEntity.getCode());
+                    FrameUtils.onShowImage(DetailInfoWindow.super.getOwner(), true, image,
+                            "Изображение " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
                 }
             });
         } else {

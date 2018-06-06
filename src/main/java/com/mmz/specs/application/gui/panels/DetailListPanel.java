@@ -353,7 +353,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 detailIconLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), image, "Изображение " + selectedComponent.getCode()); //testme does it works????
+                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
+                                image, "Изображение " + selectedComponent.getCode() + " "
+                                        + selectedComponent.getDetailTitleByDetailTitleId().getTitle());
                     }
                 });
             } else {

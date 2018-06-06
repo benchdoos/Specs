@@ -181,14 +181,15 @@ public class FrameUtils {
     }
 
 
-    public static void onShowImage(Window parent, BufferedImage image, String title) {
+    public static void onShowImage(Window parent, boolean modal, BufferedImage image, String title) {
         final ImageViewer imageViewer = new ImageViewer(image);
         imageViewer.setPixelatedZoom(true);
 
-        final JFrame imageFrame = new JFrame();
+        final JDialog imageFrame = new JDialog();
+        imageFrame.setModal(modal);
         imageFrame.setTitle(title);
         imageFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(FrameUtils.class.getResource("/img/gui/picture64.png")));
-        imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        imageFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         imageFrame.add(imageViewer.getComponent());
 

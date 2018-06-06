@@ -68,6 +68,7 @@ public class EditImageWindow extends JDialog {
     private void initGui() {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
+        setModal(true);
 
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/pictureEdit64.png")));
         setTitle("Редактирование изображения");
@@ -129,7 +130,8 @@ public class EditImageWindow extends JDialog {
             detailIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    FrameUtils.onShowImage(FrameUtils.findWindow(EditImageWindow.super.getRootPane()), image, "Изображение " + detailEntity.getCode());
+                    FrameUtils.onShowImage(FrameUtils.findWindow(EditImageWindow.super.getRootPane()), true, image,
+                            "Изображение " + detailEntity.getCode() + detailEntity.getDetailTitleByDetailTitleId().getTitle());
                 }
             });
         } else {
@@ -153,37 +155,6 @@ public class EditImageWindow extends JDialog {
                 System.out.println("You selected the file: " + file);
 
                 detailEntity.setImagePath(file.getAbsolutePath());
-                /*try {
-                    FtpUtils ftp = FtpUtils.getInstance();
-                    final BufferedImage image = ftp.getImage(detailEntity.getId());
-                    if (image != null) {
-                        ftp.deleteImage(detailEntity.getId());
-                    }
-                    String chosenImageAbsolutePath = chooser.getSelectedFile().getAbsolutePath();
-
-                    long length = new File(chosenImageAbsolutePath).length();
-                    System.out.println("file size: " + length);
-                    if (length <= MAX_IMAGE_FILE_SIZE) {
-                        boolean imageUploaded = ftp.uploadImage(detailEntity.getId(), chosenImageAbsolutePath);
-                        if (imageUploaded) {
-                            log.info("Image for " + detailEntity.getId() + " was successfully updated with image: " + chosenImageAbsolutePath);
-                        } else {
-                            log.warn("Could not upload image for detail: " + detailEntity.getId() + " and image: " + chosenImageAbsolutePath);
-                        }
-                    } else {
-                        log.warn("Could not upload image for detail: " + detailEntity.getId() + " file length > maximum ( " + length + " , max: " + MAX_IMAGE_FILE_SIZE + ")");
-
-                        JOptionPane.showMessageDialog(this, "Не удалось загрузить изображение:\n" +
-                                chooser.getSelectedFile().getAbsolutePath() + "\n" +
-                                "Размер изображения больше чем 5МБ.", "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
-                    }
-                } catch (IOException e) {
-                    log.warn("Could not upload image for detail: " + detailEntity, e);
-
-                    JOptionPane.showMessageDialog(this, "Не удалось загрузить изображение:\n" +
-                            chooser.getSelectedFile().getAbsolutePath() +
-                            "\n" + e.getLocalizedMessage(), "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
-                }*/
             }
         }
         updateIcon();

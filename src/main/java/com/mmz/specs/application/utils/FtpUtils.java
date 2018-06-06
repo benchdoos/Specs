@@ -131,9 +131,18 @@ public class FtpUtils {
 
         String remoteFile = postfix + id + DEFAULT_IMAGE_EXTENSION;
 
-        log.debug("Uploading image for id:{} exists:{} with path:{} ", id, localFile.exists(), localFile);
+        log.debug("Uploading image for id:{} exists:{} with path:{} to path:{}", id, localFile.exists(), localFile, remoteFile);
         byte[] bytesIn = new byte[4096];
         int read;
+
+
+        deleteImage(id);
+
+/*
+        try (FileInputStream fis = new FileInputStream(localFile)) {
+            ftpClient.storeFile(remoteFile, fis);
+        }
+*/
 
         try (InputStream inputStream = new FileInputStream(localFile);
              OutputStream outputStream = ftpClient.storeFileStream(remoteFile)) {

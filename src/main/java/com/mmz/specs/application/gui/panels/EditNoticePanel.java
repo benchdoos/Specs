@@ -19,6 +19,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
+import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
@@ -48,6 +49,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -708,6 +710,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void updateNotice() {
         NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+        log.debug("Updating notice info: {}", selectedItem);
         if (selectedItem != null) {
             ClientMainWindow clientMainWindow = getClientMainWindow();
             if (clientMainWindow != null) {
@@ -716,7 +719,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     selectedItem.setUsersByProvidedByUserId(currentUser);
                 }
             }
-        }
+        }//todo add else and so on...
     }
 
     private void closeTab() {
@@ -741,16 +744,24 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             try {
                 if (entity.getImagePath() != null) {
                     if (!entity.getImagePath().isEmpty()) {
-                        File file = new File(entity.getImagePath());
-                        if (file.exists()) {
-                            try {
-                                final FtpUtils ftpUtils = FtpUtils.getInstance();
-                                ftpUtils.uploadImage(entity.getId(), file);
-                            } catch (Exception e) {
-                                log.warn("Could not upload image for entity: {}", entity, e);
+                        if (!entity.getImagePath().equalsIgnoreCase(ClientConstants.IMAGE_REMOVE_KEY)) {
+                            File file = new File(entity.getImagePath());
+                            if (file.exists()) {
+                                try {
+                                    final FtpUtils ftpUtils = FtpUtils.getInstance();
+                                    ftpUtils.uploadImage(entity.getId(), file);
+                                } catch (Exception e) {
+                                    log.warn("Could not upload image for entity: {}", entity, e);
+                                }
+                            } else {
+                                log.warn("Could not find file for entity: {}, file: {}", entity, file);
                             }
                         } else {
-                            log.warn("Could not find file for entity: {}, file: {}", entity, file);
+                            try {
+                                FtpUtils.getInstance().deleteImage(entity.getId());
+                            } catch (IOException e) {
+                                log.warn("Could not delete image for {}", entity, e);
+                            }
                         }
                         entity.setImagePath(null);
                     } else {
