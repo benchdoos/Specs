@@ -44,7 +44,6 @@ import java.awt.event.WindowEvent;
 
 public class CreateDetailWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final int MAXIMUM_STRING_LENGTH = 35;
 
     private JPanel contentPane;
     private JButton buttonOK;
