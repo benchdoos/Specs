@@ -137,7 +137,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 try {
                     mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity), true);
                 } catch (IllegalStateException e) {
-                    log.warn("Tab with transaction is already active");
+                    log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                     JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                             "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                 }
@@ -459,7 +459,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                         try {
                             mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
                         } catch (IllegalStateException e) {
-                            log.warn("Tab with transaction is already active");
+                            log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                             JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                     "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                         }
@@ -476,7 +476,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     @Override
     public AccessPolicyManager getPolicyManager() {
         return new AccessPolicyManager(false, false);
-        //return new AccessPolicyManager(true, false);
     }
 
     @Override

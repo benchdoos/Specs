@@ -714,7 +714,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
         log.debug("Updating notice info: {}", selectedItem);
         if (selectedItem != null) {
-            ClientMainWindow clientMainWindow = getClientMainWindow();
+            ClientMainWindow clientMainWindow = new MainWindowUtils(session).getClientMainWindow(this);
             if (clientMainWindow != null) {
                 UsersEntity currentUser = clientMainWindow.getCurrentUser();
                 if (currentUser != null) {
@@ -725,18 +725,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void closeTab() {
-        ClientMainWindow clientMainWindow = getClientMainWindow();
+        ClientMainWindow clientMainWindow = new MainWindowUtils(session).getClientMainWindow(this);
         if (clientMainWindow != null) {
             clientMainWindow.closeTab(this);
         }
-    }
-
-    private ClientMainWindow getClientMainWindow() {
-        Window parentWindow = FrameUtils.findWindow(this);
-        if (parentWindow instanceof ClientMainWindow) {
-            return (ClientMainWindow) parentWindow;
-        }
-        return null;
     }
 
     private void uploadImages() {

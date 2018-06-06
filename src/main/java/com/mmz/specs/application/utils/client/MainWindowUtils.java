@@ -15,6 +15,8 @@
 
 package com.mmz.specs.application.utils.client;
 
+import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
@@ -28,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -226,5 +229,14 @@ public class MainWindowUtils {
         }
         log.trace("Latest entity: " + latest + " from " + result);
         return latest;
+    }
+
+
+    public ClientMainWindow getClientMainWindow(Component component) {
+        Window parentWindow = FrameUtils.findWindow(component);
+        if (parentWindow instanceof ClientMainWindow) {
+            return (ClientMainWindow) parentWindow;
+        }
+        return null;
     }
 }
