@@ -86,10 +86,8 @@ public class Updater {
                     log.info("New version of file successfully downloaded: {}", downloadedFile.getAbsolutePath());
                     log.info("Starting updating to new version.");
 
-                    String argsArray = argsArrayToString(arguments);
-
                     String command = "java -jar \"" + downloadedFile.getAbsolutePath() + "\" " + ApplicationArgumentsConstants.UPDATE
-                            + " " + currentPath + " " + argsArray;
+                            + " " + currentPath;
                     log.info("Starting new version with command: {}", command);
                     Runtime.getRuntime().exec(command);
                     log.info("Closing current application");
@@ -105,8 +103,10 @@ public class Updater {
 
     private String argsArrayToString(String[] arguments) {
         StringBuilder builder = new StringBuilder();
-        for (String s : arguments) {
-            builder.append(s).append(" ");
+        if (arguments != null) {
+            for (String s : arguments) {
+                builder.append("\"").append(s).append("\"").append(" ");
+            }
         }
         return builder.toString();
     }
@@ -214,25 +214,23 @@ public class Updater {
         }
     }
 
-    public void copyMyself(String path, String[] args) {
+    public void copyMyself(String path) {
         File currentFile = null;
         File destFile = new File(path);
         try {
             currentFile = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             FileUtils.copyFile(currentFile, destFile);
             log.info("File {} successfully copied to {}", currentFile, destFile);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (URISyntaxException | IOException e) {
             log.warn("Could not copy file {} to {}", currentFile, destFile, e);
         }
 
     }
 
-    public void runNewVersion(String arg, String[] args) {
-        args = cutFirstTwoArgs(args);
-        String argsString = argsArrayToString(args);
-        String command = "java -jar " + arg + " " + argsString;
+    public void runNewVersion(String arg) {
+        log.debug("Running new version. File: {}", arg);
+        String command = "java -jar " + arg;
+        log.debug("Launching command: " + command);
         try {
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
@@ -242,9 +240,8 @@ public class Updater {
 
     private String[] cutFirstTwoArgs(String[] args) {
         if (args.length > 2) {
-            args = Arrays.copyOfRange(args, 2, args.length);
-        }
-        return args;
+            return Arrays.copyOfRange(args, 2, args.length);
+        } else return null;
     }
 
     public void deleteMyself() {
@@ -255,5 +252,10 @@ public class Updater {
             log.warn("Could not find myself", e);
         }
 
+    }
+
+    public void notifyUser() {
+        JOptionPane.showMessageDialog(null, "Приложение успешно обновлено\n" +
+                "Вы можете запустить его снова", "Приложение обновлено", JOptionPane.INFORMATION_MESSAGE);
     }
 }

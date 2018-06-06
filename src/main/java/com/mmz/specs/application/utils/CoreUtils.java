@@ -65,9 +65,10 @@ public class CoreUtils {
 
                 case ApplicationArgumentsConstants.UPDATE: {
                     if (args.length > 1) {
-                        Updater.getInstance().copyMyself(args[1], args);
-                        Updater.getInstance().runNewVersion(args[1], args);
+                        Updater.getInstance().copyMyself(args[1]);
+                        Updater.getInstance().notifyUser();
                         Updater.getInstance().deleteMyself();
+                        Updater.getInstance().runNewVersion(args[1]);
                     }
                     break;
                 }
