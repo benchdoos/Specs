@@ -595,6 +595,10 @@ public class ClientMainWindow extends JFrame {
 
     public void closeTab(Component component) {
         clientMainTabbedPane.remove(component);
+        final int selectedIndex = clientMainTabbedPane.getSelectedIndex();
+        if (selectedIndex != -1) {
+            clientMainTabbedPane.getComponentAt(selectedIndex).requestFocus();
+        }
     }
 
     private void unlockAdminTools(boolean unlock) {
