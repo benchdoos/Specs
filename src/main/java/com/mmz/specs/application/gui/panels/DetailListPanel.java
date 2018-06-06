@@ -53,8 +53,7 @@ import java.util.List;
 
 public class DetailListPanel extends JPanel implements AccessPolicy {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-
-
+    private static final int MAXIMUM_STRING_LENGTH = 35;
     private JPanel detailListPanel;
     private JPanel detailInfoPanel;
     private JTextField searchTextField;
@@ -305,12 +304,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void updateDetailInfoPanelWithEntity(DetailEntity selectedComponent) {
-        numberLabel.setText(CommonUtils.substring(25, selectedComponent.getCode()));
+        numberLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, selectedComponent.getCode()));
 
         if (selectedComponent.getDetailTitleByDetailTitleId() != null) {
             String title = selectedComponent.getDetailTitleByDetailTitleId().getTitle();
             titleLabel.setToolTipText(title);
-            titleLabel.setText(CommonUtils.substring(25, title));
+            titleLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, title));
         }
 
         unitLabel.setText(Boolean.toString(selectedComponent.isUnit())
@@ -375,8 +374,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         if (!materialList.isEmpty()) {
             for (MaterialListEntity entity : materialList) {
                 if (entity.isMainMaterial() && entity.isActive()) {
-                    String substringLongMark = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongMark());
-                    String substringLongProfile = CommonUtils.substring(25, entity.getMaterialByMaterialId().getLongProfile());
+                    String substringLongMark = CommonUtils.substring(MAXIMUM_STRING_LENGTH, entity.getMaterialByMaterialId().getLongMark());
+                    String substringLongProfile = CommonUtils.substring(MAXIMUM_STRING_LENGTH, entity.getMaterialByMaterialId().getLongProfile());
 
                     materialMarkLabel.setText(substringLongMark);
                     materialProfileLabel.setText(substringLongProfile);
@@ -529,7 +528,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         detailInfoPanel.add(numberLabel, new GridConstraints(3, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(210, -1), null, 0, false));
         titleLabel = new JLabel();
         titleLabel.setText("нет данных");
-        detailInfoPanel.add(titleLabel, new GridConstraints(4, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        detailInfoPanel.add(titleLabel, new GridConstraints(4, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(210, -1), null, 0, false));
         unitLabel = new JLabel();
         unitLabel.setText("нет данных");
         detailInfoPanel.add(unitLabel, new GridConstraints(5, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
