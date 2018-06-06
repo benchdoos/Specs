@@ -131,7 +131,7 @@ public class EditImageWindow extends JDialog {
 
     private void onUpload() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Выберете изображение (" + DEFAULT_IMAGE_EXTENSION + ")");
+        chooser.setDialogTitle("Выберите изображение (" + DEFAULT_IMAGE_EXTENSION + ")");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
 
