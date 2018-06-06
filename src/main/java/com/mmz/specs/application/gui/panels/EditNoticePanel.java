@@ -293,6 +293,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 DetailEntity selectedEntity = getSelectedDetailEntityFromTree();
                 final boolean selected = isActiveCheckBox.isSelected();
                 selectedEntity.setActive(!selected);
+                DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+                service.updateDetail(selectedEntity);
                 updateTreeDetail();
             } catch (Exception ex) {
                 log.warn("Could not set detail activity", e);
