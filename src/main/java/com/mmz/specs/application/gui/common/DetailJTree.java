@@ -32,7 +32,8 @@ import java.awt.*;
 import java.util.List;
 
 public class DetailJTree extends JTree {
-    private static final Color BACKGROUND_SELECTION_COLOR = new Color(0, 120, 215);
+    //    private static final Color BACKGROUND_SELECTION_COLOR = new Color(0, 120, 215);
+    private static final Color BACKGROUND_SELECTION_COLOR = new DefaultTreeCellRenderer().getBackgroundSelectionColor();
     private static final Color BACKGROUND_NON_SELECTION_COLOR = new JPanel().getBackground();
 
     public DetailJTree() {
