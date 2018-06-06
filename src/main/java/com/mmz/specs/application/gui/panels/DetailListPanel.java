@@ -153,9 +153,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        registerKeyboardAction(e -> {
-                    onEditDetail(true);
-                },
+        registerKeyboardAction(e -> onEditDetail(true),
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -348,16 +346,21 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
             if (image != null) {
                 BufferedImage scaledImage = Scalr.resize(image, 128);
-                detailIconLabel.setIcon(new ImageIcon(scaledImage));
-                detailIconLabel.setText("");
-                detailIconLabel.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
-                                image, "Изображение " + selectedComponent.getCode() + " "
-                                        + selectedComponent.getDetailTitleByDetailTitleId().getTitle());
-                    }
-                });
+
+                DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                DetailEntity current = (DetailEntity) lastSelectedPathComponent.getUserObject();
+                if (selectedComponent.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
+                    detailIconLabel.setIcon(new ImageIcon(scaledImage));
+                    detailIconLabel.setText("");
+                    detailIconLabel.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
+                                    image, "Изображение " + selectedComponent.getCode() + " "
+                                            + selectedComponent.getDetailTitleByDetailTitleId().getTitle());
+                        }
+                    });
+                }
             } else {
                 detailIconLabel.setIcon(null);
                 detailIconLabel.setText("Нет изображения");
