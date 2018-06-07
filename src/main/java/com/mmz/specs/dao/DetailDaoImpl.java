@@ -18,11 +18,15 @@ package com.mmz.specs.dao;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.DetailTitleEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,13 +43,13 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
-    public void setSession(Session session) {
-        this.session = session;
+    public Session getSession() {
+        return session;
     }
 
     @Override
-    public Session getSession() {
-        return session;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     @Override
@@ -88,6 +92,19 @@ public class DetailDaoImpl implements DetailDao {
         final DetailEntity entity = (DetailEntity) query.uniqueResult();
         log.debug("Detail found by code: " + code + " " + entity);
         return entity;
+    }
+
+    @Override
+    public List<DetailEntity> getDetailByTitle(DetailTitleEntity titleEntity) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
+        Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(builder.equal(root.get("detailTitleByDetailTitleId"), titleEntity));
+        Query<DetailEntity> q = session.createQuery(criteriaQuery);
+        final List<DetailEntity> result = q.list();
+        log.debug("User found by titleEntity {}: ", titleEntity, result);
+        return result;
     }
 
     @Override

@@ -18,6 +18,7 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.DetailDao;
 import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.DetailTitleEntity;
 
 import java.util.List;
 
@@ -65,6 +66,11 @@ public class DetailServiceImpl implements DetailService {
     @Override
     public DetailEntity getDetailByIndex(String index) {
         return detailDao.getDetailByIndex(index);
+    }
+
+    @Override
+    public List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity) {
+        return detailDao.getDetailByTitle(titleEntity);
     }
 
     @Override

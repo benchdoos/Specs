@@ -16,27 +16,29 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.DetailTitleEntity;
 import org.hibernate.Session;
 
 import java.util.List;
 
 public interface DetailDao {
-    public void setSession(Session session);
+    Session getSession();
 
-    public Session getSession();
+    void setSession(Session session);
 
+    int addDetail(DetailEntity detailEntity);
 
-    public int addDetail(DetailEntity detailEntity);
+    void updateDetail(DetailEntity detailEntity);
 
-    public void updateDetail(DetailEntity detailEntity);
-
-    public void removeDetail(int id);
-
-
-    public DetailEntity getDetailById(int id);
-
-    public DetailEntity getDetailByIndex(String index);
+    void removeDetail(int id);
 
 
-    public List<DetailEntity> listDetails();
+    DetailEntity getDetailById(int id);
+
+    DetailEntity getDetailByIndex(String index);
+
+
+    List<DetailEntity> getDetailByTitle(DetailTitleEntity titleEntity);
+
+    List<DetailEntity> listDetails();
 }

@@ -17,27 +17,29 @@ package com.mmz.specs.service;
 
 import com.mmz.specs.dao.DetailDao;
 import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.DetailTitleEntity;
 
 import java.util.List;
 
 public interface DetailService {
 
-    public void setDetailDao(DetailDao detailDao);
+    DetailDao getDetailDao();
 
-    public DetailDao getDetailDao();
+    void setDetailDao(DetailDao detailDao);
 
+    int addDetail(DetailEntity detailEntity);
 
-    public int addDetail(DetailEntity detailEntity);
+    void updateDetail(DetailEntity detailEntity);
 
-    public void updateDetail(DetailEntity detailEntity);
-
-    public void removeDetail(int id);
-
-
-    public DetailEntity getDetailById(int id);
-
-    public DetailEntity getDetailByIndex(String index);
+    void removeDetail(int id);
 
 
-    public List<DetailEntity> listDetails();
+    DetailEntity getDetailById(int id);
+
+    DetailEntity getDetailByIndex(String index);
+
+    List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity);
+
+
+    List<DetailEntity> listDetails();
 }
