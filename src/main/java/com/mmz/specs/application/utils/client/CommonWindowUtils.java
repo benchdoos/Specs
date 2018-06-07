@@ -15,21 +15,17 @@
 
 package com.mmz.specs.application.utils.client;
 
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.client.EditTitleWindow;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
-import com.mmz.specs.dao.DetailTitleDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.DetailTitleEntity;
 import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.DetailListServiceImpl;
-import com.mmz.specs.service.DetailTitleService;
-import com.mmz.specs.service.DetailTitleServiceImpl;
-import org.apache.commons.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -41,7 +37,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import static javax.swing.JOptionPane.*;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static javax.swing.JOptionPane.showMessageDialog;
 
 public class CommonWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -126,22 +123,16 @@ public class CommonWindowUtils {
         return result;
     }
 
-    public DetailTitleEntity onCreateNewTitle(Component component) {
-        Window window = FrameUtils.findWindow(component);
-        if (window instanceof ClientMainWindow) {
-            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
-            UsersEntity currentUser = clientMainWindow.getCurrentUser();
-
-            if (addTitle(component, currentUser)) return addNewTitle(component);
-        } else {
-            LoginWindow loginWindow = new LoginWindow(session);
-            loginWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), loginWindow));
-            loginWindow.setVisible(true);
-            UsersEntity user = loginWindow.getAuthorizedUser();
-
-            if (addTitle(component, user)) return addNewTitle(component);
+    public static int getIndexByValue(JList list, Object value) {
+        System.out.println(">>> " + list.getModel().getSize() + " " + value);
+        DefaultListModel model = (DefaultListModel) list.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            Object current = model.get(i);
+            if (current.equals(value)) {
+                return i;
+            }
         }
-        return null;
+        return -1;
     }
 
     private boolean addTitle(Component component, UsersEntity user) {
@@ -166,53 +157,33 @@ public class CommonWindowUtils {
         return false;
     }
 
-    private DetailTitleEntity addNewTitle(Component component) {
-        String result = showInputDialog(component,
-                "Введите новое наименование:", "Новое наименование", PLAIN_MESSAGE);
-        if (result != null) {
-            if (!result.isEmpty()) {
-                final int MAX_TITLE_LENGTH = 120;
-                if (result.length() <= MAX_TITLE_LENGTH) {
-                    result = result.replace("\n", " ");
-                    result = WordUtils.capitalizeFully(result);
+    public DetailTitleEntity onCreateNewTitle(Component component) {
+        Window window = FrameUtils.findWindow(component);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            UsersEntity currentUser = clientMainWindow.getCurrentUser();
 
-                    DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
-                    DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
 
-                    if (detailTitleByTitle == null) {
-                        DetailTitleEntity titleEntity = new DetailTitleEntity();
-                        titleEntity.setActive(true);
-                        titleEntity.setTitle(result);
-                        DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+            EditTitleWindow editTitleWindow = new EditTitleWindow(null);
+            editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
+            editTitleWindow.setVisible(true);
+            DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
 
-                        return createNewTitle(component, result, titleEntity, service);
-                    } else {
-                        showMessageDialog(component,
-                                "Наименование " + result +
-                                        "\nУже существует.", "Ошибка добавления", WARNING_MESSAGE);
-                    }
-                } else {
-                    showMessageDialog(component,
-                            "Длина наименования не может привышать 120 символов (сейчас: "
-                                    + result.length() + ")",
-                            "Ошибка ввода", WARNING_MESSAGE);
-                }
-            }
+            if (addTitle(component, currentUser)) return titleEntity;
+        } else {
+            LoginWindow loginWindow = new LoginWindow(session);
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), loginWindow));
+            loginWindow.setVisible(true);
+            UsersEntity user = loginWindow.getAuthorizedUser();
+
+
+            EditTitleWindow editTitleWindow = new EditTitleWindow(null);
+            editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
+            editTitleWindow.setVisible(true);
+            DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
+
+            if (addTitle(component, user)) return titleEntity;
         }
         return null;
-    }
-
-    private DetailTitleEntity createNewTitle(Component component, String result, DetailTitleEntity titleEntity, DetailTitleService service) {
-        try {
-            service.addDetailTitle(titleEntity);
-
-            ClientBackgroundService.getInstance().refreshSession();
-            return titleEntity;
-        } catch (Throwable throwable) {
-            showMessageDialog(component,
-                    "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
-                    "Ошибка добавления", WARNING_MESSAGE);
-            return null;
-        }
     }
 }
