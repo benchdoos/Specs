@@ -60,6 +60,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
     private JLabel titleActiveLabel;
     private JLabel titleNameLabel;
     private JButton editTitleButton;
+    private JButton findTitleUsageButton;
 
     public EditDataPanel() {
         this.session = ClientBackgroundService.getInstance().getSession();
@@ -330,7 +331,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         label4.setText("Ограничение:");
         panel5.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel6 = new JPanel();
-        panel6.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel6.setLayout(new GridLayoutManager(4, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel5.add(panel6, new GridConstraints(0, 1, 4, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         titleNameLabel = new JLabel();
         titleNameLabel.setText("нет данных");
@@ -344,6 +345,13 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         final JLabel label5 = new JLabel();
         label5.setText("120 символов");
         panel6.add(label5, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        findTitleUsageButton = new JButton();
+        findTitleUsageButton.setBorderPainted(false);
+        findTitleUsageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/search16.png")));
+        findTitleUsageButton.setMargin(new Insets(2, 2, 2, 2));
+        findTitleUsageButton.setText("");
+        findTitleUsageButton.setToolTipText("Поиск использований");
+        panel6.add(findTitleUsageButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
         editTitlesPanel.add(toolBar1, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
