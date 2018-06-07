@@ -20,6 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.SelectionMaterialWindow;
+import com.mmz.specs.application.gui.common.utils.Renders;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.MaterialListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
@@ -246,21 +247,7 @@ public class EditMaterialListWindow extends JDialog {
 
     private void initMaterialList() {
 
-        materialList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof MaterialListEntity) {
-                    MaterialListEntity entity = (MaterialListEntity) value;
-                    final String shortProfile = entity.getMaterialByMaterialId().getShortProfile();
-                    final String shortMark = entity.getMaterialByMaterialId().getShortMark();
-                    setOpaque(true);
-
-                    return super.getListCellRendererComponent(list, shortMark + " " + shortProfile + (entity.isMainMaterial() ? " (Основной)" : ""), index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        });
+        materialList.setCellRenderer(Renders.DEFAULT_LIST_MATERIAL_LIST_CELL_RENDERER);
 
         materialList.addListSelectionListener(e -> {
             if (materialList.getSelectedValue() != null) {

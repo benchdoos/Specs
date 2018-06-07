@@ -550,7 +550,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
             addTreeNode(entity, selectionPath);
 
-            DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
+            try {
+                DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

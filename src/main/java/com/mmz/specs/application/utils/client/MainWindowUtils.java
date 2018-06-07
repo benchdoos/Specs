@@ -19,11 +19,12 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
-import com.mmz.specs.model.DetailEntity;
-import com.mmz.specs.model.DetailListEntity;
-import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.dao.MaterialListDaoImpl;
+import com.mmz.specs.model.*;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
+import com.mmz.specs.service.MaterialListService;
+import com.mmz.specs.service.MaterialListServiceImpl;
 import com.sun.istack.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -238,5 +239,16 @@ public class MainWindowUtils {
             return (ClientMainWindow) parentWindow;
         }
         return null;
+    }
+
+    public boolean containsMaterialEntityInMaterialListEntity(MaterialEntity materialEntity) {
+        MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+        ArrayList<MaterialListEntity> list = (ArrayList<MaterialListEntity>) service.listMaterialLists();
+        for (MaterialListEntity entity : list) {
+            if (entity.getMaterialByMaterialId().equals(materialEntity)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

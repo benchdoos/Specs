@@ -44,6 +44,7 @@ public class CreateMaterialWindow extends JDialog {
     private JTextField shortProfileTextField;
     private JCheckBox activeCheckBox;
     private Session session;
+
     private MaterialEntity materialEntity;
 
     public CreateMaterialWindow(MaterialEntity materialEntity) {
@@ -143,16 +144,29 @@ public class CreateMaterialWindow extends JDialog {
         if (this.materialEntity != null) {
             materialEntity.setId(this.materialEntity.getId());
             service.updateMaterial(materialEntity);
+            this.materialEntity = materialEntity;
         } else {
-            service.addMaterial(materialEntity);
+            this.materialEntity = service.getMaterialById(service.addMaterial(materialEntity));
         }
     }
 
     private boolean checkFields() {
-        if (longMarkTextField.getText().isEmpty() || longMarkTextField.getText().length() > 200) return false;
-        if (longProfileTextField.getText().isEmpty() || longProfileTextField.getText().length() > 200) return false;
-        if (shortMarkTextField.getText().isEmpty() || shortMarkTextField.getText().length() > 40) return false;
-        if (shortProfileTextField.getText().isEmpty() || shortProfileTextField.getText().length() > 50) return false;
+        if (longMarkTextField.getText().isEmpty() || longMarkTextField.getText().length() > 200) {
+            JOptionPane.showMessageDialog(this, "Поле полной марки не может быть пустым или длинна поля быть более 200");
+            return false;
+        }
+        if (longProfileTextField.getText().isEmpty() || longProfileTextField.getText().length() > 200) {
+            JOptionPane.showMessageDialog(this, "Поле полного профиля не может быть пустым или длинна поля быть более 200");
+            return false;
+        }
+        if (shortMarkTextField.getText().isEmpty() || shortMarkTextField.getText().length() > 40) {
+            JOptionPane.showMessageDialog(this, "Поле короткой марки не может быть пустым или длинна поля быть более 40");
+            return false;
+        }
+        if (shortProfileTextField.getText().isEmpty() || shortProfileTextField.getText().length() > 50) {
+            JOptionPane.showMessageDialog(this, "Поле короткого профиля не может быть пустым или длинна поля быть более 50");
+            return false;
+        }
         return true;
     }
 
@@ -168,6 +182,10 @@ public class CreateMaterialWindow extends JDialog {
 
     private void onCancel() {
         dispose();
+    }
+
+    public MaterialEntity getMaterialEntity() {
+        return materialEntity;
     }
 
     {
