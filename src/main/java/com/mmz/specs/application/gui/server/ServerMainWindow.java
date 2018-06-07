@@ -78,7 +78,7 @@ public class ServerMainWindow extends JFrame {
     private JPanel contentPane;
     private JTabbedPane tabbedPane;
     private JPanel monitorPanel;
-    private JList<Object> onlineUserList;
+    private JList<ClientConnection> onlineUserList;
     private JLabel onlineUsersCountLabel;
     private JLabel threadsCount;
     private JLabel serverOnlineTimeLabel;
@@ -711,7 +711,7 @@ public class ServerMainWindow extends JFrame {
         DefaultListModel<ClientConnection> listModel = new DefaultListModel<>();
         for (int i = 0; i < onlineUserList.getModel().getSize(); i++) {
             if (onlineUserList.getModel().getElementAt(i) instanceof ClientConnection) {
-                listModel.addElement((ClientConnection) onlineUserList.getModel().getElementAt(i));
+                listModel.addElement(onlineUserList.getModel().getElementAt(i));
             }
         }
 
@@ -1132,7 +1132,7 @@ public class ServerMainWindow extends JFrame {
 
     private void onUserInfoButton() {
         if (onlineUserList.getSelectedIndex() >= 0) {
-            ClientConnection connection = (ClientConnection) onlineUserList.getSelectedValue();
+            ClientConnection connection = onlineUserList.getSelectedValue();
             UserInfoWindow userInfoWindow = new UserInfoWindow(connection.getUserEntity());
             if (connection.getUserEntity() == null) {
                 userInfoWindow.setClientConnection(connection);
@@ -1236,7 +1236,7 @@ public class ServerMainWindow extends JFrame {
 
     private void updateOnlineUsersList() {
         List<ClientConnection> connections = ServerBackgroundService.getInstance().getConnectedClientsList();
-        DefaultListModel<Object> model = new DefaultListModel<>();
+        DefaultListModel<ClientConnection> model = new DefaultListModel<>();
         if (connections != null) {
             for (ClientConnection connection : connections) {
                 model.addElement(connection);
