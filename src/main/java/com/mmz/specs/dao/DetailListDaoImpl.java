@@ -163,6 +163,20 @@ public class DetailListDaoImpl implements DetailListDao {
                 }
             }
         }
+
+        if (result.isEmpty()) {
+            for (DetailEntity entity : details) {
+                Query query1 = session.createQuery("from DetailListEntity where detailByParentDetailId = " + entity.getId());
+                List list1 = query1.list();
+                for (Object o : list1) {
+                    DetailListEntity detailListEntity = (DetailListEntity) o;
+                    if (detailListEntity.isActive()) {
+                        result.add(detailListEntity);
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
@@ -205,7 +219,7 @@ public class DetailListDaoImpl implements DetailListDao {
         List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
 
         for (DetailListEntity entity : detailListEntities) {
-            if (!containsEntityInList(result, entity.getDetailByParentDetailId())) {
+            if (doesNotContainEntityInList(result, entity.getDetailByParentDetailId())) {
                 result.add(entity.getDetailByParentDetailId());
             }
         }
@@ -231,7 +245,7 @@ public class DetailListDaoImpl implements DetailListDao {
         List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
 
         for (DetailListEntity entity : detailListEntities) {
-            if (!containsEntityInList(result, entity.getDetailByChildDetailId())) {
+            if (doesNotContainEntityInList(result, entity.getDetailByChildDetailId())) {
                 result.add(entity.getDetailByChildDetailId());
             }
         }
@@ -255,17 +269,17 @@ public class DetailListDaoImpl implements DetailListDao {
         return result;
     }
 
-    private boolean containsEntityInList(List<DetailEntity> list, DetailEntity entity) {
-        if (list == null) return false;
-        if (list.size() <= 0) return false;
+    private boolean doesNotContainEntityInList(List<DetailEntity> list, DetailEntity entity) {
+        if (list == null) return true;
+        if (list.size() <= 0) return true;
 
         for (DetailEntity detailEntity : list) {
             if (detailEntity.getCode().equalsIgnoreCase(entity.getCode())) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     private List<DetailListEntity> getDetailEntity(DetailEntity entity, List list) {
