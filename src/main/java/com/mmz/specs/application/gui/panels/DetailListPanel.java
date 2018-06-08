@@ -642,16 +642,19 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         addButton.setEnabled(false);
         addButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addButton.setText("");
+        addButton.setToolTipText("Добавить узел (CTRL+INSERT)");
         toolBar1.add(addButton);
         copyButton = new JButton();
         copyButton.setEnabled(false);
         copyButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/copy.png")));
         copyButton.setText("");
+        copyButton.setToolTipText("Дублировать узел (CTRL+D)");
         toolBar1.add(copyButton);
         editButton = new JButton();
         editButton.setEnabled(false);
         editButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editButton.setText("");
+        editButton.setToolTipText("Редактировать (CTRL+E)");
         toolBar1.add(editButton);
         label10.setLabelFor(searchTextField);
     }
