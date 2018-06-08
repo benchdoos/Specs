@@ -95,7 +95,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initTimer() {
-        uiUpdateTimer = new Timer(1000, e -> updateStatusLabel());
+        uiUpdateTimer = new Timer(300, e -> updateStatusLabel());
         if (!uiUpdateTimer.isRunning()) {
             uiUpdateTimer.start();
         }

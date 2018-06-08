@@ -151,26 +151,28 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void onCopyButton() {
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (selectedEntity != null) {
-            CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
-            addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
-            addDetailWindow.setVisible(true);
+            if (selectedEntity.isUnit()) {
+                CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
+                addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
+                addDetailWindow.setVisible(true);
 
-            DetailEntity entity = addDetailWindow.getDetailEntity();
+                DetailEntity entity = addDetailWindow.getDetailEntity();
 
-            if (entity != null) {
-                entity.setUnit(true);
-                entity.setActive(true);
+                if (entity != null) {
+                    entity.setUnit(true);
+                    entity.setActive(true);
 
-                Window window = FrameUtils.findWindow(this);
-                if (window instanceof ClientMainWindow) {
-                    ClientMainWindow mainWindow = (ClientMainWindow) window;
-                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                    try {
-                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, selectedEntity), true);
-                    } catch (IllegalStateException e) {
-                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                        JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
-                                "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                    Window window = FrameUtils.findWindow(this);
+                    if (window instanceof ClientMainWindow) {
+                        ClientMainWindow mainWindow = (ClientMainWindow) window;
+                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                        try {
+                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, selectedEntity), true);
+                        } catch (IllegalStateException e) {
+                            log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                            JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                                    "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                        }
                     }
                 }
             }
