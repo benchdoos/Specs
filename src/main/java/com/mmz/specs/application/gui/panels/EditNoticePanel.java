@@ -100,6 +100,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JLabel detailCodeLabel;
     private JLabel detailTitleLabel;
     private JButton editDetailInfoButton;
+    private JButton copyButton;
     private Session session;
     private DetailEntity detailEntity;
     private DetailEntity brotherEntity;
@@ -132,7 +133,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         initNewDetailEntity(this.detailEntity);
 
-        copyBrotherEntityToDetailEntity();
+        copyBrotherEntityToDetailEntity(this.detailEntity, this.brotherEntity);
 
         fillMainTree();
     }
@@ -192,6 +193,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void initEditPanelListeners() {
         addItemButton.addActionListener(e -> onAddNewItemButton());
+        copyButton.addActionListener(e -> onCopyButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
         moveItemDownButton.addActionListener(e -> onMoveItemDown());
@@ -227,7 +229,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
 
             private void updateEntity() {
-                DetailEntity parent = getParent(mainTree.getSelectionPath());
+                DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
                 DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 List<DetailListEntity> detailListEntitiesByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
                 Collections.sort(detailListEntitiesByParentAndChild);
@@ -352,7 +354,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         });
 
         isInterchangeableCheckBox.addActionListener(e -> {
-            DetailEntity parent = getParent(mainTree.getSelectionPath());
+            DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
             DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
             List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
             Collections.sort(detailListByParentAndChild);
@@ -647,10 +649,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         return detailListEntity;
     }
 
-    private DetailEntity getParent(TreePath selectionPath) {
-        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
-        return (DetailEntity) node.getUserObject();
-    }
 
     private boolean notContainsEntityInParents(TreePath selectionPath, DetailEntity entity) {
         for (Object o : selectionPath.getPath()) {
@@ -683,6 +681,52 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
         }
         return true;
+    }
+
+    private void onCopyButton() {
+        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
+        if (selectedEntity != null && parent != null) {
+            CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
+            addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
+            addDetailWindow.setVisible(true);
+
+            DetailEntity entity = addDetailWindow.getDetailEntity();
+
+            if (entity != null) {
+                entity.setUnit(true);
+                entity.setActive(true);
+
+                copyBrotherEntityToDetailEntity(entity, selectedEntity);
+                entity = new DetailServiceImpl(new DetailDaoImpl(session)).getDetailByIndex(entity.getCode());
+
+                DetailListService service = new DetailListServiceImpl(session);
+
+                ArrayList<DetailListEntity> listEntities = null;
+                try {
+                    listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
+                    if (listEntities.isEmpty()) {
+                        DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
+                        service.addDetailList(detailListEntity);
+                    }
+                } catch (Exception e) {
+                    DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
+                    service.addDetailList(detailListEntity);
+                }
+                fillMainTree();
+            }
+            showAllEntities(entity);
+        }
+    }
+
+    private DetailListEntity getNewDetailListEntity(DetailEntity parent, DetailEntity entity) {
+        DetailListEntity detailListEntity = new DetailListEntity();
+        detailListEntity.setDetailByParentDetailId(parent);
+        detailListEntity.setDetailByChildDetailId(entity);
+        detailListEntity.setQuantity(1);
+        detailListEntity.setActive(true);
+        detailListEntity.setInterchangeableNode(false);
+        return detailListEntity;
     }
 
     private void onRemoveItem() { //Testme need several tests
@@ -1034,6 +1078,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 //----------------------
 
                 addItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
+                copyButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
                 removeItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
                 moveItemUpButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
                 moveItemDownButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
@@ -1205,7 +1250,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         techProcessComboBox.addActionListener(e -> {
             try {
                 DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                selectedEntity.setTechProcessByTechProcessId((TechProcessEntity) techProcessComboBox.getSelectedItem());
+                if (selectedEntity != null) {
+                    selectedEntity.setTechProcessByTechProcessId((TechProcessEntity) techProcessComboBox.getSelectedItem());
+                }
             } catch (Exception ignore) {/*NOP*/
             }
         });
@@ -1250,7 +1297,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         onCancel();
     }
 
-    private void copyBrotherEntityToDetailEntity() {
+    private void copyBrotherEntityToDetailEntity(DetailEntity detailEntity, DetailEntity brotherEntity) {
         if (brotherEntity != null) {
             DetailListService service = new DetailListServiceImpl(session);
             final ArrayList<DetailListEntity> detailListByParent = (ArrayList<DetailListEntity>) service.getDetailListByParent(brotherEntity);
@@ -1263,6 +1310,13 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         finalList.add(finalEntity);
                     }
                 }
+
+                DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                if (detailService.getDetailByIndex(detailEntity.getCode()) == null) {
+                    detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                }
+
+
                 for (DetailListEntity entity : finalList) {
                     if (entity != null) {
                         DetailListEntity newEntity = new DetailListEntity();
@@ -1275,14 +1329,20 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         service.addDetailList(newEntity);
                     }
                 }
-                ArrayList<DetailListEntity> list = (ArrayList<DetailListEntity>) service.getDetailListByParent(detailEntity);
-                String detailCode = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                log.debug("Showing all DetailListEntities for: {}", detailCode);
-                for (DetailListEntity entity : list) {
-                    if (entity.getDetailByParentDetailId().equals(detailEntity)) {
-                        log.debug("Added entity {} for {}", entity, detailCode);
-                    }
-                }
+
+                showAllEntities(detailEntity);
+            }
+        }
+    }
+
+    private void showAllEntities(DetailEntity detailEntity) {
+        DetailListService service = new DetailListServiceImpl(session);
+        ArrayList<DetailListEntity> list = (ArrayList<DetailListEntity>) service.getDetailListByParent(detailEntity);
+        String detailCode = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+        log.debug("Showing all DetailListEntities for: {}", detailCode);
+        for (DetailListEntity entity : list) {
+            if (entity.getDetailByParentDetailId().equals(detailEntity)) {
+                log.debug("Added entity {} for {}", entity, detailCode);
             }
         }
     }
@@ -1393,6 +1453,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         addItemButton.setText("");
         addItemButton.setToolTipText("Добавить деталь / узел (CTRL++)");
         treeToolBar.add(addItemButton);
+        copyButton = new JButton();
+        copyButton.setEnabled(false);
+        copyButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/copy.png")));
+        copyButton.setText("");
+        treeToolBar.add(copyButton);
         removeItemButton = new JButton();
         removeItemButton.setEnabled(false);
         removeItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));

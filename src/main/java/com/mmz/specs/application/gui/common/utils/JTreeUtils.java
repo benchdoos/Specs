@@ -19,6 +19,7 @@ import com.mmz.specs.model.DetailEntity;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 public class JTreeUtils {
     public static DetailEntity getSelectedDetailEntityFromTree(JTree tree) {
@@ -26,5 +27,15 @@ public class JTreeUtils {
         if (lastSelectedPathComponent != null) {
             return (DetailEntity) lastSelectedPathComponent.getUserObject();
         } else return null;
+    }
+
+    public static DetailEntity getParentForSelectionPath(TreePath selectionPath) {
+        if (selectionPath != null) {
+            final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
+            if (node != null) {
+                return (DetailEntity) node.getUserObject();
+            }
+        }
+        return null;
     }
 }

@@ -251,6 +251,14 @@
                           <toolTipText value="Добавить деталь / узел (CTRL++)"/>
                         </properties>
                       </component>
+                      <component id="18512" class="javax.swing.JButton" binding="copyButton">
+                        <constraints/>
+                        <properties>
+                          <enabled value="false"/>
+                          <icon value="img/gui/edit/copy.png"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
                       <component id="b5c5e" class="javax.swing.JButton" binding="removeItemButton">
                         <constraints/>
                         <properties>
