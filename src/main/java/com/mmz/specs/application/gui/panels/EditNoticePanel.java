@@ -1079,7 +1079,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 //----------------------
 
                 addItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
-                copyButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
+                copyButton.setEnabled(((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser))) && detailEntity.isUnit());
                 removeItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
                 moveItemUpButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
                 moveItemDownButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));

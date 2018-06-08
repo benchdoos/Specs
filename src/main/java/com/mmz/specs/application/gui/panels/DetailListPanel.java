@@ -450,10 +450,10 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void initMainTree() {
         mainTree.addTreeSelectionListener(e -> {
-            DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-            if (entityFromTree != null) {
+            DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+            if (selectedEntity != null) {
                 DetailServiceImpl detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                DetailEntity loadedEntity = detailService.getDetailById(entityFromTree.getId());
+                DetailEntity loadedEntity = detailService.getDetailById(selectedEntity.getId());
 
                 updateDetailInfoPanel(loadedEntity);
             }
@@ -497,8 +497,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     @Override
     public void setUIEnabled(boolean enable) {
         addButton.setEnabled(enable);
-        copyButton.setEnabled(enable);
         editButton.setEnabled(enable);
+        final DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        copyButton.setEnabled(selectedEntity != null ? enable && selectedEntity.isUnit() : enable);
     }
 
     /**
