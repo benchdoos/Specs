@@ -694,11 +694,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             DetailEntity entity = addDetailWindow.getDetailEntity();
 
             if (entity != null) {
-                entity.setUnit(true);
+                entity.setUnit(selectedEntity.isUnit());
                 entity.setActive(true);
 
                 copyBrotherEntityToDetailEntity(entity, selectedEntity);
-                entity = new DetailServiceImpl(new DetailDaoImpl(session)).getDetailByIndex(entity.getCode());
+
+                entity = createDetailEntityIfNotExist(entity);
 
                 DetailListService service = new DetailListServiceImpl(session);
 
@@ -1311,10 +1312,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     }
                 }
 
-                DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                if (detailService.getDetailByIndex(detailEntity.getCode()) == null) {
-                    detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
-                }
+                detailEntity = createDetailEntityIfNotExist(detailEntity);
 
 
                 for (DetailListEntity entity : finalList) {
@@ -1333,6 +1331,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 showAllEntities(detailEntity);
             }
         }
+    }
+
+    private DetailEntity createDetailEntityIfNotExist(DetailEntity detailEntity) {
+        DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+        final DetailEntity detailByIndex = detailService.getDetailByIndex(detailEntity.getCode());
+        if (detailByIndex == null) {
+            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+        } else {
+            detailEntity = detailByIndex;
+        }
+        return detailEntity;
     }
 
     private void showAllEntities(DetailEntity detailEntity) {
