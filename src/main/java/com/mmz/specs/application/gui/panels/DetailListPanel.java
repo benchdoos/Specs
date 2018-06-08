@@ -23,6 +23,7 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.CreateDetailWindow;
 import com.mmz.specs.application.gui.client.MaterialListWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
+import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
@@ -42,7 +43,6 @@ import org.imgscalr.Scalr;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -73,6 +73,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private JButton editButton;
     private JLabel materialMarkLabel;
     private JLabel materialProfileLabel;
+    private JButton copyButton;
 
     public DetailListPanel() {
         $$$setupUI$$$();
@@ -112,6 +113,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         addButton.addActionListener(e -> onAddNewItem());
 
+        copyButton.addActionListener(e -> onCopyButton());
+
         editButton.addActionListener(e -> onEditDetail(true));
         editButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -140,6 +143,35 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                     log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                     JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                             "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private void onCopyButton() {
+        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (selectedEntity != null) {
+            CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
+            addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
+            addDetailWindow.setVisible(true);
+
+            DetailEntity entity = addDetailWindow.getDetailEntity();
+
+            if (entity != null) {
+                entity.setUnit(true);
+                entity.setActive(true);
+
+                Window window = FrameUtils.findWindow(this);
+                if (window instanceof ClientMainWindow) {
+                    ClientMainWindow mainWindow = (ClientMainWindow) window;
+                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                    try {
+                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, selectedEntity), true);
+                    } catch (IllegalStateException e) {
+                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                        JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                                "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                    }
                 }
             }
         }
@@ -238,33 +270,27 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onNoticeInfo(boolean select) {
-        DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-        if (lastSelectedPathComponent != null) {
-            if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
-                DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
+        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (selectedEntity != null) {
+            DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            List<DetailListEntity> list;
 
-                DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
-                List<DetailListEntity> list;
-
-                if (detailListService.getDetailListByParent(detailEntity).size() > 0) {
-                    list = detailListService.getDetailListByParent(detailEntity);
-                } else {
-                    list = detailListService.getDetailListByChild(detailEntity);
-
-                }
-                if (list != null) {
-                    if (list.size() > 0) {
-                        List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
-                        NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
-                        noticeInfoPanel.setDetailEntity(detailEntity);
-
-                        ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
-                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
-                        clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);
-                    }
-                }
+            if (detailListService.getDetailListByParent(selectedEntity).size() > 0) {
+                list = detailListService.getDetailListByParent(selectedEntity);
             } else {
-                log.warn("Not DetailEntity: " + mainTree.getLastSelectedPathComponent().getClass().getName());
+                list = detailListService.getDetailListByChild(selectedEntity);
+
+            }
+            if (list != null) {
+                if (list.size() > 0) {
+                    List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
+                    NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
+                    noticeInfoPanel.setDetailEntity(selectedEntity);
+
+                    ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
+                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
+                    clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);
+                }
             }
         }
     }
@@ -347,8 +373,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             if (image != null) {
                 BufferedImage scaledImage = Scalr.resize(image, 128);
 
-                DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-                DetailEntity current = (DetailEntity) lastSelectedPathComponent.getUserObject();
+                DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 if (selectedComponent.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
                     detailIconLabel.setIcon(new ImageIcon(scaledImage));
                     detailIconLabel.setText("");
@@ -425,19 +450,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void initMainTree() {
         mainTree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+            DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+            if (entityFromTree != null) {
+                DetailServiceImpl detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                DetailEntity loadedEntity = detailService.getDetailById(entityFromTree.getId());
 
-            if (lastSelectedPathComponent != null) {
-                if (lastSelectedPathComponent.getUserObject() instanceof DetailEntity) {
-                    DetailEntity entityFromTree = (DetailEntity) lastSelectedPathComponent.getUserObject();
-
-                    DetailServiceImpl detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                    DetailEntity loadedEntity = detailService.getDetailById(entityFromTree.getId());
-
-                    updateDetailInfoPanel(loadedEntity);
-                } else {
-                    log.warn("Not DetailEntity: " + mainTree.getLastSelectedPathComponent().getClass().getName());
-                }
+                updateDetailInfoPanel(loadedEntity);
             }
         });
 
@@ -445,10 +463,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onEditDetail(boolean select) {
-        if (mainTree.getLastSelectedPathComponent() != null) {
-            DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-            DetailEntity entityFromTree = (DetailEntity) defaultMutableTreeNode.getUserObject();
-
+        final DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (entityFromTree != null) {
             Window window = FrameUtils.findWindow(this);
             if (window instanceof ClientMainWindow) {
                 ClientMainWindow mainWindow = (ClientMainWindow) window;
@@ -481,6 +497,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     @Override
     public void setUIEnabled(boolean enable) {
         addButton.setEnabled(enable);
+        copyButton.setEnabled(enable);
         editButton.setEnabled(enable);
     }
 
@@ -610,6 +627,11 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         addButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addButton.setText("");
         toolBar1.add(addButton);
+        copyButton = new JButton();
+        copyButton.setEnabled(false);
+        copyButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/copy.png")));
+        copyButton.setText("");
+        toolBar1.add(copyButton);
         editButton = new JButton();
         editButton.setEnabled(false);
         editButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
