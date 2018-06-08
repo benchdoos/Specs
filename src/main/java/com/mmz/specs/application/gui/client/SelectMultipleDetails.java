@@ -48,7 +48,7 @@ public class SelectMultipleDetails extends JDialog {
 
     private ArrayList<DetailEntity> selectedDetailEntities;
 
-    public SelectMultipleDetails() {
+    SelectMultipleDetails() {
         this.session = ClientBackgroundService.getInstance().getSession();
 
         initWindow();
@@ -149,11 +149,18 @@ public class SelectMultipleDetails extends JDialog {
     private void onOK() {
         final List<DetailEntity> selectedValuesList = mainList.getSelectedValuesList();
         if (!selectedValuesList.isEmpty()) {
-            selectedDetailEntities = (ArrayList<DetailEntity>) selectedValuesList;
+            final ArrayList<DetailEntity> selectedValuesList1 = (ArrayList<DetailEntity>) selectedValuesList;
+            if (selectedValuesList1.size() > 1) {
+                selectedDetailEntities = selectedValuesList1;
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Выеберете как минимум 2 детали",
+                        "Внимание", JOptionPane.WARNING_MESSAGE);
+            }
         } else {
             selectedDetailEntities = null;
+            dispose();
         }
-        dispose();
     }
 
     private void onCancel() {
@@ -161,7 +168,7 @@ public class SelectMultipleDetails extends JDialog {
         dispose();
     }
 
-    public ArrayList<DetailEntity> getSelectedDetailEntities() {
+    ArrayList<DetailEntity> getSelectedDetailEntities() {
         return selectedDetailEntities;
     }
 
