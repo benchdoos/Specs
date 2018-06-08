@@ -19,6 +19,7 @@ import com.mmz.specs.dao.DetailDao;
 import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailTitleEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -27,6 +28,10 @@ public class DetailServiceImpl implements DetailService {
 
     public DetailServiceImpl() {
         detailDao = new DetailDaoImpl();
+    }
+
+    public DetailServiceImpl(Session session) {
+        this.detailDao = new DetailDaoImpl(session);
     }
 
     public DetailServiceImpl(DetailDao detailDao) {
