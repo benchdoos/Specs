@@ -192,7 +192,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void initEditPanelListeners() {
-        addItemButton.addActionListener(e -> onAddNewItemButton());
+        /*addItemButton.addActionListener(e -> onAddNewItemButton());*/
+        addItemButton.addActionListener(e -> onAddNewItemButtonNew());
         copyButton.addActionListener(e -> onCopyButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
@@ -367,6 +368,24 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         });
 
         editImageButton.addActionListener(e -> onEditDetailImage());
+    }
+
+    private void onAddNewItemButtonNew() {
+        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, false, true);
+        selectionDetailWindow.setLocation(FrameUtils
+                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+        selectionDetailWindow.setVisible(true);
+        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+
+        if (list != null) {
+            for (DetailEntity entity : list) {
+                if (entity != null) {
+                    final TreePath selectionPath = mainTree.getSelectionPath();
+                    addTreeNode(entity, selectionPath);
+                }
+            }
+        }
+
     }
 
 
@@ -685,38 +704,42 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void onCopyButton() {
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
-        if (selectedEntity != null && parent != null) {
-            CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
-            addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
-            addDetailWindow.setVisible(true);
+        final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+        final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
+        if (!isRoot) {
+            DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
+            if (selectedEntity != null && parent != null) {
+                CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
+                addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
+                addDetailWindow.setVisible(true);
 
-            DetailEntity entity = addDetailWindow.getDetailEntity();
+                DetailEntity entity = addDetailWindow.getDetailEntity();
 
-            if (entity != null) {
-                entity.setUnit(selectedEntity.isUnit());
-                entity.setActive(true);
+                if (entity != null) {
+                    entity.setUnit(selectedEntity.isUnit());
+                    entity.setActive(true);
 
-                copyBrotherEntityToDetailEntity(entity, selectedEntity);
+                    copyBrotherEntityToDetailEntity(entity, selectedEntity);
 
-                entity = createDetailEntityIfNotExist(entity);
+                    entity = createDetailEntityIfNotExist(entity);
 
-                DetailListService service = new DetailListServiceImpl(session);
+                    DetailListService service = new DetailListServiceImpl(session);
 
-                ArrayList<DetailListEntity> listEntities = null;
-                try {
-                    listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
-                    if (listEntities.isEmpty()) {
+                    ArrayList<DetailListEntity> listEntities = null;
+                    try {
+                        listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
+                        if (listEntities.isEmpty()) {
+                            DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
+                            service.addDetailList(detailListEntity);
+                        }
+                    } catch (Exception e) {
                         DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
                         service.addDetailList(detailListEntity);
                     }
-                } catch (Exception e) {
-                    DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                    service.addDetailList(detailListEntity);
+                    fillMainTree();
                 }
-                fillMainTree();
+                showAllEntities(entity);
             }
-            showAllEntities(entity);
         }
     }
 
