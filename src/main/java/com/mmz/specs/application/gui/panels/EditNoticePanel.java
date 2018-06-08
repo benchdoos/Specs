@@ -687,7 +687,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
         if (selectedEntity != null && parent != null) {
-            CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
+            CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
             addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
             addDetailWindow.setVisible(true);
 

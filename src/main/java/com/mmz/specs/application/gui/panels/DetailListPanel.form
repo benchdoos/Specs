@@ -302,6 +302,7 @@
                       <enabled value="false"/>
                       <icon value="img/gui/edit/add.png"/>
                       <text value=""/>
+                      <toolTipText value="Добавить узел (CTRL+INSERT)"/>
                     </properties>
                   </component>
                   <component id="9ffbc" class="javax.swing.JButton" binding="copyButton">
@@ -310,6 +311,7 @@
                       <enabled value="false"/>
                       <icon value="img/gui/edit/copy.png"/>
                       <text value=""/>
+                      <toolTipText value="Дублировать узел (CTRL+D)"/>
                     </properties>
                   </component>
                   <component id="810d8" class="javax.swing.JButton" binding="editButton">
@@ -318,6 +320,7 @@
                       <enabled value="false"/>
                       <icon value="img/gui/edit/edit.png"/>
                       <text value=""/>
+                      <toolTipText value="Редактировать (CTRL+E)"/>
                     </properties>
                   </component>
                 </children>

@@ -58,6 +58,18 @@ public class CreateDetailWindow extends JDialog {
 
     public CreateDetailWindow(DetailEntity detailEntity) {
         $$$setupUI$$$();
+        initWindow(detailEntity);
+    }
+
+    public CreateDetailWindow(DetailEntity detailEntity, boolean customIsUnit) {
+        $$$setupUI$$$();
+        initWindow(detailEntity);
+        unitCheckBox.setSelected(customIsUnit);
+        unitCheckBox.setEnabled(false);
+    }
+
+    private void initWindow(DetailEntity detailEntity) {
+        $$$setupUI$$$();
         this.detailEntity = detailEntity;
         session = ClientBackgroundService.getInstance().getSession();
 

@@ -110,6 +110,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         initSearchTextFieldKeysBindings();
 
+        initKeyBindings();
+
 
         addButton.addActionListener(e -> onAddNewItem());
 
@@ -124,6 +126,21 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
         });
+    }
+
+    private void initKeyBindings() {
+        registerKeyboardAction(e -> onAddNewItem(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        registerKeyboardAction(e -> onCopyButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        registerKeyboardAction(e -> onEditDetail(true),
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
     }
 
     private void onAddNewItem() {
@@ -152,7 +169,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (selectedEntity != null) {
             if (selectedEntity.isUnit()) {
-                CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
+                CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
                 addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
                 addDetailWindow.setVisible(true);
 
@@ -185,10 +202,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         searchTextField.registerKeyboardAction(e -> searchTextField.setText(""),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        registerKeyboardAction(e -> onEditDetail(true),
-                KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
     }
