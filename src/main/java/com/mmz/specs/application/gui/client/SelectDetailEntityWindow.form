@@ -76,7 +76,7 @@
             </constraints>
             <properties>
               <editable value="true"/>
-              <maximumRowCount value="30"/>
+              <maximumRowCount value="15"/>
             </properties>
           </component>
           <component id="8084c" class="javax.swing.JButton" binding="multipleSelectionButton">
@@ -108,7 +108,9 @@
                 <maximum-size width="400" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <maximumRowCount value="15"/>
+            </properties>
           </component>
           <component id="5aeb9" class="javax.swing.JCheckBox" binding="unitCheckBox">
             <constraints>

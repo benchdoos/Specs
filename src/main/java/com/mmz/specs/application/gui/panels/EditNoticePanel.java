@@ -393,7 +393,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
 
     private void onEditDetailInfo() {
-        final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        /*final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         CreateDetailWindow createDetailWindow = new CreateDetailWindow(selectedDetailEntityFromTree);
         createDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createDetailWindow));
         createDetailWindow.setVisible(true);
@@ -404,7 +404,34 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             updateTreeDetail();
             detailCodeLabel.setText(changed.getCode());
             detailTitleLabel.setText(changed.getDetailTitleByDetailTitleId().getTitle());
+        }*/
+        final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+
+        if (selectedDetailEntityFromTree != null) {
+            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(selectedDetailEntityFromTree, true, selectedDetailEntityFromTree.isUnit());
+            selectionDetailWindow.setLocation(FrameUtils
+                    .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+            selectionDetailWindow.setVisible(true);
+            ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+
+            if (list != null) {
+                if (list.size() > 0) {
+                    final DetailEntity changed = list.get(0);
+                    if (changed != null) {
+                        /*DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+                        service.updateDetail(changed);*/
+                        updateTreeDetail();
+                        detailCodeLabel.setText(changed.getCode());
+                        detailTitleLabel.setText(changed.getDetailTitleByDetailTitleId().getTitle());
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Нельзя сделать выбор из нескольких деталей",
+                            "Ошибка редактирования", JOptionPane.WARNING_MESSAGE);
+                }
+            }
         }
+
+
     }
 
     private void onEditDetailImage() {

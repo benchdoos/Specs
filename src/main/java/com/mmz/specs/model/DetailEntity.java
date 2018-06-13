@@ -16,6 +16,7 @@
 package com.mmz.specs.model;
 
 import com.google.common.collect.ComparisonChain;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -137,13 +138,29 @@ public class DetailEntity implements Comparable<DetailEntity> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null) return false;
+        /*if (o == null) return false;
         if (this == o) return true;
         if (!(o instanceof DetailEntity)) return false;
 
         DetailEntity that = (DetailEntity) o;
 
-        return code != null && that.getCode() != null && code.equals(that.getCode());
+        final boolean codeE = getCode() != null && that.getCode() != null && getCode().equals(that.getCode());
+        final boolean titleE = getDetailTitleByDetailTitleId() != null && that.getDetailTitleByDetailTitleId() != null
+                && getDetailTitleByDetailTitleId().equals(that.getDetailTitleByDetailTitleId());
+        return codeE && titleE;
+
+        if (this == o) return true;*/
+
+        if (!(o instanceof DetailEntity)) return false;
+
+        DetailEntity that = (DetailEntity) o;
+
+        return new EqualsBuilder()
+                .append(getId(), that.getId())
+                .append(getDetailTitleByDetailTitleId().getTitle(), that.getDetailTitleByDetailTitleId().getTitle())
+                .append(isActive(), that.isActive())
+                .append(isUnit(), that.isUnit())
+                .isEquals();
     }
 
     @Override
