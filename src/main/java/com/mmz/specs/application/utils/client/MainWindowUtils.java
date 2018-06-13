@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.utils.client;
 
+import com.google.common.collect.ComparisonChain;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -56,6 +57,11 @@ public class MainWindowUtils {
 
         for (DetailListEntity detailListEntity : askedListRoot) {
             List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
+            rootParentsList.sort((o1, o2) -> ComparisonChain.start()
+                    .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                    .compare(o1.getCode(), o2.getCode())
+                    .compareTrueFirst(o1.isActive(), o2.isActive())
+                    .result());
             if (rootParentsList.size() == 0) {
                 result = addUniqueResult(result, service, uniqueRootDetails, detailListEntity);
             }
@@ -95,6 +101,12 @@ public class MainWindowUtils {
 
     public DefaultMutableTreeNode getChildren(DetailListService service, DetailEntity parent) {
         ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
+        children.sort((o1, o2) -> ComparisonChain.start()
+                .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                .compare(o1.getCode(), o2.getCode())
+                .compareTrueFirst(o1.isActive(), o2.isActive())
+                .result());
+        
         DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         if (children.size() > 0) {
             for (DetailEntity entity : children) {
