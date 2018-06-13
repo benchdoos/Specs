@@ -29,6 +29,7 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.*;
 import com.mmz.specs.model.*;
@@ -381,7 +382,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             for (DetailEntity entity : list) {
                 if (entity != null) {
                     final TreePath selectionPath = mainTree.getSelectionPath();
-                    addTreeNode(entity, selectionPath);
+                    if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
+                        addTreeNode(entity, selectionPath);
+                    }
                 }
             }
         }
@@ -583,23 +586,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void addTreeNode(DetailEntity entity, TreePath selectionPath) {
         log.debug("Adding new entity {} to path: {}", entity, selectionPath);
         if (selectionPath != null) {
-            if (notContainsEntityInParents(selectionPath, entity)) {
-                if (notContainsEntityInChildren(selectionPath, entity)) {
-                    //fixme when we select root (for example) and add existing element from root - we got 2 entitys in root
-                    if (entity != null) {
-                        log.debug("Session transaction is: " + session.getTransaction().getStatus());
-                        addItemToTree(selectionPath, entity);
-                        fillEmptyDetailInfoPanel();
-                    }
-                } else {
-                    showMessageDialog(this, "Нельзя добавить деталь / узел "
-                            + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
-                            "т.к. он(а) уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
+            if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
+                if (entity != null) {
+                    log.debug("Session transaction is: " + session.getTransaction().getStatus());
+                    addItemToTree(selectionPath, entity);
+                    fillEmptyDetailInfoPanel();
                 }
-            } else {
-                showMessageDialog(this, "Нельзя добавить узел "
-                        + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
-                        "т.к. он не может содержать самого себя.", "Ошибка добавления", ERROR_MESSAGE);
             }
         } else {
             showMessageDialog(this, "Укажите сначала, куда необходимо добавить деталь", "Ошибка добавления", ERROR_MESSAGE);
@@ -668,39 +660,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         return detailListEntity;
     }
 
-
-    private boolean notContainsEntityInParents(TreePath selectionPath, DetailEntity entity) {
-        for (Object o : selectionPath.getPath()) {
-            if (o != null) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) o;
-                if (node.getUserObject() instanceof DetailEntity) {
-                    DetailEntity current = (DetailEntity) node.getUserObject();
-                    if (current.equals(entity)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean notContainsEntityInChildren(TreePath path, DetailEntity entity) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
-        for (int i = 0; i < node.getChildCount(); i++) {
-            final Object child = mainTree.getModel().getChild(node, i);
-            if (child != null) {
-                if (child instanceof DefaultMutableTreeNode) {
-                    DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) child).getUserObject();
-                    if (detailEntity != null && entity != null) {
-                        if (detailEntity.getId() == entity.getId()) {
-                            return false;
-                        }
-                    } else return false;
-                }
-            }
-        }
-        return true;
-    }
 
     private void onCopyButton() {
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
@@ -1163,7 +1122,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 fillDetailInfoPanel(lastUsed, selected);
             }
         });
-        mainTree.setBackground(new JPanel().getBackground());
     }
 
     private void fillMainTree() {
@@ -1422,7 +1380,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         noticeDescriptionTextArea = new JTextArea();
         noticeDescriptionTextArea.setBackground(new Color(-855310));
         noticeDescriptionTextArea.setEditable(false);
-        Font noticeDescriptionTextAreaFont = this.$$$getFont$$$("Consolas", -1, 14, noticeDescriptionTextArea.getFont());
+        Font noticeDescriptionTextAreaFont = UIManager.getFont("Label.font");
         if (noticeDescriptionTextAreaFont != null) noticeDescriptionTextArea.setFont(noticeDescriptionTextAreaFont);
         scrollPane1.setViewportView(noticeDescriptionTextArea);
         final JLabel label4 = new JLabel();
@@ -1473,8 +1431,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         changePanel.add(panel2, new GridConstraints(1, 0, 13, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane2 = new JScrollPane();
         panel2.add(scrollPane2, new GridConstraints(0, 0, 12, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        mainTree.setFocusable(true);
         mainTree.setRootVisible(false);
-        mainTree.setScrollsOnExpand(true);
         scrollPane2.setViewportView(mainTree);
         treeToolBar = new JToolBar();
         treeToolBar.setFloatable(false);
@@ -1616,25 +1574,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         label11.setLabelFor(workpieceWeightTextField);
         label13.setLabelFor(techProcessComboBox);
         label14.setLabelFor(detailQuantityTextField);
-    }
-
-    /**
-     * @noinspection ALL
-     */
-    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
-        if (currentFont == null) return null;
-        String resultName;
-        if (fontName == null) {
-            resultName = currentFont.getName();
-        } else {
-            Font testFont = new Font(fontName, Font.PLAIN, 10);
-            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
-                resultName = fontName;
-            } else {
-                resultName = currentFont.getName();
-            }
-        }
-        return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
     }
 
     /**

@@ -31,14 +31,15 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import static javax.swing.JOptionPane.WARNING_MESSAGE;
-import static javax.swing.JOptionPane.showMessageDialog;
+import static javax.swing.JOptionPane.*;
 
 public class CommonWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -69,6 +70,16 @@ public class CommonWindowUtils {
     public static void initApplicationVersionArea(JTextField textField) {
         textField.setBorder(BorderFactory.createEmptyBorder());
         textField.setBackground(new JPanel().getBackground());
+        String s = getApplicationVersionString();
+        if (s != null) {
+            textField.setText(s);
+        } else {
+            textField.setText(null);
+            textField.setVisible(false);
+        }
+    }
+
+    public static String getApplicationVersionString() {
         Properties properties = new Properties();
         try {
             properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
@@ -76,14 +87,98 @@ public class CommonWindowUtils {
             String version = properties.getProperty("application.version");
             String build = properties.getProperty("application.build");
             if (version != null && build != null) {
-                textField.setText(name + " v." + version + " (" + build + ")");
+                return name + " v." + version + " (" + build + ")";
             } else {
-                textField.setText(null);
-                textField.setVisible(false);
+                return null;
             }
         } catch (Exception e) {
             log.warn("Could not load application version info", e);
+            return null;
         }
+    }
+
+    public static int getIndexByValue(JList list, Object value) {
+        System.out.println(">>> " + list.getModel().getSize() + " " + value);
+        DefaultListModel model = (DefaultListModel) list.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            Object current = model.get(i);
+            if (current.equals(value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static boolean pathNotContainsEntity(Component parentComponent, JTree mainTree, TreePath selectionPath, DetailEntity entity) {
+        if (notContainsEntityInParent(parentComponent, selectionPath, entity)) {
+            if (notContainsEntityInParents(parentComponent, selectionPath, entity)) {
+                return notContainsEntityInChildren(parentComponent, mainTree, selectionPath, entity);
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean notContainsEntityInParent(Component parentComponent, TreePath selectionPath, DetailEntity entity) {
+        final Object o = selectionPath.getLastPathComponent();
+        if (o != null) {
+            if (o instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) o;
+                for (int i = 0; i < node.getChildCount(); i++) {
+                    DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) node.getChildAt(i);
+                    final Object userObject = childNode.getUserObject();
+                    if (userObject instanceof DetailEntity) {
+                        DetailEntity current = (DetailEntity) userObject;
+                        if (current.getId() == entity.getId()) {
+                            showMessageDialog(parentComponent, "Нельзя добавить деталь/узел "
+                                    + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                                    "т.к. он/она уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean notContainsEntityInParents(Component parentComponent, TreePath selectionPath, DetailEntity entity) {
+        for (Object o : selectionPath.getPath()) {
+            if (o != null) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) o;
+                if (node.getUserObject() instanceof DetailEntity) {
+                    DetailEntity current = (DetailEntity) node.getUserObject();
+                    if (current.equals(entity)) {
+                        showMessageDialog(parentComponent, "Нельзя добавить узел "
+                                + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                                "т.к. он не может содержать самого себя.", "Ошибка добавления", ERROR_MESSAGE);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean notContainsEntityInChildren(Component parentComponent, JTree mainTree, TreePath path, DetailEntity entity) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getParentPath().getLastPathComponent();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            final Object child = mainTree.getModel().getChild(node, i);
+            if (child != null) {
+                if (child instanceof DefaultMutableTreeNode) {
+                    DetailEntity detailEntity = (DetailEntity) ((DefaultMutableTreeNode) child).getUserObject();
+                    if (detailEntity != null && entity != null) {
+                        if (detailEntity.getId() == entity.getId()) {
+                            showMessageDialog(parentComponent, "Нельзя добавить деталь / узел "
+                                    + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                                    "т.к. он(а) уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
+                            return false;
+                        }
+                    } else return false;
+                }
+            }
+        }
+        return true;
     }
 
     public DefaultListModel<DetailEntity> getEffectList(int id) {
@@ -121,18 +216,6 @@ public class CommonWindowUtils {
             }
         }
         return result;
-    }
-
-    public static int getIndexByValue(JList list, Object value) {
-        System.out.println(">>> " + list.getModel().getSize() + " " + value);
-        DefaultListModel model = (DefaultListModel) list.getModel();
-        for (int i = 0; i < model.getSize(); i++) {
-            Object current = model.get(i);
-            if (current.equals(value)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private boolean addTitle(Component component, UsersEntity user) {

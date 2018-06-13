@@ -91,7 +91,7 @@
                         <properties>
                           <background color="-855310"/>
                           <editable value="false"/>
-                          <font name="Consolas" size="14"/>
+                          <font swing-font="Label.font"/>
                         </properties>
                       </component>
                     </children>
@@ -222,11 +222,11 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="8bfad" class="javax.swing.JTree" binding="mainTree" custom-create="true">
+                      <component id="f3a66" class="javax.swing.JTree" binding="mainTree" custom-create="true">
                         <constraints/>
                         <properties>
+                          <focusable value="true"/>
                           <rootVisible value="false"/>
-                          <scrollsOnExpand value="true"/>
                         </properties>
                       </component>
                     </children>
