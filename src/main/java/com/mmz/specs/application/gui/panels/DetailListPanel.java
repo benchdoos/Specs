@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.CREATE_SINGLE;
+
 public class DetailListPanel extends JPanel implements AccessPolicy {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final int MAXIMUM_STRING_LENGTH = 35;
@@ -131,7 +133,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onAddNewItemNew() {
-        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, true, false);
+        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, CREATE_SINGLE);
         selectionDetailWindow.setLocation(FrameUtils
                 .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
         selectionDetailWindow.setVisible(true);

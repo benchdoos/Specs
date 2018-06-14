@@ -62,65 +62,9 @@ public class SelectDetailEntityWindow extends JDialog {
     private JCheckBox unitCheckBox;
     private ArrayList<DetailEntity> entities;
     private DetailEntity incomingDetailEntity;
+    private MODE mode;
     private boolean singleSelectionOnly;
     private boolean unitEnabled;
-
-    public SelectDetailEntityWindow(DetailEntity incomingDetailEntity, boolean singleSelectionOnly, boolean unitEnabled) {
-        this.incomingDetailEntity = incomingDetailEntity;
-        this.singleSelectionOnly = singleSelectionOnly;
-        this.unitEnabled = unitEnabled;
-        this.session = ClientBackgroundService.getInstance().getSession();
-        initWindow();
-    }
-
-    private void initWindow() {
-        initGui();
-
-        initListeners();
-        initKeyBindings();
-
-        initCodeComboBox();
-
-        fillCodeComboBox();
-
-
-        initTitleComboBox();
-
-        fillTitleComboBox();
-
-        initSeveralSelectionButton();
-
-        updateCodeComboBox();
-
-        pack();
-        setResizable(false);
-    }
-
-    private void fillCodeComboBox() {
-        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
-
-        DetailService service = new DetailServiceImpl(session);
-        final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listDetails();
-
-        detailEntities.sort((o1, o2) -> {
-            if (o2 != null) {
-                return ComparisonChain.start()
-                        .compare(o1.getCode(), o2.getCode())
-                        .compareTrueFirst(o1.isActive(), o2.isActive())
-                        .compareTrueFirst(o1.isUnit(), o2.isUnit())
-                        .result();
-            } else {
-                return -1;
-            }
-        });
-
-        for (DetailEntity entity : detailEntities) {
-            model.addElement(entity.getCode());
-        }
-
-        codeComboBox.setModel(model);
-        AutoCompleteDecorator.decorate(this.codeComboBox);
-    }
 
 
    /* private void onNewDetailSave(String fixedCode, DetailEntity dbDetail) {
@@ -201,6 +145,94 @@ public class SelectDetailEntityWindow extends JDialog {
 // >>> IMPORTANT!! <<<
 // DO NOT EDIT OR ADD ANY CODE HERE!
         $$$setupUI$$$();
+    }
+
+    public SelectDetailEntityWindow(DetailEntity incomingDetailEntity, MODE mode) {
+        this.incomingDetailEntity = incomingDetailEntity;
+        this.mode = mode;
+        /*this.singleSelectionOnly = singleSelectionOnly;
+        this.unitEnabled = unitEnabled;*/
+        this.session = ClientBackgroundService.getInstance().getSession();
+        initMode(mode);
+        initWindow();
+    }
+
+    private void initMode(MODE mode) {
+        switch (mode) {
+            case CREATE_SINGLE: {
+                this.singleSelectionOnly = true;
+                this.unitEnabled = true;
+                break;
+            }
+            case SELECT_SINGLE: {
+                this.singleSelectionOnly = true;
+                this.unitEnabled = false;
+                break;
+            }
+            case COPY: {
+                this.singleSelectionOnly = true;
+                this.unitEnabled = false;
+                break;
+            }
+            case EDIT: {
+                this.singleSelectionOnly = true;
+                if (incomingDetailEntity != null) {
+                    this.unitEnabled = incomingDetailEntity.isUnit();
+                }
+                break;
+            }
+            case DEFAULT: {
+                this.singleSelectionOnly = false;
+                this.unitEnabled = true;
+                break;
+            }
+        }
+    }
+
+
+            /*
+        try {
+                            DetailEntity dbDetail = service.getDetailByIndex(selectedDetail.getCode());
+
+                        } catch (Exception e) {
+                            if (incomingDetailEntity == null) {
+                                selectedDetail.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                                entities.set(0, service.getDetailById(service.addDetail(selectedDetail)));
+                                dispose();
+                            } else {
+                                incomingDetailEntity.setCode((String) codeComboBox.getSelectedItem());
+                                incomingDetailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+
+                                service.updateDetail(incomingDetailEntity);
+
+                                entities.set(0, service.getDetailById(service.addDetail(incomingDetailEntity)));
+                                dispose();
+                            }
+                        }
+         */
+
+    private void initWindow() {
+        initGui();
+
+        initListeners();
+        initKeyBindings();
+
+        initCodeComboBox();
+
+        fillCodeComboBox();
+
+        initTitleComboBox();
+
+        fillTitleComboBox();
+
+        initUnitCheckBox();
+
+        initSeveralSelectionButton();
+
+        updateCodeComboBox();
+
+        pack();
+        setResizable(false);
     }
 
     private void initListeners() {
@@ -307,65 +339,69 @@ public class SelectDetailEntityWindow extends JDialog {
         });
     }
 
-            /*
-        try {
-                            DetailEntity dbDetail = service.getDetailByIndex(selectedDetail.getCode());
+    /*
+                        final DetailTitleEntity selectedTitle = (DetailTitleEntity) titleComboBox.getSelectedItem();
+                        final String selectedCode = (String) codeComboBox.getSelectedItem();
+                        if (incomingDetailEntity != null) {
+                            if (selectedTitle != null) {
+                                if (!incomingDetailEntity.getDetailTitleByDetailTitleId().equals(selectedTitle)
+                                        || !incomingDetailEntity.getCode().equalsIgnoreCase(selectedCode)) {
+                                    final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
+                                            + selectedDetail.getCode() + " " + selectedDetail.getDetailTitleByDetailTitleId().getTitle() + "\n" +
+                                            "на: " + dbDetail.getCode() + " " + selectedTitle.getTitle());
+                                    if (i == 0) { // confirm
+                                        if (dbDetail.getId() == incomingDetailEntity.getId()) {
 
-                        } catch (Exception e) {
-                            if (incomingDetailEntity == null) {
-                                selectedDetail.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
-                                entities.set(0, service.getDetailById(service.addDetail(selectedDetail)));
-                                dispose();
-                            } else {
-                                incomingDetailEntity.setCode((String) codeComboBox.getSelectedItem());
-                                incomingDetailEntity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                                            selectedDetail.setDetailTitleByDetailTitleId(selectedTitle);
 
-                                service.updateDetail(incomingDetailEntity);
+                                            service.updateDetail(selectedDetail);
 
-                                entities.set(0, service.getDetailById(service.addDetail(incomingDetailEntity)));
-                                dispose();
-                            }
-                        }
-         */
-
-        /*
-                            final DetailTitleEntity selectedTitle = (DetailTitleEntity) titleComboBox.getSelectedItem();
-                            final String selectedCode = (String) codeComboBox.getSelectedItem();
-                            if (incomingDetailEntity != null) {
-                                if (selectedTitle != null) {
-                                    if (!incomingDetailEntity.getDetailTitleByDetailTitleId().equals(selectedTitle)
-                                            || !incomingDetailEntity.getCode().equalsIgnoreCase(selectedCode)) {
-                                        final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
-                                                + selectedDetail.getCode() + " " + selectedDetail.getDetailTitleByDetailTitleId().getTitle() + "\n" +
-                                                "на: " + dbDetail.getCode() + " " + selectedTitle.getTitle());
-                                        if (i == 0) { // confirm
-                                            if (dbDetail.getId() == incomingDetailEntity.getId()) {
-
-                                                selectedDetail.setDetailTitleByDetailTitleId(selectedTitle);
-
-                                                service.updateDetail(selectedDetail);
-
-                                                entities.set(0, service.getDetailById(incomingDetailEntity.getId()));
-                                                dispose();
-                                            } else {
-                                                FrameUtils.shakeFrame(this);
-                                                JOptionPane.showMessageDialog(this,
-                                                        "Вы указали существующий индекс другой детали: \n"
-                                                                + dbDetail.getCode() + " "
-                                                                + dbDetail.getDetailTitleByDetailTitleId().getTitle());
-                                                log.warn("User tried to change code for entity: {}, that has another entity: {}",
-                                                        selectedDetail, dbDetail);
-                                            }
+                                            entities.set(0, service.getDetailById(incomingDetailEntity.getId()));
+                                            dispose();
+                                        } else {
+                                            FrameUtils.shakeFrame(this);
+                                            JOptionPane.showMessageDialog(this,
+                                                    "Вы указали существующий индекс другой детали: \n"
+                                                            + dbDetail.getCode() + " "
+                                                            + dbDetail.getDetailTitleByDetailTitleId().getTitle());
+                                            log.warn("User tried to change code for entity: {}, that has another entity: {}",
+                                                    selectedDetail, dbDetail);
                                         }
-                                    } else {
-                                        System.out.println("!!!!!!!!!!!!! + everything is alright! ");
-                                        dispose();
                                     }
                                 } else {
-
+                                    System.out.println("!!!!!!!!!!!!! + everything is alright! ");
+                                    dispose();
                                 }
+                            } else {
+
                             }
+                        }
 */
+    private void fillCodeComboBox() {
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+
+        DetailService service = new DetailServiceImpl(session);
+        final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listDetails();
+
+        detailEntities.sort((o1, o2) -> {
+            if (o2 != null) {
+                return ComparisonChain.start()
+                        .compare(o1.getCode(), o2.getCode())
+                        .compareTrueFirst(o1.isActive(), o2.isActive())
+                        .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                        .result();
+            } else {
+                return -1;
+            }
+        });
+
+        for (DetailEntity entity : detailEntities) {
+            model.addElement(entity.getCode());
+        }
+
+        codeComboBox.setModel(model);
+        AutoCompleteDecorator.decorate(this.codeComboBox);
+    }
 
     private void initKeyBindings() {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -442,26 +478,18 @@ public class SelectDetailEntityWindow extends JDialog {
         return entities;
     }
 
-    private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
-        if (incomingDetailEntity == null) {
-            setTitle("Выбор детали");
-        } else {
-            final String detailInfo = incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle();
-            setTitle("Редактирование детали: " + detailInfo);
-            multipleSelectionButton.setEnabled(false);
-            unitCheckBox.setEnabled(false);
-
-            final ArrayList<DetailEntity> detailEntities = new ArrayList<>();
-            detailEntities.add(incomingDetailEntity);
-            fillDetailInfo(detailEntities);
-        }
-
-        multipleSelectionButton.setEnabled(!singleSelectionOnly);
+    private void initUnitCheckBox() {
+        unitCheckBox.addActionListener(e -> {
+            if (entities != null) {
+                if (entities.size() == 1) {
+                    final DetailEntity entity = entities.get(0);
+                    if (entity != null) {
+                        entity.setUnit(unitCheckBox.isSelected());
+                        entities.set(0, entity);
+                    }
+                }
+            }
+        });
     }
 
     private void initSeveralSelectionButton() {
@@ -500,6 +528,28 @@ public class SelectDetailEntityWindow extends JDialog {
                 || (ch >= 'А' && ch <= 'Я');
     }
 
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
+        if (incomingDetailEntity == null) {
+            setTitle("Выбор детали");
+        } else {
+            final String detailInfo = incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle();
+            setTitle("Редактирование детали: " + detailInfo);
+            /*multipleSelectionButton.setEnabled(false);
+            unitCheckBox.setEnabled(false);*/
+
+            final ArrayList<DetailEntity> detailEntities = new ArrayList<>();
+            detailEntities.add(incomingDetailEntity);
+            fillDetailInfo(detailEntities);
+        }
+
+        multipleSelectionButton.setEnabled(!singleSelectionOnly);
+    }
+
     private void fillDetailInfo(ArrayList<DetailEntity> detailEntities) {
         codeComboBox.setEnabled(true);
         unitCheckBox.setEnabled(unitEnabled);
@@ -511,7 +561,6 @@ public class SelectDetailEntityWindow extends JDialog {
 
             unitCheckBox.setEnabled(unitEnabled);
             unitCheckBox.setSelected(false);
-
         } else {
             if (detailEntities.size() == 0) {
                 titleComboBox.setSelectedItem(null);
@@ -523,7 +572,19 @@ public class SelectDetailEntityWindow extends JDialog {
                     final DetailEntity detailEntity = detailEntities.get(0);
                     titleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
                     unitCheckBox.setSelected(detailEntity.isUnit());
-                    unitCheckBox.setEnabled(false);
+                    DetailEntity dbEntity = new DetailServiceImpl(session).getDetailByIndex(detailEntity.getCode());
+                    if (dbEntity != null) {
+                        unitCheckBox.setEnabled(false);
+                    } else {
+                        if (mode != MODE.EDIT) {
+                            unitCheckBox.setEnabled(unitEnabled);
+                        }
+
+                        if (mode == MODE.COPY) {
+                            unitCheckBox.setSelected(true);
+                            unitCheckBox.setEnabled(false);
+                        }
+                    }
                 } else {
                     DefaultComboBoxModel<String> codeModel = new DefaultComboBoxModel<>();
                     final String SOME_DETAILS_SELECTED_STRING = "выбрано несколько деталей";
@@ -562,36 +623,7 @@ public class SelectDetailEntityWindow extends JDialog {
             this.entities = null;
             fillCodeComboBox();
             fillTitleComboBox();
-            fillDetail(new DetailServiceImpl(session));
-        }
-    }
-
-    private void fillDetail(DetailService service) {
-        final String selectedItem = (String) codeComboBox.getSelectedItem();
-        if (selectedItem != null) {
-            if (selectedItem.length() < 30) {
-                final DetailEntity detailEntity = service.getDetailByIndex(selectedItem);
-                if (detailEntity != null) {
-                    entities = new ArrayList<>();
-                    entities.add(detailEntity);
-                    fillDetailInfo(entities);
-                } else {
-                    if (entities != null) {
-                        entities = null;
-                        fillDetailInfo(null);
-                    } else {
-                        entities = new ArrayList<>();
-
-                        DetailEntity entity = new DetailEntity();
-                        entity.setCode((String) codeComboBox.getSelectedItem());
-                        entity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
-                        entity.setActive(true);
-
-                        entities.add(entity);
-                        fillDetailInfo(entities);
-                    }
-                }
-            }
+            fillDetail();
         }
     }
 
@@ -686,29 +718,32 @@ public class SelectDetailEntityWindow extends JDialog {
         return false;
     }
 
-    private void onOK() {
-        log.debug("Got entities to save: " + entities);
-        if (verify()) {
-            if (entities != null) {
-                if (entities.size() == 1) {
-                    DetailEntity selectedDetail = entities.get(0);
-                    if (selectedDetail != null) {
-                        // fixme this breaks another entity, that is not changing.... wtf??? links???
-//                        selectedDetail.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
-                        if (incomingDetailEntity == null) {
-                            createNewDetail(selectedDetail);
-                        } else {
-                            editExistingDetail(selectedDetail);
-                        }
-
-                    } else {
-                        dispose();
-                    }
+    private void fillDetail() {
+        DetailService service = new DetailServiceImpl(session);
+        final String selectedItem = (String) codeComboBox.getSelectedItem();
+        if (selectedItem != null) {
+            if (selectedItem.length() < 30) {
+                final DetailEntity detailEntity = service.getDetailByIndex(selectedItem);
+                if (detailEntity != null) {
+                    entities = new ArrayList<>();
+                    entities.add(detailEntity);
+                    fillDetailInfo(entities);
                 } else {
-                    dispose();
+                    if (entities != null) {
+                        entities = null;
+                        fillDetailInfo(null);
+                    } else {
+                        entities = new ArrayList<>();
+
+                        DetailEntity entity = new DetailEntity();
+                        entity.setCode((String) codeComboBox.getSelectedItem());
+                        entity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                        entity.setActive(true);
+
+                        entities.add(entity);
+                        fillDetailInfo(entities);
+                    }
                 }
-            } else {
-                dispose();
             }
         }
     }
@@ -742,9 +777,49 @@ public class SelectDetailEntityWindow extends JDialog {
         }
     }
 
-    private void initCodeComboBox() {
-        DetailService service = new DetailServiceImpl(session);
+    private void onOK() {
+        log.debug("Got entities to save: " + entities);
+        if (verify()) {
+            if (entities != null) {
+                if (entities.size() == 1) {
+                    DetailEntity selectedDetail = entities.get(0);
+                    if (selectedDetail != null) {
+                        if (mode != MODE.COPY) {
+                            if (incomingDetailEntity == null) {
+                                createNewDetail(selectedDetail);
+                            } else {
+                                editExistingDetail(selectedDetail);
+                            }
+                        } else {
+                            DetailService service = new DetailServiceImpl(session);
+                            DetailEntity dbEntity = service.getDetailByIndex(selectedDetail.getCode());
+                            if (dbEntity == null) {
+                                selectedDetail.setUnit(true);
+                                createNewDetail(selectedDetail);
+                            } else {
+                                JOptionPane.showMessageDialog(this,
+                                        "Необходимо указать новый индекс детали", "Ошибка копирования",
+                                        JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
+                    } else {
+                        dispose();
+                    }
+                } else {
+                    if (mode != MODE.SELECT_SINGLE && mode != MODE.CREATE_SINGLE) {
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Необходимо выбрать только 1 деталь", "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            } else {
+                dispose();
+            }
+        }
+    }
 
+    private void initCodeComboBox() {
         ((JTextField) codeComboBox.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
 
             @Override
@@ -778,10 +853,10 @@ public class SelectDetailEntityWindow extends JDialog {
         codeComboBox.addItemListener(e -> {
             if (entities != null) {
                 if (entities.size() <= 1) {
-                    fillDetail(service);
+                    fillDetail();
                 }
             } else {
-                fillDetail(service);
+                fillDetail();
             }
         });
         codeComboBox.setSelectedIndex(-1);
@@ -851,4 +926,6 @@ public class SelectDetailEntityWindow extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
+    public enum MODE {DEFAULT, CREATE_SINGLE, SELECT_SINGLE, COPY, EDIT}
 }

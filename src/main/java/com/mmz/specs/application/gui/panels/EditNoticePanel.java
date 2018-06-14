@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
+import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.*;
 import static javax.swing.JOptionPane.*;
 
 public class EditNoticePanel extends JPanel implements AccessPolicy, Transactional {
@@ -281,14 +282,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         unitCheckBox.addActionListener(e -> {
             //todo check if DetailListEntity does not have detailEntity as a parent (not a unit, otherwise - notify user)
             DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-
-            DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
-//            ArrayList<DetailListEntity> detailListByParent = (ArrayList<DetailListEntity>) detailListService.getDetailListByParent(detailEntity);
-
-            detailEntity.setUnit(unitCheckBox.isSelected());
-            DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
-            service.updateDetail(detailEntity);
-            updateTreeDetail();
+            if (detailEntity != null) {
+                detailEntity.setUnit(unitCheckBox.isSelected());
+                DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+                service.updateDetail(detailEntity);
+                updateTreeDetail();
+            }
 
            /* DetailListEntity latestEntity = null;
             if (!detailListByParent.isEmpty()) {
@@ -372,7 +371,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void onAddNewItemButtonNew() {
-        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, false, true);
+        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, DEFAULT);
         selectionDetailWindow.setLocation(FrameUtils
                 .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
         selectionDetailWindow.setVisible(true);
@@ -408,7 +407,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
 
         if (selectedDetailEntityFromTree != null) {
-            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(selectedDetailEntityFromTree, true, selectedDetailEntityFromTree.isUnit());
+            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(selectedDetailEntityFromTree, EDIT);
             selectionDetailWindow.setLocation(FrameUtils
                     .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
             selectionDetailWindow.setVisible(true);
@@ -695,36 +694,47 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         if (!isRoot) {
             DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
             if (selectedEntity != null && parent != null) {
-                CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
+                /*CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
                 addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
                 addDetailWindow.setVisible(true);
 
-                DetailEntity entity = addDetailWindow.getDetailEntity();
+                DetailEntity entity = addDetailWindow.getDetailEntity();*/
 
-                if (entity != null) {
-                    entity.setUnit(selectedEntity.isUnit());
-                    entity.setActive(true);
+                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
+                selectionDetailWindow.setLocation(FrameUtils
+                        .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                selectionDetailWindow.setVisible(true);
+                ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
 
-                    copyBrotherEntityToDetailEntity(entity, selectedEntity);
+                if (list != null) {
+                    if (list.size() == 1) {
+                        DetailEntity entity = list.get(0);
+                        if (entity != null) {
+                            entity.setUnit(selectedEntity.isUnit());
+                            entity.setActive(true);
 
-                    entity = createDetailEntityIfNotExist(entity);
+                            copyBrotherEntityToDetailEntity(entity, selectedEntity);
 
-                    DetailListService service = new DetailListServiceImpl(session);
+                            entity = createDetailEntityIfNotExist(entity);
 
-                    ArrayList<DetailListEntity> listEntities = null;
-                    try {
-                        listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
-                        if (listEntities.isEmpty()) {
-                            DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                            service.addDetailList(detailListEntity);
+                            DetailListService service = new DetailListServiceImpl(session);
+
+                            ArrayList<DetailListEntity> listEntities;
+                            try {
+                                listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
+                                if (listEntities.isEmpty()) {
+                                    DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
+                                    service.addDetailList(detailListEntity);
+                                }
+                            } catch (Exception e) {
+                                DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
+                                service.addDetailList(detailListEntity);
+                            }
+                            fillMainTree();
                         }
-                    } catch (Exception e) {
-                        DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                        service.addDetailList(detailListEntity);
+                        showAllEntities(entity);
                     }
-                    fillMainTree();
                 }
-                showAllEntities(entity);
             }
         }
     }
