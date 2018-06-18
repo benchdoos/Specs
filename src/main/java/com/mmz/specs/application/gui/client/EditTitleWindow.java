@@ -105,7 +105,7 @@ public class EditTitleWindow extends JDialog {
             if (!result.isEmpty()) {
                 if (result.length() <= MAX_TITLE_LENGTH) {
                     result = result.replace("\n", " ");
-                    result = WordUtils.capitalizeFully(result);
+                    result = fixTitle(result);
 
                     DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
                     DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
@@ -142,6 +142,32 @@ public class EditTitleWindow extends JDialog {
                         "Ошибка ввода", WARNING_MESSAGE);
             }
         }
+    }
+
+    private String fixTitle(String title) {
+        if (title == null) return null;
+        if (title.length() > 0) {
+            final String[] split = title.split(" ");
+            for (int i = 0; i < split.length; i++) {
+                if (i == 0) {
+                    split[i] = WordUtils.capitalizeFully(split[i]);
+                } else {
+                    split[i] = split[i].toLowerCase();
+                }
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < split.length; i++) {
+                String str = split[i];
+                builder.append(str);
+                if (i != split.length - 1) {
+                    builder.append(" ");
+                }
+            }
+
+            title = builder.toString();
+        }
+        return title;
     }
 
     private void updateTitleEntity(String result) {
