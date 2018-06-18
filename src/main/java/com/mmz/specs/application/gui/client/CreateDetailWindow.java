@@ -198,7 +198,7 @@ public class CreateDetailWindow extends JDialog {
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
         DetailEntity dbDetail;
         try {
-            dbDetail = service.getDetailByIndex(fixedCode);
+            dbDetail = service.getDetailByCode(fixedCode);
         } catch (Exception e) {
             dbDetail = null;
         }

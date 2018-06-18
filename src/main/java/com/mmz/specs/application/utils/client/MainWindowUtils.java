@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -259,5 +260,17 @@ public class MainWindowUtils {
             }
         }
         return false;
+    }
+
+    public TreeNode getDetailsTreeByDetails(List<DetailEntity> detailsBySearch) {
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+
+        for (DetailEntity e : detailsBySearch) {
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(e);
+            result.add(node);
+        }
+
+        return result;
     }
 }

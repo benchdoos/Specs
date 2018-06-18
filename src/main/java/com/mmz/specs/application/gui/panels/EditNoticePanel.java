@@ -327,7 +327,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 try {
                     if (child != null) {
-                        double weight = Double.parseDouble(finishedWeightTextField.getText());
+                        String text = finishedWeightTextField.getText();
+                        text = text.replaceAll(",", ".");
+                        double weight = Double.parseDouble(text);
                         child.setFinishedWeight(weight);
                         updateTreeDetail();
                     }
@@ -342,7 +344,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 try {
                     if (child != null) {
-                        double weight = Double.parseDouble(workpieceWeightTextField.getText());
+                        String text = workpieceWeightTextField.getText();
+                        text = text.replaceAll(",", ".");
+                        double weight = Double.parseDouble(text);
                         child.setWorkpieceWeight(weight);
                         updateTreeDetail();
                     }
@@ -587,7 +591,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         //fixme this doesn't work for some reason
-        contentPane.registerKeyboardAction(e -> onAddNewItemButton(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onAddNewItemButtonNew(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onRemoveItem(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -1379,7 +1383,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
 
             final String code = detailEntity.getCode();
-            final DetailEntity detailByIndex = service.getDetailByIndex(code); // todo fixme
+            final DetailEntity detailByIndex = service.getDetailByCode(code); // todo fixme
             /*final DetailEntity detailByIndex = service.getDetailById(detailEntity.getId());*/
             if (detailByIndex == null) {
                 System.out.println(">>> detail: " + detailEntity);

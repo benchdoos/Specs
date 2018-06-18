@@ -18,6 +18,7 @@ package com.mmz.specs.application.utils.client;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.EditTitleWindow;
 import com.mmz.specs.application.gui.common.LoginWindow;
+import com.mmz.specs.application.utils.CoreUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.DetailListDaoImpl;
@@ -37,7 +38,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 import static javax.swing.JOptionPane.*;
 
@@ -70,30 +70,12 @@ public class CommonWindowUtils {
     public static void initApplicationVersionArea(JTextField textField) {
         textField.setBorder(BorderFactory.createEmptyBorder());
         textField.setBackground(new JPanel().getBackground());
-        String s = getApplicationVersionString();
+        String s = CoreUtils.getApplicationVersionString();
         if (s != null) {
             textField.setText(s);
         } else {
             textField.setText(null);
             textField.setVisible(false);
-        }
-    }
-
-    public static String getApplicationVersionString() {
-        Properties properties = new Properties();
-        try {
-            properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
-            String name = properties.getProperty("application.name");
-            String version = properties.getProperty("application.version");
-            String build = properties.getProperty("application.build");
-            if (version != null && build != null) {
-                return name + " v." + version + " (" + build + ")";
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            log.warn("Could not load application version info", e);
-            return null;
         }
     }
 

@@ -114,10 +114,20 @@
           </component>
           <component id="5aeb9" class="javax.swing.JCheckBox" binding="unitCheckBox">
             <constraints>
-              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="&amp;Узел"/>
+            </properties>
+          </component>
+          <component id="13d1b" class="javax.swing.JButton" binding="createTitleButton">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <icon value="img/gui/titleNew16.png"/>
+              <text value=""/>
+              <toolTipText value="Создать новое наименование"/>
             </properties>
           </component>
         </children>
