@@ -18,6 +18,7 @@ package com.mmz.specs.application.utils;
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.core.updater.Updater;
+import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
 import com.mmz.specs.application.managers.ClientManager;
@@ -30,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Properties;
 
 public class CoreUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -167,6 +169,24 @@ public class CoreUtils {
         UIManager.put("FileChooser.fileAttrHeaderText", "Атрибуты");
 
         UIManager.put("FileChooser.acceptAllFileFilterText", "Все файлы");
+    }
+
+    public static String getApplicationVersionString() {
+        Properties properties = new Properties();
+        try {
+            properties.load(ClientMainWindow.class.getResourceAsStream("/application.properties"));
+            String name = properties.getProperty("application.name");
+            String version = properties.getProperty("application.version");
+            String build = properties.getProperty("application.build");
+            if (version != null && build != null) {
+                return name + " v." + version + " (" + build + ")";
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            log.warn("Could not load application version info", e);
+            return null;
+        }
     }
 
 

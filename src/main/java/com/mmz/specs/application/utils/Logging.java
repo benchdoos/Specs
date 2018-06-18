@@ -36,19 +36,6 @@ public class Logging {
         startLogging(manageArguments(args));
     }
 
-    private String manageArguments(String[] args) {
-        if (args.length > 0) {
-            switch (args[0]) {
-                case ApplicationArgumentsConstants.SERVER:
-                    return LOG_PREFIX_SERVER;
-                case ApplicationArgumentsConstants.CLIENT:
-                    return LOG_PREFIX_CLIENT;
-                default:
-                    return LOG_PREFIX_CLIENT;
-            }
-        } else return LOG_PREFIX_CLIENT;
-    }
-
     /**
      * Returns the name of called class. Made for usage in static methods.
      * Created to minimize hardcoded code.
@@ -63,15 +50,32 @@ public class Logging {
         }
     }
 
+    private String manageArguments(String[] args) {
+        if (args.length > 0) {
+            switch (args[0]) {
+                case ApplicationArgumentsConstants.SERVER:
+                    return LOG_PREFIX_SERVER;
+                case ApplicationArgumentsConstants.CLIENT:
+                    return LOG_PREFIX_CLIENT;
+                default:
+                    return LOG_PREFIX_CLIENT;
+            }
+        } else return LOG_PREFIX_CLIENT;
+    }
+
     /**
      * Creates a property for Log4j
      * Warning! Run this before any log implementation.
      */
     private void startLogging(String prefix) {
         System.setProperty(ApplicationConstants.APP_LOG_PROPERTY_KEY, ApplicationConstants.LOG_FOLDER + prefix);
-        System.out.println("Logging starting at: " + LOG_FOLDER);
+        final String applicationVersionString = CoreUtils.getApplicationVersionString();
+
+        System.out.println("Logging starting at: " + LOG_FOLDER + " (" + applicationVersionString + ")");
+
         Logger log = LogManager.getLogger(getCurrentClassName());
         log.info("Logging started on: " + Calendar.getInstance().getTime() + " at: " + LOG_FOLDER);
+        log.info("Application: " + applicationVersionString);
     }
 
 }
