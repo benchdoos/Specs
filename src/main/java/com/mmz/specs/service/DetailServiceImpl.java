@@ -69,13 +69,18 @@ public class DetailServiceImpl implements DetailService {
     }
 
     @Override
-    public DetailEntity getDetailByIndex(String index) {
+    public DetailEntity getDetailByCode(String index) {
         return detailDao.getDetailByCode(index);
     }
 
     @Override
     public List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity) {
         return detailDao.getDetailByTitle(titleEntity);
+    }
+
+    @Override
+    public List<DetailEntity> getDetailsBySearch(String searchText) {
+        return detailDao.getDetailsBySearch(searchText);
     }
 
     @Override

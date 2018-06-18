@@ -40,5 +40,7 @@ public interface DetailDao {
 
     List<DetailEntity> getDetailByTitle(DetailTitleEntity titleEntity);
 
+    List<DetailEntity> getDetailsBySearch(String searchText);
+
     List<DetailEntity> listDetails();
 }

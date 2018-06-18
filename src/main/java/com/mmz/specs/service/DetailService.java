@@ -36,9 +36,11 @@ public interface DetailService {
 
     DetailEntity getDetailById(int id);
 
-    DetailEntity getDetailByIndex(String index);
+    DetailEntity getDetailByCode(String code);
 
     List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity);
+
+    List<DetailEntity> getDetailsBySearch(String searchText);
 
 
     List<DetailEntity> listDetails();

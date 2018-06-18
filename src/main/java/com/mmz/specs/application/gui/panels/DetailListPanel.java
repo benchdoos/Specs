@@ -25,6 +25,7 @@ import com.mmz.specs.application.gui.client.MaterialListWindow;
 import com.mmz.specs.application.gui.client.SelectDetailEntityWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
+import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
@@ -181,9 +182,10 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 DetailEntity entity = list.get(0);
                 if (entity != null) {
                     DetailService service = new DetailServiceImpl(session);
-                    final DetailEntity detailByIndex = service.getDetailByIndex(entity.getCode());
+                    final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
                     if (detailByIndex == null) {
                         entity.setActive(true);
+                        entity.setCode(entity.getCode().toUpperCase());
                         Window window = FrameUtils.findWindow(this);
                         if (window instanceof ClientMainWindow) {
                             ClientMainWindow mainWindow = (ClientMainWindow) window;
@@ -391,7 +393,14 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void fillMainTreeBySearch(String searchText) {
         if (session != null) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByDetailList(service.getDetailListBySearch(searchText))));
+            final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
+            if (detailListBySearch != null && detailListBySearch.size() > 0) {
+                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByDetailList(detailListBySearch)));
+            } else {
+                DetailService detailService = new DetailServiceImpl(session);
+                final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
+                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch)));
+            }
         }
     }
 
@@ -555,6 +564,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void createUIComponents() {
         mainTree = new DetailJTree();
+        searchTextField = new PlaceholderTextField();
+        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
     }
 
     @Override
@@ -660,12 +671,11 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         detailInfoPanel.add(panel2, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        searchTextField = new JTextField();
-        panel2.add(searchTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label10 = new JLabel();
         label10.setIcon(new ImageIcon(getClass().getResource("/img/gui/search16.png")));
         label10.setText("");
         panel2.add(label10, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(searchTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer2 = new Spacer();
         detailInfoPanel.add(spacer2, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
