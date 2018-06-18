@@ -104,7 +104,7 @@ public class CreateMaterialWindow extends JDialog {
     }
 
     private void onOK() {
-        if (checkFields()) {
+        if (verify()) {
             MaterialEntity materialEntity = createMaterial();
             if (!exist(materialEntity)) {
                 LoginWindow loginWindow = new LoginWindow(session);
@@ -127,8 +127,6 @@ public class CreateMaterialWindow extends JDialog {
                         "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
             }
 
-        } else {
-            FrameUtils.shakeFrame(this);
         }
     }
 
@@ -150,20 +148,24 @@ public class CreateMaterialWindow extends JDialog {
         }
     }
 
-    private boolean checkFields() {
+    private boolean verify() {
         if (longMarkTextField.getText().isEmpty() || longMarkTextField.getText().length() > 200) {
+            FrameUtils.shakeFrame(this);
             JOptionPane.showMessageDialog(this, "Поле полной марки не может быть пустым или длинна поля быть более 200");
             return false;
         }
         if (longProfileTextField.getText().isEmpty() || longProfileTextField.getText().length() > 200) {
+            FrameUtils.shakeFrame(this);
             JOptionPane.showMessageDialog(this, "Поле полного профиля не может быть пустым или длинна поля быть более 200");
             return false;
         }
         if (shortMarkTextField.getText().isEmpty() || shortMarkTextField.getText().length() > 40) {
+            FrameUtils.shakeFrame(this);
             JOptionPane.showMessageDialog(this, "Поле короткой марки не может быть пустым или длинна поля быть более 40");
             return false;
         }
         if (shortProfileTextField.getText().isEmpty() || shortProfileTextField.getText().length() > 50) {
+            FrameUtils.shakeFrame(this);
             JOptionPane.showMessageDialog(this, "Поле короткого профиля не может быть пустым или длинна поля быть более 50");
             return false;
         }
