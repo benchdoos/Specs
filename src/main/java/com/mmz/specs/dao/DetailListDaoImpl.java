@@ -100,7 +100,7 @@ public class DetailListDaoImpl implements DetailListDao {
     @Override
     public List<DetailListEntity> getDetailListByParent(String detailEntityIndex) {
         DetailDao detailDao = new DetailDaoImpl(session);
-        DetailEntity parent = detailDao.getDetailByIndex(detailEntityIndex);
+        DetailEntity parent = detailDao.getDetailByCode(detailEntityIndex);
 
         Query query = this.session.createQuery("from DetailListEntity where detailByParentDetailId= :parent");
         query.setParameter("parent", parent);
@@ -114,7 +114,7 @@ public class DetailListDaoImpl implements DetailListDao {
     public List<DetailListEntity> getDetailListByChild(String detailEntityIndex) {
 
         DetailDao detailDao = new DetailDaoImpl(this.session);
-        DetailEntity child = detailDao.getDetailByIndex(detailEntityIndex);
+        DetailEntity child = detailDao.getDetailByCode(detailEntityIndex);
 
         Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
         query.setParameter("child", child);

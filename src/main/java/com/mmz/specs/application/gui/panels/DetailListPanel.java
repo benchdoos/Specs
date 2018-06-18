@@ -15,12 +15,12 @@
 
 package com.mmz.specs.application.gui.panels;
 
+import com.google.common.collect.ComparisonChain;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
-import com.mmz.specs.application.gui.client.CreateDetailWindow;
 import com.mmz.specs.application.gui.client.MaterialListWindow;
 import com.mmz.specs.application.gui.client.SelectDetailEntityWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.COPY;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.CREATE_SINGLE;
 
 public class DetailListPanel extends JPanel implements AccessPolicy {
@@ -132,16 +133,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         });
     }
 
-    private void onAddNewItemNew() {
-        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, CREATE_SINGLE);
-        selectionDetailWindow.setLocation(FrameUtils
-                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-        selectionDetailWindow.setVisible(true);
-        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
-    }
-
     private void initKeyBindings() {
-        registerKeyboardAction(e -> onAddNewItem(),
+        registerKeyboardAction(e -> onAddNewItemNew(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_DOWN_MASK, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -155,7 +148,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
-    private void onAddNewItem() {
+   /* private void onAddNewItem() {
         CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
         addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
         addDetailWindow.setVisible(true);
@@ -175,32 +168,75 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
         }
+    }*/
+
+    private void onAddNewItemNew() {
+        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, CREATE_SINGLE);
+        selectionDetailWindow.setLocation(FrameUtils
+                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+        selectionDetailWindow.setVisible(true);
+        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+        if (list != null) {
+            if (list.size() == 1) {
+                DetailEntity entity = list.get(0);
+                if (entity != null) {
+                    DetailService service = new DetailServiceImpl(session);
+                    final DetailEntity detailByIndex = service.getDetailByIndex(entity.getCode());
+                    if (detailByIndex == null) {
+                        entity.setActive(true);
+                        Window window = FrameUtils.findWindow(this);
+                        if (window instanceof ClientMainWindow) {
+                            ClientMainWindow mainWindow = (ClientMainWindow) window;
+                            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                            try {
+                                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, true), true);
+                            } catch (IllegalStateException e) {
+                                log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                                JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                                        "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void onCopyButton() {
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (selectedEntity != null) {
             if (selectedEntity.isUnit()) {
-                CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
+                /*CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
                 addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
                 addDetailWindow.setVisible(true);
 
-                DetailEntity entity = addDetailWindow.getDetailEntity();
+                DetailEntity entity = addDetailWindow.getDetailEntity();*/
 
-                if (entity != null) {
-                    entity.setUnit(true);
-                    entity.setActive(true);
+                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
+                selectionDetailWindow.setLocation(FrameUtils
+                        .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                selectionDetailWindow.setVisible(true);
+                ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
 
-                    Window window = FrameUtils.findWindow(this);
-                    if (window instanceof ClientMainWindow) {
-                        ClientMainWindow mainWindow = (ClientMainWindow) window;
-                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                        try {
-                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, selectedEntity), true);
-                        } catch (IllegalStateException e) {
-                            log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                            JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
-                                    "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                if (list != null) {
+                    if (list.size() == 1) {
+                        DetailEntity entity = list.get(0);
+                        if (entity != null) {
+                            entity.setUnit(true);
+                            entity.setActive(true);
+
+                            Window window = FrameUtils.findWindow(this);
+                            if (window instanceof ClientMainWindow) {
+                                ClientMainWindow mainWindow = (ClientMainWindow) window;
+                                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                                try {
+                                    mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, selectedEntity), true);
+                                } catch (IllegalStateException e) {
+                                    log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                                    JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
+                                            "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                }
+                            }
                         }
                     }
                 }
@@ -292,7 +328,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void fillMainTreeFully() {
         if (session != null) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(service.listDetailLists())));
+            final List<DetailListEntity> askedListRoot = service.listDetailLists();
+            askedListRoot.sort((o1, o2) -> ComparisonChain.start() //testme
+                    .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
+                    .compareTrueFirst(o1.isActive(), o2.isActive())
+                    .result());
+            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(askedListRoot)));
         }
     }
 

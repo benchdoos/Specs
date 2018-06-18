@@ -70,7 +70,7 @@ public class DetailServiceImpl implements DetailService {
 
     @Override
     public DetailEntity getDetailByIndex(String index) {
-        return detailDao.getDetailByIndex(index);
+        return detailDao.getDetailByCode(index);
     }
 
     @Override

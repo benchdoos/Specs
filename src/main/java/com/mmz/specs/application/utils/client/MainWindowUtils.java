@@ -106,7 +106,7 @@ public class MainWindowUtils {
                 .compare(o1.getCode(), o2.getCode())
                 .compareTrueFirst(o1.isActive(), o2.isActive())
                 .result());
-        
+
         DefaultMutableTreeNode result = new DefaultMutableTreeNode();
         if (children.size() > 0) {
             for (DetailEntity entity : children) {

@@ -35,7 +35,7 @@ public interface DetailDao {
 
     DetailEntity getDetailById(int id);
 
-    DetailEntity getDetailByIndex(String index);
+    DetailEntity getDetailByCode(String index);
 
 
     List<DetailEntity> getDetailByTitle(DetailTitleEntity titleEntity);

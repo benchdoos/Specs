@@ -120,6 +120,23 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
 
+    EditNoticePanel(DetailEntity detailEntity, boolean create) {
+        $$$setupUI$$$();
+        this.detailEntity = detailEntity;
+        this.session = ClientBackgroundService.getInstance().getSession();
+
+        session.getTransaction().begin();
+
+        if (create) {
+            DetailService service = new DetailServiceImpl(session);
+            this.detailEntity = service.getDetailById(service.addDetail(detailEntity));
+        }
+
+        initGui();
+
+        fillMainTree();
+    }
+
     /**
      * Creates duplicate of brother for detailEntity
      */
@@ -133,7 +150,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         initGui();
 
-        initNewDetailEntity(this.detailEntity);
+        //initNewDetailEntity(this.detailEntity);
 
         copyBrotherEntityToDetailEntity(this.detailEntity, this.brotherEntity);
 
@@ -141,7 +158,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void initNewDetailEntity(DetailEntity detailEntity) {
-        DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+        DetailService service = new DetailServiceImpl(session);
         this.detailEntity = service.getDetailById(service.addDetail(detailEntity));
     }
 
@@ -517,8 +534,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void updateMaterialsForEntity(DetailEntity detailEntity, ArrayList<MaterialListEntity> newMaterialsList, ArrayList<MaterialListEntity> oldMaterialsList) {
-        final String newMaterialsNames = getMaterialsNames(newMaterialsList);
-
         MaterialListService materialListService = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
         for (MaterialListEntity entity : oldMaterialsList) {
             System.out.println("old>> " + entity);
@@ -1333,6 +1348,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 detailEntity = createDetailEntityIfNotExist(detailEntity);
 
 
+                for (DetailEntity e : new DetailServiceImpl(session).listDetails()) {
+                    System.out.println("------->> " + detailEntity.getCode().equalsIgnoreCase(e.getCode()) + " " + e);
+                }
+
                 for (DetailListEntity entity : finalList) {
                     if (entity != null) {
                         DetailListEntity newEntity = new DetailListEntity();
@@ -1352,12 +1371,22 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private DetailEntity createDetailEntityIfNotExist(DetailEntity detailEntity) {
-        DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-        final DetailEntity detailByIndex = detailService.getDetailByIndex(detailEntity.getCode());
-        if (detailByIndex == null) {
-            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
-        } else {
-            detailEntity = detailByIndex;
+        if (detailEntity != null) {
+            DetailService service = new DetailServiceImpl(session);
+
+            for (DetailEntity e : service.listDetails()) {
+                System.out.println("------->> " + detailEntity.getCode().equalsIgnoreCase(e.getCode()) + " " + e);
+            }
+
+            final String code = detailEntity.getCode();
+            final DetailEntity detailByIndex = service.getDetailByIndex(code); // todo fixme
+            /*final DetailEntity detailByIndex = service.getDetailById(detailEntity.getId());*/
+            if (detailByIndex == null) {
+                System.out.println(">>> detail: " + detailEntity);
+                detailEntity = service.getDetailById(service.addDetail(detailEntity));
+            } else {
+                detailEntity = detailByIndex;
+            }
         }
         return detailEntity;
     }

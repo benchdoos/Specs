@@ -26,7 +26,7 @@ public class DetailDaoImplTest {
         Main.main(new String[]{"-server"});
         DetailDao detailDao = new DetailDaoImpl();
 
-        DetailEntity entity = detailDao.getDetailByIndex("ЛВ-185.00.050");
+        DetailEntity entity = detailDao.getDetailByCode("ЛВ-185.00.050");
         System.out.println("entity - " + entity.getCode());
     }
 }

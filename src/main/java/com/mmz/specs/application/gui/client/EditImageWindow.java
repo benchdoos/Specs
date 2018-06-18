@@ -135,7 +135,7 @@ public class EditImageWindow extends JDialog {
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
 
-        FileFilter fileFilter = new FileNameExtensionFilter("Изображение " + DEFAULT_IMAGE_EXTENSION, DEFAULT_IMAGE_EXTENSION);
+        FileFilter fileFilter = new FileNameExtensionFilter("Изображение " + DEFAULT_IMAGE_EXTENSION, DEFAULT_IMAGE_EXTENSION, DEFAULT_IMAGE_EXTENSION.toUpperCase());
         chooser.setFileFilter(fileFilter);
         int returnValue = chooser.showDialog(this, "OK");
         if (returnValue == JFileChooser.APPROVE_OPTION) {

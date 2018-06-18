@@ -43,12 +43,9 @@
                       <autoscrolls value="false"/>
                       <borderPainted value="false"/>
                       <contentAreaFilled value="true"/>
-                      <foreground color="-16765749"/>
-                      <margin top="0" left="0" bottom="0" right="0"/>
-                      <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
                       <rolloverEnabled value="true"/>
-                      <text value="Просмотр вложенности узлов" noi18n="true"/>
+                      <text value="&amp;Просмотр вложенности узлов" noi18n="true"/>
                     </properties>
                   </component>
                   <component id="c8e78" class="javax.swing.JButton" binding="editDataButton">
@@ -60,13 +57,10 @@
                       <borderPainted value="false"/>
                       <contentAreaFilled value="true"/>
                       <enabled value="false"/>
-                      <foreground color="-16765749"/>
                       <icon value="img/gui/user/securityShield16.png"/>
-                      <margin top="0" left="0" bottom="0" right="0"/>
-                      <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
                       <rolloverEnabled value="true"/>
-                      <text value="Редактирование данных" noi18n="true"/>
+                      <text value="&amp;Редактирование данных" noi18n="true"/>
                       <toolTipText value="Редактирование списков констант" noi18n="true"/>
                     </properties>
                   </component>
@@ -84,13 +78,10 @@
                       <borderPainted value="false"/>
                       <contentAreaFilled value="true"/>
                       <enabled value="false"/>
-                      <foreground color="-16765749"/>
                       <icon value="img/gui/user/securityShield16.png"/>
-                      <margin top="0" left="0" bottom="0" right="0"/>
-                      <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
                       <rolloverEnabled value="true"/>
-                      <text value="Администрирование" noi18n="true"/>
+                      <text value="&amp;Администрирование" noi18n="true"/>
                       <toolTipText value="Редактирование данных" noi18n="true"/>
                     </properties>
                   </component>
@@ -102,12 +93,9 @@
                       <autoscrolls value="false"/>
                       <borderPainted value="false"/>
                       <contentAreaFilled value="true"/>
-                      <foreground color="-16765749"/>
-                      <margin top="0" left="0" bottom="0" right="0"/>
-                      <opaque value="false"/>
                       <requestFocusEnabled value="true"/>
                       <rolloverEnabled value="true"/>
-                      <text value="Просмотр извещений" noi18n="true"/>
+                      <text value="П&amp;росмотр извещений" noi18n="true"/>
                     </properties>
                   </component>
                   <vspacer id="5165a">

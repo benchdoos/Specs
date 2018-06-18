@@ -56,7 +56,7 @@ public class DetailDaoImpl implements DetailDao {
     public int addDetail(DetailEntity detailEntity) {
         Integer id = (Integer) session.save(detailEntity);
         detailEntity = getDetailById(id);
-        log.debug("Detail successfully saved: " + detailEntity);
+        log.debug("Detail successfully saved at id:{}, detail: " + detailEntity);
         return id;
 
     }
@@ -84,14 +84,25 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
-    public DetailEntity getDetailByIndex(String code) {
-        Query query = session.createQuery("from DetailEntity where code = :code");
+    public DetailEntity getDetailByCode(String code) {
+       /* Query query = session.createQuery("from DetailEntity where code = :code");
 
         query.setParameter("code", code);
 
         final DetailEntity entity = (DetailEntity) query.uniqueResult();
         log.debug("Detail found by code: " + code + " " + entity);
+        return entity;*/
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
+        Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(builder.equal(root.get("code"), code));
+        Query<DetailEntity> q = session.createQuery(criteriaQuery);
+        final DetailEntity entity = q.uniqueResult();
+        log.debug("Detail found by code: " + code + " " + entity);
         return entity;
+
     }
 
     @Override
