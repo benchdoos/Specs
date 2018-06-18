@@ -172,7 +172,7 @@ public class EditImageWindow extends JDialog {
             });
         } else {
             detailIconLabel.setIcon(null);
-            detailIconLabel.setText(NO_IMAGE);
+            setDefaultImage();
         }
     }
 
@@ -191,9 +191,9 @@ public class EditImageWindow extends JDialog {
                             if (file.exists() && file.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
                                 detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
                                 detailEntity.setImagePath(file.getAbsolutePath());
-                                updateIcon();
                             }
                         }
+                        updateIcon();
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -202,7 +202,6 @@ public class EditImageWindow extends JDialog {
         };
         try {
             dropTarget.addDropTargetListener(new DropTargetAdapter() {
-                Icon icon = detailIconLabel.getIcon();
 
                 @Override
                 public void drop(DropTargetDropEvent dtde) {
@@ -222,22 +221,23 @@ public class EditImageWindow extends JDialog {
                     setDefaultImage();
                     super.dragExit(dte);
                 }
-
-                private void setDefaultImage() {
-                    detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
-                    if (icon == null) {
-                        detailIconLabel.setText(NO_IMAGE);
-                        detailIconLabel.setIcon(null);
-                    } else {
-                        detailIconLabel.setText(null);
-                        detailIconLabel.setIcon(icon);
-                    }
-                }
             });
         } catch (TooManyListenersException e) {
             log.warn("Can not init drag and drop dropTarget", e);
         }
         contentPane.setDropTarget(dropTarget);
+    }
+
+    private void setDefaultImage() {
+        Icon icon = detailIconLabel.getIcon();
+        detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
+        if (icon == null) {
+            detailIconLabel.setText(NO_IMAGE);
+            detailIconLabel.setIcon(null);
+        } else {
+            detailIconLabel.setText(null);
+            detailIconLabel.setIcon(icon);
+        }
     }
 
     private void onDelete() {
