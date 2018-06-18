@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.gui.common.utils;
 
+import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.model.MaterialEntity;
 import com.mmz.specs.model.MaterialListEntity;
 
@@ -28,9 +29,11 @@ public class Renders {
             try {
                 if (value instanceof MaterialListEntity) {
                     MaterialListEntity entity = (MaterialListEntity) value;
-                    final String shortProfile = entity.getMaterialByMaterialId().getShortProfile();
                     final String shortMark = entity.getMaterialByMaterialId().getShortMark();
+                    String shortProfile = entity.getMaterialByMaterialId().getShortProfile();
                     setOpaque(true);
+
+                    shortProfile = CommonWindowUtils.getCanonicalProfile(shortProfile);
 
                     return super.getListCellRendererComponent(list, shortMark + " " + shortProfile + (entity.isMainMaterial() ? " (Основной)" : ""), index, isSelected, cellHasFocus);
                 } else {

@@ -1062,7 +1062,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     if (entity.isActive()) {
                         MaterialEntity materialByMaterialId = entity.getMaterialByMaterialId();
                         if (materialByMaterialId.isActive()) {
-                            result.append(materialByMaterialId.getShortMark()).append(" ").append(materialByMaterialId.getShortProfile()).append(", ");
+                            String shortProfile = materialByMaterialId.getShortProfile();
+                            shortProfile = CommonWindowUtils.getCanonicalProfile(shortProfile);
+                            result.append(materialByMaterialId.getShortMark()).append(" ").append(shortProfile).append(", ");
                         }
                     }
                 }

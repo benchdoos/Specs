@@ -251,4 +251,10 @@ public class CommonWindowUtils {
         }
         return null;
     }
+
+    public static String getCanonicalProfile(String text) {
+        text = text.replaceAll("круг", "Ø");
+        text = text.replaceAll("Круг", "Ø");
+        return text;
+    }
 }
