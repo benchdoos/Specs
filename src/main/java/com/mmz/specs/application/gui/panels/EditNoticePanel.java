@@ -1195,7 +1195,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getDetailListTreeByDetailList(detailListService.getDetailListByParent(detailEntity));
                     if (detailListTreeByDetailList.children().hasMoreElements()) {
                         mainTree.setModel(new DefaultTreeModel(detailListTreeByDetailList));
-                        mainTree.updateUI();
                     } else {
                         if (detailEntity != null) {
                             DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
