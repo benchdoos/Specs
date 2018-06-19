@@ -194,9 +194,9 @@ public class DetailListDaoImpl implements DetailListDao {
 
         ArrayList<DetailListEntity> result = new ArrayList<>();
         for (DetailListEntity e : arrayList) {
-            if (e.isActive()) {
-                result.add(e);
-            }
+            //if (e.isActive()) { //todo check on what influenses?
+            result.add(e);
+            //}
         }
 
         return result;

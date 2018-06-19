@@ -829,6 +829,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 if (selectedItem != null) {
                     updateNotice();
                     updateAllNotices();
+                    removeUnusedDetailLists();
 
                     //todo update info about notice!!!!
                     log.debug("Transaction status: {}", session.getTransaction().getStatus());
@@ -845,6 +846,27 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 JOptionPane.showMessageDialog(this,
                         "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
                         JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void removeUnusedDetailLists() {
+        DetailListService service = new DetailListServiceImpl(session);
+        final List<DetailListEntity> detailListEntities = service.listDetailLists();
+        for (DetailListEntity entity : detailListEntities) {
+            if (!entity.isActive() && entity.getNoticeByNoticeId().equals(noticeComboBox.getSelectedItem())) {
+                //remove!!!
+                List<DetailListEntity> result = service.getDetailListByParentAndChild(entity.getDetailByParentDetailId(), entity.getDetailByChildDetailId());//todo fix this
+
+                if (result.size() > 1) {
+                    DetailListEntity detailListEntity = new MainWindowUtils(session).getLatestDetailListEntity(result);
+                    if (!detailListEntity.equals(entity)) {
+                        service.removeDetailList(entity.getId());
+                    }
+
+                } else if (result.size() == 1) {
+                    service.removeDetailList(entity.getId());
+                }
             }
         }
     }
