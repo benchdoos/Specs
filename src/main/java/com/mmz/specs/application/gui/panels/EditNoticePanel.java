@@ -381,18 +381,21 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void onAddNewItemButtonNew() {
-        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, DEFAULT);
-        selectionDetailWindow.setLocation(FrameUtils
-                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-        selectionDetailWindow.setVisible(true);
-        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+        final Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
+        if (lastSelectedPathComponent != null) {
+            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, DEFAULT);
+            selectionDetailWindow.setLocation(FrameUtils
+                    .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+            selectionDetailWindow.setVisible(true);
+            ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
 
-        if (list != null) {
-            for (DetailEntity entity : list) {
-                if (entity != null) {
-                    final TreePath selectionPath = mainTree.getSelectionPath();
-                    if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
-                        addTreeNode(entity, selectionPath);
+            if (list != null) {
+                for (DetailEntity entity : list) {
+                    if (entity != null) {
+                        final TreePath selectionPath = mainTree.getSelectionPath();
+                        if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
+                            addTreeNode(entity, selectionPath);
+                        }
                     }
                 }
             }
