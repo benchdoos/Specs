@@ -200,26 +200,12 @@ public class CommonWindowUtils {
         return result;
     }
 
-    private boolean addTitle(Component component, UsersEntity user) {
-        if (user != null) {
-            if (user.isActive()) {
-                if (user.isAdmin()) {
-                    return true;
-                } else {
-                    showMessageDialog(component,
-                            "Вам необходимо быть администратором,\n" +
-                                    "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
-                }
-            } else {
-                showMessageDialog(component,
-                        "Пользователь не активен,\n" +
-                                "обратитесь к администратору для продолжения.", "Ошибка доступа", WARNING_MESSAGE);
-            }
-        } else {
-            showMessageDialog(component,
-                    "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", WARNING_MESSAGE);
+    public static String getCanonicalProfile(String text) {
+        if (text.toLowerCase().contains("круг")) {
+            text = text.replaceAll("круг", "Ø");
+            text = text.replaceAll("Круг", "Ø");
         }
-        return false;
+        return text;
     }
 
     public DetailTitleEntity onCreateNewTitle(Component component) {
@@ -229,32 +215,51 @@ public class CommonWindowUtils {
             UsersEntity currentUser = clientMainWindow.getCurrentUser();
 
 
-            EditTitleWindow editTitleWindow = new EditTitleWindow(null);
-            editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
-            editTitleWindow.setVisible(true);
-            DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
-
-            if (addTitle(component, currentUser)) return titleEntity;
+            if (addTitle(component, currentUser)) {
+                return getDetailTitleEntity(component);
+            }
         } else {
             LoginWindow loginWindow = new LoginWindow(session);
             loginWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), loginWindow));
             loginWindow.setVisible(true);
             UsersEntity user = loginWindow.getAuthorizedUser();
 
-
-            EditTitleWindow editTitleWindow = new EditTitleWindow(null);
-            editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
-            editTitleWindow.setVisible(true);
-            DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
-
-            if (addTitle(component, user)) return titleEntity;
+            if (addTitle(component, user)) {
+                return getDetailTitleEntity(component);
+            }
         }
         return null;
     }
 
-    public static String getCanonicalProfile(String text) {
-        text = text.replaceAll("круг", "Ø");
-        text = text.replaceAll("Круг", "Ø");
-        return text;
+    private boolean addTitle(Component component, UsersEntity user) {
+        if (user != null) {
+            if (user.isActive()) {
+                if (user.isAdmin()) {
+                    return true;
+                } else {
+                    FrameUtils.shakeFrame(component);
+                    showMessageDialog(component,
+                            "Вам необходимо быть администратором,\n" +
+                                    "чтобы проводить изменения.", "Ошибка доступа", WARNING_MESSAGE);
+                }
+            } else {
+                FrameUtils.shakeFrame(component);
+                showMessageDialog(component,
+                        "Пользователь не активен,\n" +
+                                "обратитесь к администратору для продолжения.", "Ошибка доступа", WARNING_MESSAGE);
+            }
+        } else {
+            FrameUtils.shakeFrame(component);
+            showMessageDialog(component,
+                    "Необходимо выполнить вход, чтобы продолжить", "Ошибка входа", WARNING_MESSAGE);
+        }
+        return false;
+    }
+
+    private DetailTitleEntity getDetailTitleEntity(Component component) {
+        EditTitleWindow editTitleWindow = new EditTitleWindow(null);
+        editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
+        editTitleWindow.setVisible(true);
+        return editTitleWindow.getDetailTitleEntity();
     }
 }
