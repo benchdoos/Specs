@@ -106,17 +106,18 @@ public class CreateMaterialWindow extends JDialog {
     private void onOK() {
         if (verify()) {
             MaterialEntity materialEntity = createMaterial();
-            if (!exist(materialEntity) && this.materialEntity == null) {
-                loginAndUpdate(materialEntity);
-            } else {
-                if (exist(materialEntity) && this.materialEntity != null) {
-                    loginAndUpdate(materialEntity);
-                } else {
+
+            if (exist(materialEntity)) {
+                if (this.materialEntity == null) {
+                    FrameUtils.shakeFrame(this);
                     JOptionPane.showMessageDialog(this, "Данный материал существует",
                             "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    loginAndUpdate(materialEntity);
                 }
+            } else {
+                loginAndUpdate(materialEntity);
             }
-
         }
     }
 
