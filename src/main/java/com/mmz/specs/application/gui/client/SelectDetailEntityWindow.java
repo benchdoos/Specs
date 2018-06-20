@@ -470,6 +470,10 @@ public class SelectDetailEntityWindow extends JDialog {
                             unitCheckBox.setSelected(true);
                             unitCheckBox.setEnabled(false);
                         }
+
+                        if (mode == MODE.DEFAULT || mode == MODE.CREATE_SINGLE) {
+                            unitCheckBox.setEnabled(true);
+                        }
                     }
                 } else {
                     DefaultComboBoxModel<String> codeModel = new DefaultComboBoxModel<>();
