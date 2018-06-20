@@ -23,7 +23,6 @@ import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
-import com.mmz.specs.application.gui.common.SelectionDetailWindow;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -105,7 +104,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JButton copyButton;
     private Session session;
     private DetailEntity detailEntity;
-    private DetailEntity brotherEntity;
 
     EditNoticePanel(DetailEntity detailEntity) {
         $$$setupUI$$$();
@@ -143,23 +141,15 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     EditNoticePanel(DetailEntity detailEntity, DetailEntity brotherEntity) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
-        this.brotherEntity = brotherEntity;
         this.session = ClientBackgroundService.getInstance().getSession();
 
         session.getTransaction().begin();
 
         initGui();
 
-        //initNewDetailEntity(this.detailEntity);
-
-        copyBrotherEntityToDetailEntity(this.detailEntity, this.brotherEntity);
+        copyBrotherEntityToDetailEntity(this.detailEntity, brotherEntity);
 
         fillMainTree();
-    }
-
-    private void initNewDetailEntity(DetailEntity detailEntity) {
-        DetailService service = new DetailServiceImpl(session);
-        this.detailEntity = service.getDetailById(service.addDetail(detailEntity));
     }
 
     private void initGui() {
@@ -211,7 +201,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void initEditPanelListeners() {
-        /*addItemButton.addActionListener(e -> onAddNewItemButton());*/
         addItemButton.addActionListener(e -> onAddNewItemButtonNew());
         copyButton.addActionListener(e -> onCopyButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
@@ -413,18 +402,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
 
     private void onEditDetailInfo() {
-        /*final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        CreateDetailWindow createDetailWindow = new CreateDetailWindow(selectedDetailEntityFromTree);
-        createDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createDetailWindow));
-        createDetailWindow.setVisible(true);
-        final DetailEntity changed = createDetailWindow.getDetailEntity();
-        if (changed != null) {
-            DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
-            service.updateDetail(changed);
-            updateTreeDetail();
-            detailCodeLabel.setText(changed.getCode());
-            detailTitleLabel.setText(changed.getDetailTitleByDetailTitleId().getTitle());
-        }*/
         final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
 
         if (selectedDetailEntityFromTree != null) {
@@ -568,23 +545,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     }
 
-    private String getMaterialsNames(ArrayList<MaterialListEntity> listEntities) { //fixme or not me... old list is incorrect and half duplicate new one
-        StringBuilder result = new StringBuilder();
-        for (MaterialListEntity entity : listEntities) {
-            if (entity.isActive()) {
-                final MaterialEntity material = entity.getMaterialByMaterialId();
-                if (material.isActive()) {
-                    result.append(material.getShortMark()).append(" ").append(material.getShortProfile());
-                    if (entity.isMainMaterial()) {
-                        result.append(" (Основной)");
-                    }
-                    result.append("\n\t");
-                }
-            }
-        }
-        return result.toString();
-    }
-
     private void initKeyBindings() {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -594,36 +554,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-    }
-
-    private void onAddNewItemButton() {
-        JPopupMenu jPopupMenu = new JPopupMenu();
-        JMenuItem addExisting = new JMenuItem("Добавить существующую");
-        addExisting.setIcon(new ImageIcon(getClass().getResource("/img/gui/addExistingItem.png")));
-        addExisting.addActionListener(e -> onAddExistingItem());
-
-
-        JMenuItem addNew = new JMenuItem("Добавить новую");
-        addNew.setIcon(new ImageIcon(getClass().getResource("/img/gui/addNewItem.png")));
-        addNew.addActionListener(e -> onAddNewItem());
-
-        jPopupMenu.add(addExisting);
-        jPopupMenu.add(addNew);
-        jPopupMenu.show(addItemButton, addItemButton.getBounds().x, addItemButton.getBounds().y
-                + addItemButton.getBounds().height);
-
-    }
-
-    private void onAddNewItem() {
-        CreateDetailWindow addDetailWindow = new CreateDetailWindow(null);
-        addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
-        addDetailWindow.setVisible(true);
-        DetailEntity entity = addDetailWindow.getDetailEntity();
-
-        if (entity != null) {
-            final TreePath selectionPath = mainTree.getSelectionPath();
-            addTreeNode(entity, selectionPath);
-        }
     }
 
     private void addTreeNode(DetailEntity entity, TreePath selectionPath) {
@@ -638,26 +568,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
         } else {
             showMessageDialog(this, "Укажите сначала, куда необходимо добавить деталь", "Ошибка добавления", ERROR_MESSAGE);
-        }
-    }
-
-    private void onAddExistingItem() {
-        SelectionDetailWindow selectionDetailWindow = new SelectionDetailWindow();
-        selectionDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-        selectionDetailWindow.setVisible(true);
-
-        DetailEntity entity = selectionDetailWindow.getSelectedEntity();
-        if (entity != null) {
-            final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-            final TreePath selectionPath = mainTree.getSelectionPath();
-
-            addTreeNode(entity, selectionPath);
-
-            try {
-                DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 
