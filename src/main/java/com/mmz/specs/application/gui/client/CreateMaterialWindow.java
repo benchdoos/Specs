@@ -106,28 +106,36 @@ public class CreateMaterialWindow extends JDialog {
     private void onOK() {
         if (verify()) {
             MaterialEntity materialEntity = createMaterial();
-            if (!exist(materialEntity)) {
-                LoginWindow loginWindow = new LoginWindow(session);
-                loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
-                loginWindow.setVisible(true);
-                UsersEntity user = loginWindow.getAuthorizedUser();
-                if (user != null) {
-                    if (user.isActive()) {
-                        if (user.isAdmin() || user.isEditor()) {
-                            saveMaterial(materialEntity);
-                            dispose();
-                            return;
-                        }
-                    }
-                }
-                JOptionPane.showMessageDialog(this, "Необходимо быть действующим редактором " +
-                        "\nили администратором, чтобы продожить.", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
+            if (!exist(materialEntity) && this.materialEntity == null) {
+                loginAndUpdate(materialEntity);
             } else {
-                JOptionPane.showMessageDialog(this, "Данный материал существует",
-                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+                if (exist(materialEntity) && this.materialEntity != null) {
+                    loginAndUpdate(materialEntity);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Данный материал существует",
+                            "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+                }
             }
 
         }
+    }
+
+    private void loginAndUpdate(MaterialEntity materialEntity) {
+        LoginWindow loginWindow = new LoginWindow(session);
+        loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+        loginWindow.setVisible(true);
+        UsersEntity user = loginWindow.getAuthorizedUser();
+        if (user != null) {
+            if (user.isActive()) {
+                if (user.isAdmin() || user.isEditor()) {
+                    saveMaterial(materialEntity);
+                    dispose();
+                    return;
+                }
+            }
+        }
+        JOptionPane.showMessageDialog(this, "Необходимо быть действующим редактором " +
+                "\nили администратором, чтобы продожить.", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
     }
 
     private boolean exist(MaterialEntity materialEntity) {
