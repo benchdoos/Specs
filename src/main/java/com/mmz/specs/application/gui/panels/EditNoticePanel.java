@@ -201,7 +201,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void initEditPanelListeners() {
-        addItemButton.addActionListener(e -> onAddNewItemButtonNew());
+        addItemButton.addActionListener(e -> onAddNewItemButton());
         copyButton.addActionListener(e -> onCopyButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
         moveItemUpButton.addActionListener(e -> onMoveItemUp());
@@ -380,7 +380,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         editImageButton.addActionListener(e -> onEditDetailImage());
     }
 
-    private void onAddNewItemButtonNew() {
+    private void onAddNewItemButton() {
         final Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
         if (lastSelectedPathComponent != null) {
             SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, DEFAULT);
@@ -395,6 +395,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         final TreePath selectionPath = mainTree.getSelectionPath();
                         if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
                             addTreeNode(entity, selectionPath);
+                            mainTree.setSelectionPath(selectionPath);
                         }
                     }
                 }
@@ -552,7 +553,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         //fixme this doesn't work for some reason
-        contentPane.registerKeyboardAction(e -> onAddNewItemButtonNew(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onAddNewItemButton(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onRemoveItem(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -622,14 +623,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
         final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
         if (!isRoot) {
-            DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
+            final TreePath selectionPath = mainTree.getSelectionPath();
+
+            DetailEntity parent = JTreeUtils.getParentForSelectionPath(selectionPath);
             if (selectedEntity != null && parent != null) {
-                /*CreateDetailWindow addDetailWindow = new CreateDetailWindow(null, selectedEntity.isUnit());
-                addDetailWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), addDetailWindow));
-                addDetailWindow.setVisible(true);
-
-                DetailEntity entity = addDetailWindow.getDetailEntity();*/
-
                 SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
                 selectionDetailWindow.setLocation(FrameUtils
                         .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));

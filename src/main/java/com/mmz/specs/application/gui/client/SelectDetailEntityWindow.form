@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="371" height="208"/>
+      <xy x="48" y="54" width="348" height="208"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -59,77 +59,95 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="5c255" class="javax.swing.JLabel">
+          <grid id="98dce" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="5" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
-            <properties>
-              <labelFor value="ea92d"/>
-              <text value="Введите индекс:"/>
-            </properties>
-          </component>
-          <component id="ea92d" class="javax.swing.JComboBox" binding="codeComboBox">
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="5c255" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <labelFor value="ea92d"/>
+                  <text value="Введите индекс:"/>
+                </properties>
+              </component>
+              <component id="ea92d" class="javax.swing.JComboBox" binding="codeComboBox">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <maximum-size width="400" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <editable value="true"/>
+                  <maximumRowCount value="15"/>
+                </properties>
+              </component>
+              <component id="d42a8" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <labelFor value="5fff1"/>
+                  <text value="Наименование:"/>
+                </properties>
+              </component>
+              <component id="5fff1" class="com.mmz.specs.application.gui.common.utils.SwitchingComboBox" binding="titleComboBox" custom-create="true">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="250" height="-1"/>
+                    <maximum-size width="400" height="-1"/>
+                  </grid>
+                </constraints>
+              </component>
+              <component id="5aeb9" class="javax.swing.JCheckBox" binding="unitCheckBox">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="&amp;Узел"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="c08c3" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                <maximum-size width="400" height="-1"/>
-              </grid>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
-            <properties>
-              <editable value="true"/>
-              <maximumRowCount value="15"/>
-            </properties>
-          </component>
-          <component id="8084c" class="javax.swing.JButton" binding="multipleSelectionButton">
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="8084c" class="javax.swing.JButton" binding="multipleSelectionButton">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <icon value="img/gui/tree/someDetails.png"/>
+                  <toolTipText value="&amp;Выбрать несколько деталей"/>
+                </properties>
+              </component>
+              <component id="13d1b" class="javax.swing.JButton" binding="createTitleButton">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <icon value="img/gui/titleNew16.png"/>
+                  <text value=""/>
+                  <toolTipText value="Создать новое наименование"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <vspacer id="fe171">
             <constraints>
-              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="1" row-span="4" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
-            <properties>
-              <icon value="img/gui/tree/someDetails.png"/>
-            </properties>
-          </component>
-          <hspacer id="c3b3f">
-            <constraints>
-              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </hspacer>
-          <component id="d42a8" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <labelFor value="5669d"/>
-              <text value="Наименование:"/>
-            </properties>
-          </component>
-          <component id="5669d" class="javax.swing.JComboBox" binding="titleComboBox">
-            <constraints>
-              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                <preferred-size width="250" height="-1"/>
-                <maximum-size width="400" height="-1"/>
-              </grid>
-            </constraints>
-            <properties>
-              <maximumRowCount value="15"/>
-            </properties>
-          </component>
-          <component id="5aeb9" class="javax.swing.JCheckBox" binding="unitCheckBox">
-            <constraints>
-              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="&amp;Узел"/>
-            </properties>
-          </component>
-          <component id="13d1b" class="javax.swing.JButton" binding="createTitleButton">
-            <constraints>
-              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <icon value="img/gui/titleNew16.png"/>
-              <text value=""/>
-              <toolTipText value="Создать новое наименование"/>
-            </properties>
-          </component>
+          </vspacer>
         </children>
       </grid>
     </children>

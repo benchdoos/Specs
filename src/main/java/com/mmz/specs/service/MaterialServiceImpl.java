@@ -21,6 +21,7 @@ import com.mmz.specs.dao.MaterialDaoImpl;
 import com.mmz.specs.model.MaterialEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -34,6 +35,10 @@ public class MaterialServiceImpl implements MaterialService {
 
     public MaterialServiceImpl(MaterialDao materialDao) {
         this.materialDao = materialDao;
+    }
+
+    public MaterialServiceImpl(Session session) {
+        this.materialDao = new MaterialDaoImpl(session);
     }
 
     @Override
