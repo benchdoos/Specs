@@ -51,9 +51,14 @@ public abstract class SwitchingComboBox<E> extends JComboBox<E> {
         KeyAdapter keyAdapter = new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                typedItem = typedItem + e.getKeyChar();
-                selectTypedItem();
-                timeoutTimer.restart();
+                if (e.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
+                    typedItem = typedItem + e.getKeyChar();
+                    selectTypedItem();
+                    timeoutTimer.restart();
+                } else {
+                    typedItem = "";
+                    timeoutTimer.restart();
+                }
             }
         };
         addKeyListener(keyAdapter);
