@@ -19,11 +19,17 @@ import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
+import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.service.DetailService;
+import com.mmz.specs.service.DetailServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +86,88 @@ public class DetailListDaoImpl implements DetailListDao {
     }
 
     @Override
+    public DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity notice) {
+        Query query = this.session.createQuery("from DetailListEntity where " +
+                "detailByParentDetailId = :parent and " +
+                "detailByChildDetailId= :child and noticeByNoticeId=:notice" +
+                " order by id asc");
+        query.setParameter("parent", parent);
+        query.setParameter("child", child);
+        query.setParameter("notice", notice);
+
+        final List list = query.list();
+
+        DetailListEntity result = null;
+        for (Object o : list) {
+            if (o instanceof DetailListEntity) {
+                DetailListEntity entity = (DetailListEntity) o;
+                if (result != null) {
+                    if (result.getId() < entity.getId()) {
+                        result = entity;
+                    }
+                } else {
+                    result = entity;
+                }
+            }
+        }
+        return result;
+
+
+        /*CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<DetailListEntity> criteriaQuery = builder.createQuery(DetailListEntity.class);
+        Root<DetailListEntity> root = criteriaQuery.from(DetailListEntity.class);
+
+        criteriaQuery.select(root);
+        final Predicate detailByParentDetailId = builder.equal(root.get("detailByParentDetailId"), parent);
+        final Predicate detailByChildDetailId = builder.equal(root.get("detailByChildDetailId"), child);
+        final Predicate noticeByNoticeId = builder.equal(root.get("noticeByNoticeId"), notice);
+
+        criteriaQuery.where(builder.and(detailByParentDetailId, detailByChildDetailId, noticeByNoticeId));
+
+        Query<DetailListEntity> q = session.createQuery(criteriaQuery);
+        final List<DetailListEntity> list = q.list();
+
+        System.out.println(">>> (" + list.size() + ")" + list);
+
+        DetailListEntity result = null;
+        for (DetailListEntity entity : list) {
+            if (result != null) {
+                if (entity != null) {
+                    if (result.getId() < entity.getId()) {
+                        result = entity;
+                    }
+                }
+            } else {
+                result = entity;
+            }
+        }
+        return result;*/
+    }
+
+    @Override
+    public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
+        final long time = System.nanoTime();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+
+        CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
+        Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
+        criteria.select(root);
+        criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate"))/*, builder.desc(root.get("noticeByNoticeId").get("date"))*/);
+
+        final Query<DetailListEntity> query = session.createQuery(criteria);
+
+        query.setFirstResult(0);
+        query.setMaxResults(1);
+        final DetailListEntity entity = query.getSingleResult();
+
+//        log.debug("Latest detailList successfully found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
+
+//        System.out.println("getting lastDetailListEntity COST: " + ((System.nanoTime() - time) / 1000000) + " for: " + entity);
+        return entity;
+
+    }
+
+    @Override
     public List<DetailListEntity> getDetailListByParent(DetailEntity parent) {
         Query query = this.session.createQuery("from DetailListEntity where detailByParentDetailId= :parent");
         query.setParameter("parent", parent);
@@ -99,8 +187,8 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public List<DetailListEntity> getDetailListByParent(String detailEntityIndex) {
-        DetailDao detailDao = new DetailDaoImpl(session);
-        DetailEntity parent = detailDao.getDetailByCode(detailEntityIndex);
+        DetailService service = new DetailServiceImpl(session);
+        DetailEntity parent = service.getDetailByCode(detailEntityIndex);
 
         Query query = this.session.createQuery("from DetailListEntity where detailByParentDetailId= :parent");
         query.setParameter("parent", parent);
@@ -142,6 +230,7 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public List<DetailListEntity> getDetailListBySearch(String searchText) {
+        log.debug("User is searching: {}", searchText);
         Query query = session.createQuery("from DetailEntity where code like '%" + searchText + "%'");
         ArrayList<DetailEntity> details = new ArrayList<>();
 
@@ -177,6 +266,8 @@ public class DetailListDaoImpl implements DetailListDao {
             }
         }
 
+        log.debug("Search result for {} is: (size: {}), {}", searchText, result.size(), result);
+
         return result;
     }
 
@@ -186,20 +277,13 @@ public class DetailListDaoImpl implements DetailListDao {
         query.setParameter("parent", parent);
         query.setParameter("child", child);
 
-        List list = query.list();
+       /* List list = query.list();
         ArrayList<DetailListEntity> arrayList = new ArrayList<>(list.size());
         for (Object o : list) {
             arrayList.add((DetailListEntity) o);
-        }
+        }*/
 
-        ArrayList<DetailListEntity> result = new ArrayList<>();
-        for (DetailListEntity e : arrayList) {
-            //if (e.isActive()) { //todo check on what influenses?
-            result.add(e);
-            //}
-        }
-
-        return result;
+        return query.list();
     }
 
     @Override
@@ -231,25 +315,14 @@ public class DetailListDaoImpl implements DetailListDao {
         Query query = session.createQuery("from DetailListEntity where detailByParentDetailId = :parent");
         query.setParameter("parent", parent);
 
-        List list = query.list();
-
-        List<DetailListEntity> detailListEntities = new ArrayList<>(list.size());
-
-        for (Object object : list) {
-            if (object instanceof DetailListEntity) {
-                detailListEntities.add((DetailListEntity) object);
+        final ArrayList<DetailEntity> result = new ArrayList<>();
+        for (final Object o : query.list()) {
+            final DetailListEntity detailListEntity = (DetailListEntity) o;
+            final DetailEntity detailByChildDetailId = detailListEntity.getDetailByChildDetailId();
+            if (!result.contains(detailByChildDetailId)) {
+                result.add(detailByChildDetailId);
             }
         }
-
-
-        List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
-
-        for (DetailListEntity entity : detailListEntities) {
-            if (doesNotContainEntityInList(result, entity.getDetailByChildDetailId())) {
-                result.add(entity.getDetailByChildDetailId());
-            }
-        }
-
         return result;
     }
 

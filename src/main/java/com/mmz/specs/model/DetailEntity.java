@@ -23,7 +23,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "DETAIL")
-public class DetailEntity implements Comparable<DetailEntity> {
+public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
     private int id;
     private String code;
     private boolean unit;
@@ -187,9 +187,14 @@ public class DetailEntity implements Comparable<DetailEntity> {
         } else {
             return -1;
         }
-//        result -= that.getCode().compareTo(this.getCode());
-        /*result += (that.isActive() == this.isActive()) ? 1 : 0;*/
-//        return result;
+    }
 
+    @Override
+    public String toSimpleString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("index", code)
+                .append("title", detailTitleByDetailTitleId.getTitle())
+                .toString();
     }
 }

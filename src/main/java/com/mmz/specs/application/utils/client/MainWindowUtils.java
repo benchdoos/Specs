@@ -19,14 +19,12 @@ import com.google.common.collect.ComparisonChain;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.MaterialListDaoImpl;
 import com.mmz.specs.model.*;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
 import com.mmz.specs.service.MaterialListService;
 import com.mmz.specs.service.MaterialListServiceImpl;
-import com.sun.istack.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -36,177 +34,142 @@ import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MainWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-
+    private static final long NANO_TIME = 1000000;
     private Session session;
+
 
     public MainWindowUtils(Session session) {
         this.session = session;
     }
 
-    public DefaultMutableTreeNode getDetailListFullTree(List<DetailListEntity> askedListRoot) {
 
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
-        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+    public DefaultMutableTreeNode getDetailListFullTree(List<DetailListEntity> listEntities) {
+        final long time = System.nanoTime();
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+        ArrayList<DetailEntity> roots = getRootObjects(listEntities);
 
-
-        ArrayList<String> uniqueRootDetails = new ArrayList<>();
-
-        for (DetailListEntity detailListEntity : askedListRoot) {
-            List<DetailEntity> rootParentsList = service.listParents(detailListEntity.getDetailByParentDetailId());
-            rootParentsList.sort((o1, o2) -> ComparisonChain.start()
-                    .compareTrueFirst(o1.isUnit(), o2.isUnit())
-                    .compare(o1.getCode(), o2.getCode())
-                    .compareTrueFirst(o1.isActive(), o2.isActive())
-                    .result());
-            if (rootParentsList.size() == 0) {
-                result = addUniqueResult(result, service, uniqueRootDetails, detailListEntity);
-            }
+        System.out.println("roots: ");
+        for (DetailEntity e : roots) {
+            System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
         }
+
+        for (DetailEntity entity : roots) {
+            DefaultMutableTreeNode node = getChildren(entity);
+            result.add(node);
+        }
+        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
         return result;
     }
 
-    private DefaultMutableTreeNode addUniqueResult(DefaultMutableTreeNode result, DetailListService service, ArrayList<String> uniqueRootDetails, DetailListEntity detailListEntity) {
-        //testme, does it work properly
-        if (!uniqueRootDetails.contains(detailListEntity.getDetailByParentDetailId().getCode())) {
-            if (detailListEntity.getDetailByParentDetailId().isActive()) {
-                uniqueRootDetails.add(detailListEntity.getDetailByParentDetailId().getCode());
+    private ArrayList<DetailEntity> getRootObjects(List<DetailListEntity> listEntities) {
+        DetailListService service = new DetailListServiceImpl(session);
 
-                DefaultMutableTreeNode node = getChildren(service, detailListEntity.getDetailByParentDetailId());
-                result.add(node);
+        ArrayList<DetailEntity> roots = new ArrayList<>();
+        ArrayList<DetailEntity> children = new ArrayList<>();
+
+        for (DetailListEntity current : listEntities) {
+            final DetailEntity parentDetailEntity = current.getDetailByParentDetailId();
+
+            if (!roots.contains(parentDetailEntity)) {
+                if (!children.contains(parentDetailEntity)) {
+                    List<DetailEntity> parents = service.listParents(parentDetailEntity);
+                    if (parents.size() == 0) {
+                        roots.add(parentDetailEntity);
+                    } else {
+                        children.add(parentDetailEntity);
+                    }
+                }
             }
         }
-        return result;
+        return roots;
     }
 
-    public DefaultMutableTreeNode getDetailListTreeByDetailList(List<DetailListEntity> askedListRoot) {
+
+    public DefaultMutableTreeNode getDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
+        final long time = System.nanoTime();
 
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+        ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
+        System.out.println(">>> roots: ");
+        System.out.println(roots);
+        for (DetailEntity entity : roots) {
+            DefaultMutableTreeNode node = getChildren(entity);
+            result.add(node);
+        }
+        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        return result;
+    }
 
-
-        ArrayList<String> uniqueRootDetails = new ArrayList<>();
-
-        for (DetailListEntity detailListEntity : askedListRoot) {
-            List<DetailEntity> rootChildren = service.listChildren(detailListEntity.getDetailByParentDetailId());
-            if (rootChildren.size() > 0) {
-                addUniqueResult(result, service, uniqueRootDetails, detailListEntity);
+    private ArrayList<DetailEntity> getParentsObjects(List<DetailListEntity> listEntities) {
+        ArrayList<DetailEntity> result = new ArrayList<>();
+        for (DetailListEntity e : listEntities) {
+            final DetailEntity detailByParentDetailId = e.getDetailByParentDetailId();
+            if (!result.contains(detailByParentDetailId)) {
+                result.add(detailByParentDetailId);
             }
         }
         return result;
     }
 
-    public DefaultMutableTreeNode getChildren(DetailListService service, DetailEntity parent) {
-        ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
-        children.sort((o1, o2) -> ComparisonChain.start()
-                .compareTrueFirst(o1.isUnit(), o2.isUnit())
-                .compare(o1.getCode(), o2.getCode())
-                .compareTrueFirst(o1.isActive(), o2.isActive())
-                .result());
+    public DefaultMutableTreeNode getChildren(DetailEntity parent) {
+        log.warn("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
+        final long total1 = System.nanoTime();
 
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
-        if (children.size() > 0) {
-            for (DetailEntity entity : children) {
-                if (entity != null) {
-                    ArrayList<DetailListEntity> detailListEntities = (ArrayList<DetailListEntity>) service.getDetailListByParent(parent);
-                    NoticeEntity lastNotice = getLatestNotice(entity, detailListEntities);
+        DefaultMutableTreeNode result = null;
+        if (parent.isActive()) {
+            DetailListService service = new DetailListServiceImpl(session);
+            final long t1 = System.nanoTime();
 
+            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
+            if (parent.getCode().contains("110.00.000-03")) {
+                System.err.println("getting children list COST: " + ((System.nanoTime() - t1) / NANO_TIME));
+            }
 
-                    log.trace("Latest notice for {} finally is: {}", entity, lastNotice);
+            result = new DefaultMutableTreeNode();
+            if (children.size() > 0) {
+                log.trace("Parent {} has children count: {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), children.size());
 
-                    List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild(parent, entity);
-                    DetailListEntity lastDetailListEntity = getLatestListEntity(lastNotice, detailListByParentAndChild);
+                if (children.size() > 1) {
+                    children.sort((o1, o2) -> ComparisonChain.start()
+                            .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                            .compare(o1.getCode(), o2.getCode())
+                            .compareTrueFirst(o1.isActive(), o2.isActive())
+                            .result());
+                }
 
-                    log.trace("Finally got params: entity: {}, lastDetailListForEntity: {}", entity, lastDetailListEntity);
-                    if (lastDetailListEntity != null) {
-                        if (lastDetailListEntity.isActive()) {
-                            if (entity.isActive()) {
-                                result.add(getChildren(service, entity));
+                for (DetailEntity child : children) {
+                    if (child != null) {
+                        if (child.isActive()) {
+                            DetailListEntity lastDetailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, child);
+                            if (lastDetailListEntity != null) {
+                                if (lastDetailListEntity.isActive()) {
+                                    if (child.isUnit()) {
+                                        final long time1 = System.nanoTime();
+                                        result.add(getChildren(child));
+                                        System.err.println("adding children to result COST: " + ((System.nanoTime() - time1) / NANO_TIME) + " for: " + lastDetailListEntity);
+
+                                    } else {
+                                        result.add(new DefaultMutableTreeNode(child));
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        result.setAllowsChildren(parent.isUnit());
-        result.setUserObject(parent);
-        return result;
-    }
-
-    private DetailListEntity getLatestListEntity(NoticeEntity latestNotice, List<DetailListEntity> detailListByParentAndChild) {
-        DetailListEntity lastDetailListEntity = null;
-        if (latestNotice != null) {
-            for (DetailListEntity e : detailListByParentAndChild) {
-                if (e.getNoticeByNoticeId() != null) {
-                    if (e.getNoticeByNoticeId().equals(latestNotice)) {
-                        log.trace("Got equal notices, current: {}, last: {}", e, latestNotice);
-                        int id = e.getNoticeByNoticeId().getId();
-                        if (id >= latestNotice.getId()) {
-                            latestNotice = e.getNoticeByNoticeId();
-                            lastDetailListEntity = e;
-                        }
-                    } else {
-                        if (e.getNoticeByNoticeId().getDate().after(latestNotice.getDate())) {
-                            latestNotice = e.getNoticeByNoticeId();
-                            lastDetailListEntity = e;
-                        }
-                    }
-                }
-            }
-        } else {
-            if (detailListByParentAndChild.size() > 0) {
-                return detailListByParentAndChild.get(0);
-            }
+            result.setAllowsChildren(parent.isUnit());
+            result.setUserObject(parent);
         }
 
-        return lastDetailListEntity;
-    }
+        final long total2 = System.nanoTime();
 
-    private NoticeEntity getLatestNotice(DetailEntity entity, ArrayList<DetailListEntity> detailListEntities) {
-        NoticeEntity lastNotice = null;
-        for (DetailListEntity detailListEntity : detailListEntities) {
-            ArrayList<NoticeEntity> notices = new ArrayList<>();
-
-            if (detailListEntity.getDetailByChildDetailId().getId() == entity.getId()) {
-                notices.add(detailListEntity.getNoticeByNoticeId());
-
-                Collections.sort(notices);
-
-                if (notices.size() > 0) {
-                    lastNotice = getLatestNoticeFromNoticeList(notices);
-                    String entityInfo = entity.getId() + " " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle();
-                    log.trace(">>> latest notice for " + entityInfo + " is: " + lastNotice);
-                }
-            }
-        }
-        return lastNotice;
-    }
-
-    private NoticeEntity getLatestNoticeFromNoticeList(@NotNull ArrayList<NoticeEntity> notices) {
-        NoticeEntity result = null;
-        for (NoticeEntity entity : notices) {
-            if (result != null) {
-                if (result.getDate().equals(entity.getDate())) {
-                    int i = result.getNumber().compareTo(entity.getNumber());
-                    if (i == 0) {
-                        int j = Integer.compare(result.getId(), entity.getId());
-                        if (j < 0) {
-                            result = entity;
-                        }
-                    } else if (i < 0) {
-                        result = entity;
-                    }
-                } else if (result.getDate().before(entity.getDate())) {
-                    result = entity;
-                }
-            } else {
-                result = entity;
-            }
-        }
+        log.info("Getting children for parent: {} COST in time: {}",
+                parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(),
+                ((total2 - total1) / NANO_TIME));
         return result;
     }
 
@@ -264,13 +227,10 @@ public class MainWindowUtils {
 
     public TreeNode getDetailsTreeByDetails(List<DetailEntity> detailsBySearch) {
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-
         for (DetailEntity e : detailsBySearch) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(e);
             result.add(node);
         }
-
         return result;
     }
 }

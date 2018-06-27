@@ -19,6 +19,7 @@ import com.mmz.specs.dao.DetailListDao;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
+import com.mmz.specs.model.NoticeEntity;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -66,6 +67,16 @@ public class DetailListServiceImpl implements DetailListService {
     @Override
     public DetailListEntity getDetailListById(long id) {
         return this.detailListDao.getDetailListById(id);
+    }
+
+    @Override
+    public DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity latestNotice) {
+        return this.detailListDao.getDetailListByParentAndChildAndNotice(parent, child, latestNotice);
+    }
+
+    @Override
+    public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
+        return this.detailListDao.getLatestDetailListEntityByParentAndChild(parent, child);
     }
 
     @Override

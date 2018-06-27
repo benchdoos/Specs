@@ -18,44 +18,49 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.DetailListDao;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
+import com.mmz.specs.model.NoticeEntity;
 
 import java.util.List;
 
 public interface DetailListService {
 
-    public DetailListDao getDetailListDao();
+    DetailListDao getDetailListDao();
 
-    public void setDetailListDao(DetailListDao detailListDao);
+    void setDetailListDao(DetailListDao detailListDao);
 
-    public long addDetailList(DetailListEntity detailListEntity);
+    long addDetailList(DetailListEntity detailListEntity);
 
-    public void updateDetailList(DetailListEntity detailListEntity);
+    void updateDetailList(DetailListEntity detailListEntity);
 
-    public void removeDetailList(long id);
-
-
-    public DetailListEntity getDetailListById(long id);
+    void removeDetailList(long id);
 
 
-    public List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity);
+    DetailListEntity getDetailListById(long id);
 
-    public List<DetailListEntity> getDetailListByChild(DetailEntity detailEntity);
+    DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity latestNotice);
 
-    public List<DetailListEntity> getDetailListByParent(String detailEntityIndex);
-
-    public List<DetailListEntity> getDetailListByChild(String detailEntityIndex);
+    DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child);
 
 
-    public List<DetailListEntity> getDetailListByNoticeId(int id);
+    List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity);
 
-    public List<DetailListEntity> getDetailListBySearch(String searchText);
+    List<DetailListEntity> getDetailListByChild(DetailEntity detailEntity);
 
-    public List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child);
+    List<DetailListEntity> getDetailListByParent(String detailEntityIndex);
+
+    List<DetailListEntity> getDetailListByChild(String detailEntityIndex);
 
 
-    public List<DetailEntity> listParents(DetailEntity detailEntity);
+    List<DetailListEntity> getDetailListByNoticeId(int id);
 
-    public List<DetailEntity> listChildren(DetailEntity detailEntity);
+    List<DetailListEntity> getDetailListBySearch(String searchText);
 
-    public List<DetailListEntity> listDetailLists();
+    List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child);
+
+
+    List<DetailEntity> listParents(DetailEntity detailEntity);
+
+    List<DetailEntity> listChildren(DetailEntity detailEntity);
+
+    List<DetailListEntity> listDetailLists();
 }

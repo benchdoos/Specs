@@ -57,6 +57,7 @@ public abstract class SwitchingComboBox<E> extends JComboBox<E> {
                     timeoutTimer.restart();
                 } else {
                     typedItem = "";
+                    selectTypedItem();
                     timeoutTimer.restart();
                 }
             }

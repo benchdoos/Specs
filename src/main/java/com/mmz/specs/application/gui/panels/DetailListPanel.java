@@ -45,6 +45,7 @@ import org.imgscalr.Scalr;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -96,6 +97,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         initMainTree();
 
+        detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        fillMainTreeFully();
     }
 
     private void initListeners() {
@@ -307,7 +311,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                     .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
                     .compareTrueFirst(o1.isActive(), o2.isActive())
                     .result());
-            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListFullTree(askedListRoot)));
+            final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getDetailListFullTree(askedListRoot);
+            mainTree.setModel(new DefaultTreeModel(detailListFullTree));
         }
     }
 
@@ -367,7 +372,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
             if (detailListBySearch != null && detailListBySearch.size() > 0) {
-                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByDetailList(detailListBySearch)));
+                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByEntityList(detailListBySearch)));
             } else {
                 DetailService detailService = new DetailServiceImpl(session);
                 final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
@@ -517,7 +522,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             }
         });
 
-        fillMainTreeFully();
     }
 
     private void onEditDetail(boolean select) {
