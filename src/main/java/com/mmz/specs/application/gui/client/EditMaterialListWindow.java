@@ -154,7 +154,8 @@ public class EditMaterialListWindow extends JDialog {
             MaterialListEntity entity = new MaterialListEntity();
             entity.setDetailByDetailId(detailEntity);
             entity.setMaterialByMaterialId(selectedValue);
-            entity.setMainMaterial(false);
+            final boolean isSizeZero = model.size() == 0;
+            entity.setMainMaterial(isSizeZero);
             entity.setActive(true);
             if (!modelContainsMaterial(model, entity)) {
                 model.addElement(entity);
@@ -225,6 +226,26 @@ public class EditMaterialListWindow extends JDialog {
         CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null);
         createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
         createMaterialWindow.setVisible(true);
+
+        final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
+        if (materialEntity != null) {
+            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+
+            MaterialListEntity entity = new MaterialListEntity();
+            entity.setDetailByDetailId(detailEntity);
+            entity.setMaterialByMaterialId(materialEntity);
+
+            final boolean isSizeZero = model.getSize() == 0;
+            entity.setMainMaterial(isSizeZero);
+            entity.setActive(true);
+
+            MaterialListService service = new MaterialListServiceImpl(session);
+            final MaterialListEntity materialListById = service.getMaterialListById(service.addMaterialList(entity));
+            if (materialListById != null) {
+                model.addElement(entity);
+                materialList.setSelectedValue(entity, true);
+            }
+        }
     }
 
     private void initCheckBoxListeners() {
@@ -259,10 +280,6 @@ public class EditMaterialListWindow extends JDialog {
                 shortMarkLabel.setText(materialByMaterialId.getShortMark());
                 shortProfileLabel.setText(materialByMaterialId.getShortProfile());
 
-
-                /*activeCheckBox.setSelected(materialByMaterialId.isActive());
-                activeCheckBox.setEnabled(true);*/
-
                 mainCheckBox.setSelected(selectedValue.isMainMaterial());
                 mainCheckBox.setEnabled(true);
 
@@ -278,9 +295,6 @@ public class EditMaterialListWindow extends JDialog {
         longProfileLabel.setText("Нет данных");
         shortMarkLabel.setText("Нет данных");
         shortProfileLabel.setText("Нет данных");
-
-               /* activeCheckBox.setSelected(false);
-                activeCheckBox.setEnabled(false);*/
 
         mainCheckBox.setSelected(false);
         mainCheckBox.setEnabled(false);
