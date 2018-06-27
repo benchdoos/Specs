@@ -19,6 +19,7 @@ import com.mmz.specs.dao.MaterialListDao;
 import com.mmz.specs.dao.MaterialListDaoImpl;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.MaterialListEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class MaterialListServiceImpl implements MaterialListService {
 
     public MaterialListServiceImpl(MaterialListDao materialListDao) {
         this.materialListDao = materialListDao;
+    }
+
+    public MaterialListServiceImpl(Session session) {
+        this.materialListDao = new MaterialListDaoImpl(session);
     }
 
     @Override
