@@ -47,6 +47,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -292,6 +294,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 detailEntity.setUnit(unitCheckBox.isSelected());
                 DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
                 service.updateDetail(detailEntity);
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                node.setAllowsChildren(unitCheckBox.isSelected());
+
                 updateTreeDetail();
             }
 
@@ -327,6 +333,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
         });
 
+        finishedWeightTextField.addFocusListener(weightFocusAdapter(finishedWeightTextField));
+
         workpieceWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(workpieceWeightTextField) {
             @Override
             public void updateEntity() {
@@ -343,6 +351,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 }
             }
         });
+
+        workpieceWeightTextField.addFocusListener(weightFocusAdapter(workpieceWeightTextField));
 
         editDetailInfoButton.addActionListener(e -> onEditDetailInfo());
         editMaterialButton.addActionListener(e -> onEditMaterial());
@@ -378,6 +388,27 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         });
 
         editImageButton.addActionListener(e -> onEditDetailImage());
+    }
+
+    private FocusAdapter weightFocusAdapter(JTextField textField) {
+        return new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                try {
+                    String text = textField.getText();
+                    text = text.replaceAll(",", ".");
+                    double weight = Double.parseDouble(text);
+                    if (weight == 0) {
+                        textField.setSelectionStart(0);
+                        textField.setSelectionEnd(textField.getText().length());
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+
+            }
+        }
+
+                ;
     }
 
     private void onAddNewItemButton() {
@@ -597,7 +628,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         DetailListEntity detailListEntity = getFilledEntity(entity, node);
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(ClientBackgroundService.getInstance().getSession()));
         service.getDetailListById(service.addDetailList(detailListEntity));
-        DefaultMutableTreeNode fullNode = new MainWindowUtils(session).getChildren(new DetailListServiceImpl(new DetailListDaoImpl(session)), entity);
+        DefaultMutableTreeNode fullNode = new MainWindowUtils(session).getChildren(entity);
         node.add(fullNode);
 
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
@@ -658,6 +689,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                                 service.addDetailList(detailListEntity);
                             }
                             fillMainTree();
+                            mainTree.expandPath(selectionPath);
                         }
                         showAllEntities(entity);
                     }
@@ -1122,7 +1154,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     root.add(detail);
                     mainTree.setModel(new DefaultTreeModel(root));
                 } else {
-                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getDetailListTreeByDetailList(detailListService.getDetailListByParent(detailEntity));
+                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getDetailListTreeByEntityList(detailListService.getDetailListByParent(detailEntity));
                     if (detailListTreeByDetailList.children().hasMoreElements()) {
                         mainTree.setModel(new DefaultTreeModel(detailListTreeByDetailList));
                     } else {
@@ -1583,6 +1615,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 
     private abstract class WeightDocumentListener implements DocumentListener {
         private final String defaultTooltipText;
