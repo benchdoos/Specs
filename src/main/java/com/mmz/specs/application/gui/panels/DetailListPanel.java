@@ -373,7 +373,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
             if (detailListBySearch != null && detailListBySearch.size() > 0) {
-                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailListTreeByEntityList(detailListBySearch)));
+                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch)));
             } else {
                 DetailService detailService = new DetailServiceImpl(session);
                 final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);

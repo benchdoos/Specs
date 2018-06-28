@@ -119,6 +119,20 @@ public class MainWindowUtils {
         return result;
     }
 
+    public DefaultMutableTreeNode getModuleDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
+        final long time = System.nanoTime();
+
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+        ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
+        System.out.println(">>> roots: ");
+        System.out.println(roots);
+        for (DetailEntity entity : roots) {
+            result.add(new DefaultMutableTreeNode(entity));
+        }
+        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        return result;
+    }
+
     private ArrayList<DetailEntity> getParentsObjects(List<DetailListEntity> listEntities) {
         ArrayList<DetailEntity> result = new ArrayList<>();
         for (DetailListEntity e : listEntities) {
