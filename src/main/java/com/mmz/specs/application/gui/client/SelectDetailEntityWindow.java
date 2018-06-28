@@ -327,7 +327,11 @@ public class SelectDetailEntityWindow extends JDialog {
 
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
         if (incomingDetailEntity == null) {
-            setTitle("Выбор детали");
+            if (mode != MODE.COPY) {
+                setTitle("Выбор детали");
+            } else {
+                setTitle("Создание детали для копии");
+            }
         } else {
             final String detailInfo = incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle();
             setTitle("Редактирование детали: " + detailInfo);
