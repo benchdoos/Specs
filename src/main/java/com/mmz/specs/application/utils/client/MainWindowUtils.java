@@ -17,6 +17,7 @@ package com.mmz.specs.application.utils.client;
 
 import com.google.common.collect.ComparisonChain;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.dao.MaterialListDaoImpl;
@@ -29,9 +30,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -302,5 +309,55 @@ public class MainWindowUtils {
             result.add(node);
         }
         return result;
+    }
+
+    public MouseListener getMouseListener(JTree mainTree) {
+        return new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int selRow = mainTree.getRowForLocation(e.getX(), e.getY());
+                TreePath selPath = mainTree.getPathForLocation(e.getX(), e.getY());
+                if (selRow != -1) {
+                    if (e.getClickCount() == 1) {
+                        System.out.println(e.getButton());
+                        if (e.getButton() == MouseEvent.BUTTON3) {
+                            addPopup(selPath);
+                        }
+                    } else if (e.getClickCount() == 2) {
+                        if (!mainTree.isExpanded(selPath)) {
+                            expandPath(selPath);
+                        }
+                    }
+                }
+            }
+
+            private void addPopup(TreePath selectedPath) {
+                final JPopupMenu popup = new JPopupMenu();
+                JMenuItem reload = new JMenuItem("Обновить",
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
+                reload.addActionListener(e -> {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                    node.removeAllChildren();
+                    expandPath(selectedPath);
+                });
+                popup.add(reload);
+                mainTree.setComponentPopupMenu(popup);
+            }
+
+            private void expandPath(TreePath selectedPath) {
+                DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                if (selectedEntity != null) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                    int childCount = node.getChildCount();
+                    System.out.println("children count: " + selectedEntity.toSimpleString() + " " + childCount);
+                    if (childCount == 0) {
+                        new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
+                        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+                        model.reload(node);
+                        mainTree.expandPath(selectedPath);
+                    }
+                }
+            }
+        };
     }
 }

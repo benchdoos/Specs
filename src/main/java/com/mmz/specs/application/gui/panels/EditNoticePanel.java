@@ -47,10 +47,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -210,18 +207,13 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void updateNotices() {
         DetailListService service = new DetailListServiceImpl(session);
         List<DetailListEntity> result = service.getDetailListByParent(detailEntity);
-        System.out.println(">>>> " + result);
         for (DetailListEntity entity : result) {
             if (entity != null) {
-                System.out.println("op: " + entity);
                 if (entity.getNoticeByNoticeId() == null) {
                     entity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
                     service.updateDetailList(entity);
                 }
             }
-        }
-        for (DetailListEntity entity : result) {
-            System.out.println("final: " + entity);
         }
     }
 
@@ -1171,6 +1163,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 fillDetailInfoPanel(lastUsed, selected);
             }
         });
+
+        MouseListener ml = new MainWindowUtils(session).getMouseListener(mainTree);
+        mainTree.addMouseListener(ml);
     }
 
     private void fillMainTree() {
@@ -1183,7 +1178,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     root.add(detail);
                     mainTree.setModel(new DefaultTreeModel(root));
                 } else {
-                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getDetailListTreeByEntityList(detailListService.getDetailListByParent(detailEntity));
+                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListService.getDetailListByParent(detailEntity));
                     if (detailListTreeByDetailList.children().hasMoreElements()) {
                         mainTree.setModel(new DefaultTreeModel(detailListTreeByDetailList));
                     } else {
