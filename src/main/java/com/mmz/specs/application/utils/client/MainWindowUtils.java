@@ -65,6 +65,21 @@ public class MainWindowUtils {
         return result;
     }
 
+
+    public DefaultMutableTreeNode getModuleDetailListFullTree(List<DetailListEntity> listEntities) {
+        final long time = System.nanoTime();
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+        ArrayList<DetailEntity> roots = getRootObjects(listEntities);
+
+        System.out.println("roots: ");
+        for (DetailEntity e : roots) {
+            result.add(new DefaultMutableTreeNode(e));
+            System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
+        }
+        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        return result;
+    }
+
     private ArrayList<DetailEntity> getRootObjects(List<DetailListEntity> listEntities) {
         DetailListService service = new DetailListServiceImpl(session);
 
@@ -125,10 +140,6 @@ public class MainWindowUtils {
             final long t1 = System.nanoTime();
 
             ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
-            if (parent.getCode().contains("110.00.000-03")) {
-                System.err.println("getting children list COST: " + ((System.nanoTime() - t1) / NANO_TIME));
-            }
-
             result = new DefaultMutableTreeNode();
             if (children.size() > 0) {
                 log.trace("Parent {} has children count: {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), children.size());
@@ -171,6 +182,51 @@ public class MainWindowUtils {
                 parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(),
                 ((total2 - total1) / NANO_TIME));
         return result;
+    }
+
+    public void getModuleChildren(DefaultMutableTreeNode result, DetailEntity parent) {
+        log.debug("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
+        final long total1 = System.nanoTime();
+        if (parent.isActive()) {
+            DetailListService service = new DetailListServiceImpl(session);
+            final long t1 = System.nanoTime();
+
+            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
+
+            if (children.size() > 0) {
+                log.trace("Parent {} has children count: {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), children.size());
+
+                if (children.size() > 1) {
+                    children.sort((o1, o2) -> ComparisonChain.start()
+                            .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                            .compare(o1.getCode(), o2.getCode())
+                            .compareTrueFirst(o1.isActive(), o2.isActive())
+                            .result());
+                }
+
+                for (DetailEntity child : children) {
+                    if (child != null) {
+                        if (child.isActive()) {
+                            DetailListEntity lastDetailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, child);
+                            if (lastDetailListEntity != null) {
+                                if (lastDetailListEntity.isActive()) {
+                                    final DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child);
+                                    childNode.setAllowsChildren(parent.isUnit());
+                                    result.add(childNode);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        final long total2 = System.nanoTime();
+
+        log.info("Getting children for parent: {} COST in time: {}",
+                parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(),
+                ((total2 - total1) / NANO_TIME));
     }
 
     public DetailListEntity getLatestDetailListEntity(List<DetailListEntity> result) {

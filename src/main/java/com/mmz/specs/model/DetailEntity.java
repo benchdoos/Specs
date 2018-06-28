@@ -18,6 +18,7 @@ package com.mmz.specs.model;
 import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 
@@ -191,7 +192,7 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
 
     @Override
     public String toSimpleString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
                 .append("id", id)
                 .append("index", code)
                 .append("title", detailTitleByDetailTitleId.getTitle())

@@ -147,21 +147,24 @@ public class DetailListDaoImpl implements DetailListDao {
     @Override
     public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
         CriteriaBuilder builder = session.getCriteriaBuilder();
-
         CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
         Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
         criteria.select(root);
-        criteria.where(builder.equal(root.get("detailByParentDetailId"), parent));
-        criteria.where(builder.equal(root.get("detailByChildDetailId"), child));
+        criteria.where(builder.equal(root.get("detailByParentDetailId"), parent), builder.equal(root.get("detailByChildDetailId"), child));
         criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate"))/*, builder.desc(root.get("noticeByNoticeId").get("date"))*/);
 
         final Query<DetailListEntity> query = session.createQuery(criteria);
 
         query.setFirstResult(0);
         query.setMaxResults(1);
-        final DetailListEntity entity = query.getSingleResult();
+        DetailListEntity entity = null;
+        try {
+            entity = query.getSingleResult();
+        } catch (javax.persistence.NoResultException e) {
+            log.warn("Can not find latest detailList found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), null);
+        }
 
-        log.debug("Latest detailList successfully found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
+        log.debug("Latest detailList successfully found by parent: {} and child: {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
 
         return entity;
 
@@ -282,8 +285,10 @@ public class DetailListDaoImpl implements DetailListDao {
         for (Object o : list) {
             arrayList.add((DetailListEntity) o);
         }*/
+        final List list = query.list();
+        log.debug("Successfully found DetailList by parent: {}, and child: {} : {}", parent, child, list);
 
-        return query.list();
+        return list;
     }
 
     @Override

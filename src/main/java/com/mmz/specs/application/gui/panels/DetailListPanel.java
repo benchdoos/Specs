@@ -47,6 +47,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -307,11 +308,11 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         if (session != null) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             final List<DetailListEntity> askedListRoot = service.listDetailLists();
-            askedListRoot.sort((o1, o2) -> ComparisonChain.start() //testme
+            askedListRoot.sort((o1, o2) -> ComparisonChain.start()
                     .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
                     .compareTrueFirst(o1.isActive(), o2.isActive())
                     .result());
-            final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getDetailListFullTree(askedListRoot);
+            final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree(askedListRoot);
             mainTree.setModel(new DefaultTreeModel(detailListFullTree));
         }
     }
@@ -521,6 +522,56 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 updateDetailInfoPanel(loadedEntity);
             }
         });
+
+        MouseListener ml = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int selRow = mainTree.getRowForLocation(e.getX(), e.getY());
+                TreePath selPath = mainTree.getPathForLocation(e.getX(), e.getY());
+                if (selRow != -1) {
+                    if (e.getClickCount() == 1) {
+                        System.out.println(e.getButton());
+                        if (e.getButton() == MouseEvent.BUTTON3) {
+                            addPopup(selPath);
+                        }
+                    } else if (e.getClickCount() == 2) {
+                        System.out.println("2: " + selRow + " selpath: " + selPath);
+                        if (!mainTree.isExpanded(selPath)) {
+                            expandPath(selPath);
+                        }
+                    }
+                }
+            }
+
+            private void addPopup(TreePath selectedPath) {
+                final JPopupMenu popup = new JPopupMenu();
+                JMenuItem reload = new JMenuItem("Обновить",
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
+                reload.addActionListener(e -> {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                    node.removeAllChildren();
+                    expandPath(selectedPath);
+                });
+                popup.add(reload);
+                mainTree.setComponentPopupMenu(popup);
+            }
+
+            private void expandPath(TreePath selectedPath) {
+                DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                if (selectedEntity != null) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                    int childCount = node.getChildCount();
+                    System.out.println("children count: " + selectedEntity.toSimpleString() + " " + childCount);
+                    if (childCount == 0) {
+                        new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
+                        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+                        model.reload(node);
+                        mainTree.expandPath(selectedPath);
+                    }
+                }
+            }
+        };
+        mainTree.addMouseListener(ml);
 
     }
 

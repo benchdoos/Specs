@@ -183,15 +183,20 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         mainTabbedPane.addChangeListener(e -> {
             NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
-            if (mainTabbedPane.getSelectedIndex() != 0) {
+            final int selectedIndex = mainTabbedPane.getSelectedIndex();
+            if (selectedIndex != 0) {
                 if (selectedItem == null) {
                     mainTabbedPane.setSelectedIndex(0);
                     JOptionPane.showMessageDialog(this,
                             "Укажите извещение!", "Ошибка", JOptionPane.WARNING_MESSAGE);
                 } else {
                     final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mainTree.getModel().getRoot();
-                    if (root.getChildCount() <= 0) {
+                    updateNotices();
+                    /*if (root.getChildCount() <= 0) {
                         fillMainTree();
+                    }*/
+                    if (selectedIndex == 1) {
+                        fillMainTree(); //fixme... this reloads all model every time you select 2,3 tab... you need to load once, ant the first time selecting
                     }
                 }
             }
@@ -200,6 +205,24 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void updateNotices() {
+        DetailListService service = new DetailListServiceImpl(session);
+        List<DetailListEntity> result = service.getDetailListByParent(detailEntity);
+        System.out.println(">>>> " + result);
+        for (DetailListEntity entity : result) {
+            if (entity != null) {
+                System.out.println("op: " + entity);
+                if (entity.getNoticeByNoticeId() == null) {
+                    entity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
+                    service.updateDetailList(entity);
+                }
+            }
+        }
+        for (DetailListEntity entity : result) {
+            System.out.println("final: " + entity);
+        }
     }
 
     private void initEditPanelListeners() {
