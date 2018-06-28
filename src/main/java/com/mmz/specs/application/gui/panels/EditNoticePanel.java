@@ -673,22 +673,26 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                             copyBrotherEntityToDetailEntity(entity, selectedEntity);
 
-                            entity = createDetailEntityIfNotExist(entity);
-
                             DetailListService service = new DetailListServiceImpl(session);
+
+                            DetailListEntity listEntity = null;
 
                             ArrayList<DetailListEntity> listEntities;
                             try {
                                 listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
                                 if (listEntities.isEmpty()) {
                                     DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                                    service.addDetailList(detailListEntity);
+                                    listEntity = service.getDetailListById(service.addDetailList(detailListEntity));
                                 }
                             } catch (Exception e) {
                                 DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                                service.addDetailList(detailListEntity);
+                                listEntity = service.getDetailListById(service.addDetailList(detailListEntity));
                             }
-                            lastSelectedPathComponent.add(new DefaultMutableTreeNode(entity));
+                            System.out.println("-----> " + listEntity);
+                            /*final DefaultMutableTreeNode children = new MainWindowUtils(session).getChildren(entity);
+                            lastSelectedPathComponent.add(children);
+                            DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+                            model.reload(lastSelectedPathComponent);*/
                             fillMainTree();
                             mainTree.setSelectionPath(selectionPath);
                         }
@@ -1323,6 +1327,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         newEntity.setDetailByChildDetailId(entity.getDetailByChildDetailId());
                         newEntity.setQuantity(entity.getQuantity());
                         newEntity.setInterchangeableNode(entity.isInterchangeableNode());
+                        newEntity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
                         newEntity.setActive(true);
 
                         service.addDetailList(newEntity);
