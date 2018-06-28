@@ -688,8 +688,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                                 DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
                                 service.addDetailList(detailListEntity);
                             }
+                            lastSelectedPathComponent.add(new DefaultMutableTreeNode(entity));
                             fillMainTree();
-                            mainTree.expandPath(selectionPath);
+                            mainTree.setSelectionPath(selectionPath);
                         }
                         showAllEntities(entity);
                     }
@@ -705,6 +706,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         detailListEntity.setQuantity(1);
         detailListEntity.setActive(true);
         detailListEntity.setInterchangeableNode(false);
+        detailListEntity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
         return detailListEntity;
     }
 
@@ -1314,11 +1316,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                 detailEntity = createDetailEntityIfNotExist(detailEntity);
 
-
-                for (DetailEntity e : new DetailServiceImpl(session).listDetails()) {
-                    System.out.println("------->> " + detailEntity.getCode().equalsIgnoreCase(e.getCode()) + " " + e);
-                }
-
                 for (DetailListEntity entity : finalList) {
                     if (entity != null) {
                         DetailListEntity newEntity = new DetailListEntity();
@@ -1340,19 +1337,15 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private DetailEntity createDetailEntityIfNotExist(DetailEntity detailEntity) {
         if (detailEntity != null) {
             DetailService service = new DetailServiceImpl(session);
-
-            for (DetailEntity e : service.listDetails()) {
-                System.out.println("------->> " + detailEntity.getCode().equalsIgnoreCase(e.getCode()) + " " + e);
-            }
-
-            final String code = detailEntity.getCode();
-            final DetailEntity detailByIndex = service.getDetailByCode(code); // todo fixme
-            /*final DetailEntity detailByIndex = service.getDetailById(detailEntity.getId());*/
-            if (detailByIndex == null) {
-                System.out.println(">>> detail: " + detailEntity);
+            try {
+                final DetailEntity detailById = service.getDetailById(detailEntity.getId());
+                if (detailById == null) {
+                    detailEntity = service.getDetailById(service.addDetail(detailEntity));
+                } else {
+                    detailEntity = detailById;
+                }
+            } catch (Exception e) {
                 detailEntity = service.getDetailById(service.addDetail(detailEntity));
-            } else {
-                detailEntity = detailByIndex;
             }
         }
         return detailEntity;
