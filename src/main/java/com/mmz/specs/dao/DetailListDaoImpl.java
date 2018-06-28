@@ -146,7 +146,6 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
-        final long time = System.nanoTime();
         CriteriaBuilder builder = session.getCriteriaBuilder();
 
         CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
@@ -164,7 +163,6 @@ public class DetailListDaoImpl implements DetailListDao {
 
         log.debug("Latest detailList successfully found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
 
-//        System.out.println("getting lastDetailListEntity COST: " + ((System.nanoTime() - time) / 1000000) + " for: " + entity);
         return entity;
 
     }
