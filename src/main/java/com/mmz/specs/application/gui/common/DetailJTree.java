@@ -22,9 +22,11 @@ import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
 
 import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.util.List;
 
 public class DetailJTree extends JTree {
     private static final Color BACKGROUND_SELECTION_COLOR = new DefaultTreeCellRenderer().getBackgroundSelectionColor();
@@ -55,7 +57,7 @@ public class DetailJTree extends JTree {
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     }
 
-    @Override
+    /*@Override
     public String convertValueToText(Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         if (value instanceof DefaultMutableTreeNode) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
@@ -72,7 +74,7 @@ public class DetailJTree extends JTree {
                             DetailListService service = new DetailListServiceImpl(ClientBackgroundService.getInstance().getSession());
                             DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
 
-                            if (detailEntity != null) {
+                            if (detailEntity != null && detailListEntity != null) {
                                 String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
                                 return super.convertValueToText(data, selected, expanded, leaf, row, hasFocus);
 
@@ -87,10 +89,13 @@ public class DetailJTree extends JTree {
             }
         }
         return super.convertValueToText(value, selected, expanded, leaf, row, hasFocus);
-    }
+    }*/
 
     private DefaultTreeCellRenderer getRenderer() {
         return new DefaultTreeCellRenderer() {
+            DetailListService service = new DetailListServiceImpl(ClientBackgroundService.getInstance().getSession());
+
+
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
                 if (selected) {
@@ -111,38 +116,48 @@ public class DetailJTree extends JTree {
                                     DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
                                     DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
 
-                                    DetailListService service = new DetailListServiceImpl(ClientBackgroundService.getInstance().getSession());
-                                    List<DetailListEntity> result = service.getDetailListByParentAndChild(parent, detailEntity);
+//                                    List<DetailListEntity> result = service.getDetailListByParentAndChild(parent, detailEntity);
 
-                                    if (result.size() > 0) {
-                                        DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
+                                    /*if (result.size() > 0) {*/
+                                    DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
+                                    updateBackgroundColor(selected, detailListEntity);
+                                    updateIcon(detailEntity);
 
-                                        updateBackgroundColor(selected, detailListEntity);
-                                        updateIcon(detailEntity);
+                                    if (detailListEntity != null) {
+                                        String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                        return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
+                                    } else {
+                                        String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                        return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                                     }
+                                    /*}*/
                                 }
                             }
                         }
                         updateIcon(detailEntity);
+                        final String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                        return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                     }
                 }
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             }
 
             private void updateBackgroundColor(boolean selected, DetailListEntity detailListEntity) {
-                if (detailListEntity.isInterchangeableNode()) {
-                    if (!selected) {
-                        this.setBackgroundNonSelectionColor(Color.GRAY.brighter());
-                    } else {
-                        this.setBackgroundSelectionColor(Color.GRAY);
+                if (detailListEntity != null) {
+                    if (detailListEntity.isInterchangeableNode()) {
+                        if (!selected) {
+                            this.setBackgroundNonSelectionColor(Color.GRAY.brighter());
+                        } else {
+                            this.setBackgroundSelectionColor(Color.GRAY);
+                        }
                     }
-                }
 
-                if (!detailListEntity.getDetailByChildDetailId().isActive()) {
-                    if (!selected) {
-                        this.setBackgroundNonSelectionColor(Color.RED);
-                    } else {
-                        this.setBackgroundSelectionColor(Color.RED.darker());
+                    if (!detailListEntity.getDetailByChildDetailId().isActive()) {
+                        if (!selected) {
+                            this.setBackgroundNonSelectionColor(Color.RED);
+                        } else {
+                            this.setBackgroundSelectionColor(Color.RED.darker());
+                        }
                     }
                 }
             }
