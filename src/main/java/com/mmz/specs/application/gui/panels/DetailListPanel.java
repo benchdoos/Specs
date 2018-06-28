@@ -506,7 +506,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                     counter++;
                 }
             }
-            materialLabel.setText("Материал (" + counter + "):");
+            if (counter > 1) {
+                materialLabel.setText("Материал (" + counter + "):");
+            } else materialLabel.setText("Материал:");
             materialMarkLabel.addMouseListener(adapter);
             materialProfileLabel.addMouseListener(adapter);
         }
@@ -535,7 +537,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                             addPopup(selPath);
                         }
                     } else if (e.getClickCount() == 2) {
-                        System.out.println("2: " + selRow + " selpath: " + selPath);
                         if (!mainTree.isExpanded(selPath)) {
                             expandPath(selPath);
                         }
