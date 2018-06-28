@@ -152,6 +152,8 @@ public class DetailListDaoImpl implements DetailListDao {
         CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
         Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
         criteria.select(root);
+        criteria.where(builder.equal(root.get("detailByParentDetailId"), parent));
+        criteria.where(builder.equal(root.get("detailByChildDetailId"), child));
         criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate"))/*, builder.desc(root.get("noticeByNoticeId").get("date"))*/);
 
         final Query<DetailListEntity> query = session.createQuery(criteria);
@@ -160,7 +162,7 @@ public class DetailListDaoImpl implements DetailListDao {
         query.setMaxResults(1);
         final DetailListEntity entity = query.getSingleResult();
 
-//        log.debug("Latest detailList successfully found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
+        log.debug("Latest detailList successfully found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
 
 //        System.out.println("getting lastDetailListEntity COST: " + ((System.nanoTime() - time) / 1000000) + " for: " + entity);
         return entity;
