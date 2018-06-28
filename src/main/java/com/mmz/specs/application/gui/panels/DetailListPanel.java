@@ -98,8 +98,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         initMainTree();
 
-        detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         fillMainTreeFully();
     }
 
@@ -432,6 +430,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 if (selectedComponent.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
                     detailIconLabel.setIcon(new ImageIcon(scaledImage));
                     detailIconLabel.setText("");
+                    detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
                     detailIconLabel.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -444,6 +443,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             } else {
                 detailIconLabel.setIcon(null);
                 detailIconLabel.setText("Нет изображения");
+                detailIconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+
             }
         };
 
