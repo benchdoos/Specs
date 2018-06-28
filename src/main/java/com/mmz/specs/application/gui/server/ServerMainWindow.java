@@ -1310,7 +1310,8 @@ public class ServerMainWindow extends JFrame {
     private void updateUser(UsersEntity usersEntity, UsersService usersService, UsersEntity entity) {
         usersService.getUsersDao().getSession().getTransaction().begin();
 
-        if (entity != null) {
+        final UsersEntity userById = usersService.getUserById(entity.getId());
+        if (userById != null) {
             usersService.updateUser(usersEntity);
         } else {
             usersService.getUserById(usersService.addUser(usersEntity));
