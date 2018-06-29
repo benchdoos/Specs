@@ -18,6 +18,7 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.ConstantsDao;
 import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -31,6 +32,11 @@ public class ConstantsServiceImpl implements ConstantsService {
     public ConstantsServiceImpl(ConstantsDao constantsDao) {
         this.constantsDao = constantsDao;
     }
+
+    public ConstantsServiceImpl(Session session) {
+        this.constantsDao = new ConstantsDaoImpl(session);
+    }
+
 
     @Override
     public ConstantsDao getConstantsDao() {
