@@ -73,6 +73,7 @@ public class ClientMainWindow extends JFrame {
     private Timer uiUpdateTimer;
     private Timer unlockUiTimer;
     private int unlockedSeconds;
+    private int maxUnlockedSeconds;
 
     private void initKeyBindings() {
         contentPane.registerKeyboardAction(e -> onLogin(),
@@ -118,7 +119,7 @@ public class ClientMainWindow extends JFrame {
                     constant = getConstantsEntity(service);
                     if (constant != null) {
                         String value = constant.getValue();
-                        Integer maxUnlockedSeconds = Integer.valueOf(value);
+                        maxUnlockedSeconds = Integer.valueOf(value);
                         if (unlockedSeconds > maxUnlockedSeconds) {
                             unlockedSeconds = 0;
                             lockUI();
@@ -498,13 +499,25 @@ public class ClientMainWindow extends JFrame {
     }
 
     private ConstantsEntity getConstantsEntity(ConstantsService service) {
-        ConstantsEntity constant = null;
-        if (currentUser.isAdmin()) {
-            constant = service.getConstantByKey(DaoConstants.USER_ADMIN_TIMEOUT);
-        } else if (currentUser.isEditor()) {
-            constant = service.getConstantByKey(DaoConstants.USER_EDITOR_TIMEOUT);
+        if (maxUnlockedSeconds == 0) {
+            ConstantsEntity constant = null;
+            if (currentUser.isAdmin()) {
+                constant = service.getConstantByKey(DaoConstants.USER_ADMIN_TIMEOUT);
+            } else if (currentUser.isEditor()) {
+                constant = service.getConstantByKey(DaoConstants.USER_EDITOR_TIMEOUT);
+            }
+            try {
+                if (constant != null) {
+                    maxUnlockedSeconds = Integer.valueOf(constant.getValue());
+                }
+            } catch (Exception ignore) {
+            }
+            return constant;
+        } else {
+            final ConstantsEntity constantsEntity = new ConstantsEntity();
+            constantsEntity.setValue(maxUnlockedSeconds + "");
+            return constantsEntity;
         }
-        return constant;
     }
 
     private void onDisconnectFromFtp() {
