@@ -690,32 +690,33 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                             DetailListService service = new DetailListServiceImpl(session);
 
-                            DetailListEntity listEntity = null;
-
                             ArrayList<DetailListEntity> listEntities;
                             try {
                                 listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
                                 if (listEntities.isEmpty()) {
                                     DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                                    listEntity = service.getDetailListById(service.addDetailList(detailListEntity));
+                                    service.addDetailList(detailListEntity);
                                 }
                             } catch (Exception e) {
                                 DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                                listEntity = service.getDetailListById(service.addDetailList(detailListEntity));
+                                service.addDetailList(detailListEntity);
                             }
-                            System.out.println("-----> " + listEntity);
-                            /*final DefaultMutableTreeNode children = new MainWindowUtils(session).getChildren(entity);
-                            lastSelectedPathComponent.add(children);
-                            DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
-                            model.reload(lastSelectedPathComponent);*/
-                            fillMainTree();
-                            mainTree.setSelectionPath(selectionPath);
+
+                            addNode(selectionPath);
                         }
                         showAllEntities(entity);
                     }
                 }
             }
         }
+    }
+
+    private void addNode(TreePath selectionPath) {
+        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
+        DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(detailEntity);
+        node.add(newChild);
+        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+        model.reload(node);
     }
 
     private DetailListEntity getNewDetailListEntity(DetailEntity parent, DetailEntity entity) {
@@ -1336,7 +1337,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     }
                 }
 
-                detailEntity = createDetailEntityIfNotExist(detailEntity);
+                this.detailEntity = createDetailEntityIfNotExist(detailEntity);
+                detailEntity = this.detailEntity;
 
                 for (DetailListEntity entity : finalList) {
                     if (entity != null) {
