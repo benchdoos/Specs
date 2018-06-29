@@ -442,6 +442,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
                             addTreeNode(entity, selectionPath);
                             mainTree.setSelectionPath(selectionPath);
+                            mainTree.requestFocus();
                         }
                     }
                 }
@@ -598,8 +599,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void initKeyBindings() {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        //fixme this doesn't work for some reason
         contentPane.registerKeyboardAction(e -> onAddNewItemButton(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCopyButton(), KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onRemoveItem(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -667,44 +668,47 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void onCopyButton() {
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-        final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
-        if (!isRoot) {
-            final TreePath selectionPath = mainTree.getSelectionPath();
+        if (lastSelectedPathComponent != null) {
+            final boolean isRoot = mainTree.getModel().getRoot().equals(lastSelectedPathComponent.getParent());
+            if (!isRoot) {
+                final TreePath selectionPath = mainTree.getSelectionPath();
 
-            DetailEntity parent = JTreeUtils.getParentForSelectionPath(selectionPath);
-            if (selectedEntity != null && parent != null) {
-                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
-                selectionDetailWindow.setLocation(FrameUtils
-                        .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-                selectionDetailWindow.setVisible(true);
-                ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+                DetailEntity parent = JTreeUtils.getParentForSelectionPath(selectionPath);
+                if (selectedEntity != null && parent != null) {
+                    SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
+                    selectionDetailWindow.setLocation(FrameUtils
+                            .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                    selectionDetailWindow.setVisible(true);
+                    ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
 
-                if (list != null) {
-                    if (list.size() == 1) {
-                        DetailEntity entity = list.get(0);
-                        if (entity != null) {
-                            entity.setUnit(selectedEntity.isUnit());
-                            entity.setActive(true);
+                    if (list != null) {
+                        if (list.size() == 1) {
+                            DetailEntity entity = list.get(0);
+                            if (entity != null) {
+                                entity.setUnit(selectedEntity.isUnit());
+                                entity.setActive(true);
 
-                            copyBrotherEntityToDetailEntity(entity, selectedEntity);
+                                copyBrotherEntityToDetailEntity(entity, selectedEntity);
 
-                            DetailListService service = new DetailListServiceImpl(session);
+                                DetailListService service = new DetailListServiceImpl(session);
 
-                            ArrayList<DetailListEntity> listEntities;
-                            try {
-                                listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
-                                if (listEntities.isEmpty()) {
+                                ArrayList<DetailListEntity> listEntities;
+                                try {
+                                    listEntities = (ArrayList<DetailListEntity>) service.getDetailListByParentAndChild(parent, entity);
+                                    if (listEntities.isEmpty()) {
+                                        DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
+                                        service.addDetailList(detailListEntity);
+                                    }
+                                } catch (Exception e) {
                                     DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
                                     service.addDetailList(detailListEntity);
                                 }
-                            } catch (Exception e) {
-                                DetailListEntity detailListEntity = getNewDetailListEntity(parent, entity);
-                                service.addDetailList(detailListEntity);
-                            }
 
-                            addNode(selectionPath);
+                                addNode(selectionPath);
+                                mainTree.requestFocus();
+                            }
+                            showAllEntities(entity);
                         }
-                        showAllEntities(entity);
                     }
                 }
             }
@@ -740,7 +744,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         log.debug("Class: {}, {} ", selected.getClass().getName(), parent.getClass().getName());
         log.debug("User want to remove item: {}, its parent: {}", selected, parent);
         DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-        List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild(parent, selected);
+        /*List<DetailListEntity> detailListByParentAndChild = service.getDetailListByParentAndChild(parent, selected);
         ArrayList<DetailListEntity> lastUsed = new ArrayList<>();
 
         for (DetailListEntity entity : detailListByParentAndChild) {
@@ -755,6 +759,27 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     entity.setActive(false);
                     service.updateDetailList(entity);
                     log.debug("DetailList {} successfully was marked as not active", entity);
+                }
+            }
+        }*/
+        //todo testme
+        DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, selected);
+        if (detailListEntity != null) {
+            if (detailListEntity.getNoticeByNoticeId().equals(noticeComboBox.getSelectedItem())) {
+                if (detailListEntity.isActive()) {
+                    detailListEntity.setActive(false);
+                    service.updateDetailList(detailListEntity);
+                }
+            } else {
+                final DetailListEntity detailListByParentAndChildAndNotice = service.getDetailListByParentAndChildAndNotice(parent, selected, (NoticeEntity) noticeComboBox.getSelectedItem());
+                if (detailListByParentAndChildAndNotice != null) {
+                    if (detailListByParentAndChildAndNotice.isActive()) {
+                        detailListByParentAndChildAndNotice.setActive(false);
+                        service.updateDetailList(detailListByParentAndChildAndNotice);
+                    }
+                } else {
+                    detailListEntity.setActive(false);
+                    service.addDetailList(detailListEntity);
                 }
             }
         }
