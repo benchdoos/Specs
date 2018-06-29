@@ -35,6 +35,8 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,10 +75,24 @@ public class CommonWindowUtils {
         String s = CoreUtils.getApplicationVersionString();
         if (s != null) {
             textField.setText(s);
+            textField.setComponentPopupMenu(getVersionTextFieldPopupMenu(textField));
         } else {
             textField.setText(null);
             textField.setVisible(false);
         }
+    }
+
+    private static JPopupMenu getVersionTextFieldPopupMenu(JTextField textField) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem copy = new JMenuItem("Копировать");
+        copy.addActionListener(e -> {
+            StringSelection stringSelection = new StringSelection(textField.getText());
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, stringSelection);
+        });
+        copy.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(CommonWindowUtils.class.getResource("/img/gui/edit/copy.png"))));
+        menu.add(copy);
+        return menu;
     }
 
     public static int getIndexByValue(JList list, Object value) {
