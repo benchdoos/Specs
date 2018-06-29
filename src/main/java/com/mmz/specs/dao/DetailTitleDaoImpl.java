@@ -109,4 +109,17 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
         }
         return result;
     }
+
+    @Override
+    public List<DetailTitleEntity> getDetailTitlesBySearch(String searchText) {
+        Query query = session.createQuery("from DetailTitleEntity where UPPER(title) like UPPER( '%" + searchText + "%')");
+        ArrayList<DetailTitleEntity> titles = new ArrayList<>();
+
+        List list = query.list();
+        for (Object o : list) {
+            titles.add((DetailTitleEntity) o);
+        }
+        System.out.println("for search: " + searchText + " found: " + titles);
+        return titles;
+    }
 }

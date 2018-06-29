@@ -21,22 +21,24 @@ import com.mmz.specs.model.DetailTitleEntity;
 import java.util.List;
 
 public interface DetailTitleService {
-    public DetailTitleDao getDetailTitleDao();
+    DetailTitleDao getDetailTitleDao();
 
-    public void setDetailTitleDao(DetailTitleDao detailTitleDao);
-
-
-    public int addDetailTitle(DetailTitleEntity detailTitlesEntity);
-
-    public void updateDetailTitle(DetailTitleEntity detailTitlesEntity);
-
-    public void removeDetailTitle(int id);
+    void setDetailTitleDao(DetailTitleDao detailTitleDao);
 
 
-    public DetailTitleEntity getDetailTitleById(int id);
+    int addDetailTitle(DetailTitleEntity detailTitlesEntity);
 
-    public DetailTitleEntity getDetailTitleByTitle(String title);
+    void updateDetailTitle(DetailTitleEntity detailTitlesEntity);
+
+    void removeDetailTitle(int id);
 
 
-    public List<DetailTitleEntity> listDetailTitles();
+    DetailTitleEntity getDetailTitleById(int id);
+
+    DetailTitleEntity getDetailTitleByTitle(String title);
+
+
+    List<DetailTitleEntity> listDetailTitles();
+
+    List<DetailTitleEntity> getDetailTitlesBySearch(String searchText);
 }

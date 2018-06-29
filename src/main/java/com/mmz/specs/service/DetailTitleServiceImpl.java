@@ -76,4 +76,10 @@ public class DetailTitleServiceImpl implements DetailTitleService {
     public List<DetailTitleEntity> listDetailTitles() {
         return detailTitleDao.listDetailTitles();
     }
+
+    @Override
+    public List<DetailTitleEntity> getDetailTitlesBySearch(String searchText) {
+        return this.detailTitleDao.getDetailTitlesBySearch(searchText);
+    }
+
 }
