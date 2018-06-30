@@ -311,7 +311,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
     }
 
     private void onCancel() {
-        int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите отменить изменения?\n" +
+        int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
                 "В случае подтверждения все изменения не сохранятся и никак\n" +
                 "не повлияют на базу данных.\n" +
                 "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
