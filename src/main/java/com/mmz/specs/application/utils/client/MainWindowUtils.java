@@ -41,33 +41,15 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("DeprecatedIsStillUsed")
 public class MainWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final long NANO_TIME = 1000000;
-    private Session session;
+    private final Session session;
 
 
     public MainWindowUtils(Session session) {
         this.session = session;
-    }
-
-
-    public DefaultMutableTreeNode getDetailListFullTree(List<DetailListEntity> listEntities) {
-        final long time = System.nanoTime();
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        ArrayList<DetailEntity> roots = getRootObjects(listEntities);
-
-        System.out.println("roots: ");
-        for (DetailEntity e : roots) {
-            System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
-        }
-
-        for (DetailEntity entity : roots) {
-            DefaultMutableTreeNode node = getChildren(entity);
-            result.add(node);
-        }
-        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
-        return result;
     }
 
 
@@ -162,14 +144,13 @@ public class MainWindowUtils {
      * This method loads all children -> that's why it is too slow!
      */
     @Deprecated
-    public DefaultMutableTreeNode getChildren(DetailEntity parent) {
+    private DefaultMutableTreeNode getChildren(DetailEntity parent) {
         log.warn("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
         final long total1 = System.nanoTime();
 
         DefaultMutableTreeNode result = null;
         if (parent.isActive()) {
             DetailListService service = new DetailListServiceImpl(session);
-            final long t1 = System.nanoTime();
 
             ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
             result = new DefaultMutableTreeNode();
@@ -221,7 +202,6 @@ public class MainWindowUtils {
         final long total1 = System.nanoTime();
         if (parent.isActive()) {
             DetailListService service = new DetailListServiceImpl(session);
-            final long t1 = System.nanoTime();
 
             ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
 
