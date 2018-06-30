@@ -179,7 +179,6 @@ public class CoreUtils {
             String version = properties.getProperty("application.version");
             String build = properties.getProperty("application.build");
 
-            System.out.println(name + " v" + version + " b" + build);
             if (version != null && build != null) {
                 return name + " v." + version + "." + build;
             } else {
