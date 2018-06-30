@@ -203,8 +203,8 @@ public class Updater {
             String version = properties.getProperty("application.version");
             String build = properties.getProperty("application.build");
             if (version != null && build != null) {
-                String s = build.split("build-")[1];
-                return (version + "-b." + s);
+                String s = build.split(" ")[0];
+                return (version + "." + s);
             } else {
                 return null;
             }

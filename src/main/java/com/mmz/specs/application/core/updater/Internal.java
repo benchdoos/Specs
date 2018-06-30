@@ -15,8 +15,6 @@
 
 package com.mmz.specs.application.core.updater;
 
-import java.util.Arrays;
-
 /**
  * Created by Eugene Zrazhevsky on 03.11.2016.
  */
@@ -41,15 +39,8 @@ class Internal {
         if (str2 == null) {
             str2 = "0.0";
         }
-        String[] originalValues1 = str1.split("\\.");
-        String[] originalValues2 = str2.split("\\.");
-
-        String[] values1 = replaceBuildInfo(originalValues1);
-        String[] values2 = replaceBuildInfo(originalValues2);
-
-        int buildNumber1 = getBuildNumber(originalValues1);
-        int buildNumber2 = getBuildNumber(originalValues2);
-
+        String[] values1 = str1.split("\\.");
+        String[] values2 = str2.split("\\.");
         int i = 0;
         // set index to first non-equal ordinal or length of shortest version string
         while (i < values1.length && i < values2.length && values1[i].equals(values2[i])) {
@@ -58,36 +49,10 @@ class Internal {
         // compare first non-equal ordinal number
         if (i < values1.length && i < values2.length) {
             int diff = Integer.valueOf(values1[i]).compareTo(Integer.valueOf(values2[i]));
-            int signum = Integer.signum(diff);
-            if (signum == 0) {
-                int buildDiff = Integer.compare(buildNumber1, buildNumber2);
-                return Integer.signum(buildDiff);
-            }
-            return signum;
+            return Integer.signum(diff);
         }
         // the strings are equal or one string is a substring of the other
         // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
-        int signum = Integer.signum(values1.length - values2.length);
-        if (signum == 0) {
-            int buildDiff = Integer.compare(buildNumber1, buildNumber2);
-            return Integer.signum(buildDiff);
-        }
-        return signum;
+        return Integer.signum(values1.length - values2.length);
     }
-
-    private static int getBuildNumber(String[] originalValues1) {
-        return Integer.valueOf(originalValues1[originalValues1.length - 1]);
-    }
-
-    private static String[] replaceBuildInfo(String[] values) {
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].contains("-b")) {
-                values[i] = values[i].replace("-b", "");
-                values = Arrays.copyOf(values, values.length - 1);
-                return values;
-            }
-        }
-        return values;
-    }
-
 }
