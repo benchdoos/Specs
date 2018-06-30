@@ -795,7 +795,9 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void lockUI() {
-        log.debug("User called locking UI, {} login out.", currentUser.getUsername());
+        if (currentUser != null) {
+            log.debug("User called locking UI, {} login out.", currentUser.getUsername());
+        }
         unlockButtonIconUpdate(false);
         unlockAdminTools(false);
         unlockTabsAndUIs();
