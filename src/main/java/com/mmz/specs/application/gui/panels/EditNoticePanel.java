@@ -38,6 +38,8 @@ import org.hibernate.Session;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -177,24 +179,39 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         initEditPanelListeners();
 
-        mainTabbedPane.addChangeListener(e -> {
-            NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
-            final int selectedIndex = mainTabbedPane.getSelectedIndex();
-            if (selectedIndex != 0) {
-                if (selectedItem == null) {
-                    mainTabbedPane.setSelectedIndex(0);
-                    JOptionPane.showMessageDialog(this,
-                            "Укажите извещение!", "Ошибка", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mainTree.getModel().getRoot();
-                    updateNotices();
+        Component c = this;
+        mainTabbedPane.addChangeListener(new ChangeListener() {
+            int previousTabIndex = -1;
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+                final int selectedIndex = mainTabbedPane.getSelectedIndex();
+                if (selectedIndex != 0) {
+                    if (selectedItem == null) {
+                        mainTabbedPane.setSelectedIndex(0);
+                        JOptionPane.showMessageDialog(FrameUtils.findWindow(c),
+                                "Укажите извещение!", "Ошибка", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mainTree.getModel().getRoot();
+                        updateNotices();
                     /*if (root.getChildCount() <= 0) {
                         fillMainTree();
                     }*/
-                    if (selectedIndex == 1) {
-                        fillMainTree(); //fixme... this reloads all model every time you select 2,3 tab... you need to load once, ant the first time selecting
+                        /*if (selectedIndex == 1) {
+                            if (previousTabIndex == 0) {
+                                fillMainTree();
+                                fillEmptyDetailInfoPanel();
+                            }
+                        }*/
+
+                        if (((DefaultMutableTreeNode) mainTree.getModel().getRoot()).getChildCount() == 0) {
+                            fillMainTree();
+                            fillEmptyDetailInfoPanel();
+                        }
                     }
                 }
+                previousTabIndex = selectedIndex;
             }
         });
 
