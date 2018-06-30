@@ -127,13 +127,14 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     }
 
     private void initListeners() {
+        Component c = this;
         detailEffectedList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     if (detailEffectedList.getSelectedValue() != null) {
                         DetailInfoWindow detailInfoWindow = new DetailInfoWindow(detailEffectedList.getSelectedValue(), session);
-                        detailInfoWindow.setLocation(FrameUtils.getFrameOnCenter(detailInfoWindow.getOwner(), detailInfoWindow));
+                        detailInfoWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), detailInfoWindow));
                         detailInfoWindow.setVisible(true);
                     }
                 }
