@@ -148,6 +148,7 @@ public class ClientMainWindow extends JFrame {
         JMenuBar mainMenuBar = new JMenuBar();
 
         JMenu fileMenu = getFileMenu();
+        fileMenu.setEnabled(false);//unsupported yet!
 
         mainMenuBar.add(fileMenu);
 
