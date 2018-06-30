@@ -344,7 +344,7 @@ public class MainWindowUtils {
         };
     }
 
-    public KeyListener getKeyListener(JTree mainTree) {
+    public KeyListener getArrowKeyListener(JTree mainTree) {
         return new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

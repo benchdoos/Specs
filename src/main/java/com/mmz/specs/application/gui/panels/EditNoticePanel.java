@@ -24,10 +24,7 @@ import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
-import com.mmz.specs.application.utils.CommonUtils;
-import com.mmz.specs.application.utils.FrameUtils;
-import com.mmz.specs.application.utils.FtpUtils;
-import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.*;
@@ -47,6 +44,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
@@ -438,17 +437,21 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             if (list != null) {
                 for (DetailEntity entity : list) {
                     if (entity != null) {
-                        final TreePath selectionPath = mainTree.getSelectionPath();
-                        if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
-                            addTreeNode(entity, selectionPath);
-                            mainTree.setSelectionPath(selectionPath);
-                            mainTree.requestFocus();
-                        }
+                        addDetailToTree(entity);
                     }
                 }
             }
         }
 
+    }
+
+    private void addDetailToTree(DetailEntity entity) {
+        final TreePath selectionPath = mainTree.getSelectionPath();
+        if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
+            addTreeNode(entity, selectionPath);
+            mainTree.setSelectionPath(selectionPath);
+            mainTree.requestFocus();
+        }
     }
 
 
@@ -605,6 +608,21 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+    }
+
+    private void onPasteFromClipboard() {
+        System.out.println("hello");
+        if (mainTree.hasFocus()) {
+            try {
+                String string = (String) Toolkit.getDefaultToolkit()
+                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
+                System.out.println("Got string: " + string);
+                DetailEntity detailEntity = new StringUtils(session).getDetailEntityFromString(string);
+                System.out.println("Detail from clipboard: " + detailEntity);
+                addDetailToTree(detailEntity);
+            } catch (UnsupportedFlavorException | IOException ignore) {
+            }
+        }
     }
 
     private void addTreeNode(DetailEntity entity, TreePath selectionPath) {
@@ -1192,8 +1210,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         MouseListener ml = new MainWindowUtils(session).getMouseListener(mainTree);
         mainTree.addMouseListener(ml);
-        KeyListener k1 = new MainWindowUtils(session).getKeyListener(mainTree);
-        mainTree.addKeyListener(k1);
+        KeyListener initArrowKeyListener = new MainWindowUtils(session).getArrowKeyListener(mainTree);
+        mainTree.addKeyListener(initArrowKeyListener);
+        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK);
+        mainTree.registerKeyboardAction(e -> onPasteFromClipboard(), ctrlV, JComponent.WHEN_FOCUSED);
     }
 
     private void fillMainTree() {

@@ -168,7 +168,7 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
-                .append("index", code)
+                .append("code", code)
                 .append("unit", unit)
                 .append("finishedWeigth", finishedWeight)
                 .append("workpieceWeight", workpieceWeight)
@@ -194,7 +194,7 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
     public String toSimpleString() {
         return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
                 .append("id", id)
-                .append("index", code)
+                .append("code", code)
                 .append("title", detailTitleByDetailTitleId.getTitle())
                 .toString();
     }

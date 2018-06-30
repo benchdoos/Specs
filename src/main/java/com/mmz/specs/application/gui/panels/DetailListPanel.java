@@ -543,7 +543,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         MouseListener ml = new MainWindowUtils(session).getMouseListener(mainTree);
         mainTree.addMouseListener(ml);
-        KeyListener k1 = new MainWindowUtils(session).getKeyListener(mainTree);
+        KeyListener k1 = new MainWindowUtils(session).getArrowKeyListener(mainTree);
         mainTree.addKeyListener(k1);
 
     }
