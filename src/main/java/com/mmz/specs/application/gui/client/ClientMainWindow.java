@@ -207,14 +207,16 @@ public class ClientMainWindow extends JFrame {
         menu.add(connectionSettings);
 
         JMenuItem connectServer = new JMenuItem("Подключение к серверу");
-        connectServer.setAccelerator(KeyStroke.getKeyStroke("control shift C")); //KeyEvent.VK_C, true
+        connectServer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
+                InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         connectServer.addActionListener(e -> onConnectToServer());
         connectServer.setIconTextGap(0);
         menu.add(connectServer);
 
         JMenuItem disconnectServer = new JMenuItem("Отключение от сервера");
         disconnectServer.addActionListener(e -> onDisconnectFromServer());
-        disconnectServer.setAccelerator(KeyStroke.getKeyStroke("control shift D")); //KeyEvent.VK_D, true
+        disconnectServer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
+                InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         disconnectServer.setIconTextGap(0);
         disconnectServer.setEnabled(false); //not able for users
         menu.add(disconnectServer);
@@ -473,7 +475,7 @@ public class ClientMainWindow extends JFrame {
 
     private void onConnectToServer() {
         if (ClientBackgroundService.getInstance().isConnected()) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(this,
                     "Сервер уже подключён", "Уведомление",
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
