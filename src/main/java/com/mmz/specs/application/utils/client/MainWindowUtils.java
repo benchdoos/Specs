@@ -108,7 +108,12 @@ public class MainWindowUtils {
         return roots;
     }
 
-
+    /**
+     * Gives full tree for listEntities, ignoring search (if there is so)
+     *
+     * @deprecated Use {@link #getModuleDetailListFullTree(List)} instead
+     */
+    @Deprecated
     public DefaultMutableTreeNode getDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
         final long time = System.nanoTime();
 
@@ -149,6 +154,14 @@ public class MainWindowUtils {
         return result;
     }
 
+    /**
+     * Gives children for {@link DetailEntity} parent.
+     *
+     * @see #getModuleChildren(DefaultMutableTreeNode, DetailEntity)
+     * @deprecated Use <code>getModuleChildren</code> instead.
+     * This method loads all children -> that's why it is too slow!
+     */
+    @Deprecated
     public DefaultMutableTreeNode getChildren(DetailEntity parent) {
         log.warn("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
         final long total1 = System.nanoTime();
@@ -203,7 +216,7 @@ public class MainWindowUtils {
         return result;
     }
 
-    private void getModuleChildren(DefaultMutableTreeNode result, DetailEntity parent) {
+    public void getModuleChildren(DefaultMutableTreeNode result, DetailEntity parent) {
         log.debug("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
         final long total1 = System.nanoTime();
         if (parent.isActive()) {
