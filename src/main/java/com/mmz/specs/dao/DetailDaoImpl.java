@@ -120,7 +120,7 @@ public class DetailDaoImpl implements DetailDao {
 
     @Override
     public List<DetailEntity> getDetailsBySearch(String searchText) {
-        Query query = session.createQuery("from DetailEntity where code like '%" + searchText + "%'");
+        Query query = session.createQuery("from DetailEntity where UPPER(code) like UPPER('%" + searchText + "%')");
         ArrayList<DetailEntity> details = new ArrayList<>();
 
         List list = query.list();
