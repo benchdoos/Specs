@@ -83,7 +83,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JCheckBox unitCheckBox;
     private JTextField finishedWeightTextField;
     private JTextField workpieceWeightTextField;
-    private JButton createMaterialButton;
     private JComboBox<TechProcessEntity> techProcessComboBox;
     private JButton createTechProcessButton;
     private JCheckBox isActiveCheckBox;
@@ -387,7 +386,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         editDetailInfoButton.addActionListener(e -> onEditDetailInfo());
         editMaterialButton.addActionListener(e -> onEditMaterial());
-        createMaterialButton.addActionListener(e -> onCreateNewMaterial());
         createTechProcessButton.addActionListener(e -> onCreateNewTechProcess());
 
         isActiveCheckBox.addActionListener(e -> {
@@ -545,12 +543,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
             }
         }
-    }
-
-    private void onCreateNewMaterial() {
-        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null);
-        createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
-        createMaterialWindow.setVisible(true);
     }
 
     private void updateTreeDetail() {
@@ -1083,8 +1075,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         editMaterialButton.setEnabled(false);
 
-        createMaterialButton.setEnabled(false);
-
         techProcessComboBox.setSelectedItem(null);
         techProcessComboBox.setEnabled(false);
         createTechProcessButton.setEnabled(false);
@@ -1149,8 +1139,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                 editMaterialButton.setEnabled(!detailEntity.isUnit());
 
-                createMaterialButton.setEnabled(!detailEntity.isUnit() && currentUser.isAdmin());
-
                 techProcessComboBox.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
 
                 createTechProcessButton.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isTechnologist(currentUser)));
@@ -1175,7 +1163,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 detailQuantityTextField.setEnabled(false);
                 finishedWeightTextField.setEnabled(false);
                 workpieceWeightTextField.setEnabled(false);
-                createMaterialButton.setEnabled(false);
                 techProcessComboBox.setEnabled(false);
                 createTechProcessButton.setEnabled(false);
                 isActiveCheckBox.setEnabled(false);
@@ -1536,12 +1523,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         editNoticeButton.setToolTipText("Редактировать извещение");
         panel1.add(editNoticeButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         changePanel = new JPanel();
-        changePanel.setLayout(new GridLayoutManager(14, 6, new Insets(0, 0, 0, 0), -1, -1));
+        changePanel.setLayout(new GridLayoutManager(14, 2, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Изменения", changePanel);
         final Spacer spacer2 = new Spacer();
-        changePanel.add(spacer2, new GridConstraints(10, 5, 4, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        changePanel.add(spacer3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        changePanel.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(13, 1, new Insets(0, 0, 0, 0), -1, -1));
         changePanel.add(panel2, new GridConstraints(1, 0, 13, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -1557,18 +1542,19 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         addItemButton.setEnabled(false);
         addItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addItemButton.setText("");
-        addItemButton.setToolTipText("Добавить деталь / узел (CTRL++)");
+        addItemButton.setToolTipText("Добавить деталь / узел (INSERT)");
         treeToolBar.add(addItemButton);
         copyButton = new JButton();
         copyButton.setEnabled(false);
         copyButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/copy.png")));
         copyButton.setText("");
+        copyButton.setToolTipText("Дублировать узел (CTRL+D)");
         treeToolBar.add(copyButton);
         removeItemButton = new JButton();
         removeItemButton.setEnabled(false);
         removeItemButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
         removeItemButton.setText("");
-        removeItemButton.setToolTipText("Удалить деталь / узел (CTRL+-)");
+        removeItemButton.setToolTipText("Удалить деталь / узел (DELETE)");
         treeToolBar.add(removeItemButton);
         moveItemUpButton = new JButton();
         moveItemUpButton.setEnabled(false);
@@ -1586,8 +1572,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         moveItemDownButton.setVisible(false);
         treeToolBar.add(moveItemDownButton);
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 0), -1, -1));
-        changePanel.add(panel3, new GridConstraints(1, 1, 9, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel3.setLayout(new GridLayoutManager(9, 3, new Insets(0, 0, 0, 0), -1, -1));
+        changePanel.add(panel3, new GridConstraints(1, 1, 9, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label8 = new JLabel();
         label8.setText("Индекс:");
         panel3.add(label8, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -1604,30 +1590,25 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         label10.setText("Масса готовой детали:");
         panel3.add(label10, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         finishedWeightTextField = new JTextField();
-        panel3.add(finishedWeightTextField, new GridConstraints(4, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel3.add(finishedWeightTextField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(200, -1), null, 0, false));
         final JLabel label11 = new JLabel();
         label11.setText("Норма расхода:");
         panel3.add(label11, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         workpieceWeightTextField = new JTextField();
-        panel3.add(workpieceWeightTextField, new GridConstraints(5, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel3.add(workpieceWeightTextField, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(200, -1), null, 0, false));
         final JLabel label12 = new JLabel();
         label12.setText("Материал:");
         panel3.add(label12, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        createMaterialButton = new JButton();
-        createMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/materialNew16.png")));
-        createMaterialButton.setText("");
-        createMaterialButton.setToolTipText("Создать новый материал");
-        panel3.add(createMaterialButton, new GridConstraints(6, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label13 = new JLabel();
         label13.setText("Технический процесс:");
         panel3.add(label13, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         techProcessComboBox = new JComboBox();
-        panel3.add(techProcessComboBox, new GridConstraints(7, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(techProcessComboBox, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(200, -1), null, 0, false));
         createTechProcessButton = new JButton();
         createTechProcessButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/techprocessNew16.png")));
         createTechProcessButton.setText("");
         createTechProcessButton.setToolTipText("Создать новый тех.процесс");
-        panel3.add(createTechProcessButton, new GridConstraints(7, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(createTechProcessButton, new GridConstraints(7, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isActiveCheckBox = new JCheckBox();
         isActiveCheckBox.setHorizontalTextPosition(2);
         isActiveCheckBox.setSelected(false);
@@ -1642,16 +1623,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
         editImageButton.setText("");
         editImageButton.setToolTipText("Редактировать изображение детали");
-        panel3.add(editImageButton, new GridConstraints(8, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(editImageButton, new GridConstraints(8, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isInterchangeableCheckBox = new JCheckBox();
         isInterchangeableCheckBox.setHorizontalTextPosition(2);
         isInterchangeableCheckBox.setText("Замена (прим. в замен):");
         panel3.add(isInterchangeableCheckBox, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        editMaterialButton = new JButton();
-        editMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
-        editMaterialButton.setText("");
-        editMaterialButton.setToolTipText("Добавить материал");
-        panel3.add(editMaterialButton, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label14 = new JLabel();
         label14.setText("Количество:");
         panel3.add(label14, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -1659,14 +1635,21 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         panel3.add(detailQuantityTextField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(40, -1), new Dimension(40, -1), new Dimension(40, -1), 0, false));
         detailCodeLabel = new JLabel();
         detailCodeLabel.setText("нет данных");
-        panel3.add(detailCodeLabel, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(detailCodeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(200, -1), null, 0, false));
         detailTitleLabel = new JLabel();
         detailTitleLabel.setText("нет данных");
-        panel3.add(detailTitleLabel, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(detailTitleLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(200, -1), null, 0, false));
         editDetailInfoButton = new JButton();
         editDetailInfoButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editDetailInfoButton.setText("");
-        panel3.add(editDetailInfoButton, new GridConstraints(0, 3, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(editDetailInfoButton, new GridConstraints(0, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        editMaterialButton = new JButton();
+        editMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
+        editMaterialButton.setText("");
+        editMaterialButton.setToolTipText("Добавить материал");
+        panel3.add(editMaterialButton, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        changePanel.add(spacer3, new GridConstraints(10, 1, 4, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         savePanel = new JPanel();
         savePanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTabbedPane.addTab("Сохранение", savePanel);

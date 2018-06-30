@@ -189,7 +189,7 @@
               </grid>
             </children>
           </grid>
-          <grid id="9c71b" binding="changePanel" layout-manager="GridLayoutManager" row-count="14" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="9c71b" binding="changePanel" layout-manager="GridLayoutManager" row-count="14" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="Изменения"/>
@@ -197,11 +197,6 @@
             <properties/>
             <border type="none"/>
             <children>
-              <vspacer id="d2b69">
-                <constraints>
-                  <grid row="10" column="5" row-span="4" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </vspacer>
               <hspacer id="81228">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -248,7 +243,7 @@
                           <enabled value="false"/>
                           <icon value="img/gui/edit/add.png"/>
                           <text value=""/>
-                          <toolTipText value="Добавить деталь / узел (CTRL++)"/>
+                          <toolTipText value="Добавить деталь / узел (INSERT)"/>
                         </properties>
                       </component>
                       <component id="18512" class="javax.swing.JButton" binding="copyButton">
@@ -257,6 +252,7 @@
                           <enabled value="false"/>
                           <icon value="img/gui/edit/copy.png"/>
                           <text value=""/>
+                          <toolTipText value="Дублировать узел (CTRL+D)"/>
                         </properties>
                       </component>
                       <component id="b5c5e" class="javax.swing.JButton" binding="removeItemButton">
@@ -265,7 +261,7 @@
                           <enabled value="false"/>
                           <icon value="img/gui/edit/remove.png"/>
                           <text value=""/>
-                          <toolTipText value="Удалить деталь / узел (CTRL+-)"/>
+                          <toolTipText value="Удалить деталь / узел (DELETE)"/>
                         </properties>
                       </component>
                       <component id="69fd7" class="javax.swing.JButton" binding="moveItemUpButton">
@@ -293,10 +289,10 @@
                   </toolbar>
                 </children>
               </grid>
-              <grid id="1bbf1" layout-manager="GridLayoutManager" row-count="9" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="1bbf1" layout-manager="GridLayoutManager" row-count="9" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="1" column="1" row-span="9" col-span="5" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="1" row-span="9" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -337,8 +333,8 @@
                   </component>
                   <component id="13802" class="javax.swing.JTextField" binding="finishedWeightTextField">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                        <preferred-size width="150" height="-1"/>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="200" height="-1"/>
                       </grid>
                     </constraints>
                     <properties/>
@@ -354,8 +350,8 @@
                   </component>
                   <component id="6427f" class="javax.swing.JTextField" binding="workpieceWeightTextField">
                     <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                        <preferred-size width="150" height="-1"/>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="200" height="-1"/>
                       </grid>
                     </constraints>
                     <properties/>
@@ -366,16 +362,6 @@
                     </constraints>
                     <properties>
                       <text value="Материал:"/>
-                    </properties>
-                  </component>
-                  <component id="81056" class="javax.swing.JButton" binding="createMaterialButton">
-                    <constraints>
-                      <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <icon value="img/gui/materialNew16.png"/>
-                      <text value=""/>
-                      <toolTipText value="Создать новый материал"/>
                     </properties>
                   </component>
                   <component id="456d5" class="javax.swing.JLabel">
@@ -389,13 +375,15 @@
                   </component>
                   <component id="fad77" class="javax.swing.JComboBox" binding="techProcessComboBox">
                     <constraints>
-                      <grid row="7" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="200" height="-1"/>
+                      </grid>
                     </constraints>
                     <properties/>
                   </component>
                   <component id="64c0a" class="javax.swing.JButton" binding="createTechProcessButton">
                     <constraints>
-                      <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <icon value="img/gui/techprocessNew16.png"/>
@@ -423,7 +411,7 @@
                   </component>
                   <component id="9ae05" class="javax.swing.JButton" binding="editImageButton">
                     <constraints>
-                      <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <icon value="img/gui/pictureEdit16.png"/>
@@ -438,16 +426,6 @@
                     <properties>
                       <horizontalTextPosition value="2"/>
                       <text value="Замена (прим. в замен):"/>
-                    </properties>
-                  </component>
-                  <component id="d2f5f" class="javax.swing.JButton" binding="editMaterialButton">
-                    <constraints>
-                      <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <icon value="img/gui/edit/edit.png"/>
-                      <text value=""/>
-                      <toolTipText value="Добавить материал"/>
                     </properties>
                   </component>
                   <component id="77cc" class="javax.swing.JLabel">
@@ -471,7 +449,9 @@
                   </component>
                   <component id="a41f" class="javax.swing.JLabel" binding="detailCodeLabel">
                     <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                        <preferred-size width="200" height="-1"/>
+                      </grid>
                     </constraints>
                     <properties>
                       <text value="нет данных"/>
@@ -479,7 +459,9 @@
                   </component>
                   <component id="b167d" class="javax.swing.JLabel" binding="detailTitleLabel">
                     <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                        <preferred-size width="200" height="-1"/>
+                      </grid>
                     </constraints>
                     <properties>
                       <text value="нет данных"/>
@@ -487,15 +469,30 @@
                   </component>
                   <component id="ea937" class="javax.swing.JButton" binding="editDetailInfoButton">
                     <constraints>
-                      <grid row="0" column="3" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="2" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <icon value="img/gui/edit/edit.png"/>
                       <text value=""/>
                     </properties>
                   </component>
+                  <component id="d2f5f" class="javax.swing.JButton" binding="editMaterialButton">
+                    <constraints>
+                      <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <icon value="img/gui/edit/edit.png"/>
+                      <text value=""/>
+                      <toolTipText value="Добавить материал"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
+              <vspacer id="d2b69">
+                <constraints>
+                  <grid row="10" column="1" row-span="4" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
             </children>
           </grid>
           <grid id="f5a2e" binding="savePanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

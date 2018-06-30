@@ -708,7 +708,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         addButton.setEnabled(false);
         addButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addButton.setText("");
-        addButton.setToolTipText("Добавить узел (CTRL+INSERT)");
+        addButton.setToolTipText("Добавить узел (INSERT)");
         toolBar1.add(addButton);
         copyButton = new JButton();
         copyButton.setEnabled(false);
