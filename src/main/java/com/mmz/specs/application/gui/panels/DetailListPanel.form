@@ -287,7 +287,7 @@
                       <enabled value="false"/>
                       <icon value="img/gui/edit/add.png"/>
                       <text value=""/>
-                      <toolTipText value="Добавить узел (CTRL+INSERT)"/>
+                      <toolTipText value="Добавить узел (INSERT)"/>
                     </properties>
                   </component>
                   <component id="9ffbc" class="javax.swing.JButton" binding="copyButton">
