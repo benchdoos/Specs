@@ -216,6 +216,7 @@ public class ClientMainWindow extends JFrame {
         disconnectServer.addActionListener(e -> onDisconnectFromServer());
         disconnectServer.setAccelerator(KeyStroke.getKeyStroke("control shift D")); //KeyEvent.VK_D, true
         disconnectServer.setIconTextGap(0);
+        disconnectServer.setEnabled(false); //not able for users
         menu.add(disconnectServer);
 
         menu.setIconTextGap(0);
