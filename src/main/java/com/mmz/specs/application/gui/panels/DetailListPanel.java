@@ -380,7 +380,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 } else {
                     DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
                     final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
-                    System.out.println(">> " + detailListBySearch);
                     if (detailTitlesBySearch != null) {
                         List<DetailEntity> resultDetails = new ArrayList<>();
                         for (DetailTitleEntity e : detailTitlesBySearch) {
@@ -544,6 +543,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         MouseListener ml = new MainWindowUtils(session).getMouseListener(mainTree);
         mainTree.addMouseListener(ml);
+        KeyListener k1 = new MainWindowUtils(session).getKeyListener(mainTree);
+        mainTree.addKeyListener(k1);
 
     }
 

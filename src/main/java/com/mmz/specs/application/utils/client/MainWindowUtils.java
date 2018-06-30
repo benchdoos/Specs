@@ -36,9 +36,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,7 +203,7 @@ public class MainWindowUtils {
         return result;
     }
 
-    public void getModuleChildren(DefaultMutableTreeNode result, DetailEntity parent) {
+    private void getModuleChildren(DefaultMutableTreeNode result, DetailEntity parent) {
         log.debug("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
         final long total1 = System.nanoTime();
         if (parent.isActive()) {
@@ -325,7 +323,7 @@ public class MainWindowUtils {
                         }
                     } else if (e.getClickCount() == 2) {
                         if (!mainTree.isExpanded(selPath)) {
-                            expandPath(selPath);
+                            expandPath(selPath, mainTree);
                         }
                     }
                 }
@@ -338,26 +336,48 @@ public class MainWindowUtils {
                 reload.addActionListener(e -> {
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
                     node.removeAllChildren();
-                    expandPath(selectedPath);
+                    expandPath(selectedPath, mainTree);
                 });
                 popup.add(reload);
                 mainTree.setComponentPopupMenu(popup);
             }
+        };
+    }
 
-            private void expandPath(TreePath selectedPath) {
-                DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                if (selectedEntity != null) {
+    public KeyListener getKeyListener(JTree mainTree) {
+        return new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                final int keyCode = e.getKeyCode();
+                if (keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT) {
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-                    int childCount = node.getChildCount();
-                    System.out.println("children count: " + selectedEntity.toSimpleString() + " " + childCount);
-                    if (childCount == 0) {
-                        new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
-                        DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
-                        model.reload(node);
-                        mainTree.expandPath(selectedPath);
+                    if (node != null) {
+                        final DetailEntity detail = (DetailEntity) node.getUserObject();
+                        if (detail != null) {
+                            if (node.getChildCount() == 0 && detail.isUnit()) {
+                                TreePath selPath = mainTree.getSelectionPath();
+                                expandPath(selPath, mainTree);
+                            }
+                        }
                     }
                 }
             }
         };
+    }
+
+
+    private void expandPath(TreePath selectedPath, JTree mainTree) {
+        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (selectedEntity != null) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+            int childCount = node.getChildCount();
+            System.out.println("children count: " + selectedEntity.toSimpleString() + " " + childCount);
+            if (childCount == 0) {
+                new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
+                DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+                model.reload(node);
+                mainTree.expandPath(selectedPath);
+            }
+        }
     }
 }

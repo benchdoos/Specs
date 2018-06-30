@@ -1192,6 +1192,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         MouseListener ml = new MainWindowUtils(session).getMouseListener(mainTree);
         mainTree.addMouseListener(ml);
+        KeyListener k1 = new MainWindowUtils(session).getKeyListener(mainTree);
+        mainTree.addKeyListener(k1);
     }
 
     private void fillMainTree() {
