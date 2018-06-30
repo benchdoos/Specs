@@ -22,7 +22,7 @@ public class ClientConstants {
     public static final String MAIN_WINDOW_DIMENSION = "window.dimension";
     public static final String MAIN_WINDOW_POSITION = "window.position";
 
-    public static final Dimension MAIN_WINDOW_DEFAULT_DIMENSION = new Dimension(830, 480);
+    public static final Dimension MAIN_WINDOW_DEFAULT_DIMENSION = new Dimension(640, 480);
 
     public static final String IMAGE_REMOVE_KEY = "remove";
 }
