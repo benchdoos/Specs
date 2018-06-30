@@ -647,6 +647,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initWindowListeners() {
+        Component c = this;
         addWindowListener(new WindowAdapter() {
             private ArrayList<Transactional> getTransactionalTabs() {
                 ArrayList<Transactional> result = new ArrayList<>();
@@ -669,7 +670,16 @@ public class ClientMainWindow extends JFrame {
                 } else {
                     ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
                     for (Transactional transactional : transactionalTabList) {
-                        transactional.rollbackTransaction();
+                        if (ClientBackgroundService.getInstance().isConnected()) {
+                            if (currentUser != null) {
+                                transactional.rollbackTransaction();
+                            } else {
+                                JOptionPane.showMessageDialog(c, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
+                                        "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
+                            }
+                        } else {
+                            transactional.rollbackTransaction();
+                        }
                     }
                     if (getTransactionalTabs().isEmpty()) {
                         dispose();
