@@ -318,17 +318,25 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
 
         unitCheckBox.addActionListener(e -> {
-            //todo check if DetailListEntity does not have detailEntity as a parent (not a unit, otherwise - notify user)
             DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
             if (detailEntity != null) {
-                detailEntity.setUnit(unitCheckBox.isSelected());
-                DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
-                service.updateDetail(detailEntity);
+                DetailListService detailListService = new DetailListServiceImpl(session);
+                final List<DetailListEntity> detailListByParent = detailListService.getDetailListByParent(detailEntity);
 
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-                node.setAllowsChildren(unitCheckBox.isSelected());
+                if (detailListByParent.size() == 0) {
+                    detailEntity.setUnit(unitCheckBox.isSelected());
+                    DetailService service = new DetailServiceImpl(session);
+                    if (!unitCheckBox.isSelected()) {
+                        detailEntity.setFinishedWeight(null);
+                        detailEntity.setWorkpieceWeight(null);
+                    }
+                    service.updateDetail(detailEntity);
 
-                updateTreeDetail();
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                    node.setAllowsChildren(unitCheckBox.isSelected());
+
+                    updateTreeDetail();
+                }
             }
 
            /* DetailListEntity latestEntity = null;
@@ -683,7 +691,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         DetailListEntity detailListEntity = new DetailListEntity();
         detailListEntity.setQuantity(1);
         detailListEntity.setActive(true);
-        detailListEntity.setDetailByParentDetailId((DetailEntity) node.getUserObject()); //todo check this...
+        detailListEntity.setDetailByParentDetailId((DetailEntity) node.getUserObject());
         detailListEntity.setDetailByChildDetailId(entity);
         detailListEntity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
         String parentInfo = detailListEntity.getDetailByParentDetailId().getCode() + " " + detailListEntity.getDetailByParentDetailId().getDetailTitleByDetailTitleId().getTitle();
@@ -762,7 +770,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         return detailListEntity;
     }
 
-    private void onRemoveItem() { //Testme need several tests
+    private void onRemoveItem() {
         DefaultMutableTreeNode selectedPath = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
 
         DetailEntity selected = (DetailEntity) selectedPath.getUserObject();
@@ -790,7 +798,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 }
             }
         }*/
-        //todo testme
+        //testme
         DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, selected);
         if (detailListEntity != null) {
             if (detailListEntity.getNoticeByNoticeId().equals(noticeComboBox.getSelectedItem())) {
@@ -873,7 +881,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         for (DetailListEntity entity : detailListEntities) {
             if (!entity.isActive() && entity.getNoticeByNoticeId().equals(noticeComboBox.getSelectedItem())) {
                 //remove!!!
-                List<DetailListEntity> result = service.getDetailListByParentAndChild(entity.getDetailByParentDetailId(), entity.getDetailByChildDetailId());//todo fix this
+                List<DetailListEntity> result = service.getDetailListByParentAndChild(entity.getDetailByParentDetailId(), entity.getDetailByChildDetailId());//todo fix this... hm... why?
 
                 if (result.size() > 1) {
                     DetailListEntity detailListEntity = new MainWindowUtils(session).getLatestDetailListEntity(result);
@@ -910,7 +918,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     selectedItem.setUsersByProvidedByUserId(currentUser);
                 }
             }
-        }//todo add else and so on...
+        } else {
+            JOptionPane.showMessageDialog(this, "Укажите извещение!",
+                    "Ошибка", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     private void closeTab() {
@@ -1129,7 +1140,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                 editDetailInfoButton.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)));
 
-                unitCheckBox.setEnabled((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot);
+                unitCheckBox.setEnabled(((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot)
+                        && (new DetailListServiceImpl(session).getDetailListByParent(detailEntity).size() == 0));//testme
 
                 detailQuantityTextField.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
 
