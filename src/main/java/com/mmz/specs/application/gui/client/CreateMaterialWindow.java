@@ -228,7 +228,9 @@ public class CreateMaterialWindow extends JDialog {
         buttonOK.setText("OK");
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
-        buttonCancel.setText("Cancel");
+        buttonCancel.setText("Отмена");
+        buttonCancel.setMnemonic('Т');
+        buttonCancel.setDisplayedMnemonicIndex(1);
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(6, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -261,7 +263,13 @@ public class CreateMaterialWindow extends JDialog {
         activeCheckBox.setHorizontalTextPosition(2);
         activeCheckBox.setSelected(true);
         activeCheckBox.setText("Активна:");
+        activeCheckBox.setMnemonic('А');
+        activeCheckBox.setDisplayedMnemonicIndex(0);
         panel3.add(activeCheckBox, new GridConstraints(4, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label1.setLabelFor(longMarkTextField);
+        label2.setLabelFor(longProfileTextField);
+        label3.setLabelFor(shortMarkTextField);
+        label4.setLabelFor(shortProfileTextField);
     }
 
     /**

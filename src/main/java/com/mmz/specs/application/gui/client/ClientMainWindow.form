@@ -95,7 +95,7 @@
                       <contentAreaFilled value="true"/>
                       <requestFocusEnabled value="true"/>
                       <rolloverEnabled value="true"/>
-                      <text value="П&amp;росмотр извещений" noi18n="true"/>
+                      <text value="Прос&amp;мотр извещений" noi18n="true"/>
                     </properties>
                   </component>
                   <vspacer id="5165a">

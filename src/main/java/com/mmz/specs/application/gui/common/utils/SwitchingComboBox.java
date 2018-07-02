@@ -22,9 +22,7 @@ import java.util.Vector;
 
 public abstract class SwitchingComboBox<E> extends JComboBox<E> {
     private String typedItem = "";
-    private Timer timeoutTimer = new Timer(1000, e -> {
-        typedItem = "";
-    });
+    private Timer timeoutTimer = new Timer(1000, e -> typedItem = "");
 
     public SwitchingComboBox(E[] items) {
         super(items);

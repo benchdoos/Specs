@@ -19,6 +19,7 @@ import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -172,14 +173,10 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
     }
 
     @Override
-    public int compareTo(NoticeEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compare(that.getDate(), this.getDate())
-                    .compare(that.getNumber(), this.getNumber())
-                    .result();
-        } else {
-            return -1;
-        }
+    public int compareTo(@Nonnull NoticeEntity that) {
+        return ComparisonChain.start()
+                .compare(that.getDate(), this.getDate())
+                .compare(that.getNumber(), this.getNumber())
+                .result();
     }
 }

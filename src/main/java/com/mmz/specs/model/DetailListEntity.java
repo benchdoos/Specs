@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 
 @Entity
@@ -163,17 +164,12 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
     }
 
     @Override
-    public int compareTo(DetailListEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compare(this.getDetailByParentDetailId(), that.getDetailByParentDetailId())
-                    .compare(this.getDetailByChildDetailId(), that.getDetailByChildDetailId())
-                    .compareTrueFirst(this.isActive(), that.isActive())
-                    .compareTrueFirst(this.isInterchangeableNode(), that.isInterchangeableNode())
-                    .result();
-        } else {
-            return -1;
-        }
-
+    public int compareTo(@Nonnull DetailListEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getDetailByParentDetailId(), that.getDetailByParentDetailId())
+                .compare(this.getDetailByChildDetailId(), that.getDetailByChildDetailId())
+                .compareTrueFirst(this.isActive(), that.isActive())
+                .compareTrueFirst(this.isInterchangeableNode(), that.isInterchangeableNode())
+                .result();
     }
 }

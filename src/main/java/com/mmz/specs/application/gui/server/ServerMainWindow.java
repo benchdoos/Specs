@@ -207,9 +207,7 @@ public class ServerMainWindow extends JFrame {
 
         updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
 
-        updateUserListButton.addActionListener(e -> {
-            onUpdateUserListButton();
-        });
+        updateUserListButton.addActionListener(e -> onUpdateUserListButton());
 
         addUserButton.addActionListener(e -> onAddNewUserButton());
 
@@ -1669,6 +1667,8 @@ public class ServerMainWindow extends JFrame {
         switchMonitoringButton = new JButton();
         switchMonitoringButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/monitoring16.png")));
         switchMonitoringButton.setText("Отключить мониторинг");
+        switchMonitoringButton.setMnemonic('Т');
+        switchMonitoringButton.setDisplayedMnemonicIndex(1);
         panel12.add(switchMonitoringButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         adminUsersPanel = new JPanel();
         adminUsersPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -1802,6 +1802,8 @@ public class ServerMainWindow extends JFrame {
         saveSettingsToButton = new JButton();
         saveSettingsToButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/save.png")));
         saveSettingsToButton.setText("Сохранить в...");
+        saveSettingsToButton.setMnemonic('Р');
+        saveSettingsToButton.setDisplayedMnemonicIndex(3);
         adminSettingsPanel.add(saveSettingsToButton, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         connectionUrlTextField = new JTextField();
         adminSettingsPanel.add(connectionUrlTextField, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
@@ -1819,14 +1821,13 @@ public class ServerMainWindow extends JFrame {
         adminConstantsPanel = new JPanel();
         adminConstantsPanel.setLayout(new GridLayoutManager(3, 4, new Insets(10, 10, 10, 10), -1, -1));
         adminPane.addTab("Константы", adminConstantsPanel);
-        constantsTable = new JTable();
-        constantsTable.setAutoCreateRowSorter(true);
-        adminConstantsPanel.add(constantsTable, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         final Spacer spacer21 = new Spacer();
         adminConstantsPanel.add(spacer21, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         updateServerConstantsButton = new JButton();
         updateServerConstantsButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/save.png")));
         updateServerConstantsButton.setText("Сохранить");
+        updateServerConstantsButton.setMnemonic('С');
+        updateServerConstantsButton.setDisplayedMnemonicIndex(0);
         adminConstantsPanel.add(updateServerConstantsButton, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer22 = new Spacer();
         adminConstantsPanel.add(spacer22, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
@@ -1838,8 +1839,15 @@ public class ServerMainWindow extends JFrame {
         constantsRefreshButton = new JButton();
         constantsRefreshButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         constantsRefreshButton.setText("Обновить");
+        constantsRefreshButton.setMnemonic('Б');
+        constantsRefreshButton.setDisplayedMnemonicIndex(1);
         constantsRefreshButton.setToolTipText("Обновить");
         adminConstantsPanel.add(constantsRefreshButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane3 = new JScrollPane();
+        adminConstantsPanel.add(scrollPane3, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        constantsTable = new JTable();
+        scrollPane3.setViewportView(constantsTable);
+        label14.setLabelFor(applicationVersionArea);
         label16.setLabelFor(usernameTextField);
         label18.setLabelFor(nameTextField);
     }

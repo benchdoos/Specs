@@ -19,6 +19,7 @@ import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 
 @Entity
@@ -108,16 +109,12 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
     }
 
     @Override
-    public int compareTo(MaterialListEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compare(this.getMaterialByMaterialId().getLongMark(), that.getMaterialByMaterialId().getLongMark())
-                    .compare(this.getMaterialByMaterialId().getLongProfile(), that.getMaterialByMaterialId().getLongProfile())
-                    .compareFalseFirst(this.isMainMaterial(), that.isMainMaterial())
-                    .compareFalseFirst(this.isActive(), that.isActive())
-                    .result();
-        } else {
-            return -1;
-        }
+    public int compareTo(@Nonnull MaterialListEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getMaterialByMaterialId().getLongMark(), that.getMaterialByMaterialId().getLongMark())
+                .compare(this.getMaterialByMaterialId().getLongProfile(), that.getMaterialByMaterialId().getLongProfile())
+                .compareFalseFirst(this.isMainMaterial(), that.isMainMaterial())
+                .compareFalseFirst(this.isActive(), that.isActive())
+                .result();
     }
 }

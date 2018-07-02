@@ -217,7 +217,8 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public List<DetailListEntity> getDetailListByNoticeId(int id) {
-        Query query = this.session.createQuery("from DetailListEntity where noticeByNoticeId=" + id);
+        Query query = this.session.createQuery("from DetailListEntity where noticeByNoticeId=:id");
+        query.setParameter("id", id);
 
         List list = query.list();
 
@@ -246,7 +247,8 @@ public class DetailListDaoImpl implements DetailListDao {
         List<DetailListEntity> result = new ArrayList<>();
 
         for (DetailEntity entity : details) {
-            Query query1 = session.createQuery("from DetailListEntity where detailByChildDetailId = " + entity.getId());
+            Query query1 = session.createQuery("from DetailListEntity where detailByChildDetailId = :id");
+            query1.setParameter("id", entity.getId());
             List list1 = query1.list();
             for (Object o : list1) {
                 DetailListEntity detailListEntity = (DetailListEntity) o;
@@ -258,7 +260,8 @@ public class DetailListDaoImpl implements DetailListDao {
 
         if (result.isEmpty()) {
             for (DetailEntity entity : details) {
-                Query query1 = session.createQuery("from DetailListEntity where detailByParentDetailId = " + entity.getId());
+                Query query1 = session.createQuery("from DetailListEntity where detailByParentDetailId = :id");
+                query1.setParameter("id", entity.getId());
                 List list1 = query1.list();
                 for (Object o : list1) {
                     DetailListEntity detailListEntity = (DetailListEntity) o;
@@ -280,15 +283,14 @@ public class DetailListDaoImpl implements DetailListDao {
         query.setParameter("parent", parent);
         query.setParameter("child", child);
 
-       /* List list = query.list();
+        List list = query.list();
         ArrayList<DetailListEntity> arrayList = new ArrayList<>(list.size());
         for (Object o : list) {
             arrayList.add((DetailListEntity) o);
-        }*/
-        final List list = query.list();
+        }
         log.debug("Successfully found DetailList by parent: {}, and child: {} : {}", parent, child, list);
 
-        return list;
+        return arrayList;
     }
 
     @Override

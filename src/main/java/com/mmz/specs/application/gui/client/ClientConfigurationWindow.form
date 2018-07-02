@@ -70,7 +70,8 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Адрес сервера:" noi18n="true"/>
+              <labelFor value="8228e"/>
+              <text value="&amp;Адрес сервера:" noi18n="true"/>
             </properties>
           </component>
           <vspacer id="ce0ca">
@@ -83,7 +84,8 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Порт сервера:" noi18n="true"/>
+              <labelFor value="29b1d"/>
+              <text value="&amp;Порт сервера:" noi18n="true"/>
             </properties>
           </component>
           <component id="8228e" class="javax.swing.JTextField" binding="serverAddressTextField">

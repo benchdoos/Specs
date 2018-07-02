@@ -1693,6 +1693,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         isInterchangeableCheckBox = new JCheckBox();
         isInterchangeableCheckBox.setHorizontalTextPosition(2);
         isInterchangeableCheckBox.setText("Замена (прим. в замен):");
+        isInterchangeableCheckBox.setMnemonic('З');
+        isInterchangeableCheckBox.setDisplayedMnemonicIndex(0);
         panel3.add(isInterchangeableCheckBox, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label14 = new JLabel();
         label14.setText("Количество:");
@@ -1729,13 +1731,18 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         panel4.add(panel5, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonOK = new JButton();
         buttonOK.setText("Подтвердить");
+        buttonOK.setMnemonic('П');
+        buttonOK.setDisplayedMnemonicIndex(0);
         panel5.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
         buttonCancel.setText("Отмена");
+        buttonCancel.setMnemonic('О');
+        buttonCancel.setDisplayedMnemonicIndex(0);
         panel5.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         savePreviewPanel = new JPanel();
         savePreviewPanel.setLayout(new CardLayout(0, 0));
         savePanel.add(savePreviewPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        label1.setLabelFor(noticeComboBox);
         label10.setLabelFor(finishedWeightTextField);
         label11.setLabelFor(workpieceWeightTextField);
         label13.setLabelFor(techProcessComboBox);

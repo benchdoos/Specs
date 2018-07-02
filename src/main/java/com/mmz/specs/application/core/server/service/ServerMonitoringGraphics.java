@@ -30,6 +30,7 @@ public class ServerMonitoringGraphics {
     private final static Font defaultFont = new JLabel().getFont();
     private final String DEGREE = "\u00b0";
 
+    @SuppressWarnings("SuspiciousNameCombination")
     public XYChart getChart(int width, int height) {
         final Color BACKGROUND_COLOR = new Color(242, 242, 242);
         Font defaultFont = new JLabel().getFont();

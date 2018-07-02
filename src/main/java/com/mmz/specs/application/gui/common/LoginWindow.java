@@ -84,10 +84,8 @@ public class LoginWindow extends JDialog {
 
             @Override
             public void focusLost(FocusEvent e) {
-                int caretPosition = 0;
-                caretPosition = loginTextField.getText().length() - 1;
+                int caretPosition = loginTextField.getText().length() - 1;
                 if (caretPosition < 0) caretPosition = 0;
-
                 loginTextField.setCaretPosition(caretPosition);
             }
         });
@@ -100,8 +98,7 @@ public class LoginWindow extends JDialog {
 
             @Override
             public void focusLost(FocusEvent e) {
-                int caretPosition = 0;
-                caretPosition = passwordField.getPassword().length - 1;
+                int caretPosition = passwordField.getPassword().length - 1;
                 if (caretPosition < 0) caretPosition = 0;
 
                 passwordField.setCaretPosition(caretPosition);
@@ -178,9 +175,13 @@ public class LoginWindow extends JDialog {
         panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonOK = new JButton();
         buttonOK.setText("OK");
+        buttonOK.setMnemonic('O');
+        buttonOK.setDisplayedMnemonicIndex(0);
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
         buttonCancel.setText("Отмена");
+        buttonCancel.setMnemonic('Т');
+        buttonCancel.setDisplayedMnemonicIndex(1);
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
@@ -190,10 +191,14 @@ public class LoginWindow extends JDialog {
         final JLabel label1 = new JLabel();
         label1.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/user16.png")));
         label1.setText("Логин:");
+        label1.setDisplayedMnemonic('Л');
+        label1.setDisplayedMnemonicIndex(0);
         panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/password16.png")));
         label2.setText("Пароль");
+        label2.setDisplayedMnemonic('П');
+        label2.setDisplayedMnemonicIndex(0);
         panel3.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         passwordField = new JPasswordField();
         panel3.add(passwordField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));

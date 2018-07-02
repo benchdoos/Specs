@@ -16,9 +16,9 @@
 package com.mmz.specs.model;
 
 import com.google.common.collect.ComparisonChain;
-import com.sun.istack.NotNull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 
 @Entity
@@ -196,15 +196,10 @@ public class UsersEntity implements Comparable<UsersEntity> {
     }
 
     @Override
-    public int compareTo(@NotNull UsersEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compareTrueFirst(this.isActive(), that.active)
-                    .compare(this.getUsername(), that.getUsername())
-                    .result();
-        } else {
-            return -1;
-        }
-
+    public int compareTo(@Nonnull UsersEntity that) {
+        return ComparisonChain.start()
+                .compareTrueFirst(this.isActive(), that.active)
+                .compare(this.getUsername(), that.getUsername())
+                .result();
     }
 }

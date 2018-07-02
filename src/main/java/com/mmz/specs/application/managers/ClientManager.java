@@ -31,12 +31,11 @@ public class ClientManager {
     private static final ClientManager ourInstance = new ClientManager();
     private final ClientMainWindow clientMainWindow;
 
+    @SuppressWarnings("MethodRefCanBeReplacedWithLambda")
     private ClientManager() {
         loadClientSettings();
 
-        Runnable runnable = ClientBackgroundService::getInstance;
-
-        Thread thread = new Thread(runnable);
+        Thread thread = new Thread(ClientBackgroundService::getInstance);
         thread.start();
 
         clientMainWindow = new ClientMainWindow();

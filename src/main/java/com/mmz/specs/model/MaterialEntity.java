@@ -16,10 +16,10 @@
 package com.mmz.specs.model;
 
 import com.google.common.collect.ComparisonChain;
-import com.sun.istack.NotNull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 
 @Entity
@@ -134,17 +134,13 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
     }
 
     @Override
-    public int compareTo(@NotNull MaterialEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compare(this.getShortMark(), that.getShortMark())
-                    .compare(this.getShortProfile(), that.getShortProfile())
-                    .compare(this.getLongMark(), that.getLongMark())
-                    .compare(this.getLongProfile(), that.getLongProfile())
-                    .compareTrueFirst(this.isActive(), that.isActive())
-                    .result();
-        } else {
-            return -1;
-        }
+    public int compareTo(@Nonnull MaterialEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getShortMark(), that.getShortMark())
+                .compare(this.getShortProfile(), that.getShortProfile())
+                .compare(this.getLongMark(), that.getLongMark())
+                .compare(this.getLongProfile(), that.getLongProfile())
+                .compareTrueFirst(this.isActive(), that.isActive())
+                .result();
     }
 }

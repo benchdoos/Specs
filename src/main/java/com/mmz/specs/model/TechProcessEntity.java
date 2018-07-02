@@ -62,9 +62,7 @@ public class TechProcessEntity {
         TechProcessEntity that = (TechProcessEntity) o;
 
         if (id != that.id) return false;
-        if (process != null ? !process.equals(that.process) : that.process != null) return false;
-
-        return true;
+        return process != null ? process.equals(that.process) : that.process == null;
     }
 
     @Override

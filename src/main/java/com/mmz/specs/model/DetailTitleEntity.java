@@ -19,6 +19,7 @@ import com.google.common.collect.ComparisonChain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 
 @Entity
@@ -107,14 +108,10 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
     }
 
     @Override
-    public int compareTo(DetailTitleEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compare(this.getTitle(), that.getTitle())
-                    .compareTrueFirst(this.isActive(), that.isActive())
-                    .result();
-        } else {
-            return -1;
-        }
+    public int compareTo(@Nonnull DetailTitleEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getTitle(), that.getTitle())
+                .compareTrueFirst(this.isActive(), that.isActive())
+                .result();
     }
 }

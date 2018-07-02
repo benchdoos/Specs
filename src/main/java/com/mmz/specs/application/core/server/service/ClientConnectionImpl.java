@@ -105,7 +105,7 @@ public class ClientConnectionImpl implements ClientConnection {
 
     @Override
     public String toString() {
-        String sessionString = "";
+        String sessionString;
         if (this.session != null) {
             sessionString = "some session";
         } else sessionString = "null session";

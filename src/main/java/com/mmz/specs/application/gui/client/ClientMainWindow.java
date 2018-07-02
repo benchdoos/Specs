@@ -888,8 +888,8 @@ public class ClientMainWindow extends JFrame {
         noticeListViewButton.setRequestFocusEnabled(true);
         noticeListViewButton.setRolloverEnabled(true);
         noticeListViewButton.setText("Просмотр извещений");
-        noticeListViewButton.setMnemonic('Р');
-        noticeListViewButton.setDisplayedMnemonicIndex(1);
+        noticeListViewButton.setMnemonic('М');
+        noticeListViewButton.setDisplayedMnemonicIndex(4);
         panel1.add(noticeListViewButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         panel1.add(spacer2, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));

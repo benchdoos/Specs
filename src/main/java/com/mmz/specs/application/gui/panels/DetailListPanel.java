@@ -100,7 +100,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         initGui();
         fillMainTree(rootEntity);
-        showControls(false);
+        hideControls();
 
     }
 
@@ -117,9 +117,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         initMainTree();
     }
 
-    private void showControls(boolean controlsVisible) {
-        controlsBar.setVisible(controlsVisible);
-        searchTextField.setVisible(controlsVisible);
+    private void hideControls() {
+        controlsBar.setVisible(false);
+        searchTextField.setVisible(false);
     }
 
     private void initListeners() {
@@ -391,29 +391,27 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         if (session != null) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
-            Runnable runnable = new Runnable() {
-                public void run() {
-                    if (detailListBySearch != null && detailListBySearch.size() > 0) {
-                        mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch)));
-                    } else {
-                        DetailService detailService = new DetailServiceImpl(session);
-                        final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
+            Runnable runnable = () -> {
+                if (detailListBySearch != null && detailListBySearch.size() > 0) {
+                    mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch)));
+                } else {
+                    DetailService detailService = new DetailServiceImpl(session);
+                    final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
 
-                        if (detailsBySearch != null && detailsBySearch.size() > 0) {
-                            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch)));
-                        } else {
-                            DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
-                            final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
-                            if (detailTitlesBySearch != null) {
-                                List<DetailEntity> resultDetails = new ArrayList<>();
-                                for (DetailTitleEntity e : detailTitlesBySearch) {
-                                    if (e != null) {
-                                        final List<DetailEntity> detailsByTitle = detailService.getDetailsByTitle(e);
-                                        resultDetails.addAll(detailsByTitle);
-                                    }
+                    if (detailsBySearch != null && detailsBySearch.size() > 0) {
+                        mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch)));
+                    } else {
+                        DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
+                        final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
+                        if (detailTitlesBySearch != null) {
+                            List<DetailEntity> resultDetails = new ArrayList<>();
+                            for (DetailTitleEntity e : detailTitlesBySearch) {
+                                if (e != null) {
+                                    final List<DetailEntity> detailsByTitle = detailService.getDetailsByTitle(e);
+                                    resultDetails.addAll(detailsByTitle);
                                 }
-                                mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(resultDetails)));
                             }
+                            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(resultDetails)));
                         }
                     }
                 }

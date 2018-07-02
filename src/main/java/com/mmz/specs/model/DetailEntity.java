@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 
 @Entity
@@ -180,14 +181,10 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
     }
 
     @Override
-    public int compareTo(DetailEntity that) {
-        if (that != null) {
-            return ComparisonChain.start()
-                    .compare(this.getCode(), that.getCode())
-                    .result();
-        } else {
-            return -1;
-        }
+    public int compareTo(@Nonnull DetailEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getCode(), that.getCode())
+                .result();
     }
 
     @Override
