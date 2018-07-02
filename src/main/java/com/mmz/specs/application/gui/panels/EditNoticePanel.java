@@ -48,6 +48,9 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +61,7 @@ import java.util.List;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.*;
+import static com.mmz.specs.application.utils.FtpUtils.DEFAULT_IMAGE_EXTENSION;
 import static javax.swing.JOptionPane.*;
 
 public class EditNoticePanel extends JPanel implements AccessPolicy, Transactional {
@@ -171,6 +175,42 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         fillTechProcessComboBox();
 
         fillEmptyDetailInfoPanel();
+
+        initEditImageButton();
+    }
+
+    private void initEditImageButton() {
+        final DropTarget dropTarget = new DropTarget() {
+            @Override
+            public synchronized void drop(DropTargetDropEvent evt) {
+                try {
+                    evt.acceptDrop(DnDConstants.ACTION_COPY);
+
+                    final Object transferData = evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    List<?> list = (List<?>) transferData;
+                    if (list.size() == 1) {
+                        if (list.get(0) instanceof File) {
+                            File file = (File) list.get(0);
+                            if (file.exists() && file.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
+                                final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                                if (selectedDetailEntityFromTree != null) {
+                                    selectedDetailEntityFromTree.setImagePath(file.getAbsolutePath());
+                                    editImageButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
+                                            .getImage(getClass().getResource("/img/gui/success.png"))));
+                                    new Timer(3000, e -> {
+                                        editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
+                                    }).start();
+
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        editImageButton.setDropTarget(dropTarget);
     }
 
     private void initListeners() {
