@@ -258,8 +258,12 @@ public class ClientMainWindow extends JFrame {
 
                 if (session != null) {
                     if (session.isConnected()) {
-                        session.disconnect();
-                        session = null;
+                        try {
+                            session.disconnect();
+                            session = null;
+                        } catch (Exception e) {
+                            log.warn("Could not disconnect", e);
+                        }
 
                         statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
                         statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
