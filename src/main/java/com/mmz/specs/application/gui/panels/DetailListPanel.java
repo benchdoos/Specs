@@ -81,12 +81,29 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private JLabel materialProfileLabel;
     private JButton copyButton;
     private JLabel materialLabel;
+    private JPanel controlsBar;
 
     public DetailListPanel() {
         $$$setupUI$$$();
         session = ClientBackgroundService.getInstance().getSession();
 
         initGui();
+        fillMainTreeFully();
+
+    }
+
+    public DetailListPanel(DetailEntity rootEntity) {
+        $$$setupUI$$$();
+        session = ClientBackgroundService.getInstance().getSession();
+
+        initGui();
+        fillMainTree(rootEntity);
+        showControls(false);
+
+    }
+
+    private void fillMainTree(DetailEntity rootEntity) {
+        mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).fillMainTree(rootEntity)));
     }
 
     private void initGui() {
@@ -96,8 +113,10 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         initListeners();
 
         initMainTree();
+    }
 
-        fillMainTreeFully();
+    private void showControls(boolean controlsVisible) {
+        controlsBar.setVisible(controlsVisible);
     }
 
     private void initListeners() {
@@ -689,13 +708,13 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         mainTree.setFocusable(true);
         mainTree.setRootVisible(false);
         scrollPane1.setViewportView(mainTree);
-        final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        detailListPanel.add(panel3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        controlsBar = new JPanel();
+        controlsBar.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        detailListPanel.add(controlsBar, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
         toolBar1.setOrientation(0);
-        panel3.add(toolBar1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        controlsBar.add(toolBar1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         refreshSessionButton = new JButton();
         refreshSessionButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         refreshSessionButton.setMargin(new Insets(2, 2, 2, 2));

@@ -101,6 +101,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JLabel detailTitleLabel;
     private JButton editDetailInfoButton;
     private JButton copyButton;
+    private JPanel savePreviewPanel;
     private Session session;
     private DetailEntity detailEntity;
 
@@ -204,9 +205,22 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             }
                         }*/
 
-                        if (((DefaultMutableTreeNode) mainTree.getModel().getRoot()).getChildCount() == 0) {
-                            fillMainTree();
-                            fillEmptyDetailInfoPanel();
+                        if (selectedIndex == 1) {
+                            if (((DefaultMutableTreeNode) mainTree.getModel().getRoot()).getChildCount() == 0) {
+                                fillMainTree();
+                                fillEmptyDetailInfoPanel();
+                            }
+                        }
+
+                        if (selectedIndex == 2) {
+                            savePreviewPanel.removeAll();
+                            final JLabel label = new JLabel("Инициализация...");
+                            savePreviewPanel.add(label);
+                            SwingUtilities.invokeLater(() -> {
+                                final DetailListPanel comp = new DetailListPanel(detailEntity);
+                                savePreviewPanel.add(comp);
+                                savePreviewPanel.remove(label);
+                            });
                         }
                     }
                 }
@@ -1679,8 +1693,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         buttonCancel = new JButton();
         buttonCancel.setText("Отмена");
         panel5.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        savePanel.add(spacer5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        savePreviewPanel = new JPanel();
+        savePreviewPanel.setLayout(new CardLayout(0, 0));
+        savePanel.add(savePreviewPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         label10.setLabelFor(finishedWeightTextField);
         label11.setLabelFor(workpieceWeightTextField);
         label13.setLabelFor(techProcessComboBox);

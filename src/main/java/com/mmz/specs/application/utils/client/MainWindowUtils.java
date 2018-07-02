@@ -20,12 +20,11 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.dao.DetailDaoImpl;
+import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.MaterialListDaoImpl;
 import com.mmz.specs.model.*;
-import com.mmz.specs.service.DetailListService;
-import com.mmz.specs.service.DetailListServiceImpl;
-import com.mmz.specs.service.MaterialListService;
-import com.mmz.specs.service.MaterialListServiceImpl;
+import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -372,5 +371,34 @@ public class MainWindowUtils {
                 mainTree.expandPath(selectedPath);
             }
         }
+    }
+
+    public DefaultMutableTreeNode fillMainTree(DetailEntity detailEntity) {
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
+        if (session != null) {
+            if (detailEntity != null) {
+                DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
+                if (!detailEntity.isUnit()) {
+                    DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                    DefaultMutableTreeNode detail = new DefaultMutableTreeNode(detailEntity, false);
+                    root.add(detail);
+                    return root;
+                } else {
+                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListService.getDetailListByParent(detailEntity));
+                    if (detailListTreeByDetailList.children().hasMoreElements()) {
+                        return detailListTreeByDetailList;
+                    } else {
+                        DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                        detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                        DefaultMutableTreeNode newChild = new DefaultMutableTreeNode();
+                        newChild.setUserObject(detailEntity);
+                        root.add(newChild);
+                        return root;
+                    }
+                }
+            }
+        }
+        return result;
     }
 }
