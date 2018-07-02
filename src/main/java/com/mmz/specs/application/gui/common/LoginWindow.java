@@ -25,6 +25,7 @@ import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.UsersService;
 import com.mmz.specs.service.UsersServiceImpl;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import javax.swing.*;
 import java.awt.*;
@@ -117,6 +118,8 @@ public class LoginWindow extends JDialog {
     }
 
     private void onOK() {
+        refreshUsers();
+
         UsersService usersService = new UsersServiceImpl(new UsersDaoImpl(session));
         try {
             String login = loginTextField.getText().toLowerCase();
@@ -135,6 +138,13 @@ public class LoginWindow extends JDialog {
             FrameUtils.shakeFrame(this);
         }
 
+    }
+
+    private void refreshUsers() {
+        final Query query = session.createQuery("from UsersEntity");
+        for (Object o : query.list()) {
+            session.refresh(o);
+        }
     }
 
     private void onCancel() {
