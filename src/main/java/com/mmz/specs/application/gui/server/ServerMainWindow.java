@@ -208,9 +208,7 @@ public class ServerMainWindow extends JFrame {
         updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
 
         updateUserListButton.addActionListener(e -> {
-            clearCurrentUserPanel();
-            updateAdminRegisteredUsersPanel();
-            restoreTextFieldsColors();
+            onUpdateUserListButton();
         });
 
         addUserButton.addActionListener(e -> onAddNewUserButton());
@@ -219,6 +217,12 @@ public class ServerMainWindow extends JFrame {
         switchMonitoringButton.addActionListener(e -> onSwitchMonitoring());
 
         initUserInfoPanelListeners();
+    }
+
+    private void onUpdateUserListButton() {
+        clearCurrentUserPanel();
+        updateAdminRegisteredUsersPanel();
+        restoreTextFieldsColors();
     }
 
     private void updateOnlineUsersCount() {
@@ -757,7 +761,11 @@ public class ServerMainWindow extends JFrame {
 
         usernameTextField.getDocument().addDocumentListener(usernameTextFieldDocumentListener);
 
-        resetPasswordButton.addActionListener(e -> onResetPasswordButton(registeredUserList.getSelectedValue()));
+        resetPasswordButton.addActionListener(e -> {
+            UsersEntity selectedValue = registeredUserList.getSelectedValue();
+            onResetPasswordButton(selectedValue);
+            onUpdateUserListButton();
+        });
 
         nameTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
