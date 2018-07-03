@@ -73,7 +73,7 @@
                 </constraints>
                 <properties>
                   <labelFor value="ea92d"/>
-                  <text value="Введите индекс:"/>
+                  <text value="Обозначение:"/>
                 </properties>
               </component>
               <component id="ea92d" class="javax.swing.JComboBox" binding="codeComboBox">
