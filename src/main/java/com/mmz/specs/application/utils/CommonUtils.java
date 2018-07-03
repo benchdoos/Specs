@@ -15,11 +15,19 @@
 
 package com.mmz.specs.application.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class CommonUtils {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
 
@@ -60,5 +68,22 @@ public class CommonUtils {
 
     public static Image iconToImage(Icon icon) {
         return ((ImageIcon) icon).getImage();
+    }
+
+    public static BufferedImage getBufferedImage(File img) {
+        try {
+            BufferedImage in = ImageIO.read(img);
+
+            BufferedImage newImage = new BufferedImage(
+                    in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g = newImage.createGraphics();
+            g.drawImage(in, 0, 0, null);
+            g.dispose();
+            return newImage;
+        } catch (IOException e) {
+            log.warn("Could not get BufferedImage for: {}", img, e);
+        }
+        return null;
     }
 }

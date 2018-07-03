@@ -50,10 +50,12 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.mmz.specs.application.core.client.ClientConstants.IMAGE_REMOVE_KEY;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.COPY;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.CREATE_SINGLE;
 
@@ -82,7 +84,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private JButton copyButton;
     private JLabel materialLabel;
     private JPanel controlsBar;
-    private DetailEntity rootEntity;
 
     public DetailListPanel() {
         $$$setupUI$$$();
@@ -93,8 +94,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
-    public DetailListPanel(DetailEntity rootEntity) {
-        this.rootEntity = rootEntity;
+    DetailListPanel(DetailEntity rootEntity) {
         $$$setupUI$$$();
         session = ClientBackgroundService.getInstance().getSession();
 
@@ -460,36 +460,75 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             detailIconLabel.setText("Загрузка...");
             FrameUtils.removeAllComponentListeners(detailIconLabel);
 
-            FtpUtils ftp = FtpUtils.getInstance();
-            BufferedImage image = ftp.getImage(selectedComponent.getId());
-
-            if (image != null) {
-                BufferedImage scaledImage = Scalr.resize(image, 128);
-
-                DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                if (selectedComponent.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
-                    detailIconLabel.setIcon(new ImageIcon(scaledImage));
-                    detailIconLabel.setText("");
-                    detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                    detailIconLabel.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
-                                    image, "Изображение " + selectedComponent.getCode() + " "
-                                            + selectedComponent.getDetailTitleByDetailTitleId().getTitle());
-                        }
-                    });
+            if (selectedComponent != null) {
+                if (selectedComponent.getImagePath() == null) {
+                    loadImageFromFtp(selectedComponent);
+                } else {
+                    if (selectedComponent.getImagePath().equalsIgnoreCase(IMAGE_REMOVE_KEY)) {
+                        setEmptyImageIcon();
+                    } else {
+                        loadImageFromLocalStorage(selectedComponent);
+                    }
                 }
             } else {
-                detailIconLabel.setIcon(null);
-                detailIconLabel.setText("Нет изображения");
-                detailIconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-
+                setEmptyImageIcon();
             }
         };
 
         Thread thread = new Thread(runnable);
         thread.start();
+    }
+
+    private void loadImageFromLocalStorage(DetailEntity selectedComponent) {
+        final String imagePath = selectedComponent.getImagePath();
+        File file = new File(imagePath);
+        if (file.exists()) {
+            final boolean jpg = file.getAbsolutePath().toLowerCase().endsWith("jpg");
+            if (jpg) {
+                final BufferedImage bufferedImage = CommonUtils.getBufferedImage(file);
+                if (bufferedImage != null) {
+                    updateDetailIconByImage(selectedComponent, bufferedImage);
+                } else {
+                    setEmptyImageIcon();
+                }
+            }
+        }
+    }
+
+    private void loadImageFromFtp(DetailEntity selectedComponent) {
+        FtpUtils ftp = FtpUtils.getInstance();
+        BufferedImage image = ftp.getImage(selectedComponent.getId());
+
+        if (image != null) {
+            updateDetailIconByImage(selectedComponent, image);
+        } else {
+            setEmptyImageIcon();
+        }
+    }
+
+    private void updateDetailIconByImage(DetailEntity selectedComponent, BufferedImage image) {
+        BufferedImage scaledImage = Scalr.resize(image, 128);
+
+        DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (selectedComponent.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
+            detailIconLabel.setIcon(new ImageIcon(scaledImage));
+            detailIconLabel.setText("");
+            detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            detailIconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
+                            image, "Изображение " + selectedComponent.getCode() + " "
+                                    + selectedComponent.getDetailTitleByDetailTitleId().getTitle());
+                }
+            });
+        }
+    }
+
+    private void setEmptyImageIcon() {
+        detailIconLabel.setIcon(null);
+        detailIconLabel.setText("Нет изображения");
+        detailIconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     private void fillDetailMaterialInfo(DetailEntity selectedComponent) {

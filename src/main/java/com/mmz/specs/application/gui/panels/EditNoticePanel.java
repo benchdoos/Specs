@@ -48,9 +48,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +56,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TooManyListenersException;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.*;
@@ -181,6 +180,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void initEditImageButton() {
         final DropTarget dropTarget = new DropTarget() {
+            Timer timer = null;
+
             @Override
             public synchronized void drop(DropTargetDropEvent evt) {
                 try {
@@ -197,20 +198,67 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                                     selectedDetailEntityFromTree.setImagePath(file.getAbsolutePath());
                                     editImageButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
                                             .getImage(getClass().getResource("/img/gui/success.png"))));
-                                    new Timer(3000, e -> {
-                                        editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
-                                    }).start();
-
+                                } else {
+                                    onFail();
                                 }
+
+                            } else {
+                                onFail();
                             }
+                        } else {
+                            onFail();
                         }
+                    } else {
+                        onFail();
+                    }
+                    if (timer == null) {
+                        timer = new Timer(3000, e -> {
+                            editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
+                        });
+                        timer.start();
+                    } else {
+                        timer.restart();
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.warn("Could not update image by drag&drop", ex);
                 }
+            }
+
+            private void onFail() {
+                editImageButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getResource("/img/gui/fail.png"))));
             }
         };
         editImageButton.setDropTarget(dropTarget);
+
+        try {
+            dropTarget.addDropTargetListener(new DropTargetAdapter() {
+
+                @Override
+                public void drop(DropTargetDropEvent dtde) {
+                    setDefaultImage();
+                }
+
+                private void setDefaultImage() {
+                    editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
+                }
+
+                @Override
+                public void dragEnter(DropTargetDragEvent dtde) {
+                    editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/import16.png")));
+                    super.dragEnter(dtde);
+                }
+
+                @Override
+                public void dragExit(DropTargetEvent dte) {
+                    setDefaultImage();
+                    super.dragExit(dte);
+                }
+            });
+        } catch (TooManyListenersException e) {
+            log.warn("Can not init drag and drop dropTarget", e);
+        }
+
     }
 
     private void initListeners() {
