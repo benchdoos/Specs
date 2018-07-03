@@ -215,6 +215,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         timer = new Timer(3000, e -> {
                             editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
                         });
+                        timer.setRepeats(false);
                         timer.start();
                     } else {
                         timer.restart();
