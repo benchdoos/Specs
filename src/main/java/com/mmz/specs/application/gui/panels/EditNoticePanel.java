@@ -324,7 +324,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
 
             private void updateEntity() {
-                DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
+                DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree);
                 DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 List<DetailListEntity> detailListEntitiesByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
                 Collections.sort(detailListEntitiesByParentAndChild);
@@ -383,6 +383,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     if (!unitCheckBox.isSelected()) {
                         detailEntity.setFinishedWeight(null);
                         detailEntity.setWorkpieceWeight(null);
+
                     }
                     service.updateDetail(detailEntity);
 
@@ -411,6 +412,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         finishedWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(finishedWeightTextField) {
             @Override
             public void updateEntity() {
+                DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree);
                 DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 try {
                     if (child != null) {
@@ -418,6 +420,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         text = text.replaceAll(",", ".");
                         double weight = Double.parseDouble(text);
                         child.setFinishedWeight(weight);
+                        updateLatestDetailListEntity(parent, child);
                         updateTreeDetail();
                     }
                 } catch (NumberFormatException ignored) {
@@ -430,6 +433,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         workpieceWeightTextField.getDocument().addDocumentListener(new WeightDocumentListener(workpieceWeightTextField) {
             @Override
             public void updateEntity() {
+                DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree);
                 DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                 try {
                     if (child != null) {
@@ -437,6 +441,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         text = text.replaceAll(",", ".");
                         double weight = Double.parseDouble(text);
                         child.setWorkpieceWeight(weight);
+                        updateLatestDetailListEntity(parent, child);
+
                         updateTreeDetail();
                     }
                 } catch (NumberFormatException ignored) {
@@ -466,7 +472,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         });
 
         isInterchangeableCheckBox.addActionListener(e -> {
-            DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree.getSelectionPath());
+            DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree);
             DetailEntity child = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
             List<DetailListEntity> detailListByParentAndChild = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByParentAndChild(parent, child);
             Collections.sort(detailListByParentAndChild);
@@ -479,6 +485,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         });
 
         editImageButton.addActionListener(e -> onEditDetailImage());
+    }
+
+
+    private void updateLatestDetailListEntity(DetailEntity parent, DetailEntity child) {
+        final DetailListServiceImpl service = new DetailListServiceImpl(session);
+        final DetailListEntity detailList = service.getLatestDetailListEntityByParentAndChild(parent, child);
+        final NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+        if (selectedItem != null) {
+            detailList.setNoticeByNoticeId(selectedItem);
+            service.updateDetailList(detailList);
+        }
     }
 
     private FocusAdapter weightFocusAdapter(JTextField textField) {
@@ -763,7 +780,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             if (!isRoot) {
                 final TreePath selectionPath = mainTree.getSelectionPath();
 
-                DetailEntity parent = JTreeUtils.getParentForSelectionPath(selectionPath);
+                DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree);
                 if (selectedEntity != null && parent != null) {
                     SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
                     selectionDetailWindow.setLocation(FrameUtils

@@ -29,7 +29,8 @@ public class JTreeUtils {
         } else return null;
     }
 
-    public static DetailEntity getParentForSelectionPath(TreePath selectionPath) {
+    public static DetailEntity getParentForSelectionPath(JTree tree) {
+        TreePath selectionPath = tree.getSelectionPath();
         if (selectionPath != null) {
             final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
             if (node != null) {
