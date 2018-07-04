@@ -171,6 +171,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        registerKeyboardAction(e -> onNoticeInfo(true),
+                KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onAddNewItem() {
@@ -729,6 +732,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         noticeInfoButton.setMargin(new Insets(2, 2, 2, 2));
         noticeInfoButton.setOpaque(false);
         noticeInfoButton.setText("");
+        noticeInfoButton.setToolTipText("Информация о извещениях (CTRL+I)");
         detailInfoPanel.add(noticeInfoButton, new GridConstraints(11, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         detailInfoPanel.add(spacer1, new GridConstraints(2, 2, 11, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));

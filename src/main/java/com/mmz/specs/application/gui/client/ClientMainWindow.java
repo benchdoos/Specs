@@ -943,6 +943,7 @@ public class ClientMainWindow extends JFrame {
         loginButton.setMargin(new Insets(2, 2, 2, 2));
         loginButton.setOpaque(false);
         loginButton.setText("");
+        loginButton.setToolTipText("Блокировка / разблокировка элементов управления (CTRL + L)");
         panel4.add(loginButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
         contentPane.add(spacer4, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
