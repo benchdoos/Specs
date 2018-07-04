@@ -26,10 +26,7 @@ import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailTitleEntity;
-import com.mmz.specs.service.DetailService;
-import com.mmz.specs.service.DetailServiceImpl;
-import com.mmz.specs.service.DetailTitleService;
-import com.mmz.specs.service.DetailTitleServiceImpl;
+import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -49,6 +46,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class SelectDetailEntityWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -688,9 +686,19 @@ public class SelectDetailEntityWindow extends JDialog {
                                 selectedDetail.setUnit(true);
                                 createNewDetail(selectedDetail);
                             } else {
-                                JOptionPane.showMessageDialog(this,
-                                        "Необходимо указать новый индекс детали", "Ошибка копирования",
-                                        JOptionPane.WARNING_MESSAGE);
+                                DetailListService detailListService = new DetailListServiceImpl(session);
+                                final List<DetailEntity> detailEntities = detailListService.listChildren(dbEntity);
+                                if (detailEntities.size() == 0 && dbEntity.isUnit()) {
+                                    entities.clear();
+                                    entities.add(dbEntity);
+                                    dispose();
+                                } else {
+                                    JOptionPane.showMessageDialog(this,
+                                            "Деталь не является узлом или \n" +
+                                                    "узел включает в себя наследников",
+                                            "Ошибка копирования",
+                                            JOptionPane.WARNING_MESSAGE);
+                                }
                             }
                         }
                     } else {
