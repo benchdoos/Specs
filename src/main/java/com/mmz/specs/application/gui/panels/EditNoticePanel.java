@@ -894,7 +894,19 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void addNode(TreePath selectionPath, DetailEntity entity) {
         final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
         DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(entity);
-        node.add(newChild);
+
+        boolean contains = false;
+        for (int i = 0; i < node.getChildCount(); i++) {
+            final DefaultMutableTreeNode childAt = (DefaultMutableTreeNode) node.getChildAt(i);
+            if (childAt.getUserObject().equals(entity)) {
+                contains = true;
+                return;
+            }
+        }
+
+        if (!contains) {
+            node.add(newChild);
+        }
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
         model.reload(node);
     }
