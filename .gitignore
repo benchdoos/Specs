@@ -1,7 +1,10 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
+### CURRENT PROJECT ###
 db
+publish/Installer
+publish/Specs
 *.ini
 *.lnk
 mvnw*
