@@ -24,6 +24,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class CommonUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -85,5 +86,41 @@ public class CommonUtils {
             log.warn("Could not get BufferedImage for: {}", img, e);
         }
         return null;
+    }
+
+    public static File getCurrentFile() {
+        try {
+            return new File(CommonUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException ignore) {
+        }
+        return null;
+    }
+
+    public static void openClientGuide() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                final File currentFile = getCurrentFile();
+                if (currentFile != null) {
+                    final String path = currentFile.getParentFile().getPath();
+                    String pathToUserGuide = path + File.separator + "Client User Guide.pdf";
+                    Desktop.getDesktop().open(new File(pathToUserGuide));
+                }
+            } catch (Exception ignore) {
+            }
+        });
+    }
+
+    public static void openServerGuide() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                final File currentFile = getCurrentFile();
+                if (currentFile != null) {
+                    final String path = currentFile.getParentFile().getPath();
+                    String pathToUserGuide = path + File.separator + "Server User Guide.pdf";
+                    Desktop.getDesktop().open(new File(pathToUserGuide));
+                }
+            } catch (Exception ignore) {
+            }
+        });
     }
 }

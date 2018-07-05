@@ -75,6 +75,16 @@ public class ClientMainWindow extends JFrame {
     private int unlockedSeconds;
     private int maxUnlockedSeconds;
 
+    public ClientMainWindow() {
+        try {
+            initGui();
+            initTimers();
+        } catch (Throwable e) {
+            log.warn("Could not init Client main window", e);
+        }
+
+    }
+
     private void initKeyBindings() {
         contentPane.registerKeyboardAction(e -> onLogin(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
@@ -791,16 +801,6 @@ public class ClientMainWindow extends JFrame {
         currentUser = null;
     }
 
-    public ClientMainWindow() {
-        try {
-            initGui();
-            initTimers();
-        } catch (Throwable e) {
-            log.warn("Could not init Client main window", e);
-        }
-
-    }
-
     private void initMainMenuBar() {
         JMenuBar mainMenuBar = new JMenuBar();
 
@@ -824,14 +824,20 @@ public class ClientMainWindow extends JFrame {
     private JMenu getHelpMenu() {
         JMenu help = new JMenu("Справка");
 
-        JMenuItem item = new JMenuItem("О приложении");
-        item.addActionListener(e -> {
+        JMenuItem userGuide = new JMenuItem("Руководство пользователя");
+        userGuide.addActionListener(e -> {
+            CommonUtils.openClientGuide();
+        });
+        help.add(userGuide);
+
+        JMenuItem about = new JMenuItem("О приложении");
+        about.addActionListener(e -> {
             AboutApplicationWindow window = new AboutApplicationWindow();
             window.setLocation(FrameUtils.getFrameOnCenter(this, window));
             window.setVisible(true);
         });
 
-        help.add(item);
+        help.add(about);
 
         return help;
     }

@@ -37,10 +37,10 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
-Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные ярлыки:"; Flags: unchecked
+Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
 
 [Files]
-Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}"; Flags: ignoreversion
+Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
 Source: "F:\Developer\JAVA\Specs\publish\Specs\client.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Client User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
