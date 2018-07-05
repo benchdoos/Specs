@@ -184,6 +184,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
             @Override
             public synchronized void drop(DropTargetDropEvent evt) {
+                onDrop(evt);
+            }
+
+            private void onDrop(DropTargetDropEvent evt) {
                 try {
                     evt.acceptDrop(DnDConstants.ACTION_COPY);
 
@@ -195,9 +199,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             if (file.exists() && file.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
                                 final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                                 if (selectedDetailEntityFromTree != null) {
-                                    selectedDetailEntityFromTree.setImagePath(file.getAbsolutePath());
-                                    editImageButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
-                                            .getImage(getClass().getResource("/img/gui/success.png"))));
+                                    onSuccess(file, selectedDetailEntityFromTree);
                                 } else {
                                     onFail();
                                 }
@@ -223,6 +225,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 } catch (Exception ex) {
                     log.warn("Could not update image by drag&drop", ex);
                 }
+            }
+
+            private void onSuccess(File file, DetailEntity selectedDetailEntityFromTree) {
+                selectedDetailEntityFromTree.setImagePath(file.getAbsolutePath());
+                editImageButton.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getResource("/img/gui/success.png"))));
             }
 
             private void onFail() {
@@ -844,7 +852,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                                 entity.setUnit(selectedEntity.isUnit());
                                 entity.setActive(true);
 
-                                copyBrotherEntityToDetailEntity(entity, selectedEntity);
+                                entity = copyBrotherEntityToDetailEntity(entity, selectedEntity);
 
                                 DetailListService service = new DetailListServiceImpl(session);
 
@@ -860,7 +868,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                                     service.addDetailList(detailListEntity);
                                 }
 
-                                addNode(selectionPath);
+                                addNode(selectionPath, entity);
                                 mainTree.requestFocus();
                             }
                             showAllEntities(entity);
@@ -871,9 +879,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         }
     }
 
-    private void addNode(TreePath selectionPath) {
+    private void addNode(TreePath selectionPath, DetailEntity entity) {
         final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
-        DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(detailEntity);
+        DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(entity);
         node.add(newChild);
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
         model.reload(node);
@@ -1507,7 +1515,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         onCancel();
     }
 
-    private void copyBrotherEntityToDetailEntity(DetailEntity detailEntity, DetailEntity brotherEntity) {
+    private DetailEntity copyBrotherEntityToDetailEntity(DetailEntity detailEntity, DetailEntity brotherEntity) {
         if (brotherEntity != null) {
             DetailListService service = new DetailListServiceImpl(session);
             final ArrayList<DetailListEntity> detailListByParent = (ArrayList<DetailListEntity>) service.getDetailListByParent(brotherEntity);
@@ -1521,8 +1529,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     }
                 }
 
-                this.detailEntity = createDetailEntityIfNotExist(detailEntity);
-                detailEntity = this.detailEntity;
+                detailEntity = createDetailEntityIfNotExist(detailEntity);
 
                 for (DetailListEntity entity : finalList) {
                     if (entity != null) {
@@ -1541,6 +1548,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 showAllEntities(detailEntity);
             }
         }
+        return detailEntity;
     }
 
     private DetailEntity createDetailEntityIfNotExist(DetailEntity detailEntity) {
