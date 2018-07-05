@@ -107,10 +107,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JPanel savePreviewPanel;
     private Session session;
     private DetailEntity detailEntity;
+    private DetailEntity rootEntity;
 
     EditNoticePanel(DetailEntity detailEntity) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
+        this.rootEntity = detailEntity;
         this.session = ClientBackgroundService.getInstance().getSession();
 
         session.getTransaction().begin();
@@ -124,6 +126,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     EditNoticePanel(DetailEntity detailEntity, boolean create) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
+        this.rootEntity = detailEntity;
         this.session = ClientBackgroundService.getInstance().getSession();
 
         session.getTransaction().begin();
@@ -144,6 +147,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     EditNoticePanel(DetailEntity detailEntity, DetailEntity brotherEntity) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
+        this.rootEntity = detailEntity;
         this.session = ClientBackgroundService.getInstance().getSession();
 
         session.getTransaction().begin();
@@ -314,7 +318,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             final JLabel label = new JLabel("Инициализация...");
                             savePreviewPanel.add(label);
                             SwingUtilities.invokeLater(() -> {
-                                final DetailListPanel comp = new DetailListPanel(detailEntity);
+                                final DetailListPanel comp = new DetailListPanel(rootEntity);
                                 savePreviewPanel.add(comp);
                                 savePreviewPanel.remove(label);
                             });
