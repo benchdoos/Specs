@@ -42,7 +42,6 @@ public class EditMaterialListWindow extends JDialog {
     private final Session session;
     private JPanel contentPane;
     private JButton buttonOK;
-    private JButton buttonCancel;
     private JList<MaterialListEntity> materialList;
     private JLabel longMarkLabel;
     private JLabel shortMarkLabel;
@@ -213,8 +212,6 @@ public class EditMaterialListWindow extends JDialog {
 
     private void initListeners() {
         buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
 
         addMaterialButton.addActionListener(e -> onAddMaterial());
         removeMaterial.addActionListener(e -> onRemoveMaterial());
