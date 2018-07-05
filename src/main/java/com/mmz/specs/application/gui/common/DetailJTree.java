@@ -16,6 +16,7 @@
 package com.mmz.specs.application.gui.common;
 
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.service.DetailListService;
@@ -43,7 +44,6 @@ public class DetailJTree extends JTree {
 
         setBackground(BACKGROUND_NON_SELECTION_COLOR);
 
-//        DetailTreeCellRenderer renderer = new DetailTreeCellRenderer();
 
         DefaultTreeCellRenderer renderer = getRenderer();
 
@@ -55,41 +55,8 @@ public class DetailJTree extends JTree {
         setCellRenderer(renderer);
 
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        addTreeSelectionListener(e -> FrameUtils.getNotifyUserIsActiveActionListener(this).actionPerformed(null));
     }
-
-    /*@Override
-    public String convertValueToText(Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-        if (value instanceof DefaultMutableTreeNode) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            if (node.getUserObject() instanceof DetailEntity) {
-                DetailEntity detailEntity = (DetailEntity) node.getUserObject();
-                if (row >= 0) {
-                    final TreePath pathForRow1 = this.getPathForRow(row);
-                    if (pathForRow1 != null) {
-                        Object[] pathForRow = pathForRow1.getParentPath().getPath();
-                        if (pathForRow.length > 1) {
-                            DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
-                            DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
-
-                            DetailListService service = new DetailListServiceImpl(ClientBackgroundService.getInstance().getSession());
-                            DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
-
-                            if (detailEntity != null && detailListEntity != null) {
-                                String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                                return super.convertValueToText(data, selected, expanded, leaf, row, hasFocus);
-
-                            }
-                        }
-                    }
-                }
-                if (detailEntity != null) {
-                    final String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                    return super.convertValueToText(data, selected, expanded, leaf, row, hasFocus);
-                }
-            }
-        }
-        return super.convertValueToText(value, selected, expanded, leaf, row, hasFocus);
-    }*/
 
     private DefaultTreeCellRenderer getRenderer() {
         return new DefaultTreeCellRenderer() {

@@ -108,6 +108,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private Session session;
     private DetailEntity detailEntity;
     private DetailEntity rootEntity;
+    private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
     EditNoticePanel(DetailEntity detailEntity) {
         $$$setupUI$$$();
@@ -165,6 +166,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         initListeners();
 
+        initUpdateUserIsActiveListeners();
+
         initKeyBindings();
 
         initNoticeComboBox();
@@ -180,6 +183,18 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         fillEmptyDetailInfoPanel();
 
         initEditImageButton();
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        createNoticeButton.addActionListener(notifyUserIsActiveListener);
+        editNoticeButton.addActionListener(notifyUserIsActiveListener);
+        buttonOK.addActionListener(notifyUserIsActiveListener);
+        buttonCancel.addActionListener(notifyUserIsActiveListener);
+        addItemButton.addActionListener(notifyUserIsActiveListener);
+        copyButton.addActionListener(notifyUserIsActiveListener);
+        removeItemButton.addActionListener(notifyUserIsActiveListener);
+        editDetailInfoButton.addActionListener(notifyUserIsActiveListener);
+        editImageButton.addActionListener(notifyUserIsActiveListener);
     }
 
     private void initEditImageButton() {
@@ -296,16 +311,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     } else {
                         final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mainTree.getModel().getRoot();
                         updateNotices();
-                    /*if (root.getChildCount() <= 0) {
-                        fillMainTree();
-                    }*/
-                        /*if (selectedIndex == 1) {
-                            if (previousTabIndex == 0) {
-                                fillMainTree();
-                                fillEmptyDetailInfoPanel();
-                            }
-                        }*/
-
                         if (selectedIndex == 1) {
                             if (((DefaultMutableTreeNode) mainTree.getModel().getRoot()).getChildCount() == 0) {
                                 fillMainTree();
@@ -328,6 +333,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 previousTabIndex = selectedIndex;
             }
         });
+
+        mainTabbedPane.addChangeListener(e ->
+                FrameUtils.getNotifyUserIsActiveActionListener(this).actionPerformed(null));
 
         buttonOK.addActionListener(e -> onOK());
 

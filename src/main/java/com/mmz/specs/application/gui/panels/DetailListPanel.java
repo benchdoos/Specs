@@ -84,6 +84,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private JButton copyButton;
     private JLabel materialLabel;
     private JPanel controlsBar;
+    private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
     public DetailListPanel() {
         $$$setupUI$$$();
@@ -114,7 +115,21 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         initListeners();
 
+        initUpdateUserIsActive();
+
         initMainTree();
+    }
+
+    private void initUpdateUserIsActive() {
+        noticeInfoButton.addActionListener(notifyUserIsActiveListener);
+
+        refreshSessionButton.addActionListener(notifyUserIsActiveListener);
+
+        addButton.addActionListener(notifyUserIsActiveListener);
+
+        copyButton.addActionListener(notifyUserIsActiveListener);
+
+        editButton.addActionListener(notifyUserIsActiveListener);
     }
 
     private void hideControls() {
@@ -655,6 +670,15 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         editButton.setEnabled(enable);
         final DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         copyButton.setEnabled(selectedEntity != null ? enable && selectedEntity.isUnit() : enable);
+    }
+
+
+    private void notifyUserIsActive() {
+        final Window window = FrameUtils.findWindow(this);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            clientMainWindow.resetUnlockedSeconds();
+        }
     }
 
     /**

@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.utils;
 
+import com.mmz.specs.application.gui.client.ClientMainWindow;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
 
@@ -219,5 +220,15 @@ public class FrameUtils {
         for (MouseListener l : component.getMouseListeners()) {
             component.removeMouseListener(l);
         }
+    }
+
+    public static ActionListener getNotifyUserIsActiveActionListener(Component component) {
+        return e -> {
+            final Window window = FrameUtils.findWindow(component);
+            if (window instanceof ClientMainWindow) {
+                ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+                clientMainWindow.resetUnlockedSeconds();
+            }
+        };
     }
 }

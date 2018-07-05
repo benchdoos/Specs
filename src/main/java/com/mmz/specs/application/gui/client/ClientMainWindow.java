@@ -100,6 +100,10 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
+    public void resetUnlockedSeconds() {
+        unlockedSeconds = 0;
+    }
+
     private void updateUnlockUiTimer() {
         if (ClientBackgroundService.getInstance().isConnected()) {
             if (currentUser != null) {
