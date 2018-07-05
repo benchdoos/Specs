@@ -52,7 +52,7 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "
 Name: "{group}\{#MyAppName} — Сервер"; Filename: "{app}\{#MyAppExeName}";Parameters: "-server"; IconFilename: "{app}\server.ico"; Tasks: server
 Name: "{group}\Руководство пользователя"; Filename: "{app}\Client User Guide.pdf"
 Name: "{group}\Руководство администратора"; Filename: "{app}\Server User Guide.pdf"; Tasks: server
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\client.ico"; Tasks: desktopicon
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Registry]
