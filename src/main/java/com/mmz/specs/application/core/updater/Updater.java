@@ -93,7 +93,7 @@ public class Updater {
 
                /* String command = "java -jar \"" + downloadedFile.getAbsolutePath() + "\" " + ApplicationArgumentsConstants.UPDATE
                         + " " + currentPath;*/
-                String command = downloadedFile.getAbsolutePath() + " /verysilent";
+                String command = "\"" + downloadedFile.getAbsolutePath() + "\"" + " /verysilent";
                 log.info("Starting new version with command: {}", command);
                 window.dispose();
                 Runtime.getRuntime().exec(command);
