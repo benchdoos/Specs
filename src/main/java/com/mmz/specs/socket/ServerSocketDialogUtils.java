@@ -19,12 +19,14 @@ import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import static com.mmz.specs.connection.HibernateConstants.*;
 import static com.mmz.specs.socket.SocketConstants.USER_PC_NAME;
 
 class ServerSocketDialogUtils {
@@ -56,9 +58,16 @@ class ServerSocketDialogUtils {
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
             String serverDbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
             /*serverDbConnectionUrl = serverDbConnectionUrl.replace("localhost", ServerSocketService.getInstance().getServerInetAddress());*/
-            out.writeUTF(serverDbConnectionUrl);
+            /*out.writeUTF(serverDbConnectionUrl);
             out.writeUTF(ServerSettingsManager.getInstance().getServerDbUsername());
-            out.writeUTF(ServerSettingsManager.getInstance().getServerDbPassword());
+            out.writeUTF(ServerSettingsManager.getInstance().getServerDbPassword());*/
+
+            JSONObject json = new JSONObject();
+            json.put(CP_DB_CONNECTION_URL_KEY, serverDbConnectionUrl);
+            json.put(CP_CONNECTION_USERNAME_KEY, ServerSettingsManager.getInstance().getServerDbUsername());
+            json.put(CP_CONNECTION_PASSWORD_KEY, ServerSettingsManager.getInstance().getServerDbPassword());
+            final String s = json.toString();
+            out.writeUTF(s);
         } catch (IOException e) {
             log.warn("Could not send session info for client");
         }

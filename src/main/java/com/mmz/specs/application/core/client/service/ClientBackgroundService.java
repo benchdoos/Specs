@@ -31,12 +31,15 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
+import org.json.JSONObject;
 
 import javax.persistence.metamodel.EntityType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
+import static com.mmz.specs.connection.HibernateConstants.*;
 
 public class ClientBackgroundService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -132,26 +135,15 @@ public class ClientBackgroundService {
         try {
             log.info("Asking server for session, command: " + SocketConstants.GIVE_SESSION);
             outputStream.writeUTF(SocketConstants.GIVE_SESSION);
-            String dbAddress = dataInputStream.readUTF(); //todo replace with json???
-            String dbUsername = dataInputStream.readUTF();
-            String dbPassword = dataInputStream.readUTF();
-            dbAddress = dbAddress.replace("localhost", socket.getInetAddress().getHostAddress());
+            String params = dataInputStream.readUTF();
+            JSONObject obj = new JSONObject(params);
+
+            String dbAddress = obj.getString(CP_DB_CONNECTION_URL_KEY);
+            String dbUsername = obj.getString(CP_CONNECTION_USERNAME_KEY);
+            String dbPassword = obj.getString(CP_CONNECTION_PASSWORD_KEY);
 
             log.info("Got configuration from server: {} {} ({})", dbAddress, dbUsername, dbPassword.length());
-            log.info("Creating configuration");
-            Configuration configuration = new Configuration();
-            log.info("Loading hibernate configuration file");
-            configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
-            log.info("Configuration file successfully loaded");
-            log.info("Setting hibernate connection configuration from server");
-            configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbAddress);
-            configuration.setProperty(HibernateConstants.CP_CONNECTION_USERNAME_KEY, dbUsername);
-            configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, dbPassword);
-            configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "1"); // only 1 connection for client, important!!!
-            log.info("Creating Hibernate connection at: " + dbAddress
-                    + " username: " + dbUsername + " password length: " + dbPassword.length());
-            SessionFactory factory = configuration.buildSessionFactory();
-            Session session = factory.openSession();
+            Session session = createSession(dbAddress, dbUsername, dbPassword);
             this.session = session;
             return session;
         } catch (Throwable e) {
@@ -159,6 +151,23 @@ public class ClientBackgroundService {
         }
 
         return null;
+    }
+
+    private Session createSession(String dbAddress, String dbUsername, String dbPassword) {
+        log.info("Creating configuration");
+        Configuration configuration = new Configuration();
+        log.info("Loading hibernate configuration file");
+        configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
+        log.info("Configuration file successfully loaded");
+        log.info("Setting hibernate connection configuration from server");
+        configuration.setProperty(CP_DB_CONNECTION_URL_KEY, dbAddress);
+        configuration.setProperty(CP_CONNECTION_USERNAME_KEY, dbUsername);
+        configuration.setProperty(CP_CONNECTION_PASSWORD_KEY, dbPassword);
+        configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "1"); // only 1 connection for client, important!!!
+        log.info("Creating Hibernate connection at: " + dbAddress
+                + " username: " + dbUsername + " password length: " + dbPassword.length());
+        SessionFactory factory = configuration.buildSessionFactory();
+        return factory.openSession();
     }
 
     public void closeConnection() throws IOException {
