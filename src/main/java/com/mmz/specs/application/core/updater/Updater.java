@@ -21,6 +21,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.common.UpdaterWindow;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -47,7 +49,7 @@ public class Updater {
     private ApplicationVersion serverVersion;
 
     private Updater() {
-        log.debug("Starting Updater instance");
+        log.debug("Starting UpdaterWindow instance");
         try {
             connection = getConnection();
         } catch (Throwable t) {
@@ -73,9 +75,14 @@ public class Updater {
     }
 
     public void startUpdate() {
-        log.info("Showing message to user about update");
-        JOptionPane.showMessageDialog(null, "Доступно новое обновление, подождите несколько \n" +
-                "секунд, пока приложение обновится", "Обновление", JOptionPane.INFORMATION_MESSAGE);
+
+        UpdaterWindow window = new UpdaterWindow(serverVersion);
+        SwingUtilities.invokeLater(() -> {
+            log.info("Showing message to user about update");
+            window.setLocation(FrameUtils.getFrameOnCenter(null, window));
+            window.setVisible(true);
+        });
+
         log.info("Starting update");
         try {
             String currentPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
@@ -88,6 +95,7 @@ public class Updater {
                         + " " + currentPath;*/
                 String command = downloadedFile.getAbsolutePath() + " /verysilent";
                 log.info("Starting new version with command: {}", command);
+                window.dispose();
                 Runtime.getRuntime().exec(command);
                 log.info("Closing current application");
             } else {
