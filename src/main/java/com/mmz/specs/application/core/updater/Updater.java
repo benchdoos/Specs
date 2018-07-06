@@ -19,7 +19,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mmz.specs.application.core.ApplicationArgumentsConstants;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.utils.Logging;
@@ -73,31 +72,30 @@ public class Updater {
         return true;
     }
 
-    public void startUpdate(String[] arguments) {
+    public void startUpdate() {
         log.info("Showing message to user about update");
         JOptionPane.showMessageDialog(null, "Доступно новое обновление, подождите несколько \n" +
                 "секунд, пока приложение обновится", "Обновление", JOptionPane.INFORMATION_MESSAGE);
-        log.info("Starting update with arguments: {}", Arrays.toString(arguments));
-        if (arguments != null) {
-            try {
-                String currentPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-                File downloadedFile = download();
-                if (downloadedFile != null) {
-                    log.info("New version of file successfully downloaded: {}", downloadedFile.getAbsolutePath());
-                    log.info("Starting updating to new version.");
+        log.info("Starting update");
+        try {
+            String currentPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            File downloadedFile = download();
+            if (downloadedFile != null) {
+                log.info("New version of file successfully downloaded: {}", downloadedFile.getAbsolutePath());
+                log.info("Starting updating to new version.");
 
-                    String command = "java -jar \"" + downloadedFile.getAbsolutePath() + "\" " + ApplicationArgumentsConstants.UPDATE
-                            + " " + currentPath;
-                    log.info("Starting new version with command: {}", command);
-                    Runtime.getRuntime().exec(command);
-                    log.info("Closing current application");
-                } else {
-                    log.warn("Could not download new version, downloadedFile: null");
-                }
-
-            } catch (Throwable e) {
-                log.warn("Could not update file", e);
+               /* String command = "java -jar \"" + downloadedFile.getAbsolutePath() + "\" " + ApplicationArgumentsConstants.UPDATE
+                        + " " + currentPath;*/
+                String command = downloadedFile.getAbsolutePath() + " /verysilent";
+                log.info("Starting new version with command: {}", command);
+                Runtime.getRuntime().exec(command);
+                log.info("Closing current application");
+            } else {
+                log.warn("Could not download new version, downloaded file: null");
             }
+
+        } catch (Throwable e) {
+            log.warn("Could not download file", e);
         }
     }
 

@@ -45,7 +45,7 @@ public class CoreUtils {
                     if (Updater.getInstance().isUpdateNotAvailable()) {
                         startClient();
                     } else {
-                        Updater.getInstance().startUpdate(args);
+                        Updater.getInstance().startUpdate();
                     }
                     break;
                 }
