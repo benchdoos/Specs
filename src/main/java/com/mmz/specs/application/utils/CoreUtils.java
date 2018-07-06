@@ -60,7 +60,7 @@ public class CoreUtils {
                         ServerMainWindow serverMainWindow = new ServerMainWindow();
                         serverMainWindow.setVisible(true);
                     } else {
-                        Updater.getInstance().startUpdate(args);
+                        Updater.getInstance().startUpdate();
                     }
                     break;
                 }
@@ -80,7 +80,7 @@ public class CoreUtils {
                         log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
                         startClient();
                     } else {
-                        Updater.getInstance().startUpdate(args);
+                        Updater.getInstance().startUpdate();
                     }
                     break;
                 }
@@ -91,7 +91,7 @@ public class CoreUtils {
                 ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
                 startClient();
             } else {
-                Updater.getInstance().startUpdate(args);
+                Updater.getInstance().startUpdate();
             }
         }
     }
