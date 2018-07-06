@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.utils;
 
+import com.mmz.specs.application.ApplicationException;
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.core.updater.Updater;
@@ -42,25 +43,18 @@ public class CoreUtils {
             log.debug("Got arguments: " + Arrays.toString(args));
             switch (firstArgument) {
                 case ApplicationArgumentsConstants.CLIENT: {
-                    if (Updater.getInstance().isUpdateNotAvailable()) {
-                        startClient();
-                    } else {
-                        Updater.getInstance().startUpdate();
-                    }
+                    initClient();
                     break;
                 }
                 case ApplicationArgumentsConstants.SERVER: {
                     if (Updater.getInstance().isUpdateNotAvailable()) {
-                        log.debug("Argument is for " + ModeManager.MODE.SERVER);
-
-                        loadServerSettings();
-
-                        ServerBackgroundService service = ServerBackgroundService.getInstance();
-
-                        ServerMainWindow serverMainWindow = new ServerMainWindow();
-                        serverMainWindow.setVisible(true);
+                        startServer();
                     } else {
-                        Updater.getInstance().startUpdate();
+                        try {
+                            Updater.getInstance().startUpdate();
+                        } catch (ApplicationException e) {
+                            startServer();
+                        }
                     }
                     break;
                 }
@@ -75,13 +69,9 @@ public class CoreUtils {
                     break;
                 }
                 default: {
-                    if (Updater.getInstance().isUpdateNotAvailable()) {
-                        log.debug("Unknown argument: " + firstArgument);
-                        log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
-                        startClient();
-                    } else {
-                        Updater.getInstance().startUpdate();
-                    }
+                    log.debug("Unknown argument: " + firstArgument);
+                    log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
+                    initClient();
                     break;
                 }
             }
@@ -91,9 +81,36 @@ public class CoreUtils {
                 ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
                 startClient();
             } else {
-                Updater.getInstance().startUpdate();
+                try {
+                    Updater.getInstance().startUpdate();
+                } catch (ApplicationException e) {
+                    startClient();
+                }
             }
         }
+    }
+
+    private static void initClient() {
+        if (Updater.getInstance().isUpdateNotAvailable()) {
+            startClient();
+        } else {
+            try {
+                Updater.getInstance().startUpdate();
+            } catch (ApplicationException e) {
+                startClient();
+            }
+        }
+    }
+
+    private static void startServer() {
+        log.debug("Argument is for " + ModeManager.MODE.SERVER);
+
+        loadServerSettings();
+
+        ServerBackgroundService service = ServerBackgroundService.getInstance();
+
+        ServerMainWindow serverMainWindow = new ServerMainWindow();
+        serverMainWindow.setVisible(true);
     }
 
     private static void startClient() {
@@ -118,7 +135,6 @@ public class CoreUtils {
             serverConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, serverConfigurationWindow));
 
             serverConfigurationWindow.setVisible(true);
-            //loadServerSettings();//TODO check this properly
         }
 
     }

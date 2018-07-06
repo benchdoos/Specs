@@ -19,6 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mmz.specs.application.ApplicationException;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.common.UpdaterWindow;
@@ -74,8 +75,7 @@ public class Updater {
         return true;
     }
 
-    public void startUpdate() {
-
+    public void startUpdate() throws ApplicationException {
         UpdaterWindow window = new UpdaterWindow(serverVersion);
         SwingUtilities.invokeLater(() -> {
             log.info("Showing message to user about update");
@@ -104,6 +104,10 @@ public class Updater {
 
         } catch (Throwable e) {
             log.warn("Could not download file", e);
+            JOptionPane.showMessageDialog(window, "Ошибка во время обновления:\n" + e.getLocalizedMessage(),
+                    "Ошибка обновления", JOptionPane.WARNING_MESSAGE);
+            window.dispose();
+            throw new ApplicationException(e);
         }
     }
 
