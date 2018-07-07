@@ -2,10 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Specs"
-#define MyAppVersion "0.1.2"
+#define MyAppVersion "0.1.3"
 #define MyAppPublisher "ООО Майкопский машиностроительный завод"
 #define MyAppURL "http://maykop-mmz.com/"
 #define MyAppExeName "Specs.jar"
+#define MyAppServerRusName "Specs — Сервер"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -29,6 +30,7 @@ SetupIconFile=F:\Developer\JAVA\Specs\publish\Specs\client.ico
 UninstallDisplayIcon={app}\client.ico
 Compression=lzma
 SolidCompression=yes
+CloseApplications=yes
 
 
 [Languages]
@@ -38,18 +40,21 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
+Name: "updateServer"; Description: "После обновления сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
+Name: "updateClient"; Description: "После обновления клиент"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
+
 
 [Files]
 Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
 Source: "F:\Developer\JAVA\Specs\publish\Specs\client.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server
+Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server; Components: server
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Client User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Server User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\client.ico"
-Name: "{group}\{#MyAppName} — Сервер"; Filename: "{app}\{#MyAppExeName}";Parameters: "-server"; IconFilename: "{app}\server.ico"; Tasks: server
+Name: "{group}\{#MyAppServerRusName}"; Filename: "{app}\{#MyAppExeName}";Parameters: "-server"; IconFilename: "{app}\server.ico"; Tasks: server
 Name: "{group}\Руководство пользователя"; Filename: "{app}\Client User Guide.pdf"
 Name: "{group}\Руководство администратора"; Filename: "{app}\Server User Guide.pdf"; Tasks: server
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\client.ico"; Tasks: desktopicon
@@ -60,4 +65,7 @@ Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Parameters:"-server"; Description: "{#MyAppServerRusName}"; Flags: shellexec postinstall; Tasks: server
+Filename: "{app}\{#MyAppExeName}"; Parameters:"-update -server"; Description: "{cm:LaunchProgram,{#MyAppServerRusName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateServer
+Filename: "{app}\{#MyAppExeName}"; Parameters:"-update"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateClient
 
