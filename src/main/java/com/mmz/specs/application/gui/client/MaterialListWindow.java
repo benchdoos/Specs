@@ -107,8 +107,8 @@ public class MaterialListWindow extends JDialog {
 
             String longMark = entity.getMaterialByMaterialId().getLongMark();
             String longProfile = entity.getMaterialByMaterialId().getLongProfile();
-            String delimiter = CommonWindowUtils.createDelimiter(longMark, longProfile);
-            String text = "<html> <p style=\"line-height: 0.2em;\">" + longMark + "<br>" + delimiter + "<br>" + longProfile + "</p></html>";
+            String delimiter = CommonWindowUtils.createDelimiter(longProfile, longMark);
+            String text = "<html> <p style=\"line-height: 0.2em;\">" + longProfile + "<br>" + delimiter + "<br>" + longMark + "</p></html>";
             text = text.replace("null", "");
             longMaterialLabel.setText(text);
 
