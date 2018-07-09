@@ -618,8 +618,8 @@ public class ClientMainWindow extends JFrame {
         adminButton.setEnabled(unlock);
     }
 
-    private void onViewDetailList(boolean select) {
-        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
+    private void onViewDetailList(final boolean select) {
+        final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
         log.debug("Adding ViewDetailList tab");
         try {
             addTab("Просмотр вложенности", icon, new DetailListPanel(), select);
