@@ -945,8 +945,8 @@ public class ClientMainWindow extends JFrame {
         usernameLabel = new JLabel();
         Font usernameLabelFont = this.$$$getFont$$$(null, Font.BOLD, 11, usernameLabel.getFont());
         if (usernameLabelFont != null) usernameLabel.setFont(usernameLabelFont);
-        usernameLabel.setText("");
-        panel4.add(usernameLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        usernameLabel.setText(" ");
+        panel4.add(usernameLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         loginButton = new JButton();
         loginButton.setBorderPainted(false);
         loginButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/admin/locked.png")));
