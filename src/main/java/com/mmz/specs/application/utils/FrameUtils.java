@@ -228,6 +228,14 @@ public class FrameUtils {
             if (window instanceof ClientMainWindow) {
                 ClientMainWindow clientMainWindow = (ClientMainWindow) window;
                 clientMainWindow.resetUnlockedSeconds();
+            } else {
+                if (window instanceof JDialog) {
+                    JFrame parentFrame = (JFrame) window.getParent();
+                    if (parentFrame instanceof ClientMainWindow) {
+                        ClientMainWindow clientMainWindow = (ClientMainWindow) parentFrame;
+                        clientMainWindow.resetUnlockedSeconds();
+                    }
+                }
             }
         };
     }

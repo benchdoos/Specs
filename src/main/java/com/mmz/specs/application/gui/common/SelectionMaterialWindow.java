@@ -20,6 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.utils.SwitchingComboBox;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.MaterialDaoImpl;
 import com.mmz.specs.model.MaterialEntity;
 import com.mmz.specs.service.MaterialService;
@@ -28,6 +29,7 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -43,6 +45,7 @@ public class SelectionMaterialWindow extends JDialog {
     private JLabel longMarkLabel;
     private JLabel longProfileLabel;
     private MaterialEntity selectedMaterialEntity;
+    private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
     public SelectionMaterialWindow() {
         $$$setupUI$$$();
@@ -58,8 +61,18 @@ public class SelectionMaterialWindow extends JDialog {
 
         fillMaterialComboBox();
 
+        initUpdateUserIsActiveListeners();
+
+
         pack();
         setMinimumSize(getSize());
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        buttonOK.addActionListener(notifyUserIsActiveListener);
+        buttonCancel.addActionListener(notifyUserIsActiveListener);
+        materialComboBox.addActionListener(notifyUserIsActiveListener);
+
     }
 
     private void initMaterialComboBox() {

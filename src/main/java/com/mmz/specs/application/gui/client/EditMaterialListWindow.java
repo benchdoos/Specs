@@ -32,6 +32,7 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -54,6 +55,7 @@ public class EditMaterialListWindow extends JDialog {
     private JCheckBox mainCheckBox;
     private DetailEntity detailEntity;
     private boolean isCanceled = false;
+    private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
     public EditMaterialListWindow(DetailEntity detailEntity) {
         if (detailEntity == null) {
@@ -77,9 +79,21 @@ public class EditMaterialListWindow extends JDialog {
 
         initCheckBoxListeners();
 
+        initUpdateUserIsActiveListeners();
+
+
         pack();
         setMinimumSize(new Dimension(540, getSize().height));
         setSize(getMinimumSize());
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        materialList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+
+        addMaterialButton.addActionListener(notifyUserIsActiveListener);
+        removeMaterial.addActionListener(notifyUserIsActiveListener);
+        createNewMaterialButton.addActionListener(notifyUserIsActiveListener);
+        editMaterialButton.addActionListener(notifyUserIsActiveListener);
     }
 
     private void initGui() {

@@ -41,6 +41,7 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -72,6 +73,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
     private JLabel shortMarkLabel;
     private JLabel shortProfileLabel;
     private JLabel activeMarkLabel;
+    private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
     public EditDataPanel() {
         this.session = ClientBackgroundService.getInstance().getSession();
@@ -89,6 +91,26 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         initEditTitleTab();
 
         initEditMaterialTab();
+
+        initUpdateUserIsActiveListeners();
+
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        tabbedPane.addChangeListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+
+        titleList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+        materialList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+
+        addTitleItemButton.addActionListener(notifyUserIsActiveListener);
+        removeTitleItemButton.addActionListener(notifyUserIsActiveListener);
+
+        editTitleButton.addActionListener(notifyUserIsActiveListener);
+        findTitleUsageButton.addActionListener(notifyUserIsActiveListener);
+
+        addMaterialItemButton.addActionListener(notifyUserIsActiveListener);
+        removeMaterialItemButton.addActionListener(notifyUserIsActiveListener);
+        editMaterialItemButton.addActionListener(notifyUserIsActiveListener);
     }
 
     private void initListeners() {
@@ -542,10 +564,13 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         toolBar2.add(editMaterialItemButton);
         final JPanel panel10 = new JPanel();
         panel10.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane.addTab("Тех. процессы", panel10);
+        tabbedPane.addTab("Детали", panel10);
         final JPanel panel11 = new JPanel();
         panel11.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane.addTab("Извещения", panel11);
+        final JPanel panel12 = new JPanel();
+        panel12.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        tabbedPane.addTab("Тех. процессы", panel12);
     }
 
     /**
