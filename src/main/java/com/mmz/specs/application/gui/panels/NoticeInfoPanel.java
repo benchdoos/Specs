@@ -28,6 +28,7 @@ import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -48,6 +49,7 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     private Session session;
     private List<NoticeEntity> noticeEntities;
     private DetailEntity detailEntity;
+    private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
 
     public NoticeInfoPanel(Session session, List<NoticeEntity> noticeEntities) {
@@ -71,6 +73,14 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         initDetailEffectedList();
 
         initListeners();
+
+        initUpdateUserIsActiveListeners();
+
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        noticeList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+        detailEffectedList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
     }
 
     private void initDetailInfoLabel() {
