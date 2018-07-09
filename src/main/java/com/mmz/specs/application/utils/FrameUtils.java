@@ -25,8 +25,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 public class FrameUtils {
-    private static final Timer timer = new Timer(60, null);
     public static final Dimension DEFAULT_DIMENSION = new Dimension(640, 480);
+    private static final Timer timer = new Timer(60, null);
 
     /**
      * Finds window on component given.
@@ -225,15 +225,20 @@ public class FrameUtils {
     public static ActionListener getNotifyUserIsActiveActionListener(Component component) {
         return e -> {
             final Window window = FrameUtils.findWindow(component);
-            if (window instanceof ClientMainWindow) {
-                ClientMainWindow clientMainWindow = (ClientMainWindow) window;
-                clientMainWindow.resetUnlockedSeconds();
-            } else {
-                if (window instanceof JDialog) {
-                    JFrame parentFrame = (JFrame) window.getParent();
-                    if (parentFrame instanceof ClientMainWindow) {
-                        ClientMainWindow clientMainWindow = (ClientMainWindow) parentFrame;
-                        clientMainWindow.resetUnlockedSeconds();
+            if (window != null) {
+                if (window instanceof ClientMainWindow) {
+                    ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+                    clientMainWindow.resetUnlockedSeconds();
+                } else {
+                    if (window instanceof JDialog) {
+                        final Container parent = window.getParent();
+                        if (parent instanceof JFrame) {
+                            JFrame parentFrame = (JFrame) parent;
+                            if (parentFrame instanceof ClientMainWindow) {
+                                ClientMainWindow clientMainWindow = (ClientMainWindow) parentFrame;
+                                clientMainWindow.resetUnlockedSeconds();
+                            }
+                        }
                     }
                 }
             }
