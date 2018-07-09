@@ -38,6 +38,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 
 import static com.mmz.specs.connection.HibernateConstants.*;
 
@@ -196,15 +197,30 @@ public class ClientBackgroundService {
     }
 
     public void refreshSession() {
+        log.debug("Refreshing session for all entities");
         if (session != null) {
             final Metamodel metamodel = session.getSessionFactory().getMetamodel();
             for (EntityType<?> entityType : metamodel.getEntities()) {
-                final String entityName = entityType.getName();
-                final Query query = session.createQuery("from " + entityName);
-                for (Object o : query.list()) {
-                    session.refresh(o);
-                }
+                refreshCurrentEntityType(entityType.getName());
             }
+        }
+        log.debug("Refreshing session for all entities successfully finished.");
+    }
+
+    public void refreshSession(Class class_) {
+        log.debug("Refreshing session for: {}", class_.getName());
+        if (session != null) {
+            refreshCurrentEntityType(class_.getName());
+        }
+        log.debug("Refreshing session for: {} successfully finished.", class_.getName());
+    }
+
+    private void refreshCurrentEntityType(String name) {
+        final Query query = session.createQuery("from " + name);
+        final List list = query.list();
+        log.debug("Refreshing list size: {}", list.size());
+        for (Object o : list) {
+            session.refresh(o);
         }
     }
 

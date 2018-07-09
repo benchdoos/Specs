@@ -382,7 +382,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void onRefreshSession() {
         if (ClientBackgroundService.getInstance().isConnected()) {
-            ClientBackgroundService.getInstance().refreshSession();
+            ClientBackgroundService.getInstance().refreshSession(DetailListEntity.class);
             fillMainTreeFully();
             searchTextField.setText("");
         }
