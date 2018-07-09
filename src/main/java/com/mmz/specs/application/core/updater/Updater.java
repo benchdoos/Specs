@@ -20,6 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mmz.specs.application.ApplicationException;
+import com.mmz.specs.application.core.ApplicationArgumentsConstants;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.common.UpdaterWindow;
@@ -45,9 +46,12 @@ public class Updater {
 
     private static final String GITHUB_URL = "https://api.github.com/repos/benchdoos/Specs/releases/latest";
     private static final String DEFAULT_ENCODING = "UTF-8";
+    private static final File INSTALLER_FILE = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
+            + File.separator + ApplicationConstants.APPLICATION_FINAL_NAME);
     private static Updater ourInstance = new Updater();
     private HttpsURLConnection connection = null;
     private ApplicationVersion serverVersion;
+
 
     private Updater() {
         log.debug("Starting UpdaterWindow instance");
@@ -75,7 +79,7 @@ public class Updater {
         return true;
     }
 
-    public void startUpdate() throws ApplicationException {
+    public void startUpdate(String argument) throws ApplicationException {
         UpdaterWindow window = new UpdaterWindow(serverVersion);
         SwingUtilities.invokeLater(() -> {
             log.info("Showing message to user about update");
@@ -85,7 +89,6 @@ public class Updater {
 
         log.info("Starting update");
         try {
-            String currentPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
             File downloadedFile = download();
             if (downloadedFile != null) {
                 log.info("New version of file successfully downloaded: {}", downloadedFile.getAbsolutePath());
@@ -93,7 +96,10 @@ public class Updater {
 
                /* String command = "java -jar \"" + downloadedFile.getAbsolutePath() + "\" " + ApplicationArgumentsConstants.UPDATE
                         + " " + currentPath;*/
-                String command = "\"" + downloadedFile.getAbsolutePath() + "\"" + " /verysilent";
+
+                //String taskCommand = getCurrentTaskCommand(argument);
+
+                String command = "\"" + downloadedFile.getAbsolutePath() + "\"" + " /verysilent " /*+ taskCommand*/;
                 log.info("Starting new version with command: {}", command);
                 window.dispose();
                 Runtime.getRuntime().exec(command);
@@ -111,31 +117,28 @@ public class Updater {
         }
     }
 
-    private String argsArrayToString(String[] arguments) {
-        StringBuilder builder = new StringBuilder();
-        if (arguments != null) {
-            for (String s : arguments) {
-                builder.append("\"").append(s).append("\"").append(" ");
+    private String getCurrentTaskCommand(String argument) {
+        if (argument != null) {
+            if (argument.equalsIgnoreCase(ApplicationArgumentsConstants.CLIENT)) {
+                return "/TASKS=\"updateClient\"";
+            } else if (argument.equalsIgnoreCase(ApplicationArgumentsConstants.SERVER)) {
+                return "/TASKS=\"updateServer\"";
             }
         }
-        return builder.toString();
+        return "";
     }
 
     private File download() {
-        File installerFile = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
-                + File.separator + ApplicationConstants.APPLICATION_FINAL_NAME);
-        if (installerFile.exists()) {
-            boolean delete = installerFile.delete();
+        if (INSTALLER_FILE.exists()) {
+            boolean delete = INSTALLER_FILE.delete();
         }
         try {
-            log.info("Starting downloading file from {} to {}", serverVersion.getDownloadUrl(), installerFile.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(serverVersion.getDownloadUrl()), installerFile, 5000, 5000);
-            installerFile = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
-                    + File.separator + ApplicationConstants.APPLICATION_FINAL_NAME);
+            log.info("Starting downloading file from {} to {}", serverVersion.getDownloadUrl(), INSTALLER_FILE.getAbsolutePath());
+            FileUtils.copyURLToFile(new URL(serverVersion.getDownloadUrl()), INSTALLER_FILE, 5000, 5000);
         } catch (IOException e) {
-            log.warn("Could not download file from {} to {}", serverVersion.getDownloadUrl(), installerFile, e);
+            log.warn("Could not download file from {} to {}", serverVersion.getDownloadUrl(), INSTALLER_FILE, e);
         }
-        return installerFile;
+        return INSTALLER_FILE;
     }
 
     private void getServerApplicationVersion() throws IOException { //replace by apache HttpComponents?
@@ -266,6 +269,14 @@ public class Updater {
 
     public void notifyUser() {
         JOptionPane.showMessageDialog(null, "Приложение успешно обновлено\n" +
-                "Вы можете запустить его снова", "Приложение обновлено", JOptionPane.INFORMATION_MESSAGE);
+                "Текущая версия: v." + getCurrentVersion(), "Приложение обновлено", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void deleteInstaller() {
+        log.debug("Deleting installation file : " + INSTALLER_FILE);
+        final boolean delete = INSTALLER_FILE.delete();
+        if (!delete) {
+            log.warn("Could not delete installation file");
+        }
     }
 }

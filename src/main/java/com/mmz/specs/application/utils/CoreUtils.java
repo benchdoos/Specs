@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import static com.mmz.specs.application.core.ApplicationArgumentsConstants.CLIENT;
+import static com.mmz.specs.application.core.ApplicationArgumentsConstants.SERVER;
+
 public class CoreUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
@@ -41,40 +44,7 @@ public class CoreUtils {
         if (args.length > 0) {
             final String firstArgument = args[0].toLowerCase();
             log.debug("Got arguments: " + Arrays.toString(args));
-            switch (firstArgument) {
-                case ApplicationArgumentsConstants.CLIENT: {
-                    initClient();
-                    break;
-                }
-                case ApplicationArgumentsConstants.SERVER: {
-                    if (Updater.getInstance().isUpdateNotAvailable()) {
-                        startServer();
-                    } else {
-                        try {
-                            Updater.getInstance().startUpdate();
-                        } catch (ApplicationException e) {
-                            startServer();
-                        }
-                    }
-                    break;
-                }
-
-                case ApplicationArgumentsConstants.UPDATE: {
-                    if (args.length > 1) {
-                        Updater.getInstance().copyMyself(args[1]);
-                        Updater.getInstance().notifyUser();
-                        Updater.getInstance().deleteMyself();
-                        Updater.getInstance().runNewVersion(args[1]);
-                    }
-                    break;
-                }
-                default: {
-                    log.debug("Unknown argument: " + firstArgument);
-                    log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
-                    initClient();
-                    break;
-                }
-            }
+            switchMode(args, firstArgument);
         } else {
             if (Updater.getInstance().isUpdateNotAvailable()) {
                 log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
@@ -82,10 +52,51 @@ public class CoreUtils {
                 startClient();
             } else {
                 try {
-                    Updater.getInstance().startUpdate();
+                    Updater.getInstance().startUpdate(CLIENT);
                 } catch (ApplicationException e) {
                     startClient();
                 }
+            }
+        }
+    }
+
+    private static void switchMode(String[] args, String firstArgument) {
+        switch (firstArgument) {
+            case CLIENT: {
+                initClient();
+                break;
+            }
+            case SERVER: {
+                if (Updater.getInstance().isUpdateNotAvailable()) {
+                    startServer();
+                } else {
+                    try {
+                        Updater.getInstance().startUpdate(SERVER);
+                    } catch (ApplicationException e) {
+                        startServer();
+                    }
+                }
+                break;
+            }
+
+            case ApplicationArgumentsConstants.UPDATE: {
+                Updater.getInstance().notifyUser();
+                Updater.getInstance().deleteInstaller();
+                if (args.length > 1) {
+                    final String arg = args[1];
+                    if (arg.equalsIgnoreCase(SERVER)) {
+                        switchMode(null, SERVER);
+                    }
+                } else {
+                    switchMode(null, CLIENT);
+                }
+                break;
+            }
+            default: {
+                log.debug("Unknown argument: " + firstArgument);
+                log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
+                initClient();
+                break;
             }
         }
     }
@@ -95,7 +106,7 @@ public class CoreUtils {
             startClient();
         } else {
             try {
-                Updater.getInstance().startUpdate();
+                Updater.getInstance().startUpdate(CLIENT);
             } catch (ApplicationException e) {
                 startClient();
             }

@@ -40,14 +40,14 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
-Name: "updateServer"; Description: "После обновления сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
-Name: "updateClient"; Description: "После обновления клиент"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
+;Name: "updateServer"; Description: "После обновления сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
+;Name: "updateClient"; Description: "После обновления клиент"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
 
 
 [Files]
 Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
 Source: "F:\Developer\JAVA\Specs\publish\Specs\client.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server; Components: server
+Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server;
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Client User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Server User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -64,8 +64,8 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall unchecked
 Filename: "{app}\{#MyAppExeName}"; Parameters:"-server"; Description: "{#MyAppServerRusName}"; Flags: shellexec postinstall; Tasks: server
-Filename: "{app}\{#MyAppExeName}"; Parameters:"-update -server"; Description: "{cm:LaunchProgram,{#MyAppServerRusName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateServer
-Filename: "{app}\{#MyAppExeName}"; Parameters:"-update"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateClient
+;Filename: "{app}\{#MyAppExeName}"; Parameters:"-update -server"; Description: "{cm:LaunchProgram,{#MyAppServerRusName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateServer
+;Filename: "{app}\{#MyAppExeName}"; Parameters:"-update"; Description: "{cm:LaunchProgram,{#MyAppName} - После обновления}"; Flags: shellexec postinstall hidewizard; Tasks: updateClient
 
