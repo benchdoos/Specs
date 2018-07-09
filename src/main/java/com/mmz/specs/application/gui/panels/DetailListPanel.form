@@ -270,6 +270,7 @@
                   <component id="2a75e" class="javax.swing.JButton" binding="refreshSessionButton">
                     <constraints/>
                     <properties>
+                      <disabledIcon value="img/application/loading2.gif"/>
                       <icon value="img/gui/refresh-left-arrow.png"/>
                       <margin top="2" left="2" bottom="2" right="2"/>
                       <text value=""/>

@@ -382,9 +382,19 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void onRefreshSession() {
         if (ClientBackgroundService.getInstance().isConnected()) {
-            ClientBackgroundService.getInstance().refreshSession(DetailListEntity.class);
-            fillMainTreeFully();
-            searchTextField.setText("");
+            new Thread(() -> {
+                refreshSessionButton.setEnabled(false);
+
+                final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
+                mainTree.setModel(model);
+
+                ClientBackgroundService.getInstance().refreshSession(DetailListEntity.class);
+                fillMainTreeFully();
+
+                refreshSessionButton.setEnabled(true);
+
+                searchTextField.setText("");
+            }).start();
         }
     }
 
@@ -789,6 +799,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         toolBar1.setOrientation(0);
         controlsBar.add(toolBar1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
         refreshSessionButton = new JButton();
+        refreshSessionButton.setDisabledIcon(new ImageIcon(getClass().getResource("/img/application/loading2.gif")));
         refreshSessionButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
         refreshSessionButton.setMargin(new Insets(2, 2, 2, 2));
         refreshSessionButton.setText("");

@@ -212,15 +212,19 @@ public class ClientBackgroundService {
         if (session != null) {
             refreshCurrentEntityType(class_.getName());
         }
-        log.debug("Refreshing session for: {} successfully finished.", class_.getName());
     }
 
     private void refreshCurrentEntityType(String name) {
-        final Query query = session.createQuery("from " + name);
-        final List list = query.list();
-        log.debug("Refreshing list size: {}", list.size());
-        for (Object o : list) {
-            session.refresh(o);
+        try {
+            final Query query = session.createQuery("from " + name);
+            final List list = query.list();
+            log.debug("Refreshing list size: {}", list.size());
+            for (Object o : list) {
+                session.refresh(o);
+            }
+            log.debug("Refreshing session for: {} successfully finished.", name);
+        } catch (Exception e) {
+            log.warn("Could not refresh current entity type: {}", name, e);
         }
     }
 
