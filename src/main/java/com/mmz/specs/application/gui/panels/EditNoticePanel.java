@@ -610,7 +610,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void addDetailToTree(DetailEntity entity) {
         final TreePath selectionPath = mainTree.getSelectionPath();
-        if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
+        if (new MainWindowUtils(session).pathNotContainsEntity(this, selectionPath, entity)) {
             addTreeNode(entity, selectionPath);
             mainTree.setSelectionPath(selectionPath);
             mainTree.requestFocus();
@@ -785,9 +785,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void addTreeNode(DetailEntity entity, TreePath selectionPath) {
         log.debug("Adding new entity {} to path: {}", entity, selectionPath);
         if (selectionPath != null) {
-            if (CommonWindowUtils.pathNotContainsEntity(this, mainTree, selectionPath, entity)) {
+            if (new MainWindowUtils(session).pathNotContainsEntity(this, selectionPath, entity)) {
                 if (entity != null) {
-                    log.debug("Session transaction is: " + session.getTransaction().getStatus());
+                    log.debug("Session transaction status is: " + session.getTransaction().getStatus());
                     addItemToTree(selectionPath, entity);
                     fillEmptyDetailInfoPanel();
                 }

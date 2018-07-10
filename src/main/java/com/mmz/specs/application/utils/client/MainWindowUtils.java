@@ -40,6 +40,9 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.showMessageDialog;
+
 @SuppressWarnings("DeprecatedIsStillUsed")
 public class MainWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -400,5 +403,110 @@ public class MainWindowUtils {
             }
         }
         return result;
+    }
+
+
+    public boolean pathNotContainsEntity(Component component, TreePath selectionPath, DetailEntity entity) {
+        final Object o = selectionPath.getLastPathComponent();
+        if (o instanceof DefaultMutableTreeNode) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) o;
+            final Object userObject = node.getUserObject();
+            if (userObject instanceof DetailEntity) {
+                DetailEntity parent = (DetailEntity) userObject;
+
+                final boolean notContainsEntityInParentsHierarchically = notContainsEntityInParentsHierarchically(parent, entity);
+                System.out.println("notContainsEntityInParentsHierarchically result: " + notContainsEntityInParentsHierarchically);
+
+                final boolean notContainsEntityOnSameLevel = notContainsEntityOnSameLevel(node, parent, entity);
+                System.out.println("notContainsEntityOnSameLevel result: " + notContainsEntityOnSameLevel);
+
+                final boolean notContainsEntityInChildren = notContainsEntityInChildren(parent, entity);
+                System.out.println("notContainsEntityInChildren result: " + notContainsEntityInChildren);
+
+
+                if (notContainsEntityInParentsHierarchically) {
+                    if (notContainsEntityOnSameLevel) {
+                        if (!notContainsEntityInChildren) {
+                            final String message = "Нельзя добавить " + (entity.isUnit() ? "узел" : "деталь") + " "
+                                    + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                                    "т.к. " + (entity.isUnit() ? "он" : "она") + " уже содержится в узле.";
+                            showMessageDialog(component, message, "Ошибка добавления", ERROR_MESSAGE);
+                        }
+                        return notContainsEntityInChildren;
+                    } else {
+                        final String message = "Нельзя добавить " + (entity.isUnit() ? "узел" : "деталь") + " "
+                                + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                                "т.к. " + (entity.isUnit() ? "он" : "она") + " уже содержится на этом же уровне.";
+                        showMessageDialog(component, message, "Ошибка добавления", ERROR_MESSAGE);
+                    }
+
+                } else {
+                    showMessageDialog(component, "Нельзя добавить " + (entity.isUnit() ? "узел" : "деталь") + " "
+                            + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + ",\n" +
+                            "т.к. " + (entity.isUnit() ? "он" : "она") + " уже содержится в узле.", "Ошибка добавления", ERROR_MESSAGE);
+                }
+
+            }
+        }
+        return false;
+    }
+
+    private boolean notContainsEntityOnSameLevel(DefaultMutableTreeNode node, DetailEntity parent, DetailEntity entity) {
+        log.debug("Checking if entity: {} contains on the same level of parent entity: {}", entity.toSimpleString(), parent.toSimpleString());
+        DetailListService service = new DetailListServiceImpl(session);
+        if (!parent.isUnit()) {
+            DetailEntity ultraParent = ((DetailEntity) ((DefaultMutableTreeNode) node.getParent()).getUserObject());
+            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(ultraParent);
+            for (DetailEntity child : children) {
+                if (child.getId() == entity.getId()) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
+            for (DetailEntity child : children) {
+                if (child.getId() == entity.getId()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    private boolean notContainsEntityInChildren(DetailEntity parent, DetailEntity entity) {
+        log.debug("Checking if entity: {} contains in children of parent. For now parent is: {}", entity.toSimpleString(), parent.toSimpleString());
+        if (parent.getId() != entity.getId()) {
+            DetailListService service = new DetailListServiceImpl(session);
+            final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listChildren(parent);
+            ArrayList<Boolean> results = new ArrayList<>(detailEntities.size());
+            for (DetailEntity parent_ : detailEntities) {
+                results.add(parent_.getId() == entity.getId());
+            }
+            if (results.size() > 0) {
+                return results.contains(Boolean.FALSE);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean notContainsEntityInParentsHierarchically(DetailEntity parent, DetailEntity entity) {
+        log.debug("Checking if entity: {} is a parent of itself. For now parent is: {}", entity.toSimpleString(), parent.toSimpleString());
+        if (parent.getId() != entity.getId()) {
+            DetailListService service = new DetailListServiceImpl(session);
+            final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listParents(parent);
+            ArrayList<Boolean> results = new ArrayList<>(detailEntities.size());
+            for (DetailEntity parent_ : detailEntities) {
+                results.add(notContainsEntityInParentsHierarchically(parent_, entity));
+            }
+            if (results.size() > 0) {
+                return !results.contains(Boolean.FALSE);
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 }
