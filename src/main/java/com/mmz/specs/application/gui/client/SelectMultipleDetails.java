@@ -168,6 +168,12 @@ public class SelectMultipleDetails extends JDialog {
         dispose();
     }
 
+    @Override
+    public void dispose() {
+        session.close();
+        super.dispose();
+    }
+
     ArrayList<DetailEntity> getSelectedDetailEntities() {
         return selectedDetailEntities;
     }

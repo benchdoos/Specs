@@ -22,7 +22,6 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.model.DetailEntity;
-import org.hibernate.Session;
 import org.imgscalr.Scalr;
 
 import javax.swing.*;
@@ -46,9 +45,8 @@ public class DetailInfoWindow extends JFrame {
     private JLabel isActiveLabel;
     private DetailEntity entity;
 
-    public DetailInfoWindow(DetailEntity entity, Session session) {
+    public DetailInfoWindow(DetailEntity entity) {
         this.entity = entity;
-        Session session1 = session;
 
         setContentPane(contentPane);
 

@@ -234,7 +234,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
             final DetailTitleEntity selectedValue = titleList.getSelectedValue();
             final int selectedIndex = titleList.getSelectedIndex();
             if (selectedValue != null) {
-                EditTitleWindow editTitleWindow = new EditTitleWindow(selectedValue);
+                EditTitleWindow editTitleWindow = new EditTitleWindow(session, selectedValue);
                 editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), editTitleWindow));
                 editTitleWindow.setVisible(true);
                 DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
@@ -289,7 +289,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
 
     private void initEditMaterialTabButtons() {
         addMaterialItemButton.addActionListener(e -> {
-            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null);
+            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null, session);
             createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
             createMaterialWindow.setVisible(true);
             final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
@@ -316,7 +316,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         editMaterialItemButton.addActionListener(e -> {
             MaterialEntity materialEntity = materialList.getSelectedValue();
             if (materialEntity != null) {
-                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(materialEntity);
+                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(materialEntity, session);
                 createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
                 createMaterialWindow.setVisible(true);
                 final MaterialEntity entity = createMaterialWindow.getMaterialEntity();
@@ -346,6 +346,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         log.debug("User wanted to rollback changes, user's choice is: " + result);
         if (result == 0) {
             session.getTransaction().rollback();
+            session.close();
             closeTab();
         }
     }
@@ -368,6 +369,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         if (result == 0) {
             try {
                 session.getTransaction().commit();
+                session.close();
                 closeTab();
             } catch (Exception e) {
                 log.warn("Could not call commit for transaction", e);

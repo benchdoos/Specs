@@ -707,6 +707,8 @@ public class ClientMainWindow extends JFrame {
         onDisconnectFromFtp();
         uiUpdateTimer.stop();
         unlockUiTimer.stop();
+
+        session.close();
         super.dispose();
     }
 

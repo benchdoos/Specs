@@ -18,7 +18,6 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.MaterialDaoImpl;
@@ -48,9 +47,9 @@ public class CreateMaterialWindow extends JDialog {
 
     private MaterialEntity materialEntity;
 
-    public CreateMaterialWindow(MaterialEntity materialEntity) {
-        this.session = ClientBackgroundService.getInstance().getSession();
+    public CreateMaterialWindow(MaterialEntity materialEntity, Session session) {
         this.materialEntity = materialEntity;
+        this.session = session;
 
         initGui();
 
@@ -200,6 +199,12 @@ public class CreateMaterialWindow extends JDialog {
 
     private void onCancel() {
         dispose();
+    }
+
+    @Override
+    public void dispose() {
+        session.close();
+        super.dispose();
     }
 
     public MaterialEntity getMaterialEntity() {

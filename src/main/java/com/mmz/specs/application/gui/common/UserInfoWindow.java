@@ -22,6 +22,7 @@ import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.core.server.service.ClientConnection;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.model.UsersEntity;
+import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
@@ -95,19 +96,22 @@ public class UserInfoWindow extends JDialog {
     }
 
     private void onResetPassword() {
-        LoginWindow loginWindow = new LoginWindow(ClientBackgroundService.getInstance().getSession());
-        loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
-        loginWindow.setVisible(true);
-        UsersEntity user = loginWindow.getAuthorizedUser();
-        if (user != null) {
-            if (user.equals(usersEntity) || (user.isAdmin() && user.isActive())) {
-                PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, ClientBackgroundService.getInstance().getSession());
-                passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
-                passwordChangeWindow.setVisible(true);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Необходимо войти как пользователь " + usersEntity.getUsername() + "\n" +
-                                "или как администратор", "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+
+        try (final Session session = ClientBackgroundService.getInstance().getSession()) {
+            LoginWindow loginWindow = new LoginWindow(session);
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+            loginWindow.setVisible(true);
+            UsersEntity user = loginWindow.getAuthorizedUser();
+            if (user != null) {
+                if (user.equals(usersEntity) || (user.isAdmin() && user.isActive())) {
+                    PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, session);
+                    passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
+                    passwordChangeWindow.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Необходимо войти как пользователь " + usersEntity.getUsername() + "\n" +
+                                    "или как администратор", "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }

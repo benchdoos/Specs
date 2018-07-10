@@ -273,7 +273,7 @@ public class CommonWindowUtils {
     }
 
     private DetailTitleEntity getDetailTitleEntity(Component component) {
-        EditTitleWindow editTitleWindow = new EditTitleWindow(null);
+        EditTitleWindow editTitleWindow = new EditTitleWindow(session, null);
         editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
         editTitleWindow.setVisible(true);
         return editTitleWindow.getDetailTitleEntity();

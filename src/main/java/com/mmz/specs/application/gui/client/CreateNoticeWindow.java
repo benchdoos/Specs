@@ -18,7 +18,6 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.SmartJTextField;
 import com.mmz.specs.application.utils.DateLabelFormatter;
@@ -63,10 +62,10 @@ public class CreateNoticeWindow extends JDialog {
     private JDatePickerImpl createdDatePicker;
     private NoticeEntity noticeEntity;
 
-    public CreateNoticeWindow(NoticeEntity noticeEntity) {
+    public CreateNoticeWindow(Session session, NoticeEntity noticeEntity) {
         $$$setupUI$$$();
         this.noticeEntity = noticeEntity;
-        this.session = ClientBackgroundService.getInstance().getSession();
+        this.session = session;
 
         initGui();
 
@@ -379,6 +378,11 @@ public class CreateNoticeWindow extends JDialog {
         return noticeEntity;
     }
 
+    @Override
+    public void dispose() {
+        session.close();
+        super.dispose();
+    }
 
     private void createUIComponents() {
         numberTextField = new SmartJTextField();

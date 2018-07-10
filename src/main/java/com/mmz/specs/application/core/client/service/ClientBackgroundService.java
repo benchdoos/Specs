@@ -50,7 +50,7 @@ public class ClientBackgroundService {
     private Socket socket;
     private String serverAddress;
     private int serverPort;
-    private Session session;
+    private static SessionFactory factory;
 
     private ClientBackgroundService() {
         createConnection();
@@ -122,17 +122,20 @@ public class ClientBackgroundService {
     }
 
     public Session getSession() {
-        if (session != null) {
-            return session;
+        if (factory != null) {
+            return factory.openSession();
         } else {
             if (outputStream != null) {
-                return getSessionFromServer();
-
-            } else return null;
+                factory = getSessionFactoryFromServer();
+                if (factory != null) {
+                    return factory.openSession();
+                }
+            }
         }
+        return null;
     }
 
-    private Session getSessionFromServer() {
+    private SessionFactory getSessionFactoryFromServer() {
         try {
             log.info("Asking server for session, command: " + SocketConstants.GIVE_SESSION);
             outputStream.writeUTF(SocketConstants.GIVE_SESSION);
@@ -144,9 +147,8 @@ public class ClientBackgroundService {
             String dbPassword = obj.getString(CP_CONNECTION_PASSWORD_KEY);
 
             log.info("Got configuration from server: {} {} ({})", dbAddress, dbUsername, dbPassword.length());
-            Session session = createSession(dbAddress, dbUsername, dbPassword);
-            this.session = session;
-            return session;
+
+            return createFactory(dbAddress, dbUsername, dbPassword);
         } catch (Throwable e) {
             log.warn("Could not ask server for session", e);
         }
@@ -154,21 +156,23 @@ public class ClientBackgroundService {
         return null;
     }
 
-    private Session createSession(String dbAddress, String dbUsername, String dbPassword) {
+    private SessionFactory createFactory(String dbAddress, String dbUsername, String dbPassword) {
         log.info("Creating configuration");
         Configuration configuration = new Configuration();
         log.info("Loading hibernate configuration file");
         configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
         log.info("Configuration file successfully loaded");
         log.info("Setting hibernate connection configuration from server");
+
         configuration.setProperty(CP_DB_CONNECTION_URL_KEY, dbAddress);
         configuration.setProperty(CP_CONNECTION_USERNAME_KEY, dbUsername);
         configuration.setProperty(CP_CONNECTION_PASSWORD_KEY, dbPassword);
-        configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "1"); // only 1 connection for client, important!!!
+
+        configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "25");
+
         log.info("Creating Hibernate connection at: " + dbAddress
                 + " username: " + dbUsername + " password length: " + dbPassword.length());
-        SessionFactory factory = configuration.buildSessionFactory();
-        return factory.openSession();
+        return configuration.buildSessionFactory();
     }
 
     public void closeConnection() throws IOException {
@@ -198,24 +202,28 @@ public class ClientBackgroundService {
 
     public void refreshSession() {
         log.debug("Refreshing session for all entities");
-        if (session != null) {
-            final Metamodel metamodel = session.getSessionFactory().getMetamodel();
-            for (EntityType<?> entityType : metamodel.getEntities()) {
-                refreshCurrentEntityType(entityType.getName());
+        try (Session session = getSession()) {
+            if (session != null) {
+                final Metamodel metamodel = getSession().getSessionFactory().getMetamodel();
+                for (EntityType<?> entityType : metamodel.getEntities()) {
+                    refreshCurrentEntityType(entityType.getName());
+                }
             }
+            log.debug("Refreshing session for all entities successfully finished.");
         }
-        log.debug("Refreshing session for all entities successfully finished.");
     }
 
     public void refreshSession(Class class_) {
         log.debug("Refreshing session for: {}", class_.getName());
-        if (session != null) {
-            refreshCurrentEntityType(class_.getName());
+        try (Session session = getSession()) {
+            if (session != null) {
+                refreshCurrentEntityType(class_.getName());
+            }
         }
     }
 
     private void refreshCurrentEntityType(String name) {
-        try {
+        try (Session session = getSession()) {
             final Query query = session.createQuery("from " + name);
             final List list = query.list();
             log.debug("Refreshing list size: {}", list.size());

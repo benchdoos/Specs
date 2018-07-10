@@ -256,6 +256,12 @@ public class SelectDetailEntityWindow extends JDialog {
         dispose();
     }
 
+    @Override
+    public void dispose() {
+        session.close();
+        super.dispose();
+    }
+
     private String fixCode(String code) {
         if (code != null) {
             return code.toUpperCase()
@@ -558,7 +564,6 @@ public class SelectDetailEntityWindow extends JDialog {
                         + incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
                         "на: " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
                 if (i == 0) { // confirm
-                    /*service.updateDetail(entity); //add something here? what to do here???*/
                     entities.clear();
                     entities.add(entity);
                     dispose();
@@ -727,8 +732,7 @@ public class SelectDetailEntityWindow extends JDialog {
                 final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
                         + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
                         "на: " + dbDetail.getCode() + " " + dbDetail.getDetailTitleByDetailTitleId().getTitle());
-                if (i == 0) { // confirm
-                    /*service.updateDetail(entity); //add something here? what to do here???*/
+                if (i == 0) {
                     entities.clear();
                     entities.add(entity);
                     dispose();
@@ -740,8 +744,6 @@ public class SelectDetailEntityWindow extends JDialog {
             DetailTitleEntity title = (DetailTitleEntity) titleComboBox.getSelectedItem();
             if (title != null) {
                 entity.setDetailTitleByDetailTitleId(title);
-                /*final DetailEntity detailById = service.getDetailById(service.addDetail(entity));
-                entities.set(0, detailById);*/
                 entities.clear();
                 entities.add(entity);
                 dispose();
