@@ -108,6 +108,7 @@ public class CommonWindowUtils {
     }
 
     public static boolean pathNotContainsEntity(Component parentComponent, JTree mainTree, TreePath selectionPath, DetailEntity entity) {
+        //fixme use DB, not tree! You can make recursion like this.
         if (notContainsEntityInParent(parentComponent, selectionPath, entity)) {
             if (notContainsEntityInParents(parentComponent, selectionPath, entity)) {
                 return notContainsEntityInChildren(parentComponent, mainTree, selectionPath, entity);
