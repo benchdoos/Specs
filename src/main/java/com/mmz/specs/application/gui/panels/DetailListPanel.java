@@ -383,7 +383,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void onRefreshSession() {
         if (ClientBackgroundService.getInstance().isConnected()) {
             new Thread(() -> {
-                searchTextField.setText("");
                 refreshSessionButton.setEnabled(false);
                 searchTextField.setEnabled(false);
 
@@ -395,6 +394,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
                 searchTextField.setEnabled(true);
                 refreshSessionButton.setEnabled(true);
+                searchTextField.setText("");
 
             }).start();
         }
