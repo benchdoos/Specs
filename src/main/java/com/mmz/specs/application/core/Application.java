@@ -29,6 +29,7 @@ class Application {
         try {
             CoreUtils.enableLookAndFeel();
             CoreUtils.localizeFileChooser();
+            CoreUtils.localizeUI();
             CoreUtils.manageArguments(args);
         } catch (Throwable throwable) {
             log.fatal("Got exception in application: " + throwable.getLocalizedMessage(), throwable);

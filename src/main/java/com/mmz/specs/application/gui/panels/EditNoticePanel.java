@@ -81,8 +81,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JButton editNoticeButton;
     private JButton addItemButton;
     private JButton removeItemButton;
-    private JButton moveItemUpButton;
-    private JButton moveItemDownButton;
     private JCheckBox unitCheckBox;
     private JTextField finishedWeightTextField;
     private JTextField workpieceWeightTextField;
@@ -359,8 +357,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         addItemButton.addActionListener(e -> onAddNewItemButton());
         copyButton.addActionListener(e -> onCopyButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
-        moveItemUpButton.addActionListener(e -> onMoveItemUp());
-        moveItemDownButton.addActionListener(e -> onMoveItemDown());
 
         detailQuantityTextField.getDocument().addDocumentListener(new DocumentListener() {
             final int MAX_VALUE = 1000;
@@ -997,7 +993,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         "Также все проведённые изменения будут закреплены за вами, \n" +
                         "и в случае вопросов, будут обращаться к вам.\n" +
                         "Провести изменения?", "Подтверждение изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/upload.png"))));
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/sync.gif"))));
         log.debug("User wanted to commit changes, user's choice is: " + result);
         if (result == 0) {
             try {
@@ -1011,7 +1007,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     //todo update info about notice!!!!
                     log.debug("Transaction status: {}", session.getTransaction().getStatus());
                     session.getTransaction().commit();
-                    log.info("New state of db is commited");
+                    log.info("New state of db is committed");
 
                     closeTab();
                 } else {
@@ -1022,33 +1018,38 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 log.warn("Could not call commit for transaction", e);
                 JOptionPane.showMessageDialog(this,
                         "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
-                        JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.WARNING_MESSAGE,
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
             }
         }
     }
 
     private void removeUnusedDetailLists() {
+        log.debug("Starting removing unused detail lists");
         DetailListService service = new DetailListServiceImpl(session);
         final List<DetailListEntity> detailListEntities = service.listDetailLists();
         for (DetailListEntity entity : detailListEntities) {
             if (!entity.isActive() && entity.getNoticeByNoticeId().equals(noticeComboBox.getSelectedItem())) {
-                //remove!!!
                 List<DetailListEntity> result = service.getDetailListByParentAndChild(entity.getDetailByParentDetailId(), entity.getDetailByChildDetailId());//todo fix this... hm... why?
 
                 if (result.size() > 1) {
                     DetailListEntity detailListEntity = new MainWindowUtils(session).getLatestDetailListEntity(result);
                     if (!detailListEntity.equals(entity)) {
+                        log.debug("Removing detailList: {}", entity);
                         service.removeDetailList(entity.getId());
                     }
 
                 } else if (result.size() == 1) {
+                    log.debug("Removing detailList: {}", entity);
                     service.removeDetailList(entity.getId());
                 }
             }
         }
+        log.info("Removing unused detailLists finished");
     }
 
     private void updateAllNotices() {
+        log.debug("Starting updating all notices");
         DetailListService service = new DetailListServiceImpl(session);
         ArrayList<DetailListEntity> list = (ArrayList<DetailListEntity>) service.listDetailLists();
         for (DetailListEntity entity : list) {
@@ -1057,6 +1058,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 entity.setNoticeByNoticeId(selectedItem);
             }
         }
+        log.debug("Updating all notices finished successful");
     }
 
     private void updateNotice() {
@@ -1084,9 +1086,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void uploadImages() {
+        log.debug("Starting updating images");
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
-        List<DetailEntity> detailEntities = service.listDetails();
+        List<DetailEntity> detailEntities = service.listDetailsByEditedImage();
+        log.debug("Total details count: {}", detailEntities.size());
         for (DetailEntity entity : detailEntities) {
+            log.trace("Checking detail: {}", entity.toSimpleString());
             try {
                 if (entity.getImagePath() != null) {
                     if (!entity.getImagePath().isEmpty()) {
@@ -1123,9 +1128,10 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     private void onCancel() {
         int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
-                "В случае подтверждения все изменения не сохранятся и никак\n" +
-                "не повлияют на базу данных.\n" +
-                "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "В случае подтверждения все изменения не сохранятся и никак\n" +
+                        "не повлияют на базу данных.\n" +
+                        "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
         log.debug("User wanted to rollback changes, user's choice is: " + result);
         if (result == 0) {
             session.getTransaction().rollback();
@@ -1318,8 +1324,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 addItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
                 copyButton.setEnabled(((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser))) && detailEntity.isUnit());
                 removeItemButton.setEnabled((!isRoot || detailEntity.isUnit()) && (currentUser.isAdmin() || isConstructor(currentUser)));
-                moveItemUpButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
-                moveItemDownButton.setEnabled(!isRoot && currentUser.isAdmin() || isConstructor(currentUser));
 
             } else {
                 editDetailInfoButton.setEnabled(false);
@@ -1370,8 +1374,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 final boolean isRoot = mainTree.getModel().getRoot().equals(node.getParent());
                 addItemButton.setEnabled(!isRoot);
                 removeItemButton.setEnabled(!isRoot);
-                moveItemUpButton.setEnabled(!isRoot);
-                moveItemDownButton.setEnabled(!isRoot);
 
                 fillDetailInfoPanel(lastUsed, selected);
             }
@@ -1720,21 +1722,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         removeItemButton.setText("");
         removeItemButton.setToolTipText("Удалить деталь / узел (DELETE)");
         treeToolBar.add(removeItemButton);
-        moveItemUpButton = new JButton();
-        moveItemUpButton.setEnabled(false);
-        moveItemUpButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/upArrow16.png")));
-        moveItemUpButton.setText("");
-        moveItemUpButton.setToolTipText("Поднять вверх (CTRL+ВВЕРХ)");
-        moveItemUpButton.setVisible(false);
-        treeToolBar.add(moveItemUpButton);
-        moveItemDownButton = new JButton();
-        moveItemDownButton.setEnabled(false);
-        moveItemDownButton.setFocusable(false);
-        moveItemDownButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/downArrow16.png")));
-        moveItemDownButton.setText("");
-        moveItemDownButton.setToolTipText("Опустить вниз (CTRL+ВНИЗ)");
-        moveItemDownButton.setVisible(false);
-        treeToolBar.add(moveItemDownButton);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(9, 3, new Insets(0, 0, 0, 0), -1, -1));
         changePanel.add(panel3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -1867,7 +1854,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         private void verifyInput(JTextField textField) {
             try {
                 String text = textField.getText();
-                log.info("Hello, " + text);
                 text = text.replaceAll(",", ".");
                 if (text.contains("d")) {
                     throw new IllegalArgumentException("This textfield can not have d (double thing): " + text);

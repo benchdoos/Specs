@@ -84,6 +84,11 @@ public class DetailServiceImpl implements DetailService {
     }
 
     @Override
+    public List<DetailEntity> listDetailsByEditedImage() {
+        return detailDao.listDetailsByEditedImage();
+    }
+
+    @Override
     public List<DetailEntity> listDetails() {
         return detailDao.listDetails();
     }

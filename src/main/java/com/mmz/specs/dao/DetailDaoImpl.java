@@ -114,7 +114,7 @@ public class DetailDaoImpl implements DetailDao {
         criteriaQuery.where(builder.equal(root.get("detailTitleByDetailTitleId"), titleEntity));
         Query<DetailEntity> q = session.createQuery(criteriaQuery);
         final List<DetailEntity> result = q.list();
-        log.debug("User found by titleEntity {}: ", titleEntity, result);
+        log.debug("Detail found by titleEntity {}: ", titleEntity, result);
         return result;
     }
 
@@ -132,8 +132,22 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    public List<DetailEntity> listDetailsByEditedImage() {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
+        Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(builder.notEqual(root.get("imagePath"), ""));
+        Query<DetailEntity> q = session.createQuery(criteriaQuery);
+        final List<DetailEntity> result = q.list();
+        log.debug("Details found with edited image: ({}), {} ", result.size(), result);
+        return result;
+    }
+
+    @Override
     public List<DetailEntity> listDetails() {
-        List list = session.createQuery("from DetailEntity").list();
+        /*List list = session.createQuery("from DetailEntity").list();
+        log.debug("list: {}", list.size());
         List<DetailEntity> result = new ArrayList<>(list.size());
 
         for (Object detailEntity : list) {
@@ -143,6 +157,16 @@ public class DetailDaoImpl implements DetailDao {
                 log.warn("Not Detail from list: " + detailEntity);
             }
         }
+        return result;*/
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
+        Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
+        criteriaQuery.select(root);
+        Query<DetailEntity> q = session.createQuery(criteriaQuery);
+        final List<DetailEntity> result = q.list();
+        log.debug("Full list of details: ({})", result.size(), result);
         return result;
+
     }
 }
