@@ -385,6 +385,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             new Thread(() -> {
                 refreshSessionButton.setEnabled(false);
                 searchTextField.setEnabled(false);
+                updateDetailInfoPanelWithEmptyEntity();
 
                 final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
                 mainTree.setModel(model);
