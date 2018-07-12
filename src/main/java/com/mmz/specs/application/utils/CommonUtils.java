@@ -24,7 +24,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 
 public class CommonUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -123,4 +125,17 @@ public class CommonUtils {
             }
         });
     }
+
+
+    public static String getCurrentInetAddress() {
+        String result = "Unknown";
+        try {
+            InetAddress address = InetAddress.getLocalHost();
+            result = address.getHostName();
+        } catch (UnknownHostException ex) {
+            log.warn("Could not find out inet address of the machine");
+        }
+        return result;
+    }
+
 }
