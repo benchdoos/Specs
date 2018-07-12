@@ -64,8 +64,8 @@ public class AboutApplicationWindow extends JDialog {
     private void onOpenLogFolder() {
         try {
             Desktop.getDesktop().open(new File(ApplicationConstants.LOG_FOLDER));
-        } catch (IOException e1) {
-            log.warn("Could not open log folder:" + ApplicationConstants.LOG_FOLDER, e1);
+        } catch (IOException e) {
+            log.warn("Could not open log folder: {}", ApplicationConstants.LOG_FOLDER, e);
         }
     }
 
