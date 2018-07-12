@@ -997,52 +997,55 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/sync.gif"))));
         log.debug("User wanted to commit changes, user's choice is: " + result);
 
+        if (result == 0) {
+            new Thread(this::saveChanges).start();
+        }
+    }
+
+    private void saveChanges() {
         final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
         mainWindowUtils.setClientMainWindow(this);
+        try {
+            CommonUtils.enableAllComponents(this, false);
+            mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Обновляем изображения...");
+            uploadImages();
 
-        if (result == 0) {
-            try {
-                new Thread(() -> {
-                    mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Обновляем изображения...");
-                }).start();
-                uploadImages();
+            NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+            if (selectedItem != null) {
+                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем текущее извещение...");
+                updateNotice();
 
 
-                NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
-                if (selectedItem != null) {
-                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем текущее извещение...");
-                    updateNotice();
+                mainWindowUtils.updateMessageText("Обновляем последние извещения для измененных деталей...");
+                updateAllNotices();
 
-                    mainWindowUtils.updateMessageText("Обновляем последние извещения для измененных деталей...");
-                    updateAllNotices();
+                mainWindowUtils.updateMessageText("Избавляемся от мусора...");
+                removeUnusedDetailLists();
 
-                    mainWindowUtils.updateMessageText("Избавляемся от мусора...");
-                    removeUnusedDetailLists();
+                //todo update info about notice!!!!
+                log.debug("Transaction status: {}", session.getTransaction().getStatus());
 
-                    //todo update info about notice!!!!
-                    log.debug("Transaction status: {}", session.getTransaction().getStatus());
+                mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Сохраняем изменения...");
+                session.getTransaction().commit();
 
-                    mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Сохраняем изменения...");
-                    session.getTransaction().commit();
-                    mainWindowUtils.updateMessage("/img/gui/animated/uploading_completed.gif", "Изменения успешно сохранены");
-                    mainWindowUtils.blockMessage();
-                    mainWindowUtils.updateMessageText("А ну ка");
-                    log.info("New state of db is committed");
-
-                    closeTab();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Укажите извещение!",
-                            "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
-                }
-            } catch (Exception e) {
-                log.warn("Could not call commit for transaction", e);
-                mainWindowUtils.updateMessage("/img/gui/animated/uploading_error.gif", "Ошибка во время сохранения изменений");
+                mainWindowUtils.updateMessage("/img/gui/animated/uploading_completed.gif", "Изменения успешно сохранены");
                 mainWindowUtils.blockMessage();
-                JOptionPane.showMessageDialog(this,
-                        "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
-                        JOptionPane.WARNING_MESSAGE,
-                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
+                log.info("New state of db is committed");
+
+                closeTab();
+            } else {
+                JOptionPane.showMessageDialog(this, "Укажите извещение!",
+                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
             }
+        } catch (Exception e) {
+            CommonUtils.enableAllComponents(this, true);
+            log.warn("Could not call commit for transaction", e);
+            mainWindowUtils.updateMessage("/img/gui/animated/uploading_error.gif", "Ошибка во время сохранения изменений");
+            mainWindowUtils.blockMessage();
+            JOptionPane.showMessageDialog(this,
+                    "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
+                    JOptionPane.WARNING_MESSAGE,
+                    new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
         }
     }
 
