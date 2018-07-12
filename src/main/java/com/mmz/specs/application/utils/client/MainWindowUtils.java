@@ -355,7 +355,7 @@ public class MainWindowUtils {
                     ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
 
                     expandPath(selectedPath, mainTree);
-                    
+
                     new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(null, null);
                 });
                 popup.add(reload);
@@ -391,7 +391,7 @@ public class MainWindowUtils {
         if (selectedEntity != null) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
             int childCount = node.getChildCount();
-            System.out.println("children count: " + selectedEntity.toSimpleString() + " " + childCount);
+            log.debug("Children for: {} count: {}", selectedEntity.toSimpleString(), childCount);
             if (childCount == 0) {
                 new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
                 DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
