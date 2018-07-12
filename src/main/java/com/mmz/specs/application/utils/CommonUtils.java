@@ -138,4 +138,16 @@ public class CommonUtils {
         return result;
     }
 
+    public static void enableAllComponents(Component component, boolean enable) {
+        if (component instanceof Container) {
+            Container container = (Container) component;
+            final Component[] components = container.getComponents();
+            for (Component c : components) {
+                c.setEnabled(enable);
+                enableAllComponents(c, enable);
+            }
+        } else {
+            component.setEnabled(enable);
+        }
+    }
 }
