@@ -16,6 +16,7 @@
 package com.mmz.specs.application.utils.client;
 
 import com.google.common.collect.ComparisonChain;
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -330,9 +331,32 @@ public class MainWindowUtils {
                 JMenuItem reload = new JMenuItem("Обновить",
                         new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
                 reload.addActionListener(e -> {
+                    new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage("/img/gui/animated/sync.gif", "Обновляем данные");
+
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
                     node.removeAllChildren();
+
+                    final DetailEntity parentForSelectionPath = JTreeUtils.getParentForSelectionPath(mainTree);
+                    final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+
+
+                    /*//todo fix it
+                    DetailListService service = new DetailListServiceImpl(session);
+                    if (parentForSelectionPath != null && selectedDetailEntityFromTree != null) {
+                        try {
+                            DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parentForSelectionPath, selectedDetailEntityFromTree);
+                            ClientBackgroundService.getInstance().refreshObject(session, detailListEntity);
+                        } catch (Exception e1) {
+                            ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+                        }
+                    } else {
+                        ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+                    }*/
+                    ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+
                     expandPath(selectedPath, mainTree);
+                    
+                    new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(null, null);
                 });
                 popup.add(reload);
                 mainTree.setComponentPopupMenu(popup);

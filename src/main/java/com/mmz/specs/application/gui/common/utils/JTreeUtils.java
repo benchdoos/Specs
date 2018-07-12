@@ -34,7 +34,10 @@ public class JTreeUtils {
         if (selectionPath != null) {
             final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getPath()[selectionPath.getPath().length - 2];
             if (node != null) {
-                return (DetailEntity) node.getUserObject();
+                final Object userObject = node.getUserObject();
+                if (userObject instanceof DetailEntity) {
+                    return (DetailEntity) userObject;
+                }
             }
         }
         return null;

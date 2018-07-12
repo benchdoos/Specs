@@ -218,6 +218,11 @@ public class ClientBackgroundService {
         }
     }
 
+    public void refreshObject(Session session, Object o) {
+        session.refresh(o);
+    }
+
+
     private void refreshCurrentEntityType(Session session, String name) {
         try {
             final Query query = session.createQuery("from " + name);
