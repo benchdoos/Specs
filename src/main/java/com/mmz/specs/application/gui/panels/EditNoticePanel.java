@@ -314,7 +314,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             final JLabel label = new JLabel("Инициализация...");
                             savePreviewPanel.add(label);
                             SwingUtilities.invokeLater(() -> {
-                                final DetailListPanel comp = new DetailListPanel(rootEntity);
+                                final DetailListPanel comp = new DetailListPanel(session, rootEntity);
                                 savePreviewPanel.add(comp);
                                 savePreviewPanel.remove(label);
                             });

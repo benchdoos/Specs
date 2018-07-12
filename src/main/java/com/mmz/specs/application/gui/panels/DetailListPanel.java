@@ -106,6 +106,16 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
+    DetailListPanel(Session session, DetailEntity rootEntity) {
+        $$$setupUI$$$();
+        this.session = session;
+
+        initGui();
+        fillMainTree(rootEntity);
+        hideControls();
+
+    }
+
     private void fillMainTree(DetailEntity rootEntity) {
         mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).fillMainTree(rootEntity)));
     }
