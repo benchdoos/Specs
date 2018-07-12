@@ -381,18 +381,24 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onRefreshSession() {
+        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        mainWindowUtils.setClientMainWindow(this);
         if (ClientBackgroundService.getInstance().isConnected()) {
             new Thread(() -> {
                 refreshSessionButton.setEnabled(false);
                 searchTextField.setEnabled(false);
+
+                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем список деталей...");
+
                 updateDetailInfoPanelWithEmptyEntity();
 
                 final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
                 mainTree.setModel(model);
 
-                ClientBackgroundService.getInstance().refreshSession(DetailListEntity.class);
+                ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
                 fillMainTreeFully();
 
+                mainWindowUtils.updateMessage(null, null);
                 searchTextField.setEnabled(true);
                 refreshSessionButton.setEnabled(true);
                 searchTextField.setText("");

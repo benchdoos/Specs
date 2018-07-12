@@ -758,9 +758,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         contentPane.registerKeyboardAction(e -> onAddNewItemButton(), KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onCopyButton(), KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onRemoveItem(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        contentPane.registerKeyboardAction(e -> onMoveItemUp(), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        contentPane.registerKeyboardAction(e -> onMoveItemDown(), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
     }
 
     private void onPasteFromClipboard() {
@@ -980,14 +977,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         mainTree.expandPath(parentPath);
     }
 
-    private void onMoveItemUp() {
-        System.out.println("not supported yet");
-    }
-
-    private void onMoveItemDown() {
-        System.out.println("not supported yet");
-    }
-
 
     @javax.transaction.Transactional
     private void onOK() {
@@ -998,18 +987,37 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         "Провести изменения?", "Подтверждение изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
                 new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/sync.gif"))));
         log.debug("User wanted to commit changes, user's choice is: " + result);
+
+        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        mainWindowUtils.setClientMainWindow(this);
+
         if (result == 0) {
             try {
+                new Thread(() -> {
+                    mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Обновляем изображения...");
+                }).start();
                 uploadImages();
+
+
                 NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
                 if (selectedItem != null) {
+                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем текущее извещение...");
                     updateNotice();
+
+                    mainWindowUtils.updateMessageText("Обновляем последние извещения для измененных деталей...");
                     updateAllNotices();
+
+                    mainWindowUtils.updateMessageText("Избавляемся от мусора...");
                     removeUnusedDetailLists();
 
                     //todo update info about notice!!!!
                     log.debug("Transaction status: {}", session.getTransaction().getStatus());
+
+                    mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Сохраняем изменения...");
                     session.getTransaction().commit();
+                    mainWindowUtils.updateMessage("/img/gui/animated/uploading_completed.gif", "Изменения успешно сохранены");
+                    mainWindowUtils.blockMessage();
+                    mainWindowUtils.updateMessageText("А ну ка");
                     log.info("New state of db is committed");
 
                     closeTab();
@@ -1019,6 +1027,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 }
             } catch (Exception e) {
                 log.warn("Could not call commit for transaction", e);
+                mainWindowUtils.updateMessage("/img/gui/animated/uploading_error.gif", "Ошибка во время сохранения изменений");
+                mainWindowUtils.blockMessage();
                 JOptionPane.showMessageDialog(this,
                         "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
                         JOptionPane.WARNING_MESSAGE,

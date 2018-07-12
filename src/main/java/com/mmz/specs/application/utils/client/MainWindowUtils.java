@@ -48,6 +48,7 @@ public class MainWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final long NANO_TIME = 1000000;
     private final Session session;
+    private ClientMainWindow clientMainWindow = null;
 
 
     public MainWindowUtils(Session session) {
@@ -508,5 +509,34 @@ public class MainWindowUtils {
             }
         }
         return false;
+    }
+
+    public void updateMessage(String pathToImage, String text) {
+        if (clientMainWindow != null) {
+            clientMainWindow.updateMessage(pathToImage, text);
+        }
+    }
+
+    public void setClientMainWindow(Component component) {
+        this.clientMainWindow = getClientMainWindow(component);
+    }
+
+    public void updateMessageText(String text) {
+        if (clientMainWindow != null) {
+            clientMainWindow.updateMessageText(text);
+        }
+    }
+
+    public void updateMessageIcon(String path) {
+        if (clientMainWindow != null) {
+
+            clientMainWindow.updateMessageIcon(path);
+        }
+    }
+
+    public void blockMessage() {
+        if (clientMainWindow != null) {
+            clientMainWindow.blockMessage();
+        }
     }
 }

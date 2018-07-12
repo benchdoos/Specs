@@ -174,6 +174,7 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
 
     @Override
     public int compareTo(@Nonnull NoticeEntity that) {
+        System.out.println("comparing: " + this + " with " + that);
         return ComparisonChain.start()
                 .compare(that.getDate(), this.getDate())
                 .compare(that.getNumber(), this.getNumber())

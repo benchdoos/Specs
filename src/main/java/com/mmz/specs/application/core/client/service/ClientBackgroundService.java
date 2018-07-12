@@ -45,12 +45,12 @@ import static com.mmz.specs.connection.HibernateConstants.*;
 public class ClientBackgroundService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final ClientBackgroundService ourInstance = new ClientBackgroundService();
+    private static SessionFactory factory;
     private DataOutputStream outputStream;
     private DataInputStream dataInputStream;
     private Socket socket;
     private String serverAddress;
     private int serverPort;
-    private static SessionFactory factory;
 
     private ClientBackgroundService() {
         createConnection();
@@ -200,30 +200,26 @@ public class ClientBackgroundService {
         }
     }
 
-    public void refreshSession() {
+    public void refreshSession(Session session) {
         log.debug("Refreshing session for all entities");
-        try (Session session = getSession()) {
-            if (session != null) {
-                final Metamodel metamodel = getSession().getSessionFactory().getMetamodel();
-                for (EntityType<?> entityType : metamodel.getEntities()) {
-                    refreshCurrentEntityType(entityType.getName());
-                }
+        if (session != null) {
+            final Metamodel metamodel = getSession().getSessionFactory().getMetamodel();
+            for (EntityType<?> entityType : metamodel.getEntities()) {
+                refreshCurrentEntityType(session, entityType.getName());
             }
-            log.debug("Refreshing session for all entities successfully finished.");
         }
+        log.debug("Refreshing session for all entities successfully finished.");
     }
 
-    public void refreshSession(Class class_) {
+    public void refreshSession(Session session, Class class_) {
         log.debug("Refreshing session for: {}", class_.getName());
-        try (Session session = getSession()) {
-            if (session != null) {
-                refreshCurrentEntityType(class_.getName());
-            }
+        if (session != null) {
+            refreshCurrentEntityType(session, class_.getName());
         }
     }
 
-    private void refreshCurrentEntityType(String name) {
-        try (Session session = getSession()) {
+    private void refreshCurrentEntityType(Session session, String name) {
+        try {
             final Query query = session.createQuery("from " + name);
             final List list = query.list();
             log.debug("Refreshing list size: {}", list.size());
