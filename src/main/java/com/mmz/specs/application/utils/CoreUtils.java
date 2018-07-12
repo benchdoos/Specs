@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Properties;
 
 import static com.mmz.specs.application.core.ApplicationArgumentsConstants.CLIENT;
@@ -218,4 +219,14 @@ public class CoreUtils {
     }
 
 
+    public static void localizeUI() {
+        UIManager.put("OptionPane.okButtonText", "ОК");
+        UIManager.put("OptionPane.cancelButtonText", "Отмена");
+        UIManager.put("OptionPane.yesButtonText", "Да");
+        UIManager.put("OptionPane.noButtonText", "Нет");
+        
+        Locale locale = new Locale("ru");
+        JOptionPane.setDefaultLocale(locale);
+
+    }
 }

@@ -384,6 +384,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         if (ClientBackgroundService.getInstance().isConnected()) {
             new Thread(() -> {
                 refreshSessionButton.setEnabled(false);
+                searchTextField.setEnabled(false);
+                updateDetailInfoPanelWithEmptyEntity();
 
                 final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
                 mainTree.setModel(model);
@@ -391,9 +393,10 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 ClientBackgroundService.getInstance().refreshSession(DetailListEntity.class);
                 fillMainTreeFully();
 
+                searchTextField.setEnabled(true);
                 refreshSessionButton.setEnabled(true);
-
                 searchTextField.setText("");
+
             }).start();
         }
     }

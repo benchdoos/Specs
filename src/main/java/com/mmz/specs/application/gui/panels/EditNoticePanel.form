@@ -265,27 +265,6 @@
                           <toolTipText value="Удалить деталь / узел (DELETE)"/>
                         </properties>
                       </component>
-                      <component id="69fd7" class="javax.swing.JButton" binding="moveItemUpButton">
-                        <constraints/>
-                        <properties>
-                          <enabled value="false"/>
-                          <icon value="img/gui/edit/upArrow16.png"/>
-                          <text value=""/>
-                          <toolTipText value="Поднять вверх (CTRL+ВВЕРХ)"/>
-                          <visible value="false"/>
-                        </properties>
-                      </component>
-                      <component id="91829" class="javax.swing.JButton" binding="moveItemDownButton">
-                        <constraints/>
-                        <properties>
-                          <enabled value="false"/>
-                          <focusable value="false"/>
-                          <icon value="img/gui/edit/downArrow16.png"/>
-                          <text value=""/>
-                          <toolTipText value="Опустить вниз (CTRL+ВНИЗ)"/>
-                          <visible value="false"/>
-                        </properties>
-                      </component>
                     </children>
                   </toolbar>
                 </children>

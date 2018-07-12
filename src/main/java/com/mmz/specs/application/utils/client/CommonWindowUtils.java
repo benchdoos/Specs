@@ -107,16 +107,6 @@ public class CommonWindowUtils {
         return -1;
     }
 
-    public static boolean pathNotContainsEntity(Component parentComponent, JTree mainTree, TreePath selectionPath, DetailEntity entity) {
-        if (notContainsEntityInParent(parentComponent, selectionPath, entity)) {
-            if (notContainsEntityInParents(parentComponent, selectionPath, entity)) {
-                return notContainsEntityInChildren(parentComponent, mainTree, selectionPath, entity);
-            }
-        }
-
-        return false;
-    }
-
     private static boolean notContainsEntityInParent(Component parentComponent, TreePath selectionPath, DetailEntity entity) {
         final Object o = selectionPath.getLastPathComponent();
         if (o != null) {
@@ -179,6 +169,15 @@ public class CommonWindowUtils {
         return true;
     }
 
+    public static String getCanonicalProfile(String text) {
+        //I was too lazy to make it work perfect (use array)
+        if (text.toLowerCase().contains("круг")) {
+            text = text.replaceAll("круг", "Ø");
+            text = text.replaceAll("Круг", "Ø");
+        }
+        return text;
+    }
+
     public DefaultListModel<DetailEntity> getEffectList(int id) {
         DefaultListModel<DetailEntity> model = new DefaultListModel<>();
 
@@ -214,14 +213,6 @@ public class CommonWindowUtils {
             }
         }
         return result;
-    }
-
-    public static String getCanonicalProfile(String text) {
-        if (text.toLowerCase().contains("круг")) {
-            text = text.replaceAll("круг", "Ø");
-            text = text.replaceAll("Круг", "Ø");
-        }
-        return text;
     }
 
     public DetailTitleEntity onCreateNewTitle(Component component) {

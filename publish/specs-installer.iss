@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Specs"
-#define MyAppVersion "0.1.3"
+#define MyAppVersion "0.1.4"
 #define MyAppPublisher "ООО Майкопский машиностроительный завод"
 #define MyAppURL "http://maykop-mmz.com/"
 #define MyAppExeName "Specs.jar"
