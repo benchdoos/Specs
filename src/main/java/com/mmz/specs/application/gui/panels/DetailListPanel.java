@@ -227,16 +227,26 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                             try {
                                 mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
                             } catch (IllegalStateException e) {
+                                closeSession(newSession);
                                 log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                 JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                         "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                             }
+                        } else {
+                            closeSession(newSession);
                         }
+                    } else {
+                        closeSession(newSession);
                     }
+                } else {
+                    closeSession(newSession);
                 }
+            } else {
+                closeSession(newSession);
             }
+        } else {
+            closeSession(newSession);
         }
-        closeSession(newSession);
     }
 
     private void closeSession(Session newSession) {
@@ -276,18 +286,29 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                 try {
                                     mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
                                 } catch (IllegalStateException e) {
+                                    closeSession(newSession);
                                     log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                     JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                             "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                                 }
+                            } else {
+                                closeSession(newSession);
                             }
+                        } else {
+                            closeSession(newSession);
                         }
+                    } else {
+                        closeSession(newSession);
                     }
+                } else {
+                    closeSession(newSession);
                 }
+            } else {
+                closeSession(newSession);
             }
+        } else {
+            closeSession(newSession);
         }
-
-        closeSession(newSession);
     }
 
     private void initSearchTextFieldKeysBindings() {
