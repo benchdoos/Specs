@@ -58,7 +58,10 @@ import java.util.List;
 import java.util.TooManyListenersException;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
-import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.*;
+import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.COPY;
+import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.EDIT;
+import static com.mmz.specs.application.gui.panels.EditNoticePanel.Status.DEFAULT;
+import static com.mmz.specs.application.gui.panels.EditNoticePanel.Status.SAVING;
 import static com.mmz.specs.application.utils.FtpUtils.DEFAULT_IMAGE_EXTENSION;
 import static javax.swing.JOptionPane.*;
 
@@ -106,6 +109,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private DetailEntity detailEntity;
     private DetailEntity rootEntity;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
+    private Status status = DEFAULT;
 
     EditNoticePanel(Session session, DetailEntity detailEntity) {
         $$$setupUI$$$();
@@ -578,7 +582,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void onAddNewItemButton() {
         final Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
         if (lastSelectedPathComponent != null) {
-            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(session, null, DEFAULT);
+            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(session, null, SelectDetailEntityWindow.MODE.DEFAULT);
             selectionDetailWindow.setLocation(FrameUtils
                     .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
             selectionDetailWindow.setVisible(true);
@@ -1005,6 +1009,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void saveChanges() {
         final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
         mainWindowUtils.setClientMainWindow(this);
+
+        status = SAVING;
+
         try {
             CommonUtils.enableAllComponents(this, false);
             mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Обновляем изображения...");
@@ -1032,6 +1039,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 mainWindowUtils.blockMessage();
                 log.info("New state of db is committed");
 
+                status = DEFAULT;
                 closeTab();
             } else {
                 JOptionPane.showMessageDialog(this, "Укажите извещение!",
@@ -1039,6 +1047,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             }
         } catch (Exception e) {
             CommonUtils.enableAllComponents(this, true);
+
+            status = DEFAULT;
+
             log.warn("Could not call commit for transaction", e);
             mainWindowUtils.updateMessage("/img/gui/animated/uploading_error.gif", "Ошибка во время сохранения изменений");
             mainWindowUtils.blockMessage();
@@ -1152,15 +1163,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void onCancel() {
-        int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
-                        "В случае подтверждения все изменения не сохранятся и никак\n" +
-                        "не повлияют на базу данных.\n" +
-                        "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
-        log.debug("User wanted to rollback changes, user's choice is: " + result);
-        if (result == 0) {
-            session.getTransaction().rollback();
-            closeTab();
+        if (status != SAVING) {
+            int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
+                            "В случае подтверждения все изменения не сохранятся и никак\n" +
+                            "не повлияют на базу данных.\n" +
+                            "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                    new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
+            log.debug("User wanted to rollback changes, user's choice is: " + result);
+            if (result == 0) {
+                session.getTransaction().rollback();
+                closeTab();
+            }
         }
     }
 
@@ -1566,7 +1579,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
     @Override
     public void rollbackTransaction() {
-        onCancel();
+        if (status != SAVING) {
+            onCancel();
+        }
     }
 
     private DetailEntity copyBrotherEntityToDetailEntity(DetailEntity detailEntity, DetailEntity brotherEntity) {
@@ -1930,5 +1945,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             verifyInput(textField);
         }
     }
+
+    enum Status {DEFAULT, SAVING}
 
 }
