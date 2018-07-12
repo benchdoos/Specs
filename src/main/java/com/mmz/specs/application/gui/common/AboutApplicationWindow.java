@@ -42,6 +42,7 @@ public class AboutApplicationWindow extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         setTitle("О приложении");
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         initGui();
 
