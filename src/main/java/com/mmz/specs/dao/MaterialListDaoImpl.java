@@ -24,6 +24,9 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +71,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
 
     @Override
     @Transactional
-    public void removeMaterialList(int id) {
+    public void removeMaterialList(long id) {
         MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
         if (materialListEntity != null) {
             session.delete(materialListEntity);
@@ -99,6 +102,19 @@ public class MaterialListDaoImpl implements MaterialListDao {
                 log.warn("Not MaterialList found by detail index: " + detailEntity.getCode() + " material:" + materialListEntity);
             }
         }
+        return result;
+    }
+
+    @Override
+    public List<MaterialListEntity> getUnusedMaterialLists() {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<MaterialListEntity> criteriaQuery = builder.createQuery(MaterialListEntity.class);
+        Root<MaterialListEntity> root = criteriaQuery.from(MaterialListEntity.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(builder.equal(root.get("active"), false));
+        Query<MaterialListEntity> q = session.createQuery(criteriaQuery);
+        final List<MaterialListEntity> result = q.list();
+        log.debug("MaterialListEntities found unused: ({}), {} ", result.size(), result);
         return result;
     }
 

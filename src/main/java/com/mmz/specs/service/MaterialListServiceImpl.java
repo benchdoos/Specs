@@ -59,7 +59,7 @@ public class MaterialListServiceImpl implements MaterialListService {
     }
 
     @Override
-    public void removeMaterialList(int id) {
+    public void removeMaterialList(long id) {
         materialListDao.removeMaterialList(id);
     }
 
@@ -71,6 +71,11 @@ public class MaterialListServiceImpl implements MaterialListService {
     @Override
     public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity) {
         return materialListDao.getMaterialListByDetail(detailEntity);
+    }
+
+    @Override
+    public List<MaterialListEntity> getUnusedMaterialLists() {
+        return materialListDao.getUnusedMaterialLists();
     }
 
     @Override

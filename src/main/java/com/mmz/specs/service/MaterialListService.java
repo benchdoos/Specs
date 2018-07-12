@@ -22,22 +22,23 @@ import com.mmz.specs.model.MaterialListEntity;
 import java.util.List;
 
 public interface MaterialListService {
-    public void setMaterialListDao(MaterialListDao materialListDao);
+    MaterialListDao getMaterialListDao();
 
-    public MaterialListDao getMaterialListDao();
+    void setMaterialListDao(MaterialListDao materialListDao);
 
+    long addMaterialList(MaterialListEntity materialListEntity);
 
-    public long addMaterialList(MaterialListEntity materialListEntity);
+    void updateMaterialList(MaterialListEntity materialListEntity);
 
-    public void updateMaterialList(MaterialListEntity materialListEntity);
-
-    public void removeMaterialList(int id);
-
-
-    public MaterialListEntity getMaterialListById(long id);
-
-    public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity);
+    void removeMaterialList(long id);
 
 
-    public List<MaterialListEntity> listMaterialLists();
+    MaterialListEntity getMaterialListById(long id);
+
+    List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity);
+
+    List<MaterialListEntity> getUnusedMaterialLists();
+
+
+    List<MaterialListEntity> listMaterialLists();
 }

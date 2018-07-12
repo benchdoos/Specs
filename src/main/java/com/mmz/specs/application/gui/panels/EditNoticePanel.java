@@ -1022,12 +1022,13 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем текущее извещение...");
                 updateNotice();
 
-
                 mainWindowUtils.updateMessageText("Обновляем последние извещения для измененных деталей...");
                 updateAllNotices();
 
                 mainWindowUtils.updateMessageText("Избавляемся от мусора...");
                 removeUnusedDetailLists();
+
+                removeUnusedMaterialLists();
 
                 //todo update info about notice!!!!
                 log.debug("Transaction status: {}", session.getTransaction().getStatus());
@@ -1058,6 +1059,16 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     JOptionPane.WARNING_MESSAGE,
                     new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
         }
+    }
+
+    private void removeUnusedMaterialLists() {
+        log.debug("Starting removing unused MaterialLists");
+        MaterialListService service = new MaterialListServiceImpl(session);
+        ArrayList<MaterialListEntity> list = (ArrayList<MaterialListEntity>) service.getUnusedMaterialLists();
+        for (MaterialListEntity e : list) {
+            service.removeMaterialList(e.getId());
+        }
+        log.info("Removing unused  MaterialLists finished");
     }
 
     private void removeUnusedDetailLists() {
