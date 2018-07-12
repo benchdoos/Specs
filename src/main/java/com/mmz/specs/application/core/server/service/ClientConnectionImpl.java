@@ -74,10 +74,14 @@ public class ClientConnectionImpl implements ClientConnection {
     public void close() throws IOException {
         try {
             if (this.session != null) {
+                log.debug("Closing session");
                 this.session.close();
+                log.info("Session successfully closed");
             }
             if (this.socket != null) {
+                log.debug("Closing socket");
                 this.socket.close();
+                log.info("Socket successfully closed");
             }
         } catch (IOException | RuntimeException e) {
             log.warn("Could not close session or socket", e);

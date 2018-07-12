@@ -378,12 +378,6 @@ public class CreateNoticeWindow extends JDialog {
         return noticeEntity;
     }
 
-    @Override
-    public void dispose() {
-        session.close();
-        super.dispose();
-    }
-
     private void createUIComponents() {
         numberTextField = new SmartJTextField();
         createdDatePicker = getDatePicker();

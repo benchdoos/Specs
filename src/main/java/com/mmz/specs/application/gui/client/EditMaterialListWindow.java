@@ -18,7 +18,6 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.SelectionMaterialWindow;
 import com.mmz.specs.application.gui.common.utils.Renders;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -57,13 +56,13 @@ public class EditMaterialListWindow extends JDialog {
     private boolean isCanceled = false;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
-    public EditMaterialListWindow(DetailEntity detailEntity) {
+    public EditMaterialListWindow(Session session, DetailEntity detailEntity) {
         if (detailEntity == null) {
             throw new IllegalArgumentException("Can not edit material for detail : null");
         }
 
         this.detailEntity = detailEntity;
-        this.session = ClientBackgroundService.getInstance().getSession();
+        this.session = session;
 
         initGui();
 
@@ -157,7 +156,7 @@ public class EditMaterialListWindow extends JDialog {
     }
 
     private void onAddMaterial() {
-        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow();
+        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow(session);
         selectionMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(this, selectionMaterialWindow));
         selectionMaterialWindow.setVisible(true);
         final MaterialEntity selectedValue = selectionMaterialWindow.getSelectedValue();
@@ -217,7 +216,7 @@ public class EditMaterialListWindow extends JDialog {
         if (selectedValue != null) {
             final MaterialEntity materialByMaterialId = selectedValue.getMaterialByMaterialId();
             if (materialByMaterialId != null) {
-                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(materialByMaterialId, session);
+                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, materialByMaterialId);
                 createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
                 createMaterialWindow.setVisible(true);
             }
@@ -234,7 +233,7 @@ public class EditMaterialListWindow extends JDialog {
     }
 
     private void onCreateNewMaterial() {
-        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null, session);
+        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
         createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
         createMaterialWindow.setVisible(true);
 

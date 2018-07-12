@@ -18,7 +18,6 @@ package com.mmz.specs.application.gui.common;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.utils.SwitchingComboBox;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.MaterialDaoImpl;
@@ -47,9 +46,9 @@ public class SelectionMaterialWindow extends JDialog {
     private MaterialEntity selectedMaterialEntity;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
-    public SelectionMaterialWindow() {
+    public SelectionMaterialWindow(Session session) {
         $$$setupUI$$$();
-        this.session = ClientBackgroundService.getInstance().getSession();
+        this.session = session;
 
         initGui();
 

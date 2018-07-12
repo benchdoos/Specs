@@ -18,7 +18,6 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.service.DetailService;
@@ -48,8 +47,8 @@ public class SelectMultipleDetails extends JDialog {
 
     private ArrayList<DetailEntity> selectedDetailEntities;
 
-    SelectMultipleDetails() {
-        this.session = ClientBackgroundService.getInstance().getSession();
+    SelectMultipleDetails(Session session) {
+        this.session = session;
 
         initWindow();
 
@@ -166,12 +165,6 @@ public class SelectMultipleDetails extends JDialog {
     private void onCancel() {
         selectedDetailEntities = null;
         dispose();
-    }
-
-    @Override
-    public void dispose() {
-        session.close();
-        super.dispose();
     }
 
     ArrayList<DetailEntity> getSelectedDetailEntities() {

@@ -47,7 +47,7 @@ public class CreateMaterialWindow extends JDialog {
 
     private MaterialEntity materialEntity;
 
-    public CreateMaterialWindow(MaterialEntity materialEntity, Session session) {
+    public CreateMaterialWindow(Session session, MaterialEntity materialEntity) {
         this.materialEntity = materialEntity;
         this.session = session;
 
@@ -199,12 +199,6 @@ public class CreateMaterialWindow extends JDialog {
 
     private void onCancel() {
         dispose();
-    }
-
-    @Override
-    public void dispose() {
-        session.close();
-        super.dispose();
     }
 
     public MaterialEntity getMaterialEntity() {

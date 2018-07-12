@@ -146,6 +146,7 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
+        log.debug("Getting latest DetailListEntity by parent: {} and child: {}", parent.toSimpleString(), child.toSimpleString());
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
         Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
@@ -160,11 +161,11 @@ public class DetailListDaoImpl implements DetailListDao {
         DetailListEntity entity = null;
         try {
             entity = query.getSingleResult();
+            log.debug("Latest detailList successfully found by parent: {} and child: {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
         } catch (javax.persistence.NoResultException e) {
             log.warn("Can not find latest detailList found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), null);
         }
 
-        log.debug("Latest detailList successfully found by parent: {} and child: {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
 
         return entity;
 

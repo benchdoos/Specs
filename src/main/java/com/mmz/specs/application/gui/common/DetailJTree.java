@@ -15,12 +15,12 @@
 
 package com.mmz.specs.application.gui.common;
 
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
+import org.hibernate.Session;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,6 +38,7 @@ public class DetailJTree extends JTree {
     private static final Icon UNIT_CLOSED_ICON = new ImageIcon(DetailJTree.class.getResource("/img/gui/tree/unitOpened.png"));
     private static final Icon UNIT_OPENED_ICON = new ImageIcon(DetailJTree.class.getResource("/img/gui/tree/unitOpened.png"));
     private static final Icon DETAIL_ICON = new ImageIcon(DetailJTree.class.getClass().getResource("/img/gui/tree/detail.png"));
+    private Session session;
 
     public DetailJTree() {
         setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
@@ -60,50 +61,52 @@ public class DetailJTree extends JTree {
 
     private DefaultTreeCellRenderer getRenderer() {
         return new DefaultTreeCellRenderer() {
-            DetailListService service = new DetailListServiceImpl(ClientBackgroundService.getInstance().getSession());
-
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
-                if (selected) {
-                    this.setBackgroundSelectionColor(BACKGROUND_SELECTION_COLOR);
-                } else {
-                    this.setBackgroundNonSelectionColor(BACKGROUND_NON_SELECTION_COLOR);
-                }
+                if (session != null) {
+                    DetailListService service = new DetailListServiceImpl(session);
 
-                if (value instanceof DefaultMutableTreeNode) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-                    if (node.getUserObject() instanceof DetailEntity) {
-                        DetailEntity detailEntity = (DetailEntity) node.getUserObject();
+                    if (selected) {
+                        this.setBackgroundSelectionColor(BACKGROUND_SELECTION_COLOR);
+                    } else {
+                        this.setBackgroundNonSelectionColor(BACKGROUND_NON_SELECTION_COLOR);
+                    }
 
-                        if (row >= 0) {
-                            if (tree.getPathForRow(row) != null) {
-                                Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
-                                if (pathForRow.length > 1) {
-                                    DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
-                                    DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
+                    if (value instanceof DefaultMutableTreeNode) {
+                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+                        if (node.getUserObject() instanceof DetailEntity) {
+                            DetailEntity detailEntity = (DetailEntity) node.getUserObject();
 
-//                                    List<DetailListEntity> result = service.getDetailListByParentAndChild(parent, detailEntity);
+                            if (row >= 0) {
+                                if (tree.getPathForRow(row) != null) {
+                                    Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
+                                    if (pathForRow.length > 1) {
+                                        DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
+                                        DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
 
-                                    /*if (result.size() > 0) {*/
-                                    DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
-                                    updateBackgroundColor(selected, detailListEntity);
-                                    updateIcon(detailEntity);
+                                        //                                    List<DetailListEntity> result = service.getDetailListByParentAndChild(parent, detailEntity);
 
-                                    if (detailListEntity != null) {
-                                        String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                                        return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
-                                    } else {
-                                        String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                                        return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
+                                        /*if (result.size() > 0) {*/
+                                        DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
+                                        updateBackgroundColor(selected, detailListEntity);
+                                        updateIcon(detailEntity);
+
+                                        if (detailListEntity != null) {
+                                            String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                            return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
+                                        } else {
+                                            String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                            return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
+                                        }
+                                        /*}*/
                                     }
-                                    /*}*/
                                 }
                             }
+                            updateIcon(detailEntity);
+                            final String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                            return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                         }
-                        updateIcon(detailEntity);
-                        final String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                        return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                     }
                 }
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
@@ -155,5 +158,9 @@ public class DetailJTree extends JTree {
         renderer.setClosedIcon(UNIT_CLOSED_ICON);
         renderer.setOpenIcon(UNIT_OPENED_ICON);
         renderer.setLeafIcon(DETAIL_ICON);
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

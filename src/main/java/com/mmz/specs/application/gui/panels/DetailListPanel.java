@@ -39,6 +39,7 @@ import com.mmz.specs.model.*;
 import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.imgscalr.Scalr;
 
@@ -192,7 +193,10 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onAddNewItem() {
-        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, CREATE_SINGLE);
+        Session newSession = ClientBackgroundService.getInstance().getSession();
+        newSession.beginTransaction();
+
+        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, CREATE_SINGLE);
         selectionDetailWindow.setLocation(FrameUtils
                 .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
         selectionDetailWindow.setVisible(true);
@@ -201,17 +205,17 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             if (list.size() == 1) {
                 DetailEntity entity = list.get(0);
                 if (entity != null) {
-                    DetailService service = new DetailServiceImpl(session);
+                    DetailService service = new DetailServiceImpl(newSession);
                     final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
                     if (detailByIndex == null) {
                         entity.setActive(true);
                         entity.setCode(entity.getCode().toUpperCase());
-                        Window window = FrameUtils.findWindow(this);
-                        if (window instanceof ClientMainWindow) {
-                            ClientMainWindow mainWindow = (ClientMainWindow) window;
+
+                        ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
+                        if (mainWindow != null) {
                             ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                             try {
-                                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, true), true);
+                                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
                             } catch (IllegalStateException e) {
                                 log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                 JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
@@ -222,13 +226,27 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
         }
+        closeSession(newSession);
+    }
+
+    private void closeSession(Session newSession) {
+        try {
+            log.debug("Closing session");
+            newSession.close();
+            log.info("Session successfully closed");
+        } catch (HibernateException e) {
+            log.warn("Could not close session", e);
+        }
     }
 
     private void onCopyButton() {
+        Session newSession = ClientBackgroundService.getInstance().getSession();
+        newSession.beginTransaction();
+
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (selectedEntity != null) {
             if (selectedEntity.isUnit()) {
-                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
+                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, COPY);
                 selectionDetailWindow.setLocation(FrameUtils
                         .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
                 selectionDetailWindow.setVisible(true);
@@ -241,12 +259,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                             entity.setUnit(true);
                             entity.setActive(true);
 
-                            Window window = FrameUtils.findWindow(this);
-                            if (window instanceof ClientMainWindow) {
-                                ClientMainWindow mainWindow = (ClientMainWindow) window;
+                            ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
+
+                            if (mainWindow != null) {
                                 ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                                 try {
-                                    mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entity, selectedEntity), true);
+                                    mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
                                 } catch (IllegalStateException e) {
                                     log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                     JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
@@ -258,6 +276,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
         }
+
+        closeSession(newSession);
     }
 
     private void initSearchTextFieldKeysBindings() {
@@ -632,6 +652,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void initMainTree() {
+        DetailJTree jTree = (DetailJTree) mainTree;
+        jTree.setSession(session);
+
         mainTree.addTreeSelectionListener(e -> {
             DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
             if (selectedEntity != null) {
@@ -650,25 +673,36 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onEditDetail(boolean select) {
+        Session newSession = ClientBackgroundService.getInstance().getSession();
+        newSession.beginTransaction();
+
         final DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (entityFromTree != null) {
-            Window window = FrameUtils.findWindow(this);
-            if (window instanceof ClientMainWindow) {
-                ClientMainWindow mainWindow = (ClientMainWindow) window;
+            ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
+            if (mainWindow != null) {
                 final UsersEntity currentUser = mainWindow.getCurrentUser();
                 if (currentUser != null) {
                     if ((currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive()) {
                         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                         try {
-                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(entityFromTree), select);
+                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
                         } catch (IllegalStateException e) {
+                            closeSession(newSession);
                             log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                             JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                     "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                         }
+                    } else {
+                        closeSession(newSession);
                     }
+                } else {
+                    closeSession(newSession);
                 }
+            } else {
+                closeSession(newSession);
             }
+        } else {
+            closeSession(newSession);
         }
     }
 

@@ -19,7 +19,6 @@ import com.google.common.collect.ComparisonChain;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.common.utils.SwitchingComboBox;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -67,11 +66,12 @@ public class SelectDetailEntityWindow extends JDialog {
     private boolean singleSelectionOnly;
     private boolean unitEnabled;
 
-    public SelectDetailEntityWindow(DetailEntity incomingDetailEntity, MODE mode) {
+    public SelectDetailEntityWindow(Session session, DetailEntity incomingDetailEntity, MODE mode) {
+        $$$setupUI$$$();
+
+        this.session = session;
         this.incomingDetailEntity = incomingDetailEntity;
         this.mode = mode;
-        $$$setupUI$$$();
-        this.session = ClientBackgroundService.getInstance().getSession();
         initMode(mode);
         initWindow();
     }
@@ -256,12 +256,6 @@ public class SelectDetailEntityWindow extends JDialog {
         dispose();
     }
 
-    @Override
-    public void dispose() {
-        session.close();
-        super.dispose();
-    }
-
     private String fixCode(String code) {
         if (code != null) {
             return code.toUpperCase()
@@ -423,7 +417,7 @@ public class SelectDetailEntityWindow extends JDialog {
     }
 
     private void onMultipleSelectionButton() {
-        SelectMultipleDetails selectMultipleDetails = new SelectMultipleDetails();
+        SelectMultipleDetails selectMultipleDetails = new SelectMultipleDetails(session);
         selectMultipleDetails.setLocation(FrameUtils.getFrameOnCenter(this, selectMultipleDetails));
         selectMultipleDetails.setVisible(true);
         final ArrayList<DetailEntity> selectedDetailEntities = selectMultipleDetails.getSelectedDetailEntities();
@@ -592,7 +586,6 @@ public class SelectDetailEntityWindow extends JDialog {
     private void updateReturningEntity(DetailEntity entity) {
         incomingDetailEntity.setCode(entity.getCode());
         incomingDetailEntity.setDetailTitleByDetailTitleId(entity.getDetailTitleByDetailTitleId());
-        /*service.updateDetail(incomingDetailEntity);*/
         entities.clear();
         entities.add(incomingDetailEntity);
         dispose();

@@ -20,7 +20,6 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.client.ClientConstants;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
@@ -108,13 +107,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private DetailEntity rootEntity;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
-    EditNoticePanel(DetailEntity detailEntity) {
+    EditNoticePanel(Session session, DetailEntity detailEntity) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
         this.rootEntity = detailEntity;
-        this.session = ClientBackgroundService.getInstance().getSession();
-
-        session.getTransaction().begin();
+        this.session = session;
 
         initGui();
 
@@ -122,13 +119,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
 
-    EditNoticePanel(DetailEntity detailEntity, boolean create) {
+    EditNoticePanel(Session session, DetailEntity detailEntity, boolean create) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
         this.rootEntity = detailEntity;
-        this.session = ClientBackgroundService.getInstance().getSession();
-
-        session.getTransaction().begin();
+        this.session = session;
 
         if (create) {
             DetailService service = new DetailServiceImpl(session);
@@ -143,13 +138,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     /**
      * Creates duplicate of brother for detailEntity
      */
-    EditNoticePanel(DetailEntity detailEntity, DetailEntity brotherEntity) {
+    EditNoticePanel(Session session, DetailEntity detailEntity, DetailEntity brotherEntity) {
         $$$setupUI$$$();
         this.detailEntity = detailEntity;
         this.rootEntity = detailEntity;
-        this.session = ClientBackgroundService.getInstance().getSession();
-
-        session.getTransaction().begin();
+        this.session = session;
 
         initGui();
 
@@ -310,7 +303,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mainTree.getModel().getRoot();
                         updateNotices();
                         if (selectedIndex == 1) {
-                            if (((DefaultMutableTreeNode) mainTree.getModel().getRoot()).getChildCount() == 0) {
+                            if (root.getChildCount() == 0) {
                                 fillMainTree();
                                 fillEmptyDetailInfoPanel();
                             }
@@ -585,7 +578,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private void onAddNewItemButton() {
         final Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
         if (lastSelectedPathComponent != null) {
-            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, DEFAULT);
+            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(session, null, DEFAULT);
             selectionDetailWindow.setLocation(FrameUtils
                     .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
             selectionDetailWindow.setVisible(true);
@@ -595,6 +588,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 for (DetailEntity entity : list) {
                     if (entity != null) {
                         entity = createDetailEntityIfNotExist(entity);
+
                         addDetailToTree(entity);
                     }
                 }
@@ -620,10 +614,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
 
         if (selectedDetailEntityFromTree != null) {
-            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(selectedDetailEntityFromTree, EDIT);
+            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(session, selectedDetailEntityFromTree, EDIT);
             selectionDetailWindow.setLocation(FrameUtils
                     .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
             selectionDetailWindow.setVisible(true);
+
             ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
 
             if (list != null) {
@@ -701,7 +696,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         DetailEntity detailEntity = (DetailEntity) lastSelectedPathComponent.getUserObject();
 
 
-        EditMaterialListWindow materialListWindow = new EditMaterialListWindow(detailEntity);
+        EditMaterialListWindow materialListWindow = new EditMaterialListWindow(session, detailEntity);
         materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), materialListWindow));
         materialListWindow.setVisible(true);
 
@@ -809,30 +804,44 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             entity.setActive(true);
             entity = detailService.getDetailById(detailService.addDetail(entity));
         }
-        DetailListEntity detailListEntity = getFilledEntity(entity, node);
-        DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(ClientBackgroundService.getInstance().getSession()));
 
-        service.getDetailListById(service.addDetailList(detailListEntity));
+        DetailEntity parent = (DetailEntity) node.getUserObject();
 
-        final DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(entity);
-        new MainWindowUtils(session).getModuleChildren(newChild, entity);
+        try {
+            DetailListEntity detailListEntity = generateDetailListFromEntity(parent, entity);
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
 
-        node.add(newChild);
+            service.getDetailListById(service.addDetailList(detailListEntity));
+
+            final DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(entity);
+            new MainWindowUtils(session).getModuleChildren(newChild, entity);
+
+            node.add(newChild);
+        } catch (Exception e) {
+            log.warn("Could not add new {} for parent: {} and child: {}", DetailListEntity.class, parent, entity);
+        }
 
         DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
         model.reload(node);
     }
 
-    private DetailListEntity getFilledEntity(DetailEntity entity, DefaultMutableTreeNode node) {
+    private DetailListEntity generateDetailListFromEntity(DetailEntity parent, DetailEntity child) {
+        log.debug("Generating new {} for parent: {} and child: {}", DetailListEntity.class.getName(), parent, child);
+        if (parent == null || child == null) {
+            throw new IllegalArgumentException("Parent or entity can not be null; parent: " + parent + ", child: {}" + child);
+        }
         DetailListEntity detailListEntity = new DetailListEntity();
         detailListEntity.setQuantity(1);
         detailListEntity.setActive(true);
-        detailListEntity.setDetailByParentDetailId((DetailEntity) node.getUserObject());
-        detailListEntity.setDetailByChildDetailId(entity);
-        detailListEntity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
-        String parentInfo = detailListEntity.getDetailByParentDetailId().getCode() + " " + detailListEntity.getDetailByParentDetailId().getDetailTitleByDetailTitleId().getTitle();
-        String childInfo = detailListEntity.getDetailByChildDetailId().getCode() + " " + detailListEntity.getDetailByChildDetailId().getDetailTitleByDetailTitleId().getTitle();
-        log.debug("New detailListEntity parent: {} and child: {} and quantity: {}", parentInfo, childInfo, detailListEntity.getQuantity());
+
+        detailListEntity.setDetailByParentDetailId(parent);
+        detailListEntity.setDetailByChildDetailId(child);
+
+        final NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+
+        detailListEntity.setNoticeByNoticeId(selectedItem);
+
+        log.debug("New detailListEntity parent: {} and child: {} and quantity: ({})", parent.toSimpleString(), child.toSimpleString(), detailListEntity.getQuantity());
         return detailListEntity;
     }
 
@@ -847,7 +856,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                 DetailEntity parent = JTreeUtils.getParentForSelectionPath(mainTree);
                 if (selectedEntity != null && parent != null) {
-                    SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(null, COPY);
+                    SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(session, null, COPY);
                     selectionDetailWindow.setLocation(FrameUtils
                             .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
                     selectionDetailWindow.setVisible(true);
@@ -1361,6 +1370,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void initMainTree() {
+        DetailJTree jTree = (DetailJTree) mainTree;
+        jTree.setSession(session);
+
         mainTree.addTreeSelectionListener(e -> {
             Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
             if (lastSelectedPathComponent instanceof DefaultMutableTreeNode) {

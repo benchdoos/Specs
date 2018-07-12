@@ -289,7 +289,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
 
     private void initEditMaterialTabButtons() {
         addMaterialItemButton.addActionListener(e -> {
-            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(null, session);
+            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
             createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
             createMaterialWindow.setVisible(true);
             final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
@@ -316,7 +316,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         editMaterialItemButton.addActionListener(e -> {
             MaterialEntity materialEntity = materialList.getSelectedValue();
             if (materialEntity != null) {
-                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(materialEntity, session);
+                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, materialEntity);
                 createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
                 createMaterialWindow.setVisible(true);
                 final MaterialEntity entity = createMaterialWindow.getMaterialEntity();
@@ -345,8 +345,14 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
                 "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         log.debug("User wanted to rollback changes, user's choice is: " + result);
         if (result == 0) {
+            log.debug("Rolling back transaction");
             session.getTransaction().rollback();
+            log.debug("Transaction successfully rolled back");
+
+            log.debug("Closing session");
             session.close();
+            log.info("Session successfully closed");
+
             closeTab();
         }
     }
@@ -369,7 +375,9 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         if (result == 0) {
             try {
                 session.getTransaction().commit();
+                log.debug("Closing session");
                 session.close();
+                log.info("Session successfully closed");
                 closeTab();
             } catch (Exception e) {
                 log.warn("Could not call commit for transaction", e);
