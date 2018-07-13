@@ -20,9 +20,9 @@ import java.text.SimpleDateFormat;
 
 public class ApplicationConstants {
     public static final String INTERNAL_FULL_NAME = "com.mmz.specs";
-    public static final String APPLICATION_NAME = "MMZ - Спецификации";
-    public static final String APPLICATION_NAME_POSTFIX_SERVER = " - Сервер";
-    public static final String APPLICATION_NAME_POSTFIX_CLIENT = " - Клиент";
+    public static final String APPLICATION_NAME = "Спецификации";
+    public static final String APPLICATION_NAME_POSTFIX_SERVER = " — Сервер";
+    public static final String APPLICATION_NAME_POSTFIX_CLIENT = " — Клиент";
     public static final String USER_HOME_LOCATION = System.getProperty("user.home");
     public static final String APPLICATION_SETTINGS_FOLDER_LOCATION = System
             .getProperty("user.home") + File.separator + INTERNAL_FULL_NAME + File.separator;
