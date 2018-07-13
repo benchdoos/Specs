@@ -61,22 +61,14 @@ public class MainWindowUtils {
         final long time = System.nanoTime();
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
         ArrayList<DetailEntity> roots = getRootObjects(listEntities);
-
-        roots.sort((o1, o2) -> {
-            final String rootUnit = ".00.000";
-            return ComparisonChain.start()
-                    .compareTrueFirst(o1.getCode().contains(rootUnit), o2.getCode().contains(rootUnit))
-                    .compareTrueFirst(o1.isUnit(), o2.isUnit())
-                    .compare(o1.getCode(), o2.getCode())
-                    .compareTrueFirst(o1.isActive(), o2.isActive())
-                    .result();
-        });
-
+        final String rootUnitCode = ".00.000";
 
         System.out.println("roots: ");
         for (DetailEntity e : roots) {
-            result.add(new DefaultMutableTreeNode(e));
-            System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
+            if (e.getCode().contains(rootUnitCode)) {
+                result.add(new DefaultMutableTreeNode(e));
+                System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
+            }
         }
         System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
         return result;
