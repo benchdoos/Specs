@@ -48,6 +48,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -86,6 +87,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private JLabel materialLabel;
     private JPanel controlsBar;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
+    private Thread searchThread = null;
 
     public DetailListPanel() {
         $$$setupUI$$$();
@@ -357,9 +359,31 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                     searchText = searchText.replace(",", ".");
                     searchText = searchText.toUpperCase();
                     log.debug("User is searching for: " + searchText);
-                    fillMainTreeBySearch(searchText);
+
+
+                    if (searchThread == null) {
+                        searchThread = new Thread(() -> fillMainTreeBySearch(searchText));
+                        searchThread.start();
+                    } else {
+                        if (searchThread.isAlive()) {
+                            log.debug("Interrupting search thread");
+                            searchThread.interrupt();
+                        }
+                        searchThread = new Thread(() -> fillMainTreeBySearch(searchText));
+                        searchThread.start();
+                    }
                 } else {
-                    fillMainTreeFully();
+                    if (searchThread == null) {
+                        searchThread = new Thread(() -> fillMainTreeFully());
+                        searchThread.start();
+                    } else {
+                        if (searchThread.isAlive()) {
+                            log.debug("Interrupting search thread");
+                            searchThread.interrupt();
+                        }
+                        searchThread = new Thread(() -> fillMainTreeFully());
+                        searchThread.start();
+                    }
                 }
             });
 
@@ -393,15 +417,25 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void fillMainTreeFully() {
-        if (session != null) {
+        Thread thread = Thread.currentThread();
+        if (session != null && !thread.isInterrupted()) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             final List<DetailListEntity> askedListRoot = service.listDetailLists();
-            askedListRoot.sort((o1, o2) -> ComparisonChain.start()
-                    .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
-                    .compareTrueFirst(o1.isActive(), o2.isActive())
-                    .result());
-            final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree(askedListRoot);
-            mainTree.setModel(new DefaultTreeModel(detailListFullTree));
+            if (!thread.isInterrupted()) {
+                askedListRoot.sort((o1, o2) -> ComparisonChain.start()
+                        .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
+                        .compareTrueFirst(o1.isActive(), o2.isActive())
+                        .result());
+            }
+
+            if (!thread.isInterrupted()) {
+                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree(askedListRoot);
+                mainTree.setModel(new DefaultTreeModel(detailListFullTree));
+            }
+        }
+
+        if (thread.isInterrupted()) {
+            mainTree.setModel(new DefaultTreeModel(null));
         }
     }
 
@@ -476,35 +510,56 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void fillMainTreeBySearch(final String searchText) {
-        if (session != null) {
+        final Thread thread = Thread.currentThread();
+        if (session != null && !thread.isInterrupted()) {
             DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
             final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
-            Runnable runnable = () -> {
+
+            if (!thread.isInterrupted()) {
                 if (detailListBySearch != null && detailListBySearch.size() > 0) {
-                    mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch)));
+                    final DefaultMutableTreeNode moduleDetailListTreeByEntityList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch);
+                    if (!thread.isInterrupted()) {
+                        mainTree.setModel(new DefaultTreeModel(moduleDetailListTreeByEntityList));
+                    }
                 } else {
                     DetailService detailService = new DetailServiceImpl(session);
                     final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
 
-                    if (detailsBySearch != null && detailsBySearch.size() > 0) {
-                        mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch)));
-                    } else {
-                        DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
-                        final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
-                        if (detailTitlesBySearch != null) {
-                            List<DetailEntity> resultDetails = new ArrayList<>();
-                            for (DetailTitleEntity e : detailTitlesBySearch) {
-                                if (e != null) {
-                                    final List<DetailEntity> detailsByTitle = detailService.getDetailsByTitle(e);
-                                    resultDetails.addAll(detailsByTitle);
+                    if (!thread.isInterrupted()) {
+                        if (detailsBySearch != null && detailsBySearch.size() > 0) {
+                            final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch);
+                            if (!thread.isInterrupted()) {
+                                mainTree.setModel(new DefaultTreeModel(detailsTreeByDetails));
+                            }
+                        } else {
+                            DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
+                            final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
+                            if (!thread.isInterrupted()) {
+                                if (detailTitlesBySearch != null) {
+                                    List<DetailEntity> resultDetails = new ArrayList<>();
+                                    if (!thread.isInterrupted()) {
+                                        for (DetailTitleEntity e : detailTitlesBySearch) {
+                                            if (e != null && !thread.isInterrupted()) {
+                                                final List<DetailEntity> detailsByTitle = detailService.getDetailsByTitle(e);
+
+                                                resultDetails.addAll(detailsByTitle);
+                                            }
+                                        }
+                                        final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(resultDetails);
+                                        if (!thread.isInterrupted()) {
+                                            mainTree.setModel(new DefaultTreeModel(detailsTreeByDetails));
+                                        }
+                                    }
                                 }
                             }
-                            mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).getDetailsTreeByDetails(resultDetails)));
                         }
                     }
                 }
-            };
-            SwingUtilities.invokeLater(runnable);
+            }
+        }
+
+        if (thread.isInterrupted()) {
+            mainTree.setModel(new DefaultTreeModel(null));
         }
     }
 
