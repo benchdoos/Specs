@@ -1044,7 +1044,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 closeTab();
             } else {
                 JOptionPane.showMessageDialog(this, "Укажите извещение!",
-                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE,
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
             }
         } catch (Exception e) {
             CommonUtils.enableAllComponents(this, true);
