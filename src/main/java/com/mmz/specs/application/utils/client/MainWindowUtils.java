@@ -340,19 +340,26 @@ public class MainWindowUtils {
                     final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
 
 
-                    /*//todo fix it
+                    //todo fix it
                     DetailListService service = new DetailListServiceImpl(session);
                     if (parentForSelectionPath != null && selectedDetailEntityFromTree != null) {
                         try {
                             DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parentForSelectionPath, selectedDetailEntityFromTree);
                             ClientBackgroundService.getInstance().refreshObject(session, detailListEntity);
                         } catch (Exception e1) {
-                            ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+                            final List<DetailEntity> detailEntities = service.listChildren(selectedDetailEntityFromTree);
+                            for (DetailEntity entity : detailEntities) {
+                                ClientBackgroundService.getInstance().refreshObject(session, entity);
+                                final DetailListEntity latestDetailListEntityByParentAndChild = service.getLatestDetailListEntityByParentAndChild(selectedDetailEntityFromTree, entity);
+                                ClientBackgroundService.getInstance().refreshObject(session, latestDetailListEntityByParentAndChild);
+                            }
                         }
                     } else {
                         ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
-                    }*/
-                    ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+                    }
+                    /*ClientBackgroundService.getInstance().refreshSession(session, DetailEntity.class);
+                    ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);*/
+
 
                     expandPath(selectedPath, mainTree);
 
