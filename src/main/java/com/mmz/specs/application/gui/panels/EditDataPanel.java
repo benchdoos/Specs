@@ -24,6 +24,7 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.CreateMaterialWindow;
 import com.mmz.specs.application.gui.client.EditTitleWindow;
 import com.mmz.specs.application.gui.common.utils.Renders;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
@@ -340,22 +341,17 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
 
     private void onCancel() {
         int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
-                "В случае подтверждения все изменения не сохранятся и никак\n" +
-                "не повлияют на базу данных.\n" +
-                "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "В случае подтверждения все изменения не сохранятся и никак\n" +
+                        "не повлияют на базу данных.\n" +
+                        "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
         log.debug("User wanted to rollback changes, user's choice is: " + result);
         if (result == 0) {
-            log.debug("Rolling back transaction");
-            session.getTransaction().rollback();
-            log.debug("Transaction successfully rolled back");
-
-            log.debug("Closing session");
-            session.close();
-            log.info("Session successfully closed");
-
+            CommonUtils.rollbackAndCloseSession(session);
             closeTab();
         }
     }
+
 
     private void closeTab() {
         ClientMainWindow clientMainWindow = new MainWindowUtils(session).getClientMainWindow(this);
@@ -370,7 +366,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
                         "Также все проведённые изменения будут закреплены за вами, \n" +
                         "и в случае вопросов, будут обращаться к вам.\n" +
                         "Провести изменения?", "Подтверждение изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/upload.png"))));
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/sync.gif"))));
         log.debug("User wanted to commit changes, user's choice is: " + result);
         if (result == 0) {
             try {
@@ -382,8 +378,9 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
             } catch (Exception e) {
                 log.warn("Could not call commit for transaction", e);
                 JOptionPane.showMessageDialog(this,
-                        "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
-                        JOptionPane.WARNING_MESSAGE);
+                        "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(),
+                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE,
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
             }
         }
     }

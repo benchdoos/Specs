@@ -1182,7 +1182,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
             log.debug("User wanted to rollback changes, user's choice is: " + result);
             if (result == 0) {
-                session.getTransaction().rollback();
+                CommonUtils.rollbackAndCloseSession(session);
                 closeTab();
             }
         }

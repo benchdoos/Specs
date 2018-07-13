@@ -17,6 +17,7 @@ package com.mmz.specs.application.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -148,6 +149,20 @@ public class CommonUtils {
             }
         } else {
             component.setEnabled(enable);
+        }
+    }
+
+    public static void rollbackAndCloseSession(Session session) {
+        try {
+            log.debug("Rolling back transaction");
+            session.getTransaction().rollback();
+            log.debug("Transaction successfully rolled back");
+
+            log.debug("Closing session");
+            session.close();
+            log.info("Session successfully closed");
+        } catch (Exception e) {
+            log.warn("Could not rollback transaction", e);
         }
     }
 }
