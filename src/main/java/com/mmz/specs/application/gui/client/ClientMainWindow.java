@@ -124,9 +124,7 @@ public class ClientMainWindow extends JFrame {
         if (ClientBackgroundService.getInstance().isConnected()) {
             if (currentUser != null) {
                 try {
-                    ConstantsService service = new ConstantsServiceImpl(session);
-                    ConstantsEntity constant;
-                    constant = getConstantsEntity(service);
+                    ConstantsEntity constant = getConstantsEntity();
                     if (constant != null) {
                         String value = constant.getValue();
                         maxUnlockedSeconds = Integer.valueOf(value);
@@ -431,7 +429,8 @@ public class ClientMainWindow extends JFrame {
                 "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
     }
 
-    private ConstantsEntity getConstantsEntity(ConstantsService service) {
+    private ConstantsEntity getConstantsEntity() {
+        ConstantsService service = new ConstantsServiceImpl(session);
         if (maxUnlockedSeconds == 0) {
             ConstantsEntity constant = null;
             if (currentUser.isAdmin()) {
