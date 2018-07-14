@@ -334,44 +334,48 @@ public class MainWindowUtils {
                 JMenuItem reload = new JMenuItem("Обновить",
                         new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
                 reload.addActionListener(e -> {
-                    new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage("/img/gui/animated/sync.gif", "Обновляем данные");
-
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-                    node.removeAllChildren();
-
-                    final DetailEntity parentForSelectionPath = JTreeUtils.getParentForSelectionPath(mainTree);
-                    final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-
-
-                    //todo fix it
-                    DetailListService service = new DetailListServiceImpl(session);
-                    if (parentForSelectionPath != null && selectedDetailEntityFromTree != null) {
-                        try {
-                            DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parentForSelectionPath, selectedDetailEntityFromTree);
-                            ClientBackgroundService.getInstance().refreshObject(session, detailListEntity);
-                            ClientBackgroundService.getInstance().refreshObject(session, parentForSelectionPath);
-                            ClientBackgroundService.getInstance().refreshObject(session, selectedDetailEntityFromTree);
-                        } catch (Exception e1) {
-                            ClientBackgroundService.getInstance().refreshSession(session, DetailEntity.class);
-                            ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
-
-                        }
-                    } else {
-                        final List<DetailEntity> detailEntities = service.listChildren(selectedDetailEntityFromTree);
-                        for (DetailEntity entity : detailEntities) {
-                            ClientBackgroundService.getInstance().refreshObject(session, entity);
-                            final DetailListEntity latestDetailListEntityByParentAndChild = service.getLatestDetailListEntityByParentAndChild(selectedDetailEntityFromTree, entity);
-                            ClientBackgroundService.getInstance().refreshObject(session, latestDetailListEntityByParentAndChild);
-                        }
-                    }
-
-
-                    expandPath(selectedPath, mainTree);
-
-                    new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(null, null);
+                    reloadPath(selectedPath);
                 });
                 popup.add(reload);
                 mainTree.setComponentPopupMenu(popup);
+            }
+
+            private void reloadPath(TreePath selectedPath) {
+                new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage("/img/gui/animated/sync.gif", "Обновляем данные");
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                node.removeAllChildren();
+
+                final DetailEntity parentForSelectionPath = JTreeUtils.getParentForSelectionPath(mainTree);
+                final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+
+
+                //todo fix it
+                DetailListService service = new DetailListServiceImpl(session);
+                if (parentForSelectionPath != null && selectedDetailEntityFromTree != null) {
+                    try {
+                        DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parentForSelectionPath, selectedDetailEntityFromTree);
+                        ClientBackgroundService.getInstance().refreshObject(session, detailListEntity);
+                        ClientBackgroundService.getInstance().refreshObject(session, parentForSelectionPath);
+                        ClientBackgroundService.getInstance().refreshObject(session, selectedDetailEntityFromTree);
+                    } catch (Exception e1) {
+                        ClientBackgroundService.getInstance().refreshSession(session, DetailEntity.class);
+                        ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+
+                    }
+                } else {
+                    final List<DetailEntity> detailEntities = service.listChildren(selectedDetailEntityFromTree);
+                    for (DetailEntity entity : detailEntities) {
+                        ClientBackgroundService.getInstance().refreshObject(session, entity);
+                        final DetailListEntity latestDetailListEntityByParentAndChild = service.getLatestDetailListEntityByParentAndChild(selectedDetailEntityFromTree, entity);
+                        ClientBackgroundService.getInstance().refreshObject(session, latestDetailListEntityByParentAndChild);
+                    }
+                }
+
+
+                expandPath(selectedPath, mainTree);
+
+                new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(null, null);
             }
         };
     }

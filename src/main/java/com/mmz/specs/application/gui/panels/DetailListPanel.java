@@ -180,6 +180,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         initKeyBindings();
 
+        updateDetailIconLabelListener();
+
 
         addButton.addActionListener(e -> onAddNewItem());
 
@@ -191,6 +193,28 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON2) {
                     onEditDetail(false);
+                }
+            }
+        });
+    }
+
+    private void updateDetailIconLabelListener() {
+        detailIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    final DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                    if (detailEntity != null) {
+                        JPopupMenu popupMenu = new JPopupMenu();
+                        JMenuItem refresh = new JMenuItem("Обновить",
+                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
+                        refresh.addActionListener(e1 -> {
+                            updateDetailImage(detailEntity);
+                        });
+                        popupMenu.add(refresh);
+
+                        detailIconLabel.setComponentPopupMenu(popupMenu);
+                    }
                 }
             }
         });
@@ -345,11 +369,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         titleLabel.setText("");
 
         detailIconLabel.setIcon(null);
-        if (detailIconLabel.getMouseListeners().length > 0) {
-            for (MouseListener listener : detailIconLabel.getMouseListeners()) {
-                detailIconLabel.removeMouseListener(listener);
-            }
-        }
+        FrameUtils.removeAllComponentListeners(detailIconLabel);
+        updateDetailIconLabelListener();
 
         unitLabel.setText("");
         finishedWeightLabel.setText("");
@@ -629,19 +650,20 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 .replace("false", "нет").replace("true", "да"));
     }
 
-    private void updateDetailImage(final DetailEntity selectedComponent) {
+    private void updateDetailImage(final DetailEntity detailEntity) {
         Runnable runnable = () -> {
             detailIconLabel.setText("Загрузка...");
             FrameUtils.removeAllComponentListeners(detailIconLabel);
+            updateDetailIconLabelListener();
 
-            if (selectedComponent != null) {
-                if (selectedComponent.getImagePath() == null) {
-                    loadImageFromFtp(selectedComponent);
+            if (detailEntity != null) {
+                if (detailEntity.getImagePath() == null) {
+                    loadImageFromFtp(detailEntity);
                 } else {
-                    if (selectedComponent.getImagePath().equalsIgnoreCase(IMAGE_REMOVE_KEY)) {
+                    if (detailEntity.getImagePath().equalsIgnoreCase(IMAGE_REMOVE_KEY)) {
                         setEmptyImageIcon();
                     } else {
-                        loadImageFromLocalStorage(selectedComponent);
+                        loadImageFromLocalStorage(detailEntity);
                     }
                 }
             } else {
@@ -680,20 +702,22 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         }
     }
 
-    private void updateDetailIconByImage(DetailEntity selectedComponent, BufferedImage image) {
+    private void updateDetailIconByImage(DetailEntity detailEntity, BufferedImage image) {
         BufferedImage scaledImage = Scalr.resize(image, 128);
 
         DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        if (selectedComponent.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
+        if (detailEntity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
             detailIconLabel.setIcon(new ImageIcon(scaledImage));
             detailIconLabel.setText("");
             detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
             detailIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
-                            image, "Изображение " + selectedComponent.getCode() + " "
-                                    + selectedComponent.getDetailTitleByDetailTitleId().getTitle());
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
+                                image, "Изображение " + detailEntity.getCode() + " "
+                                        + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+                    }
                 }
             });
         }
