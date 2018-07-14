@@ -204,7 +204,9 @@
                         <preferred-size width="150" height="-1"/>
                       </grid>
                     </constraints>
-                    <properties/>
+                    <properties>
+                      <toolTipText value="Поиск по обозначениям и наименованиям (CTRL+F)"/>
+                    </properties>
                   </component>
                 </children>
               </grid>

@@ -39,6 +39,7 @@ public class DetailJTree extends JTree {
     private static final Icon UNIT_OPENED_ICON = new ImageIcon(DetailJTree.class.getResource("/img/gui/tree/unitOpened.png"));
     private static final Icon DETAIL_ICON = new ImageIcon(DetailJTree.class.getClass().getResource("/img/gui/tree/detail.png"));
     private Session session;
+    private String searchText = null;
 
     public DetailJTree() {
         setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
@@ -59,8 +60,9 @@ public class DetailJTree extends JTree {
         addTreeSelectionListener(e -> FrameUtils.getNotifyUserIsActiveActionListener(this).actionPerformed(null));
     }
 
-    private DefaultTreeCellRenderer getRenderer() {
+    public DefaultTreeCellRenderer getRenderer() {
         return new DefaultTreeCellRenderer() {
+
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
@@ -85,12 +87,11 @@ public class DetailJTree extends JTree {
                                         DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
                                         DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
 
-                                        //                                    List<DetailListEntity> result = service.getDetailListByParentAndChild(parent, detailEntity);
-
-                                        /*if (result.size() > 0) {*/
                                         DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
                                         updateBackgroundColor(selected, detailListEntity);
                                         updateIcon(detailEntity);
+
+                                        updateSearch(detailEntity);
 
                                         if (detailListEntity != null) {
                                             String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
@@ -99,17 +100,30 @@ public class DetailJTree extends JTree {
                                             String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
                                             return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                                         }
-                                        /*}*/
                                     }
                                 }
                             }
                             updateIcon(detailEntity);
+                            updateSearch(detailEntity);
+
                             final String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
                             return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                         }
                     }
                 }
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            }
+
+            private void updateSearch(DetailEntity detailEntity) {
+                if (searchText != null && detailEntity != null) {
+                    if (detailEntity.getCode().contains(searchText)) {
+                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 5, Color.ORANGE));
+                    } else {
+                        this.setBorder(null);
+                    }
+                } else {
+                    this.setBorder(null);
+                }
             }
 
             private void updateBackgroundColor(boolean selected, DetailListEntity detailListEntity) {
@@ -152,6 +166,11 @@ public class DetailJTree extends JTree {
                 return dim;
             }
         };
+    }
+
+
+    public void setSearchText(String text) {
+        this.searchText = text;
     }
 
     private void initIcons(DefaultTreeCellRenderer renderer) {
