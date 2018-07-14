@@ -181,11 +181,6 @@ public class ClientMainWindow extends JFrame {
 
     private JMenu getEditMenu() {
         JMenu menu = new JMenu("Правка");
-        JMenuItem restoreFromDb = new JMenuItem("Восстановить с базы данных");
-        restoreFromDb.addActionListener(e -> onRestoreFromDb());
-
-        menu.add(restoreFromDb);
-
         return menu;
     }
 
@@ -256,24 +251,11 @@ public class ClientMainWindow extends JFrame {
         try {
             unlockTabs();
             unlockUIsForAdmins();
-            unlockUIsForConnection();
         } catch (Exception e) {
             log.warn("Could not unlock all tabs and UIs", e);
         }
     }
 
-    private void unlockUIsForConnection() {
-        //-----------------
-        boolean isConnected = ClientBackgroundService.getInstance().isConnected();
-        unlockRestoreFromDBjMenuItem(isConnected);
-    }
-
-    private void unlockRestoreFromDBjMenuItem(boolean isConnected) {
-        JMenuBar jMenuBar = getJMenuBar();
-        JMenu menu = jMenuBar.getMenu(1);
-        JMenuItem item = menu.getItem(0);
-        item.setEnabled(isConnected);
-    }
 
     private void unlockUIsForAdmins() {
         boolean isConnected = ClientBackgroundService.getInstance().isConnected();
@@ -553,11 +535,6 @@ public class ClientMainWindow extends JFrame {
 
     private void unlockAdminTools(boolean unlock) {
         adminButton.setEnabled(unlock);
-    }
-
-    private void onRestoreFromDb() {
-        ClientBackgroundService.getInstance().refreshSession(session);
-        //todo refresh all GUIs //use interface to update data for each panel
     }
 
     private void initWindowListeners() {
