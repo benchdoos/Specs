@@ -105,6 +105,16 @@ public class ClientSettingsManager {
         updateSettingsFile();
     }
 
+    public boolean isClientMainWindowExtended() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_EXTENDED);
+            return Boolean.valueOf(property);
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.MAIN_WINDOW_DEFAULT_EXTENDED;
+    }
+
     Point getClientMainWindowLocation() {
         try {
             String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_POSITION);
@@ -132,6 +142,11 @@ public class ClientSettingsManager {
     public void setClientMainWindowLocation(Point point) throws IOException {
         String value = point.x + "," + point.y;
         CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_POSITION, value);
+        updateSettingsFile();
+    }
+
+    public void setClientMainWindowExtended(boolean extended) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_EXTENDED, Boolean.toString(extended));
         updateSettingsFile();
     }
 }

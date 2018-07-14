@@ -21,8 +21,10 @@ public class ClientConstants {
     public static final String CLIENT_SERVER_ADDRESS_KEY = "server.address";
     public static final String MAIN_WINDOW_DIMENSION = "window.dimension";
     public static final String MAIN_WINDOW_POSITION = "window.position";
+    public static final String MAIN_WINDOW_EXTENDED = "window.extended";
 
     public static final Dimension MAIN_WINDOW_DEFAULT_DIMENSION = new Dimension(640, 540);
+    public static final boolean MAIN_WINDOW_DEFAULT_EXTENDED = false;
 
     public static final String IMAGE_REMOVE_KEY = "remove";
 }

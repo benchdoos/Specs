@@ -580,25 +580,30 @@ public class ClientMainWindow extends JFrame {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                if (getTransactionalTabs().isEmpty()) {
-                    dispose();
-                } else {
-                    ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
-                    for (Transactional transactional : transactionalTabList) {
-                        if (ClientBackgroundService.getInstance().isConnected()) {
-                            if (currentUser != null) {
-                                transactional.rollbackTransaction();
-                            } else {
-                                JOptionPane.showMessageDialog(c, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
-                                        "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
-                            }
-                        } else {
-                            transactional.rollbackTransaction();
-                        }
-                    }
+                try {
                     if (getTransactionalTabs().isEmpty()) {
                         dispose();
+                    } else {
+                        ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
+                        for (Transactional transactional : transactionalTabList) {
+                            if (ClientBackgroundService.getInstance().isConnected()) {
+                                if (currentUser != null) {
+                                    transactional.rollbackTransaction();
+                                } else {
+                                    JOptionPane.showMessageDialog(c, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
+                                            "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
+                                }
+                            } else {
+                                transactional.rollbackTransaction();
+                            }
+                        }
+                        if (getTransactionalTabs().isEmpty()) {
+                            dispose();
+                        }
                     }
+                } catch (HeadlessException e1) {
+                    log.warn("Could not close window properly... closing anyway", e1);
+                    dispose();
                 }
             }
 
@@ -607,7 +612,14 @@ public class ClientMainWindow extends JFrame {
                 try {
                     log.debug("Closing client window, saving location and dimension");
                     ClientSettingsManager.getInstance().setClientMainWindowLocation(getLocation());
-                    ClientSettingsManager.getInstance().setClientMainWindowDimension(getSize());
+
+                    final boolean extended = ((ClientMainWindow) c).getExtendedState() == JFrame.MAXIMIZED_BOTH;
+                    ClientSettingsManager.getInstance().setClientMainWindowExtended(extended);
+
+                    if (!extended) {
+                        ClientSettingsManager.getInstance().setClientMainWindowDimension(getSize());
+                    }
+
                     log.debug("Successfully saved client window location and dimension");
                 } catch (IOException e1) {
                     log.warn("Could not save client window location or dimension", e);
@@ -719,6 +731,7 @@ public class ClientMainWindow extends JFrame {
 
         pack();
         setSize(ClientSettingsManager.getInstance().getClientMainWindowDimension());
+        setExtendedState(ClientSettingsManager.getInstance().isClientMainWindowExtended() ? JFrame.MAXIMIZED_BOTH : JFrame.NORMAL);
     }
 
     public void updateMessage(final String imagePath, final String message) {
