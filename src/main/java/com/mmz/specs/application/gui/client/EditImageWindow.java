@@ -19,6 +19,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.client.ClientConstants;
+import com.mmz.specs.application.core.security.SecurityManager;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.TooManyListenersException;
 
+import static com.mmz.specs.application.core.ApplicationConstants.TMP_IMAGE_FOLDER;
 import static com.mmz.specs.application.utils.FtpUtils.DEFAULT_IMAGE_EXTENSION;
 
 public class EditImageWindow extends JDialog {
@@ -94,6 +97,24 @@ public class EditImageWindow extends JDialog {
         });
 
         contentPane.registerKeyboardAction(e -> onOK(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onPaste(), KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void onPaste() {
+        try {
+            Image image = CommonUtils.getImageFromClipboard();
+            if (image != null) {
+                final String filename = SecurityManager.generatePassword();
+                final boolean ignore = new File(TMP_IMAGE_FOLDER).mkdirs();
+
+                File file = new File(TMP_IMAGE_FOLDER + File.separator + filename + ".jpg");
+                ImageIO.write(CommonUtils.getBufferedImage(image), "jpg", file);
+                detailEntity.setImagePath(file.getAbsolutePath());
+                updateIcon();
+            }
+        } catch (Exception e) {
+            log.warn("Could not paste image from clipboard", e);
+        }
     }
 
     private void updateIcon() {

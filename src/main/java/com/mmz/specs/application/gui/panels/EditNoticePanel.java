@@ -1897,6 +1897,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
 
+    enum Status {DEFAULT, SAVING}
+
     private abstract class WeightDocumentListener implements DocumentListener {
         private final String defaultTooltipText;
         private JTextField textField;
@@ -1957,7 +1959,5 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             verifyInput(textField);
         }
     }
-
-    enum Status {DEFAULT, SAVING}
 
 }

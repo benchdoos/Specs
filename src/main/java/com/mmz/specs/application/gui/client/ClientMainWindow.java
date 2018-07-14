@@ -48,10 +48,13 @@ import org.hibernate.Session;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.mmz.specs.application.core.ApplicationConstants.TMP_IMAGE_FOLDER;
 
 
 public class ClientMainWindow extends JFrame {
@@ -863,6 +866,9 @@ public class ClientMainWindow extends JFrame {
         try {
             onDisconnectFromServer();
             onDisconnectFromFtp();
+
+            removeTmpImages();
+
             uiUpdateTimer.stop();
             unlockUiTimer.stop();
             blockingMessageTimer.stop();
@@ -875,6 +881,12 @@ public class ClientMainWindow extends JFrame {
             log.warn("Could not close connection", e);
         }
         super.dispose();
+    }
+
+    private void removeTmpImages() {
+        log.debug("Deleting TMP (from clipboard) images on: " + TMP_IMAGE_FOLDER);
+        File file = new File(TMP_IMAGE_FOLDER);
+        CommonUtils.deleteFolder(file);
     }
 
     private JMenu getConnectionMenu() {

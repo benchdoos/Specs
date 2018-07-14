@@ -22,6 +22,8 @@ import org.hibernate.Session;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -91,6 +93,23 @@ public class CommonUtils {
         return null;
     }
 
+    public static BufferedImage getBufferedImage(Image img) {
+        if (img instanceof BufferedImage) {
+            return (BufferedImage) img;
+        }
+
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+        // Return the buffered image
+        return bimage;
+    }
+
     public static File getCurrentFile() {
         try {
             return new File(CommonUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -127,7 +146,6 @@ public class CommonUtils {
         });
     }
 
-
     public static String getCurrentInetAddress() {
         String result = "Unknown";
         try {
@@ -163,6 +181,37 @@ public class CommonUtils {
             log.info("Session successfully closed");
         } catch (Exception e) {
             log.warn("Could not rollback transaction", e);
+        }
+    }
+
+    public static Image getImageFromClipboard() throws Exception {
+        Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+            return (Image) transferable.getTransferData(DataFlavor.imageFlavor);
+        } else {
+            return null;
+        }
+    }
+
+    public static void deleteFolder(File file) {
+        try {
+            if (file.isDirectory()) {
+                String[] entries = file.list();
+                if (entries != null) {
+                    for (String s : entries) {
+                        File currentFile = new File(file.getPath(), s);
+                        final boolean ignore = currentFile.delete();
+                    }
+                }
+            }
+            final boolean delete = file.delete();
+            if (delete) {
+                log.info("Folder {} successfully deleted", file);
+            } else {
+                log.warn("Could not delete folder: {}", file);
+            }
+        } catch (Exception e) {
+            log.warn("Could not delete folder: {}", file, e);
         }
     }
 }
