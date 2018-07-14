@@ -98,16 +98,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
-    DetailListPanel(DetailEntity rootEntity) {
-        $$$setupUI$$$();
-        session = ClientBackgroundService.getInstance().getSession();
-
-        initGui();
-        fillMainTree(rootEntity);
-        hideControls();
-
-    }
-
     DetailListPanel(Session session, DetailEntity rootEntity) {
         $$$setupUI$$$();
         this.session = session;
@@ -156,9 +146,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         noticeInfoButton.addActionListener(e -> {
             mainWindowUtils.setClientMainWindow(panel);
             mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
-            new Thread(() -> {
-                onNoticeInfo(true);
-            }).start();
+            new Thread(() -> onNoticeInfo(true)).start();
         });
 
         noticeInfoButton.addMouseListener(new MouseAdapter() {
@@ -865,15 +853,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         editButton.setEnabled(enable);
         final DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         copyButton.setEnabled(selectedEntity != null ? enable && selectedEntity.isUnit() : enable);
-    }
-
-
-    private void notifyUserIsActive() {
-        final Window window = FrameUtils.findWindow(this);
-        if (window instanceof ClientMainWindow) {
-            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
-            clientMainWindow.resetUnlockedSeconds();
-        }
     }
 
     /**
