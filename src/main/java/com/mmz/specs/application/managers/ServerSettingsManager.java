@@ -82,7 +82,7 @@ public class ServerSettingsManager {
         updateSettingsFile();
     }
 
-    public void loadSettingsFile() throws IOException {
+    public void loadSettingsFile() {
         try {
             loadSettings();
         } catch (FileNotFoundException e) {
@@ -92,11 +92,9 @@ public class ServerSettingsManager {
                 createEmptySettingsFile();
             } catch (IOException e1) {
                 log.warn("Could not create empty settings file: " + connectionFileLocation, e);
-                throw new IOException(e1);
             }
         } catch (IOException e) {
             log.warn("Could not load settings file:" + connectionFileLocation);
-            throw new IOException(e);
         }
     }
 

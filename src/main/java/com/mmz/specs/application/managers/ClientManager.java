@@ -16,7 +16,6 @@
 package com.mmz.specs.application.managers;
 
 import com.mmz.specs.application.core.ApplicationConstants;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientConfigurationWindow;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -35,8 +34,9 @@ public class ClientManager {
     private ClientManager() {
         loadClientSettings();
 
+        /*//testme before remove
         Thread thread = new Thread(ClientBackgroundService::getInstance);
-        thread.start();
+        thread.start();*/
 
         clientMainWindow = new ClientMainWindow();
         if (ClientSettingsManager.getInstance().getClientMainWindowLocation().equals(new Point(-1, -1))) {

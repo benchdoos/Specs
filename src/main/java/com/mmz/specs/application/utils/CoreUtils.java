@@ -30,7 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
@@ -136,11 +135,7 @@ public class CoreUtils {
         ServerSettingsManager settingsManager = ServerSettingsManager.getInstance();
         try {
             settingsManager.setServerSettings(CommonSettingsManager.getServerSettingsFilePath());
-            try {
-                settingsManager.loadSettingsFile();
-            } catch (IOException e) {
-                log.warn("Could not load settings file at: " + CommonSettingsManager.getServerSettingsFilePath(), e);
-            }
+            settingsManager.loadSettingsFile();
         } catch (Exception e) {
             log.warn("Could not set new server settings", e);
             ServerConfigurationWindow serverConfigurationWindow = new ServerConfigurationWindow();
@@ -224,7 +219,7 @@ public class CoreUtils {
         UIManager.put("OptionPane.cancelButtonText", "Отмена");
         UIManager.put("OptionPane.yesButtonText", "Да");
         UIManager.put("OptionPane.noButtonText", "Нет");
-        
+
         Locale locale = new Locale("ru");
         JOptionPane.setDefaultLocale(locale);
 
