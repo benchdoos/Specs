@@ -1,4 +1,19 @@
 <?xml version='1.0' encoding='utf-8'?>
+<!--
+  ~ (C) Copyright 2018.  Eugene Zrazhevsky and others.
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~ Contributors:
+  ~ Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
+  -->
+
 <!DOCTYPE hibernate-configuration PUBLIC
         "-//Hibernate/Hibernate Configuration DTD//EN"
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
@@ -9,11 +24,11 @@
         <property name="hibernate.connection.CharSet">RUSSIAN_CHARSET</property>
         <property name="hibernate.connection.characterEncoding">UTF-8</property>
 
-        <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider
+        <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider
         </property>
         <property name="hibernate.hikari.minimumIdle">5</property>
         <property name="hibernate.hikari.maximumPoolSize">100</property>
-        <property name="hibernate.hikari.idleTimeout">5000</property>
+        <property name="hibernate.hikari.idleTimeout">10000</property>
         <!--<property name="hibernate.connection.release_mode">after_statement</property>-->
         <!--TODO Calling rollback() in auto-commit mode is not allowed // FIND THIS-->
         <property name="hibernate.connection.autocommit">false</property>
@@ -22,7 +37,8 @@
         <!-- <property name="hbm2ddl.auto">update</property> -->
 
         <!--Hibernate shows sql info-->
-        <!--<property name="show_sql">true</property>-->
+        <!--<property name="show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>-->
 
 
         <mapping resource="hibernate/HibernateMapping.xml"/>
