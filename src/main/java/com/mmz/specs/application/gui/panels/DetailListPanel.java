@@ -151,13 +151,23 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void initListeners() {
-        noticeInfoButton.addActionListener(e -> onNoticeInfo(true));
+        DetailListPanel panel = this;
+        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        noticeInfoButton.addActionListener(e -> {
+            mainWindowUtils.setClientMainWindow(panel);
+            mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
+            new Thread(() -> {
+                onNoticeInfo(true);
+            }).start();
+        });
 
         noticeInfoButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON2) {
-                    onNoticeInfo(false);
+                    mainWindowUtils.setClientMainWindow(panel);
+                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
+                    new Thread(() -> onNoticeInfo(false)).start();
                 }
             }
         });
@@ -440,6 +450,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onNoticeInfo(boolean select) {
+        MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        mainWindowUtils.setClientMainWindow(this);
+
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (selectedEntity != null) {
             DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
@@ -463,6 +476,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
         }
+        mainWindowUtils.updateMessage(null, null);
     }
 
     private void onRefreshSession() {
