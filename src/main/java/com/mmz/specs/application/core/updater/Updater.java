@@ -46,7 +46,7 @@ public class Updater {
 
     private static final String GITHUB_URL = "https://api.github.com/repos/benchdoos/Specs/releases/latest";
     private static final String DEFAULT_ENCODING = "UTF-8";
-    private static final File INSTALLER_FILE = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
+    public static final File INSTALLER_FILE = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
             + File.separator + ApplicationConstants.APPLICATION_FINAL_NAME);
     private static Updater ourInstance = new Updater();
     private HttpsURLConnection connection = null;
