@@ -27,14 +27,13 @@ import java.io.*;
 
 public class FtpUtils {
     public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
+    public static final String DEFAULT_IMAGE_EXTENSION = ".jpg";
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-
-
     private static final FtpUtils ourInstance = new FtpUtils();
     private static final int FTP_PORT = 21;
-    public static final String DEFAULT_IMAGE_EXTENSION = ".jpg";
     private static int getImageCounter = 0;
     private final FTPClient ftpClient = new FTPClient();
+    int counter = 0;
     private String postfix;
     private String connectionUrl;
     private String username;
@@ -53,8 +52,15 @@ public class FtpUtils {
         this.username = username;
         this.password = password;
 
-        log.info("Creating FTP connection to " + connectionUrl
-                + " for " + username + " with password length: " + password.length());
+
+        new Thread(() -> createFtpConnection(connectionUrl, username, password)).start();
+    }
+
+    private void createFtpConnection(String connectionUrl, String username, String password) {
+        if (counter > 20) {
+            log.debug("Creating FTP connection at: {} user: {} password: ({}) postfix: {}",
+                    connectionUrl, username, password.length(), postfix);
+        }
         try {
             ftpClient.connect(connectionUrl, FTP_PORT);
 
@@ -75,10 +81,16 @@ public class FtpUtils {
                 ftpClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
 
                 ftpClient.enterLocalPassiveMode();
+
+                log.info("FTP successfully connected");
             }
         } catch (Exception e) {
-            log.warn("Could not establish FTP connection to " + connectionUrl
-                    + " for " + username + " with password length: " + password.length(), e);
+            if (counter > 20) {
+                log.warn("Could not establish FTP connection to " + connectionUrl
+                        + " for " + username + " with password length: " + password.length(), e);
+                counter = 0;
+            }
+            counter++;
         }
     }
 

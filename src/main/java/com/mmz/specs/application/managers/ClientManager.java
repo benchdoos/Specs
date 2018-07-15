@@ -34,10 +34,6 @@ public class ClientManager {
     private ClientManager() {
         loadClientSettings();
 
-        /*//testme before remove
-        Thread thread = new Thread(ClientBackgroundService::getInstance);
-        thread.start();*/
-
         clientMainWindow = new ClientMainWindow();
         if (ClientSettingsManager.getInstance().getClientMainWindowLocation().equals(new Point(-1, -1))) {
             clientMainWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientMainWindow));
@@ -66,19 +62,6 @@ public class ClientManager {
 
     public static ClientManager getInstance() {
         return ourInstance;
-    }
-
-    public void notifyClientMainWindow(ClientConnectionStatus status) {
-        switch (status) {
-            case CONNECTION_REFUSED:
-                clientMainWindow.notifyConnectionRefused();
-                break;
-            case ERROR:
-                clientMainWindow.notifyConnectionError();
-                break;
-            case SECCUSS:
-                break;
-        }
     }
 
     public enum ClientConnectionStatus {SECCUSS, ERROR, CONNECTION_REFUSED}

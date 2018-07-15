@@ -43,6 +43,7 @@ import com.mmz.specs.service.ConstantsServiceImpl;
 import com.mmz.specs.service.NoticeServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -76,6 +77,7 @@ public class ClientMainWindow extends JFrame {
     private JLabel messageLabel;
     private Timer uiUpdateTimer;
     private Timer unlockUiTimer;
+    private Timer connectionManagerTimer;
     private int unlockedSeconds;
     private int maxUnlockedSeconds;
     private boolean blockingMessage = false;
@@ -83,6 +85,7 @@ public class ClientMainWindow extends JFrame {
         blockingMessage = false;
         updateMessage(null, null);
     });
+    private boolean manualDisconnect;
 
     public ClientMainWindow() {
         try {
@@ -106,17 +109,6 @@ public class ClientMainWindow extends JFrame {
     private void initHomeTab() {
         clientMainTabbedPane.setIconAt(0,
                 new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/home12.png"))));
-    }
-
-    private void initTimers() {
-        uiUpdateTimer = new Timer(300, e -> updateStatusLabel());
-        if (!uiUpdateTimer.isRunning()) {
-            uiUpdateTimer.start();
-        }
-        unlockUiTimer = new Timer(1000, e -> updateUnlockUiTimer());
-        if (!unlockUiTimer.isRunning()) {
-            unlockUiTimer.start();
-        }
     }
 
     public void resetUnlockedSeconds() {
@@ -182,65 +174,90 @@ public class ClientMainWindow extends JFrame {
         return menu;
     }
 
+    private void manageConnections() {
+        boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
+        boolean isSessionOnline = session != null && session.isConnected();
+        boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
+        if (!manualDisconnect) {
+            if (isServerOnline) {
+                if (isSessionOnline) {
+                    if (!isFtpOnline) {
+                        ftpUtils = null;
+                        initFtp();
+                    }
+                } else {
+                    session = null;
+                    session = ClientBackgroundService.getInstance().getSession();
+                }
+            } else {
+                session = null;
+                ftpUtils = null;
+                createConnection();
+            }
+        }
+    }
+
     private JMenu getEditMenu() {
-        JMenu menu = new JMenu("Правка");
-        return menu;
+        return new JMenu("Правка");
     }
 
     private void updateStatusLabel() {
-        if (ClientBackgroundService.getInstance().isConnected()) {
-            Runnable runnable = () -> {
-                statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
-                statusLabel.setToolTipText("Сервер подключен");
+        /*if (ClientBackgroundService.getInstance().isConnected()) {
+            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
+            statusLabel.setToolTipText("Сервер подключен");
 
-                if (session == null) {
-                    Runnable getSessionRunnable = () -> {
-                        session = ClientBackgroundService.getInstance().getSession();
-                        initFtp();
-                    };
-                    SwingUtilities.invokeLater(getSessionRunnable);
+            if (session == null) {
+                //todo
+            } else {
+                if (session.isConnected()) {
+                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
+                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД подключена");
                 } else {
-                    if (session.isConnected()) {
-                        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
-                        statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД подключена");
-                    } else {
-                        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
-                        statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД не подключена");
-                    }
+                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
+                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД не подключена");
                 }
+            }
 
-                setButtonsEnabled(true);
-                unlockTabsAndUIs();
-            };
-            SwingUtilities.invokeLater(runnable);
+            setButtonsEnabled(true);
+            unlockTabsAndUIs();
         } else {
-            Runnable runnable = () -> {
-                statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-                statusLabel.setToolTipText("Сервер отключен");
+            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+            statusLabel.setToolTipText("Сервер отключен");
 
-                if (session != null) {
-                    if (session.isConnected()) {
-                        try {
-                            session.disconnect();
-                            session = null;
-                        } catch (Exception e) {
-                            log.warn("Could not disconnect", e);
-                        }
-
-                        statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-                        statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
+            if (session != null) {
+                if (session.isConnected()) {
+                    try {
+                        session.disconnect();
+                        session = null;
+                    } catch (Exception e) {
+                        log.warn("Could not disconnect", e);
                     }
-                }
 
-                setButtonsEnabled(false);
-                unlockTabsAndUIs();
-                unlockAdminTools(false);
-                if (currentUser != null) {
-                    onLogin();
+                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
+                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
                 }
-            };
-            SwingUtilities.invokeLater(runnable);
-        }
+            }
+
+            setButtonsEnabled(false);
+            unlockTabsAndUIs();
+            unlockAdminTools(false);
+            if (currentUser != null) {
+                onLogin();
+            }
+        }*/
+
+        boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
+        boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
+        boolean isSessionOnline = session != null && session.isConnected();
+        String serverInfo = isServerOnline ? "Сервер подключён" : "Сервер отключён";
+        String ftpInfo = isFtpOnline ? "FTP подключён" : "FTP отключён";
+        String sessionInfo = isSessionOnline ? "БД подключена" : "БД отключена";
+        statusLabel.setToolTipText(serverInfo + " | " + ftpInfo + " | " + sessionInfo);
+
+        updateStatusLabelIcon(isServerOnline, isFtpOnline, isSessionOnline);
+
+        setButtonsEnabled(isServerOnline && isSessionOnline);
+        unlockTabsAndUIs();
     }
 
     private void setEnabledTab(int i, boolean enabled) {
@@ -248,6 +265,20 @@ public class ClientMainWindow extends JFrame {
         if (clientMainTabbedPane.getSelectedIndex() == i && !enabled) {
             clientMainTabbedPane.setSelectedIndex(0);
         }
+    }
+
+    private void updateStatusLabelIcon(boolean isServerOnline, boolean isFtpOnline, boolean isSessionOnline) {
+        ConnectionStatus status = isServerOnline && isFtpOnline && isSessionOnline ? ConnectionStatus.CONNECTED :
+                isServerOnline ? ConnectionStatus.PARTLY_CONNECTED : ConnectionStatus.DISCONNECTED;
+        statusLabel.setIcon(getResizedStatusImage(status));
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        if (b) {
+            createConnection();
+        }
+        super.setVisible(b);
     }
 
     private void unlockTabsAndUIs() {
@@ -258,7 +289,6 @@ public class ClientMainWindow extends JFrame {
             log.warn("Could not unlock all tabs and UIs", e);
         }
     }
-
 
     private void unlockUIsForAdmins() {
         boolean isConnected = ClientBackgroundService.getInstance().isConnected();
@@ -366,8 +396,6 @@ public class ClientMainWindow extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 onUsernameInfo();
             }
-            //
-            ///**      * Method generated by IntelliJ IDEA GUI Designer
         });
     }
 
@@ -385,33 +413,41 @@ public class ClientMainWindow extends JFrame {
         configurationWindow.setVisible(true);
     }
 
+    private void createConnection() {
+        updateMessage("/img/gui/animated/connection.gif", "Устанавливаем соединение с сервером");
+        new Thread(() -> {
+            try {
+                if (!ClientBackgroundService.getInstance().isConnected()) {
+                    ClientBackgroundService.getInstance().createConnection();
+                }
+            } catch (IOException ignore) {
+            }
+            if (ClientBackgroundService.getInstance().isConnected()) {
+                session = ClientBackgroundService.getInstance().getSession();
+                initFtp();
+                updateMessage("/img/gui/animated/connection_completed.gif", "Соединение установлено");
+                blockMessage();
+            }
+
+
+        }).start();
+    }
+
     private void onConnectToServer() {
         if (ClientBackgroundService.getInstance().isConnected()) {
             JOptionPane.showMessageDialog(this,
                     "Сервер уже подключён", "Уведомление",
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
-            ClientBackgroundService.getInstance().createConnection();
+            try {
+                ClientBackgroundService.getInstance().createConnection();
+            } catch (IOException e) {
+                log.warn("Could not create a socket connection to server", e);
+                JOptionPane.showMessageDialog(this,
+                        "Не установлена связь с сервером, проверьте настройки.",
+                        "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
+            }
         }
-    }
-
-    private void onDisconnectFromServer() {
-        try {
-            log.info("Trying to disconnect from server");
-            ClientBackgroundService.getInstance().closeConnection();
-            log.info("Successfully disconnected from server");
-        } catch (IOException e) {
-            log.warn("Could not disconnect from server", e);
-            JOptionPane.showMessageDialog(this,
-                    "Не удалось отключиться от сервера.\n" + e.getLocalizedMessage(),
-                    "Ошибка отключения", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    public void notifyConnectionRefused() {
-        JOptionPane.showMessageDialog(this,
-                "Не установлена связь с сервером, проверьте настройки.",
-                "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
     }
 
     private ConstantsEntity getConstantsEntity() {
@@ -437,14 +473,30 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    private void onDisconnectFromFtp() {
-        if (ftpUtils != null) {
-            try {
-                ftpUtils.disconnect();
-            } catch (Exception e) {
-                log.warn("Could not disconnect from ftp server: " + ftpUtils, e);
-            }
+    private void onDisconnectFromServer() {
+        try {
+            log.info("Trying to disconnect from server");
+            ClientBackgroundService.getInstance().closeConnection();
+            log.info("Successfully disconnected from server");
+        } catch (IOException e) {
+            log.warn("Could not disconnect from server socket ", e);
+            JOptionPane.showMessageDialog(this,
+                    "Не удалось отключиться от сервера.\n" + e.getLocalizedMessage(),
+                    "Ошибка отключения", JOptionPane.ERROR_MESSAGE);
         }
+
+        onDisconnectFromFtp();
+
+        try {
+            session.close();
+            session = null;
+        } catch (HibernateException e) {
+            log.warn("Could not disconnect from DB", e);
+            JOptionPane.showMessageDialog(this,
+                    "Не удалось отключиться от БД.\n" + e.getLocalizedMessage(),
+                    "Ошибка отключения", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     public void notifyConnectionError() {
@@ -471,7 +523,6 @@ public class ClientMainWindow extends JFrame {
                 String username = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_USERNAME_KEY).getValue();
                 String password = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_PASSWORD_KEY).getValue();
                 String postfix = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_LOCATION_POSTFIX_KEY).getValue();
-                log.info("Creating ftp connection at: " + url + " user: " + username + " password: " + password.length() + " postfix: " + postfix);
                 ftpUtils.connect(url, username, password);
 
                 ftpUtils.setPostfix(postfix);
@@ -726,17 +777,13 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    public void updateMessageIcon(String imagePath) {
-        if (!blockingMessage) {
-            if (imagePath != null) {
-                try {
-                    messageLabel.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource(imagePath))
-                            .getScaledInstance(16, 16, 1)));
-                } catch (Exception e) {
-                    messageLabel.setIcon(null);
-                }
-            } else {
-                messageLabel.setIcon(null);
+    private void onDisconnectFromFtp() {
+        if (ftpUtils != null) {
+            try {
+                ftpUtils.disconnect();
+                ftpUtils = null;
+            } catch (Exception e) {
+                log.warn("Could not disconnect from ftp server: " + ftpUtils, e);
             }
         }
     }
@@ -861,6 +908,28 @@ public class ClientMainWindow extends JFrame {
         updateMessage(null, null);
     }
 
+    public void updateMessageIcon(String imagePath) {
+        if (!blockingMessage) {
+            if (imagePath != null) {
+                try {
+                    messageLabel.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource(imagePath))
+                            .getScaledInstance(16, 16, 1)));
+                } catch (Exception e) {
+                    log.warn("Could not set image for message label", e);
+                    messageLabel.setIcon(null);
+                }
+            } else {
+                messageLabel.setIcon(null);
+            }
+        }
+    }
+
+    private void removeTmpImages() {
+        log.debug("Deleting TMP (from clipboard) images on: " + TMP_IMAGE_FOLDER);
+        File file = new File(TMP_IMAGE_FOLDER);
+        CommonUtils.deleteFolder(file);
+    }
+
     @Override
     public void dispose() {
         try {
@@ -871,6 +940,7 @@ public class ClientMainWindow extends JFrame {
 
             uiUpdateTimer.stop();
             unlockUiTimer.stop();
+            connectionManagerTimer.stop();
             blockingMessageTimer.stop();
 
 
@@ -883,10 +953,20 @@ public class ClientMainWindow extends JFrame {
         super.dispose();
     }
 
-    private void removeTmpImages() {
-        log.debug("Deleting TMP (from clipboard) images on: " + TMP_IMAGE_FOLDER);
-        File file = new File(TMP_IMAGE_FOLDER);
-        CommonUtils.deleteFolder(file);
+    private void initTimers() {
+        uiUpdateTimer = new Timer(300, e -> updateStatusLabel());
+        if (!uiUpdateTimer.isRunning()) {
+            uiUpdateTimer.start();
+        }
+        unlockUiTimer = new Timer(1000, e -> updateUnlockUiTimer());
+        if (!unlockUiTimer.isRunning()) {
+            unlockUiTimer.start();
+        }
+
+        connectionManagerTimer = new Timer(1000, e -> manageConnections());
+        if (!connectionManagerTimer.isRunning()) {
+            connectionManagerTimer.start();
+        }
     }
 
     private JMenu getConnectionMenu() {
@@ -900,12 +980,18 @@ public class ClientMainWindow extends JFrame {
         JMenuItem connectServer = new JMenuItem("Подключение к серверу");
         connectServer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
                 InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        connectServer.addActionListener(e -> onConnectToServer());
+        connectServer.addActionListener(e -> {
+            manualDisconnect = false;
+            onConnectToServer();
+        });
         connectServer.setIconTextGap(0);
         menu.add(connectServer);
 
         JMenuItem disconnectServer = new JMenuItem("Отключение от сервера");
-        disconnectServer.addActionListener(e -> onDisconnectFromServer());
+        disconnectServer.addActionListener(e -> {
+            manualDisconnect = true;
+            onDisconnectFromServer();
+        });
         disconnectServer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
                 InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         disconnectServer.setIconTextGap(0);

@@ -91,9 +91,7 @@ public class ConstantsDaoImpl implements ConstantsDao {
         query.setParameter("key", key);
         query.setFirstResult(0);
         query.setMaxResults(1);
-        final ConstantsEntity entity = (ConstantsEntity) query.getSingleResult();
-        log.debug("Constant found by key: " + key + " " + entity);
-        return entity;
+        return (ConstantsEntity) query.getSingleResult();
 
     }
 

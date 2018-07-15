@@ -19,9 +19,16 @@ import com.mmz.specs.application.utils.Logging;
 
 public class Main {
     public Main(String[] args) {
-        new Logging(args);
-        Application application = new Application();
-        application.initApplication(args);
+        try {
+            new Logging(args);
+            Application application = new Application();
+            application.initApplication(args);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.err.println("Got an fatal exception: " + e.getLocalizedMessage());
+            System.err.println("Exiting application with code: -1");
+            System.exit(-1);
+        }
     }
 
     public static void main(final String[] args) {

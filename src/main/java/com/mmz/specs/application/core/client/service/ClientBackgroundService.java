@@ -16,7 +16,6 @@
 package com.mmz.specs.application.core.client.service;
 
 import com.mmz.specs.application.core.server.ServerConstants;
-import com.mmz.specs.application.managers.ClientManager;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -52,15 +51,11 @@ public class ClientBackgroundService {
     private String serverAddress;
     private int serverPort;
 
-    private ClientBackgroundService() {
-        createConnection();
-    }
-
     public static ClientBackgroundService getInstance() {
         return ourInstance;
     }
 
-    public void createConnection() {
+    public void createConnection() throws IOException {
         if (!isConnected()) {
             createNewServerConnection();
         }
@@ -102,23 +97,13 @@ public class ClientBackgroundService {
         }
     }
 
-    private void createNewServerConnection() {
+    private void createNewServerConnection() throws IOException {
         serverAddress = ClientSettingsManager.getInstance().getServerAddress();
         serverPort = ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
-        Runnable runnable = () -> {
-            log.info("Trying to connect to " + serverAddress + ":" + serverPort);
-            try {
-                socket = new Socket(serverAddress, serverPort);
-                socket.setSoTimeout(3000);
-                outputStream = new DataOutputStream(socket.getOutputStream());
-                dataInputStream = new DataInputStream(socket.getInputStream());
-            } catch (Exception e) {
-                log.warn("Could not establish connection", e);
-                ClientManager.getInstance().notifyClientMainWindow(ClientManager.ClientConnectionStatus.CONNECTION_REFUSED);
-            }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        socket = new Socket(serverAddress, serverPort);
+        socket.setSoTimeout(3000);
+        outputStream = new DataOutputStream(socket.getOutputStream());
+        dataInputStream = new DataInputStream(socket.getInputStream());
     }
 
     public Session getSession() {
