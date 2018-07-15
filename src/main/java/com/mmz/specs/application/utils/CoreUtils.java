@@ -30,6 +30,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
@@ -223,5 +225,10 @@ public class CoreUtils {
         Locale locale = new Locale("ru");
         JOptionPane.setDefaultLocale(locale);
 
+    }
+
+    public static void drawUI() {
+        UIManager.put("ProgressBar.selectionForeground", new ColorUIResource(Color.WHITE));
+        UIManager.put("ProgressBar.selectionBackground", new ColorUIResource(Color.BLACK));
     }
 }
