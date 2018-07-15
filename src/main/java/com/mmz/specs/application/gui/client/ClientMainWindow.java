@@ -709,20 +709,14 @@ public class ClientMainWindow extends JFrame {
 
         noticeListViewButton.addActionListener(e -> {
             updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях");
-            Runnable runnable = () -> {
-                onListNoticeInfo(true);
-            };
-            new Thread(runnable).start();
+            new Thread(() -> onListNoticeInfo(true)).start();
         });
         noticeListViewButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON2) {
                     updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях");
-                    Runnable runnable = () -> {
-                        onListNoticeInfo(false);
-                    };
-                    new Thread(runnable).start();
+                    new Thread(() -> onListNoticeInfo(false)).start();
                 }
             }
             //
