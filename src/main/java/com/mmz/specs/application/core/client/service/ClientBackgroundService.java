@@ -136,10 +136,11 @@ public class ClientBackgroundService {
     }
 
     private SessionFactory getSessionFactoryFromServer() {
+        String params = null;
         try {
             log.info("Asking server for session, command: " + SocketConstants.GIVE_SESSION);
             outputStream.writeUTF(SocketConstants.GIVE_SESSION);
-            String params = dataInputStream.readUTF();
+            params = dataInputStream.readUTF();
             JSONObject obj = new JSONObject(params);
 
             String dbAddress = obj.getString(CP_DB_CONNECTION_URL_KEY);
@@ -150,7 +151,7 @@ public class ClientBackgroundService {
 
             return createFactory(dbAddress, dbUsername, dbPassword);
         } catch (Throwable e) {
-            log.warn("Could not ask server for session", e);
+            log.warn("Could not ask server for session, params: {}", params, e);
         }
 
         return null;
