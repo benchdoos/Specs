@@ -677,8 +677,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         final String imagePath = selectedComponent.getImagePath();
         File file = new File(imagePath);
         if (file.exists()) {
-            final boolean jpg = file.getAbsolutePath().toLowerCase().endsWith("jpg");
-            if (jpg) {
+            final boolean extension = FtpUtils.getInstance().isImage(file);
+            if (extension) {
                 final BufferedImage bufferedImage = CommonUtils.getBufferedImage(file);
                 if (bufferedImage != null) {
                     updateDetailIconByImage(selectedComponent, bufferedImage);

@@ -62,7 +62,6 @@ import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.EDIT;
 import static com.mmz.specs.application.gui.panels.EditNoticePanel.Status.DEFAULT;
 import static com.mmz.specs.application.gui.panels.EditNoticePanel.Status.SAVING;
-import static com.mmz.specs.application.utils.FtpUtils.DEFAULT_IMAGE_EXTENSION;
 import static javax.swing.JOptionPane.*;
 
 public class EditNoticePanel extends JPanel implements AccessPolicy, Transactional {
@@ -210,7 +209,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     if (list.size() == 1) {
                         if (list.get(0) instanceof File) {
                             File file = (File) list.get(0);
-                            if (file.exists() && file.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
+                            final boolean extension = FtpUtils.getInstance().isImage(file);
+                            if (file.exists() && extension) {
                                 final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                                 if (selectedDetailEntityFromTree != null) {
                                     onSuccess(file, selectedDetailEntityFromTree);

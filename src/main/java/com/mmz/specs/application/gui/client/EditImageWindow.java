@@ -41,11 +41,11 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TooManyListenersException;
 
 import static com.mmz.specs.application.core.ApplicationConstants.TMP_IMAGE_FOLDER;
-import static com.mmz.specs.application.utils.FtpUtils.DEFAULT_IMAGE_EXTENSION;
 
 public class EditImageWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -152,11 +152,12 @@ public class EditImageWindow extends JDialog {
 
     private void onUpload() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Выберите изображение (" + DEFAULT_IMAGE_EXTENSION + ")");
+        chooser.setDialogTitle("Выберите изображение (" + Arrays.toString(FtpUtils.SUPPORTED_IMAGE_EXTENSIONS) + ")");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
 
-        FileFilter fileFilter = new FileNameExtensionFilter("Изображение " + DEFAULT_IMAGE_EXTENSION, DEFAULT_IMAGE_EXTENSION, DEFAULT_IMAGE_EXTENSION.toUpperCase());
+        FileFilter fileFilter = new FileNameExtensionFilter("Изображение " + Arrays.toString(FtpUtils.SUPPORTED_IMAGE_EXTENSIONS),
+                FtpUtils.SUPPORTED_IMAGE_EXTENSIONS);
         chooser.setFileFilter(fileFilter);
         int returnValue = chooser.showDialog(this, "OK");
         if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -211,7 +212,7 @@ public class EditImageWindow extends JDialog {
                     if (list.size() == 1) {
                         if (list.get(0) instanceof File) {
                             File file = (File) list.get(0);
-                            if (file.exists() && file.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
+                            if (file.exists() && FtpUtils.getInstance().isImage(file)) {
                                 detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
                                 detailEntity.setImagePath(file.getAbsolutePath());
                             }

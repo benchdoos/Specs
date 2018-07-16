@@ -24,16 +24,19 @@ import org.apache.logging.log4j.Logger;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
 
 public class FtpUtils {
     public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
-    public static final String DEFAULT_IMAGE_EXTENSION = ".jpg";
+    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".png", ".bmp", ".gif"};
+    private static final String FTP_IMAGE_EXTENSION = ".spi";
+
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final FtpUtils ourInstance = new FtpUtils();
     private static final int FTP_PORT = 21;
     private static int getImageCounter = 0;
     private final FTPClient ftpClient = new FTPClient();
-    int counter = 0;
+    private int counter = 0;
     private String postfix;
     private String connectionUrl;
     private String username;
@@ -114,8 +117,8 @@ public class FtpUtils {
             if (!ftpClient.isConnected()) return null;
             try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 
-                log.debug("Loading image at path: " + connectionUrl + postfix + id + DEFAULT_IMAGE_EXTENSION);
-                ftpClient.retrieveFile(postfix + id + DEFAULT_IMAGE_EXTENSION, output);
+                log.debug("Loading image at path: " + connectionUrl + postfix + id + FTP_IMAGE_EXTENSION);
+                ftpClient.retrieveFile(postfix + id + FTP_IMAGE_EXTENSION, output);
                 byte[] data = output.toByteArray();
                 ByteArrayInputStream input = new ByteArrayInputStream(data);
                 BufferedImage image = ImageIO.read(input);
@@ -137,11 +140,12 @@ public class FtpUtils {
         if (localFile == null) {
             throw new IllegalArgumentException("Uploading local file can not be null");
         }
-        if (!localFile.getAbsolutePath().toLowerCase().endsWith(DEFAULT_IMAGE_EXTENSION)) {
-            throw new IOException("Uploading image should have " + DEFAULT_IMAGE_EXTENSION + " extension");
+        final String path = localFile.getAbsolutePath().toLowerCase();
+        if (!isImage(localFile)) {
+            throw new IOException("Uploading image should be one of this extensions: " + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS) + " extension");
         }
 
-        String remoteFile = postfix + id + DEFAULT_IMAGE_EXTENSION;
+        String remoteFile = postfix + id + FTP_IMAGE_EXTENSION;
 
         log.debug("Uploading image for id:{} exists:{} with path:{} to path:{}", id, localFile.exists(), localFile, remoteFile);
         byte[] bytesIn = new byte[4096];
@@ -165,9 +169,25 @@ public class FtpUtils {
         ftpClient.completePendingCommand();
     }
 
+    public boolean isImage(File localFile) {
+        if (localFile != null && localFile.isFile()) {
+            if (localFile.exists()) {
+                for (String extension : SUPPORTED_IMAGE_EXTENSIONS) {
+                    final String filePath = localFile.getAbsolutePath().toLowerCase();
+                    System.out.println(filePath + " " + extension);
+                    if (filePath.contains(extension)) {
+                        System.out.println("yes: " + extension);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public void deleteImage(int id) throws IOException {
         log.debug("Removing image by id: {}" + id);
-        ftpClient.deleteFile(postfix + id + DEFAULT_IMAGE_EXTENSION);
-        log.info("Image was successfully removed: " + postfix + id + DEFAULT_IMAGE_EXTENSION);
+        ftpClient.deleteFile(postfix + id + FTP_IMAGE_EXTENSION);
+        log.info("Image was successfully removed: " + postfix + id + FTP_IMAGE_EXTENSION);
     }
 }
