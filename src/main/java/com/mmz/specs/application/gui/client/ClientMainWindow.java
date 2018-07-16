@@ -247,7 +247,7 @@ public class ClientMainWindow extends JFrame {
 
         boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
         boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
-        boolean isSessionOnline = session != null && session.isConnected();
+        boolean isSessionOnline = ClientBackgroundService.getInstance().isDBAvailable();
         String serverInfo = isServerOnline ? "Сервер подключён" : "Сервер отключён";
         String ftpInfo = isFtpOnline ? "FTP подключён" : "FTP отключён";
         String sessionInfo = isSessionOnline ? "БД подключена" : "БД отключена";
@@ -290,7 +290,8 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void unlockUIsForAdmins() {
-        boolean isConnected = ClientBackgroundService.getInstance().isConnected();
+        boolean isConnected = ClientBackgroundService.getInstance().isConnected()
+                && ClientBackgroundService.getInstance().isDBAvailable();
         if (isConnected) {
             if (currentUser != null) {
                 setEnabledUis(currentUser.isActive() && currentUser.isAdmin());

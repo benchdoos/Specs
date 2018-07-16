@@ -48,8 +48,6 @@ public class ClientBackgroundService {
     private DataOutputStream outputStream;
     private DataInputStream dataInputStream;
     private Socket socket;
-    private String serverAddress;
-    private int serverPort;
 
     public static ClientBackgroundService getInstance() {
         return ourInstance;
@@ -97,9 +95,18 @@ public class ClientBackgroundService {
         }
     }
 
+    public boolean isDBAvailable() { //fixme LIER!
+        try (Session session = getSession()) {
+            if (session == null) return false;
+            return session.isConnected() && session.isOpen();
+        } catch (Throwable ignore) {
+            return false;
+        }
+    }
+
     private void createNewServerConnection() throws IOException {
-        serverAddress = ClientSettingsManager.getInstance().getServerAddress();
-        serverPort = ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
+        String serverAddress = ClientSettingsManager.getInstance().getServerAddress();
+        int serverPort = ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
         socket = new Socket(serverAddress, serverPort);
         socket.setSoTimeout(1000);
         outputStream = new DataOutputStream(socket.getOutputStream());

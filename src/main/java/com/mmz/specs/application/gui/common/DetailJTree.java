@@ -16,10 +16,13 @@
 package com.mmz.specs.application.gui.common;
 
 import com.mmz.specs.application.utils.FrameUtils;
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.service.DetailListService;
 import com.mmz.specs.service.DetailListServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -30,10 +33,10 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 
 public class DetailJTree extends JTree {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private static final Color BACKGROUND_SELECTION_COLOR = new DefaultTreeCellRenderer().getBackgroundSelectionColor();
     private static final Color BACKGROUND_NON_SELECTION_COLOR = new JPanel().getBackground();
-    private static final Color FOREGROUND_SELECTED_COLOR = Color.WHITE;
-    private static final Color FOREGROUND_NON_SELECTED_COLOR = Color.BLACK;
 
     private static final Icon UNIT_CLOSED_ICON = new ImageIcon(DetailJTree.class.getResource("/img/gui/tree/unitOpened.png"));
     private static final Icon UNIT_OPENED_ICON = new ImageIcon(DetailJTree.class.getResource("/img/gui/tree/unitOpened.png"));
@@ -66,6 +69,7 @@ public class DetailJTree extends JTree {
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
+
                 if (session != null) {
                     DetailListService service = new DetailListServiceImpl(session);
 
@@ -86,17 +90,22 @@ public class DetailJTree extends JTree {
                                     if (pathForRow.length > 1) {
                                         DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
                                         DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
+                                        try {
+                                            DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
+                                            updateBackgroundColor(selected, detailListEntity);
+                                            updateIcon(detailEntity);
 
-                                        DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
-                                        updateBackgroundColor(selected, detailListEntity);
-                                        updateIcon(detailEntity);
+                                            updateSearch(detailEntity);
 
-                                        updateSearch(detailEntity);
-
-                                        if (detailListEntity != null) {
-                                            String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
-                                            return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
-                                        } else {
+                                            if (detailListEntity != null) {
+                                                String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                                return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
+                                            } else {
+                                                String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                                return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
+                                            }
+                                        } catch (Exception e) {
+                                            log.warn("Got exception while data update", e);
                                             String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
                                             return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                                         }
@@ -111,6 +120,7 @@ public class DetailJTree extends JTree {
                         }
                     }
                 }
+
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             }
 

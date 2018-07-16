@@ -1428,7 +1428,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 addItemButton.setEnabled(!isRoot);
                 removeItemButton.setEnabled(!isRoot);
 
-                fillDetailInfoPanel(lastUsed, selected);
+                try {
+                    fillDetailInfoPanel(lastUsed, selected);
+                } catch (Exception e1) {
+                    log.warn("Could not fill detail info for: {}", selected.toSimpleString(), e1);
+                }
             }
         });
 
