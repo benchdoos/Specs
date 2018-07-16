@@ -762,9 +762,42 @@ public class ClientMainWindow extends JFrame {
 
         updateMessage(null, null);
 
+        initStatusEaster();
+
         pack();
         setSize(ClientSettingsManager.getInstance().getClientMainWindowDimension());
         setExtendedState(ClientSettingsManager.getInstance().isClientMainWindowExtended() ? JFrame.MAXIMIZED_BOTH : JFrame.NORMAL);
+    }
+
+    private void initStatusEaster() {
+        Component component = this;
+        statusLabel.addMouseListener(new MouseAdapter() {
+            ArrayList<Integer> events = new ArrayList<>();
+            ArrayList<Integer> easter = initEasterList();
+            Timer timer = new Timer(1000, e -> events.clear());
+
+            private ArrayList<Integer> initEasterList() {
+                ArrayList<Integer> result = new ArrayList<>();
+                result.add(MouseEvent.BUTTON1);
+                result.add(MouseEvent.BUTTON1);
+                result.add(MouseEvent.BUTTON1);
+                result.add(MouseEvent.BUTTON2);
+                result.add(MouseEvent.BUTTON2);
+                return result;
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                timer.setRepeats(false);
+                timer.restart();
+                events.add(e.getButton());
+                if (events.equals(easter)) {
+                    JOptionPane.showMessageDialog(component, "Привет, Юленька!\n" +
+                                    "Юляшу не обижать!", "Ня-Ня Пасхалочка", JOptionPane.INFORMATION_MESSAGE,
+                            new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/easter/putin.gif"))));
+                }
+            }
+        });
     }
 
     public void updateMessage(final String imagePath, final String message) {
