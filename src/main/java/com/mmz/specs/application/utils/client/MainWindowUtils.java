@@ -284,6 +284,7 @@ public class MainWindowUtils {
     public ClientMainWindow getClientMainWindow(Component component) {
         Window parentWindow = FrameUtils.findWindow(component);
         if (parentWindow instanceof ClientMainWindow) {
+            this.clientMainWindow = (ClientMainWindow) parentWindow;
             return (ClientMainWindow) parentWindow;
         }
         return null;

@@ -108,6 +108,15 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
+    DetailListPanel(String searchText) {
+        $$$setupUI$$$();
+        session = ClientBackgroundService.getInstance().getSession();
+
+        initGui();
+        fillMainTreeFully();
+        searchTextField.setText(searchText);
+    }
+
     private void fillMainTree(DetailEntity rootEntity) {
         mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).fillMainTree(rootEntity)));
     }
