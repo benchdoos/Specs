@@ -83,7 +83,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
     private JLabel activeDetailLabel;
     private JList<DetailEntity> detailsList;
     private JButton findDetailUsageButton;
-    private JButton deleteDetailButton;
+    private JButton removeDetailButton;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
     public EditDataPanel() {
@@ -144,7 +144,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
             }
         });
 
-        deleteDetailButton.addActionListener(e -> {
+        removeDetailButton.addActionListener(e -> {
             Component c = this;
             DetailEntity detailEntity = detailsList.getSelectedValue();
             try {
@@ -157,6 +157,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
                         detailService.removeDetail(detailEntity.getId());
                         DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) detailsList.getModel();
                         model.removeElement(detailEntity);
+                        updateDetailInfo();
                     } else {
                         JOptionPane.showMessageDialog(c,
                                 "Вы не можете удалять детали, которые\n" +
@@ -195,6 +196,11 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
             } else {
                 usedDetailCountLabel.setText(detailListByChild.size() + "");
             }
+        } else {
+            final String noData = "нет данных";
+            detailCodeAndTitleTextField.setText(noData);
+            activeDetailLabel.setText(noData);
+            usedDetailCountLabel.setText(noData);
         }
     }
 
@@ -710,10 +716,10 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
         final JToolBar toolBar3 = new JToolBar();
         toolBar3.setFloatable(false);
         panel9.add(toolBar3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
-        deleteDetailButton = new JButton();
-        deleteDetailButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
-        deleteDetailButton.setText("");
-        toolBar3.add(deleteDetailButton);
+        removeDetailButton = new JButton();
+        removeDetailButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
+        removeDetailButton.setText("");
+        toolBar3.add(removeDetailButton);
         final Spacer spacer8 = new Spacer();
         editDetailsPanel.add(spacer8, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel10 = new JPanel();

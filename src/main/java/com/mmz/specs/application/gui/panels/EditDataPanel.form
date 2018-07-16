@@ -496,7 +496,7 @@
                         </properties>
                         <border type="none"/>
                         <children>
-                          <component id="b7ac5" class="javax.swing.JButton" binding="deleteDetailButton">
+                          <component id="b7ac5" class="javax.swing.JButton" binding="removeDetailButton">
                             <constraints/>
                             <properties>
                               <icon value="img/gui/edit/remove.png"/>
