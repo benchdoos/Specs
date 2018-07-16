@@ -197,7 +197,9 @@ public class ClientMainWindow extends JFrame {
     }
 
     private JMenu getEditMenu() {
-        return new JMenu("Правка");
+        final JMenu edit = new JMenu("Правка");
+        edit.setEnabled(false);
+        return edit;
     }
 
     private void updateStatusLabel() {
