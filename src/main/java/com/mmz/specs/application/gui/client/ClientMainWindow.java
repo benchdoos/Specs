@@ -955,7 +955,7 @@ public class ClientMainWindow extends JFrame {
             unlockUiTimer.start();
         }
 
-        connectionManagerTimer = new Timer(1000, e -> manageConnections());
+        connectionManagerTimer = new Timer(2000, e -> manageConnections());
         if (!connectionManagerTimer.isRunning()) {
             connectionManagerTimer.start();
         }

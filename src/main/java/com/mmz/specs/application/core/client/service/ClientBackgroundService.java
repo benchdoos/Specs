@@ -101,7 +101,7 @@ public class ClientBackgroundService {
         serverAddress = ClientSettingsManager.getInstance().getServerAddress();
         serverPort = ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
         socket = new Socket(serverAddress, serverPort);
-        socket.setSoTimeout(3000);
+        socket.setSoTimeout(1000);
         outputStream = new DataOutputStream(socket.getOutputStream());
         dataInputStream = new DataInputStream(socket.getInputStream());
     }
