@@ -21,6 +21,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -28,7 +29,7 @@ import java.util.Arrays;
 
 public class FtpUtils {
     public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
-    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".png", ".bmp", ".gif"};
+    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "png", "bmp", "gif"};
     private static final String FTP_IMAGE_EXTENSION = ".spi";
 
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -169,20 +170,28 @@ public class FtpUtils {
         ftpClient.completePendingCommand();
     }
 
-    public boolean isImage(File localFile) {
-        if (localFile != null && localFile.isFile()) {
-            if (localFile.exists()) {
-                for (String extension : SUPPORTED_IMAGE_EXTENSIONS) {
-                    final String filePath = localFile.getAbsolutePath().toLowerCase();
-                    System.out.println(filePath + " " + extension);
-                    if (filePath.contains(extension)) {
-                        System.out.println("yes: " + extension);
-                        return true;
+    public boolean isImage(File file) {
+        try {
+            if (file != null && file.isFile()) {
+                if (file.exists()) {
+                    for (String extension : SUPPORTED_IMAGE_EXTENSIONS) {
+                        final String filePath = file.getAbsolutePath().toLowerCase();
+                        if (filePath.contains(extension)) {
+                            return isFileAnImage(file);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            log.warn("Could not detect, if file is an image:{}", file, e);
         }
         return false;
+    }
+
+    private boolean isFileAnImage(File file) {
+        String mimeType = new MimetypesFileTypeMap().getContentType(file);
+        String type = mimeType.split("/")[0];
+        return type.equalsIgnoreCase("image");
     }
 
     public void deleteImage(int id) throws IOException {

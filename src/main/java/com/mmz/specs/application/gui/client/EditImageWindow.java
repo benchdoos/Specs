@@ -156,8 +156,9 @@ public class EditImageWindow extends JDialog {
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
 
-        FileFilter fileFilter = new FileNameExtensionFilter("Изображение " + Arrays.toString(FtpUtils.SUPPORTED_IMAGE_EXTENSIONS),
-                FtpUtils.SUPPORTED_IMAGE_EXTENSIONS);
+        FileFilter fileFilter = new FileNameExtensionFilter("Изображения "
+                + Arrays.toString(FtpUtils.SUPPORTED_IMAGE_EXTENSIONS),
+                "jpg", "png", "bmp", "gif");
         chooser.setFileFilter(fileFilter);
         int returnValue = chooser.showDialog(this, "OK");
         if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -201,6 +202,7 @@ public class EditImageWindow extends JDialog {
     }
 
     private void initDragAndDrop() {
+        Component c = this;
         final DropTarget dropTarget = new DropTarget() {
             @Override
             public synchronized void drop(DropTargetDropEvent evt) {
@@ -215,6 +217,9 @@ public class EditImageWindow extends JDialog {
                             if (file.exists() && FtpUtils.getInstance().isImage(file)) {
                                 detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
                                 detailEntity.setImagePath(file.getAbsolutePath());
+                            } else {
+                                JOptionPane.showMessageDialog(c, "Возможна загрузка только изображений форматов:\n" +
+                                        Arrays.toString(FtpUtils.SUPPORTED_IMAGE_EXTENSIONS), "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
                             }
                         }
                         updateIcon();
