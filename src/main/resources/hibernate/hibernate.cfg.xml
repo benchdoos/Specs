@@ -19,12 +19,12 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <!--<property name="connection.driver_class">org.firebirdsql.jdbc.FBDriver</property>-->
         <property name="hibernate.dialect">org.hibernate.dialect.FirebirdDialect</property>
         <property name="hibernate.connection.CharSet">RUSSIAN_CHARSET</property>
         <property name="hibernate.connection.characterEncoding">UTF-8</property>
 
-        <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+        <property name="hibernate.connection.provider_class">
+            org.hibernate.hikaricp.internal.HikariCPConnectionProvider
         </property>
         <property name="hibernate.hikari.minimumIdle">1</property>
         <property name="hibernate.hikari.maximumPoolSize">5</property>
