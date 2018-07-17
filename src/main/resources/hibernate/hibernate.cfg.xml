@@ -26,8 +26,8 @@
 
         <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider
         </property>
-        <property name="hibernate.hikari.minimumIdle">5</property>
-        <property name="hibernate.hikari.maximumPoolSize">100</property>
+        <property name="hibernate.hikari.minimumIdle">1</property>
+        <property name="hibernate.hikari.maximumPoolSize">5</property>
         <property name="hibernate.hikari.idleTimeout">10000</property>
         <!--<property name="hibernate.connection.release_mode">after_statement</property>-->
         <!--TODO Calling rollback() in auto-commit mode is not allowed // FIND THIS-->
