@@ -16,7 +16,6 @@
 package com.mmz.specs.application.core.server.service;
 
 import com.mmz.specs.model.UsersEntity;
-import org.hibernate.Session;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -24,25 +23,18 @@ import java.net.Socket;
 public interface ClientConnection {
 
 
-    public UsersEntity getUserEntity();
+    UsersEntity getUser();
 
-    public void setUserEntity(UsersEntity entity);
+    void setUser(UsersEntity user);
 
     /**
      * @return Client socket
      */
-    public Socket getSocket();
+    Socket getSocket();
 
-    public void setSocket(Socket socket);
+    void setSocket(Socket socket);
 
-    /**
-     * @return Session to DB
-     */
-    public Session getSession();
+    void close() throws IOException;
 
-    public void setSession(Session session);
-
-    public void close() throws IOException;
-
-    public String toString();
+    String toString();
 }

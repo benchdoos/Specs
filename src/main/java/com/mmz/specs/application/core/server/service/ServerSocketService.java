@@ -17,7 +17,6 @@ package com.mmz.specs.application.core.server.service;
 
 import com.mmz.specs.application.core.server.ServerConstants;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.socket.ServerSocketConnectionPool;
 import com.mmz.specs.socket.ServerSocketDialog;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +36,6 @@ public class ServerSocketService {
     private final HashMap<ClientConnection, Thread> connections = new HashMap<>();
     /*private static LinkedList<ClientConnection> connections = new LinkedList<>();
     private static LinkedList<Runnable> threads = new LinkedList<>();*/
-    private long genThreadId = 0;
     private boolean isNotClosing = true;
     private ServerSocketConnectionPool serverSocketConnectionPool;
 
@@ -59,7 +57,6 @@ public class ServerSocketService {
 
     private ClientConnection getClientConnection() throws IOException {
         ClientConnection client = new ClientConnectionImpl();
-        client.setSession(ServerDBConnectionPool.getInstance().getSession());
         client.setSocket(ServerSocketConnectionPool.getInstance().getClient());
         return client;
     }
@@ -76,10 +73,10 @@ public class ServerSocketService {
                     ServerLogMessage.ServerLogMessageLevel.INFO));
 
             ServerSocketDialog dialog = new ServerSocketDialog(connection);
-            Thread thread = new Thread(dialog, "Thread-" + this.genThreadId + " for client connection from: " + connection.getSocket().getInetAddress());
+            Thread thread = new Thread(dialog);
+            thread.setName("Client-connection-" + thread.getId() + ":" + connection.getSocket().getInetAddress());
             registerClientConnection(connection, thread);
             thread.start();
-            this.genThreadId++;
         }
     }
 
@@ -94,7 +91,7 @@ public class ServerSocketService {
         try {
             log.info("Is server currently started: " + this.serverSocketConnectionPool.isServerStarted());
             this.serverSocketConnectionPool.startServer();
-            log.info("Is Server successfully started: " + this.serverSocketConnectionPool.getServerInfo());
+            log.info("Is server successfully started: " + this.serverSocketConnectionPool.getServerInfo());
 
             ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
                     "Пул socket-соединений сервера успешно запущен",
@@ -152,8 +149,8 @@ public class ServerSocketService {
     public void closeClientConnection(ClientConnection connection) throws IOException {
         log.debug("Trying to close connection: " + connection);
         String username = "";
-        if (connection.getUserEntity() != null) {
-            username = connection.getUserEntity().getUsername() + " ";
+        if (connection.getUser() != null) {
+            username = connection.getUser().getUsername() + " ";
         }
 
         ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(

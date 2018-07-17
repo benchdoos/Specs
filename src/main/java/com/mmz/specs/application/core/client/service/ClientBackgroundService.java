@@ -17,7 +17,6 @@ package com.mmz.specs.application.core.client.service;
 
 import com.mmz.specs.application.core.server.ServerConstants;
 import com.mmz.specs.application.managers.ClientSettingsManager;
-import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.HibernateConstants;
 import com.mmz.specs.connection.ServerDBConnectionPool;
@@ -60,7 +59,17 @@ public class ClientBackgroundService {
     }
 
     public boolean isConnected() {
-        final FtpUtils ftpUtils = FtpUtils.getInstance();
+        try {
+            if (socket != null && !socket.isClosed()) {
+                outputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
+                return true;
+            }
+        } catch (Throwable throwable) {
+        }
+        return false;
+
+
+        /*final FtpUtils ftpUtils = FtpUtils.getInstance();
         if (socket != null) {
             if (socket.isClosed()) {
                 if (ftpUtils.isConnected()) {
@@ -92,7 +101,7 @@ public class ClientBackgroundService {
                 }
             }
             return false;
-        }
+        }*/
     }
 
     public boolean isDBAvailable() { //fixme LIER!

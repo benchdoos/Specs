@@ -1097,8 +1097,8 @@ public class ServerMainWindow extends JFrame {
     private void onUserInfoButton() {
         if (onlineUserList.getSelectedIndex() >= 0) {
             ClientConnection connection = onlineUserList.getSelectedValue();
-            UserInfoWindow userInfoWindow = new UserInfoWindow(connection.getUserEntity());
-            if (connection.getUserEntity() == null) {
+            UserInfoWindow userInfoWindow = new UserInfoWindow(connection.getUser());
+            if (connection.getUser() == null) {
                 userInfoWindow.setClientConnection(connection);
             }
             userInfoWindow.pack();
@@ -1307,7 +1307,7 @@ public class ServerMainWindow extends JFrame {
                 if (value instanceof ClientConnection) {
                     ClientConnection client = (ClientConnection) value;
                     String username;
-                    UsersEntity userEntity = client.getUserEntity();
+                    UsersEntity userEntity = client.getUser();
 
                     if (userEntity != null) {
                         if (!userEntity.getUsername().isEmpty()) {

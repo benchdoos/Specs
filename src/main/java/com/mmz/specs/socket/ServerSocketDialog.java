@@ -43,10 +43,6 @@ public class ServerSocketDialog implements Runnable {
 
     }
 
-    public ClientConnection getConnection() {
-        return connection;
-    }
-
     @Override
     public void run() {
         log.info("Thread started for client: " + connection);
@@ -93,31 +89,35 @@ public class ServerSocketDialog implements Runnable {
 
             case USER_LOGIN:
                 log.info("User {} is logged in.", client);
-                String userName = new ServerSocketDialogUtils(client).getUserName();
-                UsersService usersService = new UsersServiceImpl();
-                UsersEntity userByUsername = usersService.getUserByUsername(userName);
-                if (userByUsername != null) {
-                    connection.setUserEntity(userByUsername);
-                    log.info("User {} is logged in as: {}", client, userName);
-                    ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
-                            "Пользователь " + userByUsername.getUsername()
-                                    + " (" + userByUsername.getName() + " " + userByUsername.getSurname() + ")" +
-                                    " вошел в систему с компьютера: " + client.getInetAddress(),
-                            ServerLogMessage.ServerLogMessageLevel.INFO));
+                try {
+                    String userName = new ServerSocketDialogUtils(client).getUserName();
+                    UsersService usersService = new UsersServiceImpl();
+                    UsersEntity userByUsername = usersService.getUserByUsername(userName);
+                    if (userByUsername != null) {
+                        connection.setUser(userByUsername);
+                        log.info("User {} is logged in as: {}", client, userName);
+                        ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                                "Пользователь " + userByUsername.getUsername()
+                                        + " (" + userByUsername.getName() + " " + userByUsername.getSurname() + ")" +
+                                        " вошел в систему с компьютера: " + client.getInetAddress(),
+                                ServerLogMessage.ServerLogMessageLevel.INFO));
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not get username from client: {}", client, e);
                 }
                 break;
 
 
             case USER_LOGOUT:
-                if (connection.getUserEntity() != null) {
-                    log.info("User {} is logged out.", connection.getUserEntity().getUsername());
+                if (connection.getUser() != null) {
+                    log.info("User {} is logged out.", connection.getUser().getUsername());
                     ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
-                            "Пользователь " + connection.getUserEntity().getUsername()
-                                    + " (" + connection.getUserEntity().getName() + " "
-                                    + connection.getUserEntity().getSurname() + ")" +
+                            "Пользователь " + connection.getUser().getUsername()
+                                    + " (" + connection.getUser().getName() + " "
+                                    + connection.getUser().getSurname() + ")" +
                                     " вышел из системы с компьютера: " + client.getInetAddress(),
                             ServerLogMessage.ServerLogMessageLevel.INFO));
-                    connection.setUserEntity(null);
+                    connection.setUser(null);
                 }
                 break;
             case QUIT_COMMAND:

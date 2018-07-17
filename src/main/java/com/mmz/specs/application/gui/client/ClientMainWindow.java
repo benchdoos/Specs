@@ -177,6 +177,7 @@ public class ClientMainWindow extends JFrame {
         boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
         boolean isSessionOnline = session != null && session.isConnected();
         boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
+        System.out.println("STATUS IS: " + isServerOnline + " " + isSessionOnline + " " + isFtpOnline);
         if (!manualDisconnect) {
             if (isServerOnline) {
                 if (isSessionOnline) {

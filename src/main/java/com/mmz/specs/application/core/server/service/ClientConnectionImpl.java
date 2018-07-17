@@ -17,10 +17,11 @@ package com.mmz.specs.application.core.server.service;
 
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.model.UsersEntity;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -29,25 +30,19 @@ public class ClientConnectionImpl implements ClientConnection {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
     private Socket socket;
-    private Session session;
-    private UsersEntity entity;
+    private UsersEntity user;
 
     ClientConnectionImpl() {
     }
 
-    public ClientConnectionImpl(Socket socket, Session session, UsersEntity entity) {
-        this.socket = socket;
-        this.session = session;
+    @Override
+    public UsersEntity getUser() {
+        return user;
     }
 
     @Override
-    public UsersEntity getUserEntity() {
-        return entity;
-    }
-
-    @Override
-    public void setUserEntity(UsersEntity entity) {
-        this.entity = entity;
+    public void setUser(UsersEntity entity) {
+        this.user = entity;
     }
 
     @Override
@@ -61,23 +56,8 @@ public class ClientConnectionImpl implements ClientConnection {
     }
 
     @Override
-    public Session getSession() {
-        return this.session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
     public void close() throws IOException {
         try {
-            if (this.session != null) {
-                log.debug("Closing session");
-                this.session.close();
-                log.info("Session successfully closed");
-            }
             if (this.socket != null) {
                 log.debug("Closing socket");
                 this.socket.close();
@@ -91,31 +71,29 @@ public class ClientConnectionImpl implements ClientConnection {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ClientConnectionImpl)) return false;
 
         ClientConnectionImpl that = (ClientConnectionImpl) o;
 
-        if (!this.socket.equals(that.socket)) return false;
-        return this.session.equals(that.session);
+        return new EqualsBuilder()
+                .append(this.socket, that.socket)
+                .append(this.user, that.user)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = this.socket != null ? this.socket.hashCode() : 0;
-        result = 31 * result + (this.session != null ? this.session.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .append(socket)
+                .append(user)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        String sessionString;
-        if (this.session != null) {
-            sessionString = "some session";
-        } else sessionString = "null session";
         return new ToStringBuilder(this)
                 .append("socket", this.socket)
-                .append("session", sessionString)
+                .append("user", user)
                 .toString();
     }
 }

@@ -152,7 +152,7 @@ public class UserInfoWindow extends JDialog {
         String title = "Информация о пользователе: ";
         if (clientConnection != null) {
             if (isUserEntityAvailable()) {
-                setTitle(title + clientConnection.getUserEntity().getUsername());
+                setTitle(title + clientConnection.getUser().getUsername());
             } else {
                 if (clientConnection.getSocket() != null) {
                     setTitle(title + clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
@@ -174,7 +174,7 @@ public class UserInfoWindow extends JDialog {
     }
 
     private boolean isUserEntityAvailable() {
-        return clientConnection != null && clientConnection.getUserEntity() != null;
+        return clientConnection != null && clientConnection.getUser() != null;
     }
 
     private void fillUserInformation(UsersEntity entity) {
