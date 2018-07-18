@@ -16,7 +16,6 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.MaterialListEntity;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +35,7 @@ public class MaterialListDaoImpl implements MaterialListDao {
     private Session session;
 
     public MaterialListDaoImpl() {
-        session = ServerDBConnectionPool.getInstance().getSession();
+
     }
 
     public MaterialListDaoImpl(Session session) {

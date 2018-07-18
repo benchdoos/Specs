@@ -16,7 +16,6 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.UsersEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +38,6 @@ public class UsersDaoImpl implements UsersDao {
      * Use for server only!!! Otherwise use {@link UsersDaoImpl}({@link Session} session)
      */
     public UsersDaoImpl() {
-        session = ServerDBConnectionPool.getInstance().getSession();
     }
 
     public UsersDaoImpl(Session session) {
@@ -96,14 +94,6 @@ public class UsersDaoImpl implements UsersDao {
     @Override
     @Transactional
     public UsersEntity getUserByUsername(String username) { //todo use criterias allover the code.
-       /* Query criteriaQuery = session.createQuery("from UsersEntity where username = :username");
-        criteriaQuery.setParameter("username", username);
-
-        final UsersEntity entity = (UsersEntity) criteriaQuery.uniqueResult();
-        log.debug("User found by username " + username + ": " + entity);
-        return entity;
-*/
-
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<UsersEntity> criteriaQuery = builder.createQuery(UsersEntity.class);
         Root<UsersEntity> root = criteriaQuery.from(UsersEntity.class);

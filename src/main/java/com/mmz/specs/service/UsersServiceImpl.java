@@ -18,6 +18,7 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.UsersDao;
 import com.mmz.specs.dao.UsersDaoImpl;
 import com.mmz.specs.model.UsersEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -30,6 +31,10 @@ public class UsersServiceImpl implements UsersService {
 
     public UsersServiceImpl(UsersDao usersDao) {
         this.usersDao = usersDao;
+    }
+
+    public UsersServiceImpl(Session session) {
+        this.usersDao = new UsersDaoImpl(session);
     }
 
 

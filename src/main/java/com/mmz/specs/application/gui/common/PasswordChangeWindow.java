@@ -40,7 +40,7 @@ import java.util.Arrays;
 public class PasswordChangeWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    private final UsersEntity user;
+    private UsersEntity user;
     private Session session;
     private JPanel contentPane;
     private JButton buttonOK;
@@ -202,6 +202,7 @@ public class PasswordChangeWindow extends JDialog {
     }
 
     private void onCancel() {
+        user = null;
         dispose();
     }
 

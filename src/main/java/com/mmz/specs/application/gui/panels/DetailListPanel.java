@@ -26,10 +26,7 @@ import com.mmz.specs.application.gui.client.SelectDetailEntityWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
-import com.mmz.specs.application.utils.CommonUtils;
-import com.mmz.specs.application.utils.FrameUtils;
-import com.mmz.specs.application.utils.FtpUtils;
-import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.DetailDaoImpl;
@@ -530,7 +527,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
                 mainTree.setModel(model);
 
-                ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+                SessionUtils.refreshSession(session, DetailListEntity.class);
                 fillMainTreeFully();
 
                 mainWindowUtils.updateMessage(null, null);

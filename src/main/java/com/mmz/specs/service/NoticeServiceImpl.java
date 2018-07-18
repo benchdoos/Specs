@@ -19,6 +19,7 @@ import com.mmz.specs.dao.NoticeDao;
 import com.mmz.specs.dao.NoticeDaoImpl;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.model.UsersEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class NoticeServiceImpl implements NoticeService {
 
     public NoticeServiceImpl(NoticeDao noticeDao) {
         this.noticeDao = noticeDao;
+    }
+
+    public NoticeServiceImpl(Session session) {
+        this.noticeDao = new NoticeDaoImpl(session);
     }
 
     @Override

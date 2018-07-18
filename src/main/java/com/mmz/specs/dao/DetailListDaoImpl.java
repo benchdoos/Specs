@@ -16,7 +16,6 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.NoticeEntity;
@@ -38,7 +37,7 @@ public class DetailListDaoImpl implements DetailListDao {
     private Session session;
 
     public DetailListDaoImpl() {
-        this.session = ServerDBConnectionPool.getInstance().getSession();
+
     }
 
     public DetailListDaoImpl(Session session) {

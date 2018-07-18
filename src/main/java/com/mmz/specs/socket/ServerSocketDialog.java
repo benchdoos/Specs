@@ -20,11 +20,13 @@ import com.mmz.specs.application.core.server.service.ServerLogMessage;
 import com.mmz.specs.application.core.server.service.ServerMonitoringBackgroundService;
 import com.mmz.specs.application.core.server.service.ServerSocketService;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.UsersService;
 import com.mmz.specs.service.UsersServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -89,9 +91,9 @@ public class ServerSocketDialog implements Runnable {
 
             case USER_LOGIN:
                 log.info("User {} is logged in.", client);
-                try {
+                try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
                     String userName = new ServerSocketDialogUtils(client).getUserName();
-                    UsersService usersService = new UsersServiceImpl();
+                    UsersService usersService = new UsersServiceImpl(session);
                     UsersEntity userByUsername = usersService.getUserByUsername(userName);
                     if (userByUsername != null) {
                         connection.setUser(userByUsername);

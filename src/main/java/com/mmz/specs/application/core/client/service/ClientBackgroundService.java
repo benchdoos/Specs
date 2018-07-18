@@ -24,19 +24,15 @@ import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.socket.SocketConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Metamodel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
 import org.json.JSONObject;
 
-import javax.persistence.metamodel.EntityType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.List;
 
 import static com.mmz.specs.connection.HibernateConstants.*;
 
@@ -199,43 +195,6 @@ public class ClientBackgroundService {
         if (isConnected()) {
             log.info("Writing to server that user {} is disconnected.", usersEntity.getUsername());
             outputStream.writeUTF(SocketConstants.USER_LOGOUT);
-        }
-    }
-
-    public void refreshSession(Session session) {
-        log.debug("Refreshing session for all entities");
-        if (session != null) {
-            final Metamodel metamodel = getSession().getSessionFactory().getMetamodel();
-            for (EntityType<?> entityType : metamodel.getEntities()) {
-                refreshCurrentEntityType(session, entityType.getName());
-            }
-        }
-        log.debug("Refreshing session for all entities successfully finished.");
-    }
-
-    public void refreshSession(Session session, Class class_) {
-        log.debug("Refreshing session for: {}", class_.getName());
-        if (session != null) {
-            refreshCurrentEntityType(session, class_.getName());
-        }
-    }
-
-    public void refreshObject(Session session, Object o) {
-        session.refresh(o);
-    }
-
-
-    private void refreshCurrentEntityType(Session session, String name) {
-        try {
-            final Query query = session.createQuery("from " + name);
-            final List list = query.list();
-            log.debug("Refreshing list size: {}", list.size());
-            for (Object o : list) {
-                session.refresh(o);
-            }
-            log.debug("Refreshing session for: {} successfully finished.", name);
-        } catch (Exception e) {
-            log.warn("Could not refresh current entity type: {}", name, e);
         }
     }
 

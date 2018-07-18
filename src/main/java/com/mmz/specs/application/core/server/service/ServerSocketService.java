@@ -34,8 +34,6 @@ public class ServerSocketService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final ServerSocketService ourInstance = new ServerSocketService();
     private final HashMap<ClientConnection, Thread> connections = new HashMap<>();
-    /*private static LinkedList<ClientConnection> connections = new LinkedList<>();
-    private static LinkedList<Runnable> threads = new LinkedList<>();*/
     private boolean isNotClosing = true;
     private ServerSocketConnectionPool serverSocketConnectionPool;
 
@@ -142,7 +140,8 @@ public class ServerSocketService {
     }
 
     private void unregisterClientConnection(ClientConnection client) {
-        /*connections.get(client).run();*/ //for what????
+        client.setUser(null);
+        System.out.println("removing " + client + " and contains:" + connections.containsKey(client));
         this.connections.remove(client);
     }
 
@@ -168,17 +167,15 @@ public class ServerSocketService {
                 ServerLogMessage.ServerLogMessageLevel.INFO));
         AtomicInteger connectionsCount = new AtomicInteger();
 
-        this.connections.forEach((client, thread) -> {
-            thread.interrupt();
-            log.debug("Found client: " + client);
+        try {
+            closeConnections(connectionsCount);
+        } catch (Exception e) {
             try {
-                log.debug("Closing client: " + client);
-                client.close();
-                connectionsCount.getAndIncrement();
-            } catch (IOException e) {
-                log.warn("Could not close client connection: " + client);
+                closeConnections(connectionsCount);
+            } catch (Exception e1) {
+                log.warn("Could not close all connections!");
             }
-        });
+        }
 
         int totalConnectionsCount = this.connections.size();
         this.connections.clear();
@@ -196,11 +193,25 @@ public class ServerSocketService {
         }
     }
 
+    private void closeConnections(AtomicInteger connectionsCount) {
+        this.connections.forEach((client, thread) -> {
+            thread.interrupt();
+            log.debug("Found client: " + client);
+            try {
+                log.debug("Closing client: " + client);
+                client.close();
+                connectionsCount.getAndIncrement();
+            } catch (IOException e) {
+                log.warn("Could not close client connection: " + client);
+            }
+        });
+    }
+
     public int getConnectedClientsCount() {
         return this.connections.size();
     }
 
-    public List<ClientConnection> getConnectedClientsList() {
+    List<ClientConnection> getConnectedClientsList() {
         Object[] objects = this.connections.keySet().toArray();
         List<ClientConnection> result = new ArrayList<>();
         for (Object object : objects) {

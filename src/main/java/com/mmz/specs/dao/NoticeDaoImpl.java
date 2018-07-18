@@ -16,7 +16,6 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.model.UsersEntity;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +32,6 @@ public class NoticeDaoImpl implements NoticeDao {
     private Session session;
 
     public NoticeDaoImpl() {
-        session = ServerDBConnectionPool.getInstance().getSession();
     }
 
     public NoticeDaoImpl(Session session) {

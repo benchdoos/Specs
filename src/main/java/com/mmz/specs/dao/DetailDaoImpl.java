@@ -16,7 +16,6 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailTitleEntity;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +34,7 @@ public class DetailDaoImpl implements DetailDao {
     private Session session;
 
     public DetailDaoImpl() {
-        session = ServerDBConnectionPool.getInstance().getSession();
+
     }
 
     public DetailDaoImpl(Session session) {

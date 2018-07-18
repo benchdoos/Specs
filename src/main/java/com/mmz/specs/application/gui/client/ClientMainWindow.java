@@ -27,10 +27,7 @@ import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.UserInfoWindow;
 import com.mmz.specs.application.gui.panels.*;
 import com.mmz.specs.application.managers.ClientSettingsManager;
-import com.mmz.specs.application.utils.CommonUtils;
-import com.mmz.specs.application.utils.FrameUtils;
-import com.mmz.specs.application.utils.FtpUtils;
-import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.connection.DaoConstants;
@@ -42,7 +39,6 @@ import com.mmz.specs.service.ConstantsServiceImpl;
 import com.mmz.specs.service.NoticeServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -177,7 +173,6 @@ public class ClientMainWindow extends JFrame {
         boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
         boolean isSessionOnline = session != null && session.isConnected();
         boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
-        System.out.println("STATUS IS: " + isServerOnline + " " + isSessionOnline + " " + isFtpOnline);
         if (!manualDisconnect) {
             if (isServerOnline) {
                 if (isSessionOnline) {
@@ -490,16 +485,7 @@ public class ClientMainWindow extends JFrame {
 
         onDisconnectFromFtp();
 
-        try {
-            session.close();
-            session = null;
-        } catch (HibernateException e) {
-            log.warn("Could not disconnect from DB", e);
-            JOptionPane.showMessageDialog(this,
-                    "Не удалось отключиться от БД.\n" + e.getLocalizedMessage(),
-                    "Ошибка отключения", JOptionPane.ERROR_MESSAGE);
-        }
-
+        SessionUtils.closeSessionSilently(session);
     }
 
     public void notifyConnectionError() {
@@ -692,11 +678,11 @@ public class ClientMainWindow extends JFrame {
         mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем редактирование данных...");
         new Thread(() -> {
             try {
-                ClientBackgroundService.getInstance().refreshSession(session, DetailTitleEntity.class);
-                ClientBackgroundService.getInstance().refreshSession(session, MaterialEntity.class);
-                ClientBackgroundService.getInstance().refreshSession(session, DetailEntity.class);
-                ClientBackgroundService.getInstance().refreshSession(session, NoticeEntity.class);
-                ClientBackgroundService.getInstance().refreshSession(session, TechProcessEntity.class);
+                SessionUtils.refreshSession(session, DetailTitleEntity.class);
+                SessionUtils.refreshSession(session, MaterialEntity.class);
+                SessionUtils.refreshSession(session, DetailEntity.class);
+                SessionUtils.refreshSession(session, NoticeEntity.class);
+                SessionUtils.refreshSession(session, TechProcessEntity.class);
 
                 ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/databaseEdit16.png")));
                 addTab("Редактирование данных", icon, new EditDataPanel(), select);
@@ -923,7 +909,7 @@ public class ClientMainWindow extends JFrame {
                     }
 
                 } else {
-                    log.warn("Current user is active: {}, access denied.", currentUser.isActive());
+                    log.warn("Current user is active: {}, access denied.", user.isActive());
                     JOptionPane.showMessageDialog(this,
                             "Ваш аккаунт отключён, вы не можете продолжить. Обратитесь к администратору.",
                             "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
@@ -967,29 +953,27 @@ public class ClientMainWindow extends JFrame {
     private void removeTmpImages() {
         log.debug("Deleting TMP (from clipboard) images on: " + TMP_IMAGE_FOLDER);
         File file = new File(TMP_IMAGE_FOLDER);
-        CommonUtils.deleteFolder(file);
+        if (file.exists()) {
+            CommonUtils.deleteFolder(file);
+        }
     }
 
     @Override
     public void dispose() {
         try {
             onDisconnectFromServer();
-            onDisconnectFromFtp();
-
             removeTmpImages();
 
             uiUpdateTimer.stop();
             unlockUiTimer.stop();
             connectionManagerTimer.stop();
             blockingMessageTimer.stop();
-
-
-            log.debug("Closing session");
-            session.close();
-            log.info("Session successfully closed");
         } catch (Exception e) {
-            log.warn("Could not close connection", e);
+            log.warn("Could not stop something", e);
+            log.warn("Exiting system permanently, (if some of timers is alive)");
+            System.exit(-1);
         }
+
         super.dispose();
     }
 

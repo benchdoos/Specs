@@ -16,11 +16,11 @@
 package com.mmz.specs.application.utils.client;
 
 import com.google.common.collect.ComparisonChain;
-import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.SessionUtils;
 import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.MaterialListDaoImpl;
@@ -356,20 +356,20 @@ public class MainWindowUtils {
                 if (parentForSelectionPath != null && selectedDetailEntityFromTree != null) {
                     try {
                         DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parentForSelectionPath, selectedDetailEntityFromTree);
-                        ClientBackgroundService.getInstance().refreshObject(session, detailListEntity);
-                        ClientBackgroundService.getInstance().refreshObject(session, parentForSelectionPath);
-                        ClientBackgroundService.getInstance().refreshObject(session, selectedDetailEntityFromTree);
+                        SessionUtils.refreshSession(session, detailListEntity);
+                        SessionUtils.refreshSession(session, parentForSelectionPath);
+                        SessionUtils.refreshSession(session, selectedDetailEntityFromTree);
                     } catch (Exception e1) {
-                        ClientBackgroundService.getInstance().refreshSession(session, DetailEntity.class);
-                        ClientBackgroundService.getInstance().refreshSession(session, DetailListEntity.class);
+                        SessionUtils.refreshSession(session, DetailEntity.class);
+                        SessionUtils.refreshSession(session, DetailListEntity.class);
 
                     }
                 } else {
                     final List<DetailEntity> detailEntities = service.listChildren(selectedDetailEntityFromTree);
                     for (DetailEntity entity : detailEntities) {
-                        ClientBackgroundService.getInstance().refreshObject(session, entity);
+                        SessionUtils.refreshSession(session, entity);
                         final DetailListEntity latestDetailListEntityByParentAndChild = service.getLatestDetailListEntityByParentAndChild(selectedDetailEntityFromTree, entity);
-                        ClientBackgroundService.getInstance().refreshObject(session, latestDetailListEntityByParentAndChild);
+                        SessionUtils.refreshSession(session, latestDetailListEntityByParentAndChild);
                     }
                 }
 

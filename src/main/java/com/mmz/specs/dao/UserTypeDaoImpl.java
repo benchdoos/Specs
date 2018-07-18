@@ -16,7 +16,6 @@
 package com.mmz.specs.dao;
 
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.model.UserTypeEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +30,6 @@ public class UserTypeDaoImpl implements UserTypeDao {
     private Session session;
 
     public UserTypeDaoImpl() {
-        session = ServerDBConnectionPool.getInstance().getSession();
     }
 
     public UserTypeDaoImpl(Session session) {

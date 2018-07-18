@@ -18,6 +18,7 @@ package com.mmz.specs.service;
 import com.mmz.specs.dao.UserTypeDao;
 import com.mmz.specs.dao.UserTypeDaoImpl;
 import com.mmz.specs.model.UserTypeEntity;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class UserTypeServiceImpl implements UserTypeService {
 
     public UserTypeServiceImpl(UserTypeDao userTypeDao) {
         this.userTypeDao = userTypeDao;
+    }
+
+    public UserTypeServiceImpl(Session session) {
+        this.userTypeDao = new UserTypeDaoImpl(session);
     }
 
     @Override
