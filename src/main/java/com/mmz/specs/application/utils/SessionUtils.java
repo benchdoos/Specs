@@ -20,7 +20,9 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Metamodel;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.metamodel.EntityType;
 import java.util.List;
@@ -51,15 +53,20 @@ public class SessionUtils {
     }
 
     public static void closeSessionSilently(Session session) {
-        try {
-            session.getTransaction().rollback();
-        } catch (Exception e) {
-            log.warn("Could not rollback transaction", e);
-        } finally {
+        if (session != null) {
             try {
-                session.close();
-            } catch (HibernateException e) {
-                log.warn("Could not close session");
+                final Transaction transaction = session.getTransaction();
+                if (transaction.getStatus() == TransactionStatus.ACTIVE) {
+                    transaction.rollback();
+                }
+            } catch (Exception e) {
+                log.warn("Could not rollback transaction", e);
+            } finally {
+                try {
+                    session.close();
+                } catch (HibernateException e) {
+                    log.warn("Could not close session", e);
+                }
             }
         }
     }
