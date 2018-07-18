@@ -243,10 +243,10 @@ public class EditImageWindow extends JDialog {
                                         Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS), "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
                             }
                         }
+                        updateIcon();
                     }
-                    updateIcon();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.warn("Could not drag and drop image", ex);
                 } finally {
                     detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
                 }
