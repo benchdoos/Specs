@@ -44,10 +44,6 @@ public class ApplicationConstants {
     public static final String CLIENT_SETTINGS_FILE = APPLICATION_SETTINGS_FOLDER_LOCATION
             + LOG_PREFIX_CLIENT + "settings.xml";
 
-    public static final String specsNoticeFileExtension = "nspecs"; //извещение
-    public static final String specsDetailFileExtension = "dspecs"; //детали
-    public static final String specsUnitFileExtension = "uspecs"; //Узлы
-
     public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     public static final String NO_DATA_STRING = "нет данных";

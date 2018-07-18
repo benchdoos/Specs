@@ -27,10 +27,11 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Arrays;
 
+import static com.mmz.specs.application.utils.SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
+import static com.mmz.specs.application.utils.SupportedExtensionsConstants.SUPPORTED_IMAGE_EXTENSIONS;
+
 public class FtpUtils {
     public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
-    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "png", "bmp", "gif"};
-    private static final String FTP_IMAGE_EXTENSION = ".spi";
 
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final FtpUtils ourInstance = new FtpUtils();
@@ -118,8 +119,9 @@ public class FtpUtils {
             if (!ftpClient.isConnected()) return null;
             try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 
-                log.debug("Loading image at path: " + connectionUrl + postfix + id + FTP_IMAGE_EXTENSION);
-                ftpClient.retrieveFile(postfix + id + FTP_IMAGE_EXTENSION, output);
+                final String s = postfix + id + FTP_IMAGE_FILE_EXTENSION;
+                log.debug("Loading image at path: " + connectionUrl + s);
+                ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
                 byte[] data = output.toByteArray();
                 ByteArrayInputStream input = new ByteArrayInputStream(data);
                 BufferedImage image = ImageIO.read(input);
@@ -146,7 +148,7 @@ public class FtpUtils {
             throw new IOException("Uploading image should be one of this extensions: " + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS) + " extension");
         }
 
-        String remoteFile = postfix + id + FTP_IMAGE_EXTENSION;
+        String remoteFile = postfix + id + FTP_IMAGE_FILE_EXTENSION;
 
         log.debug("Uploading image for id:{} exists:{} with path:{} to path:{}", id, localFile.exists(), localFile, remoteFile);
         byte[] bytesIn = new byte[4096];
@@ -189,14 +191,25 @@ public class FtpUtils {
     }
 
     private boolean isFileAnImage(File file) {
-        String mimeType = new MimetypesFileTypeMap().getContentType(file);
-        String type = mimeType.split("/")[0];
-        return type.equalsIgnoreCase("image");
+        if (file != null && file.exists()) {
+            String mimeType = new MimetypesFileTypeMap().getContentType(file);
+            try {
+                String type = mimeType.split("/")[0];
+                log.debug("Mimetype for file {} is: {} and full is:{}", file, type, mimeType);
+                if (file.getAbsolutePath().toLowerCase().endsWith("png")) {
+                    return mimeType.contains("application/octet-stream");
+                } else {
+                    return type.equalsIgnoreCase("image");
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        } else return false;
     }
 
     public void deleteImage(int id) throws IOException {
         log.debug("Removing image by id: {}" + id);
-        ftpClient.deleteFile(postfix + id + FTP_IMAGE_EXTENSION);
-        log.info("Image was successfully removed: " + postfix + id + FTP_IMAGE_EXTENSION);
+        ftpClient.deleteFile(postfix + id + FTP_IMAGE_FILE_EXTENSION);
+        log.info("Image was successfully removed: " + postfix + id + FTP_IMAGE_FILE_EXTENSION);
     }
 }
