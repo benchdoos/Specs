@@ -5,7 +5,8 @@
 #define MyAppVersion "0.2"
 #define MyAppPublisher "ООО Майкопский машиностроительный завод"
 #define MyAppURL "http://maykop-mmz.com/"
-#define MyAppExeName "Specs.jar"
+;#define MyAppExeName "Specs.jar"
+#define MyAppExeName "Specs.exe"
 #define MyAppServerRusName "Specs — Сервер"
 
 [Setup]
@@ -25,6 +26,8 @@ DefaultGroupName={#MyAppName}
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir=F:\Developer\JAVA\Specs\publish\Installer
+WizardImageFile=F:\Developer\JAVA\Specs\publish\Specs\WizModernImage.bmp
+WizardSmallImageFile=F:\Developer\JAVA\Specs\publish\Specs\WizModernSmallImage.bmp
 OutputBaseFilename=SpecsSetup
 SetupIconFile=F:\Developer\JAVA\Specs\publish\Specs\client.ico
 UninstallDisplayIcon={app}\client.ico
@@ -45,7 +48,8 @@ Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные возможн
 
 
 [Files]
-Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
+;Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
+Source: "F:\Developer\JAVA\Specs\publish\Specs\Specs.exe"; DestDir: "{app}";
 Source: "F:\Developer\JAVA\Specs\publish\Specs\client.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server;
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Client User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
@@ -61,7 +65,7 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFil
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Registry]
-Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall unchecked
@@ -69,3 +73,6 @@ Filename: "{app}\{#MyAppExeName}"; Parameters:"-server"; Description: "{#MyAppSe
 ;Filename: "{app}\{#MyAppExeName}"; Parameters:"-update -server"; Description: "{cm:LaunchProgram,{#MyAppServerRusName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateServer
 ;Filename: "{app}\{#MyAppExeName}"; Parameters:"-update"; Description: "{cm:LaunchProgram,{#MyAppName} - После обновления}"; Flags: shellexec postinstall hidewizard; Tasks: updateClient
 
+[InstallDelete]
+;Deletes old files
+Type: files; Name: "{app}\Specs.jar"
