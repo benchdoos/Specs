@@ -1499,11 +1499,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         ApplicationConstants.DEFAULT_DATE_FORMAT.format(entity.getDate()) : NO_DATA_STRING);
 
                 UsersEntity user = entity.getUsersByProvidedByUserId();
-                noticeUserLabel.setText(user.getUsername() + " " + user.getName() + " " + user.getSurname());
+                noticeUserLabel.setText(entity.getAuthorByUserId() == null ? NO_DATA_STRING :
+                        user.getUsername() + " " + user.getName() + " " + user.getSurname());
                 noticeDescriptionTextArea.setText(entity.getDescription());
                 noticeCreatedByUserLabel.setText(
                         entity.getAuthorByUserId() == null ? NO_DATA_STRING :
-                                entity.getAuthorByUserId().getName() + " " + entity.getAuthorByUserId().getSurname());
+                                entity.getAuthorByUserId().getUsername() + " " + entity.getAuthorByUserId().getName() + " " + entity.getAuthorByUserId().getSurname());
 
                 noticeCreationDateLabel.setText(entity.getCreationDate() != null ?
                         ApplicationConstants.DEFAULT_DATE_FORMAT.format(entity.getCreationDate()) : NO_DATA_STRING);

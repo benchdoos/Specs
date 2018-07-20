@@ -8,6 +8,10 @@
 ;#define MyAppExeName "Specs.jar"
 #define MyAppExeName "Specs.exe"
 #define MyAppServerRusName "Specs — Сервер"
+#define ApplicationVersion GetFileVersion({#MyAppExeName})
+[Setup]
+
+
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -16,6 +20,8 @@
 AppId={{772BD841-E39A-414F-9BD3-534C843BCCB4}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+AppVerName={#ApplicationVersion}
+VersionInfoVersion={#ApplicationVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
