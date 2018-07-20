@@ -91,6 +91,9 @@ public class CreateNoticeWindow extends JDialog {
                 if (value instanceof UsersEntity) {
                     UsersEntity usersEntity = (UsersEntity) value;
                     String username = usersEntity.getName() + " " + usersEntity.getSurname();
+                    if (username.length() <= 1) {
+                        username = usersEntity.getUsername();
+                    }
                     return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
                 } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
