@@ -320,7 +320,9 @@ public class MainWindowUtils {
                     if (e.getClickCount() == 1) {
                         System.out.println(e.getButton());
                         if (e.getButton() == MouseEvent.BUTTON3) {
-                            addPopup(selPath);
+                            final TreePath closestPathForLocation = mainTree.getClosestPathForLocation(e.getX(), e.getY());
+                            mainTree.setSelectionPath(closestPathForLocation);
+                            addPopup(closestPathForLocation);
                         }
                     } else if (e.getClickCount() == 2) {
                         if (!mainTree.isExpanded(selPath)) {
