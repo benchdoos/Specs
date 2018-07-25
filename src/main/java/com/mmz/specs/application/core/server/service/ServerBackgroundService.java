@@ -28,7 +28,7 @@ import java.util.List;
 public class ServerBackgroundService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    private static final ServerBackgroundService ourInstance = new ServerBackgroundService();
+    private static volatile ServerBackgroundService instance;
     private final Thread serverBackGroundThread;
     private ServerSocketService serverSocketService;
     private ServerMonitoringBackgroundService monitoringBackgroundService;
@@ -43,7 +43,16 @@ public class ServerBackgroundService {
     }
 
     public static ServerBackgroundService getInstance() {
-        return ourInstance;
+        ServerBackgroundService localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ServerBackgroundService.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ServerBackgroundService();
+                }
+            }
+        }
+        return localInstance;
     }
 
     private void startServerMainBackgroundService() {
