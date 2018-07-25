@@ -72,41 +72,6 @@ public class ClientBackgroundService {
         } catch (Throwable throwable) {
         }
         return false;
-
-
-        /*final FtpUtils ftpUtils = FtpUtils.getInstance();
-        if (socket != null) {
-            if (socket.isClosed()) {
-                if (ftpUtils.isConnected()) {
-                    try {
-                        ftpUtils.disconnect();
-                    } catch (IOException ignore) {
-                    }
-                }
-                return false;
-            } else {
-                try {
-                    outputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
-                    return true;
-                } catch (IOException e) {
-                    if (ftpUtils.isConnected()) {
-                        try {
-                            ftpUtils.disconnect();
-                        } catch (IOException ignore) {
-                        }
-                    }
-                    return false;
-                }
-            }
-        } else {
-            if (ftpUtils.isConnected()) {
-                try {
-                    ftpUtils.disconnect();
-                } catch (IOException ignore) {
-                }
-            }
-            return false;
-        }*/
     }
 
     public boolean isDBAvailable() { //fixme LIER!
