@@ -48,7 +48,7 @@ public class Updater {
     private static final String DEFAULT_ENCODING = "UTF-8";
     public static final File INSTALLER_FILE = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
             + File.separator + ApplicationConstants.APPLICATION_FINAL_NAME);
-    private static Updater ourInstance = new Updater();
+    private static volatile Updater instance;
     private HttpsURLConnection connection = null;
     private ApplicationVersion serverVersion;
 
@@ -63,7 +63,16 @@ public class Updater {
     }
 
     public static Updater getInstance() {
-        return ourInstance;
+        Updater localInstance = instance;
+        if (localInstance == null) {
+            synchronized (Updater.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new Updater();
+                }
+            }
+        }
+        return localInstance;
     }
 
     public boolean isUpdateNotAvailable() {

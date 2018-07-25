@@ -25,9 +25,9 @@ import java.util.Calendar;
 import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMonitoringBackgroundService {
+    private static volatile ServerMonitoringBackgroundService instance;
     private static final int MEMORY_LENGTH = 60;
     private static final int MONITORING_TIMER_DELAY = 1000;
-    private static final ServerMonitoringBackgroundService ourInstance = new ServerMonitoringBackgroundService();
 
     private static Timer serverStateUpdateTimer;
 
@@ -38,6 +38,19 @@ public class ServerMonitoringBackgroundService {
     private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
     private static final int MAXIMUM_LOG_HISTORY_LENGTH = 10000;
     private ArrayList<ServerLogMessage> serverLogMessages = new ArrayList<>(MAXIMUM_LOG_HISTORY_LENGTH);
+
+    public static ServerMonitoringBackgroundService getInstance() {
+        ServerMonitoringBackgroundService localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ServerMonitoringBackgroundService.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ServerMonitoringBackgroundService();
+                }
+            }
+        }
+        return localInstance;
+    }
 
     private ServerMonitoringBackgroundService() {
         ActionListener listener = getMonitorTimerActionListener();
@@ -96,7 +109,7 @@ public class ServerMonitoringBackgroundService {
         return result;
     }
 
-    public ArrayList<Float> getMemoryLoadValues() {
+    ArrayList<Float> getMemoryLoadValues() {
         return this.memoryLoadValues;
     }
 
@@ -145,10 +158,6 @@ public class ServerMonitoringBackgroundService {
         }
         serverLogMessages.add(message);
 
-    }
-
-    public static ServerMonitoringBackgroundService getInstance() {
-        return ourInstance;
     }
 
     public ArrayList<ServerLogMessage> getServerLogMessages() {

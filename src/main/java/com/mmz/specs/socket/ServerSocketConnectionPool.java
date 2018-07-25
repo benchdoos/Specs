@@ -27,7 +27,7 @@ import java.net.Socket;
 
 public class ServerSocketConnectionPool {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final ServerSocketConnectionPool ourInstance = new ServerSocketConnectionPool();
+    private static volatile ServerSocketConnectionPool instance;
 
     private ServerSocket server;
 
@@ -38,7 +38,16 @@ public class ServerSocketConnectionPool {
     }
 
     public static ServerSocketConnectionPool getInstance() {
-        return ourInstance;
+        ServerSocketConnectionPool localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ServerSocketConnectionPool.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ServerSocketConnectionPool();
+                }
+            }
+        }
+        return localInstance;
     }
 
     /**

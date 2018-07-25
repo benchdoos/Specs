@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerSocketService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final ServerSocketService ourInstance = new ServerSocketService();
+    private static volatile ServerSocketService instance;
     private final HashMap<ClientConnection, Thread> connections = new HashMap<>();
     private boolean isNotClosing = true;
     private ServerSocketConnectionPool serverSocketConnectionPool;
@@ -41,7 +41,16 @@ public class ServerSocketService {
     }
 
     public static ServerSocketService getInstance() {
-        return ourInstance;
+        ServerSocketService localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ServerSocketService.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ServerSocketService();
+                }
+            }
+        }
+        return localInstance;
     }
 
     void startSocketService() {

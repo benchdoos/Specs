@@ -38,7 +38,7 @@ import javax.swing.*;
 public class ServerDBConnectionPool {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
-    private static ServerDBConnectionPool ourInstance = new ServerDBConnectionPool();
+    private static volatile ServerDBConnectionPool instance;
     private static SessionFactory ourSessionFactory = null;
 
     private static String dbConnectionUrl;
@@ -50,7 +50,16 @@ public class ServerDBConnectionPool {
     }
 
     public static ServerDBConnectionPool getInstance() {
-        return ourInstance;
+        ServerDBConnectionPool localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ServerDBConnectionPool.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ServerDBConnectionPool();
+                }
+            }
+        }
+        return localInstance;
     }
 
     private static void createConnection() throws ApplicationException {

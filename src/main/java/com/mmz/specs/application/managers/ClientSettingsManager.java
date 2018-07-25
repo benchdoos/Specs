@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class ClientSettingsManager {
-    private static final ClientSettingsManager ourInstance = new ClientSettingsManager();
+    private static volatile ClientSettingsManager instance;
     private final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private final Properties CLIENT_SETTINGS = new Properties();
     private final String connectionFileLocation = ApplicationConstants.CLIENT_SETTINGS_FILE;
@@ -40,7 +40,16 @@ public class ClientSettingsManager {
     }
 
     public static ClientSettingsManager getInstance() {
-        return ourInstance;
+        ClientSettingsManager localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ClientSettingsManager.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ClientSettingsManager();
+                }
+            }
+        }
+        return localInstance;
     }
 
     void loadSettingsFile() throws IOException {

@@ -27,20 +27,32 @@ import java.awt.*;
 
 public class ClientManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final ClientManager ourInstance = new ClientManager();
-    private final ClientMainWindow clientMainWindow;
+    private static volatile ClientManager instance;
 
     @SuppressWarnings("MethodRefCanBeReplacedWithLambda")
     private ClientManager() {
         loadClientSettings();
 
-        clientMainWindow = new ClientMainWindow();
+        ClientMainWindow clientMainWindow = new ClientMainWindow();
         if (ClientSettingsManager.getInstance().getClientMainWindowLocation().equals(new Point(-1, -1))) {
             clientMainWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientMainWindow));
         } else {
             clientMainWindow.setLocation(ClientSettingsManager.getInstance().getClientMainWindowLocation());
         }
         clientMainWindow.setVisible(true);
+    }
+
+    public static ClientManager getInstance() {
+        ClientManager localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ClientManager.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ClientManager();
+                }
+            }
+        }
+        return localInstance;
     }
 
     private void loadClientSettings() {
@@ -59,10 +71,4 @@ public class ClientManager {
             clientConfigurationWindow.setVisible(true);
         }
     }
-
-    public static ClientManager getInstance() {
-        return ourInstance;
-    }
-
-    public enum ClientConnectionStatus {SECCUSS, ERROR, CONNECTION_REFUSED}
 }

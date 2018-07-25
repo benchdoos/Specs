@@ -34,7 +34,7 @@ public class FtpUtils {
     public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
 
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final FtpUtils ourInstance = new FtpUtils();
+    private static volatile FtpUtils instance;
     private static final int FTP_PORT = 21;
     private static int getImageCounter = 0;
     private final FTPClient ftpClient = new FTPClient();
@@ -48,7 +48,16 @@ public class FtpUtils {
     }
 
     public static FtpUtils getInstance() {
-        return ourInstance;
+        FtpUtils localInstance = instance;
+        if (localInstance == null) {
+            synchronized (FtpUtils.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new FtpUtils();
+                }
+            }
+        }
+        return localInstance;
     }
 
 

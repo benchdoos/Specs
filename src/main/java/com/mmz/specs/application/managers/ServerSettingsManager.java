@@ -31,7 +31,7 @@ import java.util.Properties;
 
 public class ServerSettingsManager {
     private static final Properties SERVER_SETTINGS = new Properties();
-    private static ServerSettingsManager settingsManager = new ServerSettingsManager();
+    private static volatile ServerSettingsManager instance;
 
     private Logger log = LogManager.getLogger(Logging.getCurrentClassName());
 
@@ -43,7 +43,16 @@ public class ServerSettingsManager {
 
 
     public static ServerSettingsManager getInstance() {
-        return settingsManager;
+        ServerSettingsManager localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ClientSettingsManager.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ServerSettingsManager();
+                }
+            }
+        }
+        return localInstance;
     }
 
     public void setServerSettings(String serverSettingsFileLocation) throws ServerException {
@@ -52,7 +61,7 @@ public class ServerSettingsManager {
         } else if (serverSettingsFileLocation.isEmpty()) {
             throw new ServerException(new IllegalArgumentException("ServerDBConnectionPool settings path can not be empty"));
         }
-        settingsManager.connectionFileLocation = serverSettingsFileLocation;
+        instance.connectionFileLocation = serverSettingsFileLocation;
     }
 
     public String getServerDbConnectionUrl() {
