@@ -38,14 +38,23 @@ import static com.mmz.specs.connection.HibernateConstants.*;
 
 public class ClientBackgroundService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static final ClientBackgroundService ourInstance = new ClientBackgroundService();
+    private static volatile ClientBackgroundService instance;
     private static SessionFactory factory;
     private DataOutputStream outputStream;
     private DataInputStream dataInputStream;
     private Socket socket;
 
     public static ClientBackgroundService getInstance() {
-        return ourInstance;
+        ClientBackgroundService localInstance = instance;
+        if (localInstance == null) {
+            synchronized (ClientBackgroundService.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new ClientBackgroundService();
+                }
+            }
+        }
+        return localInstance;
     }
 
     public void createConnection() throws IOException {
