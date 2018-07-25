@@ -62,8 +62,9 @@ public class ServerDBConnectionPool {
         return localInstance;
     }
 
-    private static void createConnection() throws ApplicationException {
+    private static SessionFactory createConnection() throws ApplicationException {
         try {
+            SessionFactory factory;
             Configuration configuration = new Configuration();
             configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
             configuration.setProperty(HibernateConstants.CP_DB_CONNECTION_URL_KEY, dbConnectionUrl);
@@ -71,10 +72,9 @@ public class ServerDBConnectionPool {
             configuration.setProperty(HibernateConstants.CP_CONNECTION_PASSWORD_KEY, connectionPassword);
             log.info("Creating Hibernate connection at: " + dbConnectionUrl
                     + " username: " + connectionUsername + " password length: " + connectionPassword.length());
-            if (ourSessionFactory == null) {
-                ourSessionFactory = configuration.buildSessionFactory();
-                log.info("Hibernate connection at: " + dbConnectionUrl + " successfully started.");
-            }
+            factory = configuration.buildSessionFactory();
+            log.info("Hibernate connection at: " + dbConnectionUrl + " successfully started.");
+            return factory;
         } catch (Throwable ex) {
             throw new ApplicationException(ex);
         }
@@ -113,21 +113,22 @@ public class ServerDBConnectionPool {
     }
 
     public Session getSession() throws HibernateException {
-        if (ourSessionFactory == null) {
-            try {
-                createConnection();
-                if (ourSessionFactory == null) {
-                    throw new HibernateException("Could not create session factory");
+        try {
+            SessionFactory localFactory = ourSessionFactory;
+            if (localFactory == null) {
+                synchronized (SessionFactory.class) {
+                    localFactory = ourSessionFactory;
+                    if (localFactory == null) {
+                        ourSessionFactory = localFactory = createConnection();
+                    }
                 }
-                return ourSessionFactory.openSession();
-            } catch (ApplicationException e) {
-                JOptionPane.showMessageDialog(null, "Не удалось создать подключение к БД.",
-                        "Ошибка подключения", JOptionPane.WARNING_MESSAGE);
-                throw new HibernateException("Could not create DB connection pool at: " + dbConnectionUrl
-                        + " username: " + connectionUsername + " password length: " + connectionPassword.length(), e);
             }
-        } else {
-            return ourSessionFactory.openSession();
+            return localFactory.openSession();
+        } catch (ApplicationException e) {
+            JOptionPane.showMessageDialog(null, "Не удалось создать подключение к БД.",
+                    "Ошибка подключения", JOptionPane.WARNING_MESSAGE);
+            throw new HibernateException("Could not create DB connection pool at: " + dbConnectionUrl
+                    + " username: " + connectionUsername + " password length: " + connectionPassword.length(), e);
         }
     }
 
