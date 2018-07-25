@@ -27,7 +27,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <grid id="dd3f4" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="dd3f4" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -35,74 +35,97 @@
                 <properties/>
                 <border type="none" title="Функционал"/>
                 <children>
-                  <component id="44a6" class="javax.swing.JButton" binding="viewDetailListButton">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <autoscrolls value="false"/>
-                      <borderPainted value="false"/>
-                      <contentAreaFilled value="true"/>
-                      <requestFocusEnabled value="true"/>
-                      <rolloverEnabled value="true"/>
-                      <text value="&amp;Просмотр вложенности узлов" noi18n="true"/>
-                    </properties>
-                  </component>
-                  <component id="c8e78" class="javax.swing.JButton" binding="editDataButton">
-                    <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <autoscrolls value="false"/>
-                      <borderPainted value="false"/>
-                      <contentAreaFilled value="true"/>
-                      <enabled value="false"/>
-                      <icon value="img/gui/user/securityShield16.png"/>
-                      <requestFocusEnabled value="true"/>
-                      <rolloverEnabled value="true"/>
-                      <text value="&amp;Редактирование данных" noi18n="true"/>
-                      <toolTipText value="Редактирование списков констант" noi18n="true"/>
-                    </properties>
-                  </component>
-                  <hspacer id="bce91">
-                    <constraints>
-                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                  </hspacer>
                   <component id="c0908" class="javax.swing.JButton" binding="adminButton">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <autoscrolls value="false"/>
                       <borderPainted value="false"/>
                       <contentAreaFilled value="true"/>
                       <enabled value="false"/>
-                      <icon value="img/gui/user/securityShield16.png"/>
+                      <icon value="img/gui/adminTools.png"/>
                       <requestFocusEnabled value="true"/>
                       <rolloverEnabled value="true"/>
                       <text value="&amp;Администрирование" noi18n="true"/>
-                      <toolTipText value="Редактирование данных" noi18n="true"/>
-                    </properties>
-                  </component>
-                  <component id="2c330" class="javax.swing.JButton" binding="noticeListViewButton">
-                    <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <autoscrolls value="false"/>
-                      <borderPainted value="false"/>
-                      <contentAreaFilled value="true"/>
-                      <requestFocusEnabled value="true"/>
-                      <rolloverEnabled value="true"/>
-                      <text value="Прос&amp;мотр извещений" noi18n="true"/>
+                      <toolTipText value="Администрирование сервера" noi18n="true"/>
                     </properties>
                   </component>
                   <vspacer id="5165a">
                     <constraints>
-                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
+                  <grid id="c44eb" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="44a6" class="javax.swing.JButton" binding="viewDetailListButton">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <autoscrolls value="false"/>
+                          <horizontalAlignment value="2"/>
+                          <icon value="img/gui/tree/unitOpened.png"/>
+                          <text value="&amp;Просмотр узлов" noi18n="true"/>
+                        </properties>
+                      </component>
+                      <component id="c8e78" class="javax.swing.JButton" binding="editDataButton">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <autoscrolls value="false"/>
+                          <enabled value="false"/>
+                          <horizontalAlignment value="2"/>
+                          <icon value="img/gui/databaseEdit16.png"/>
+                          <text value="&amp;Редактирование данных" noi18n="true"/>
+                          <toolTipText value="Редактирование списков констант" noi18n="true"/>
+                        </properties>
+                      </component>
+                      <component id="2c330" class="javax.swing.JButton" binding="noticeListViewButton">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <autoscrolls value="false"/>
+                          <horizontalAlignment value="2"/>
+                          <icon value="img/gui/notice16.png"/>
+                          <text value="Прос&amp;мотр извещений" noi18n="true"/>
+                        </properties>
+                      </component>
+                      <component id="a3198" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <icon value="img/gui/user/securityShield16.png"/>
+                          <text value=""/>
+                          <toolTipText value="Доступно только администраторам"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <hspacer id="b7609">
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <component id="5e31a" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <icon value="img/gui/user/securityShield16.png"/>
+                      <text value=""/>
+                      <toolTipText value="Доступно только администраторам"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
             </children>

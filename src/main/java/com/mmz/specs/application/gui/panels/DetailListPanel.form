@@ -190,8 +190,7 @@
                   <text value="Материал:" noi18n="true"/>
                 </properties>
               </component>
-              <grid id="7124c" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                <margin top="0" left="0" bottom="0" right="0"/>
+              <grid id="7124c" layout-manager="BorderLayout" hgap="0" vgap="0">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -199,11 +198,7 @@
                 <border type="none"/>
                 <children>
                   <component id="27f99" class="javax.swing.JTextField" binding="searchTextField" custom-create="true">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                        <preferred-size width="150" height="-1"/>
-                      </grid>
-                    </constraints>
+                    <constraints border-constraint="Center"/>
                     <properties>
                       <toolTipText value="Поиск по обозначениям и наименованиям (CTRL+F)"/>
                     </properties>
@@ -273,7 +268,7 @@
                     <constraints/>
                     <properties>
                       <disabledIcon value="img/application/loading2.gif"/>
-                      <icon value="img/gui/refresh-left-arrow.png"/>
+                      <icon value="img/gui/refresh.png"/>
                       <margin top="2" left="2" bottom="2" right="2"/>
                       <text value=""/>
                       <toolTipText value="Обновить данные с базы данных" noi18n="true"/>

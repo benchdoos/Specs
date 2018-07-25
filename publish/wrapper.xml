@@ -19,7 +19,7 @@
     <headerType>gui</headerType>
     <jar>F:\Developer\JAVA\Specs\target\Specs.jar</jar>
     <outfile>F:\Developer\JAVA\Specs\publish\Specs\Specs.exe</outfile>
-    <errTitle>На вашем устройстве не установлена java. Загрузите её по ссылке ниже:</errTitle>
+    <errTitle></errTitle>
     <cmdLine></cmdLine>
     <chdir>.</chdir>
     <priority>normal</priority>

@@ -47,7 +47,7 @@ public class ClientConfigurationWindow extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(okButton);
         setTitle("Конфигурация подключения к серверу");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/networkConnections128.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/settings128.png")));
 
         initTextFields();
 
