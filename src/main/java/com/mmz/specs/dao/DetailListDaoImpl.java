@@ -152,7 +152,7 @@ public class DetailListDaoImpl implements DetailListDao {
             Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
             criteria.select(root);
             criteria.where(builder.equal(root.get("detailByParentDetailId"), parent), builder.equal(root.get("detailByChildDetailId"), child));
-            criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate"))/*, builder.desc(root.get("noticeByNoticeId").get("date"))*/);
+            criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate")));
 
             final Query<DetailListEntity> query = session.createQuery(criteria);
 
