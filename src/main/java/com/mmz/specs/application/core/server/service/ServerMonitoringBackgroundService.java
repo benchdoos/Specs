@@ -25,19 +25,23 @@ import java.util.Calendar;
 import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.*;
 
 public class ServerMonitoringBackgroundService {
-    private static volatile ServerMonitoringBackgroundService instance;
-    private static final int MEMORY_LENGTH = 60;
+    private static final int MEMORY_LENGTH = 60 * 10;
     private static final int MONITORING_TIMER_DELAY = 1000;
-
+    private static final int MAXIMUM_LOG_HISTORY_LENGTH = 10000;
+    private static volatile ServerMonitoringBackgroundService instance;
     private static Timer serverStateUpdateTimer;
-
     private final long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
     private ArrayList<Float> memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
-    private static final int MAXIMUM_LOG_HISTORY_LENGTH = 10000;
     private ArrayList<ServerLogMessage> serverLogMessages = new ArrayList<>(MAXIMUM_LOG_HISTORY_LENGTH);
+
+    private ServerMonitoringBackgroundService() {
+        ActionListener listener = getMonitorTimerActionListener();
+        serverStateUpdateTimer = new Timer(MONITORING_TIMER_DELAY, listener);
+        serverStateUpdateTimer.setRepeats(true);
+    }
 
     public static ServerMonitoringBackgroundService getInstance() {
         ServerMonitoringBackgroundService localInstance = instance;
@@ -50,12 +54,6 @@ public class ServerMonitoringBackgroundService {
             }
         }
         return localInstance;
-    }
-
-    private ServerMonitoringBackgroundService() {
-        ActionListener listener = getMonitorTimerActionListener();
-        serverStateUpdateTimer = new Timer(MONITORING_TIMER_DELAY, listener);
-        serverStateUpdateTimer.setRepeats(true);
     }
 
     private ActionListener getMonitorTimerActionListener() {
@@ -146,6 +144,15 @@ public class ServerMonitoringBackgroundService {
 
         if (serverStateUpdateTimer.isRunning()) {
             serverStateUpdateTimer.stop();
+            memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
+            cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
+            cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
+            cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
+
+            updateCpuLoad();
+            updateCpuLoadByServer();
+            updateMemoryLoad();
+            updateTemperature();
         }
         ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
                 "Успешно завершен сервис мониторинга состояния сервера",
