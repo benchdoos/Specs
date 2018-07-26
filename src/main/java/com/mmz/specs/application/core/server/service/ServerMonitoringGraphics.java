@@ -28,7 +28,12 @@ import java.util.ArrayList;
 public class ServerMonitoringGraphics {
     private final static Color BACKGROUND_COLOR = new Color(242, 242, 242);
     private final static Font defaultFont = new JLabel().getFont();
-    private final String DEGREE = "\u00b0";
+    private boolean cpuSystemShow = true;
+    private boolean temperatureServerShow = true;
+    private boolean cpuServerShow = true;
+    private boolean ramServerShow = true;
+    private boolean usersShow = true;
+
 
     @SuppressWarnings("SuspiciousNameCombination")
     public XYChart getChart(int width, int height) {
@@ -78,29 +83,60 @@ public class ServerMonitoringGraphics {
 
         ArrayList<Float> usersCountData = ServerMonitoringBackgroundService.getInstance().getUsersConnectedValues();
 
-        XYSeries memory = chart.addSeries("ОЗУ (сервер)", xAges, memoryData);
-        memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
-        memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN.darker());
-        memory.setFillColor(Color.GREEN.darker());
+        if (ramServerShow) {
+            XYSeries memory = chart.addSeries("ОЗУ (сервер)", xAges, memoryData);
+            memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
+            memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN.darker());
+            memory.setFillColor(Color.GREEN.darker());
+        }
 
-        XYSeries cpuServer = chart.addSeries("ЦП (сервер)", xAges, cpuServerData);
-        cpuServer.setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
-        cpuServer.setLineStyle(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        if (cpuServerShow) {
+            XYSeries cpuServer = chart.addSeries("ЦП (сервер)", xAges, cpuServerData);
+            cpuServer.setMarker(SeriesMarkers.NONE).setLineColor(Color.BLUE);
+            cpuServer.setLineStyle(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
 
 
-        XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
-        temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
-        temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        if (temperatureServerShow) {
+            String DEGREE = "\u00b0";
+            XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
+            temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
+            temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
 
-        XYSeries users = chart.addSeries("Пользователи", xAges, usersCountData);
-        users.setMarker(SeriesMarkers.NONE).setLineColor(Color.DARK_GRAY);
-        users.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        if (usersShow) {
+            XYSeries users = chart.addSeries("Пользователи", xAges, usersCountData);
+            users.setMarker(SeriesMarkers.NONE).setLineColor(Color.DARK_GRAY);
+            users.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
 
-        XYSeries cpuSystem = chart.addSeries("ЦП (система)", xAges, cpuData);
-        cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
-        cpuSystem.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        if (cpuSystemShow) {
+            XYSeries cpuSystem = chart.addSeries("ЦП (система)", xAges, cpuData);
+            cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
+            cpuSystem.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
 
 
         return chart;
+    }
+
+    public void setCpuSystemShow(boolean cpuSystemShow) {
+        this.cpuSystemShow = cpuSystemShow;
+    }
+
+    public void setTemperatureServerShow(boolean temperatureServerShow) {
+        this.temperatureServerShow = temperatureServerShow;
+    }
+
+    public void setCpuServerShow(boolean cpuServerShow) {
+        this.cpuServerShow = cpuServerShow;
+    }
+
+    public void setRamServerShow(boolean ramServerShow) {
+        this.ramServerShow = ramServerShow;
+    }
+
+    public void setUsersShow(boolean usersShow) {
+        this.usersShow = usersShow;
     }
 }

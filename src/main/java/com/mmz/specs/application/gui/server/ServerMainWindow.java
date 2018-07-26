@@ -142,6 +142,11 @@ public class ServerMainWindow extends JFrame {
     private JButton openClientGuideButton;
     private JButton openServerGuideButton;
     private JPanel graphicsPanel;
+    final ServerMonitoringGraphics serverMonitoringGraphics = new ServerMonitoringGraphics();
+    private JCheckBox ramServerCheckBox;
+    private JCheckBox cpuServerCheckBox;
+    private JCheckBox temperatureCpuServerCheckBox;
+    private JCheckBox usersCheckBox;
     private boolean serverOnlineCountLabelCounterShow = true;
     private JPanel onlyAdminTabsList[];
     private Timer monitorUiUpdateTimer;
@@ -149,6 +154,8 @@ public class ServerMainWindow extends JFrame {
     private boolean isWindowClosing = false;
     private UsersEntity currentLoggedInUser = null;
     private Session session;
+    private JCheckBox cpuSystemCheckBox;
+
 
     public ServerMainWindow() {
         session = ServerDBConnectionPool.getInstance().getSession();
@@ -218,6 +225,16 @@ public class ServerMainWindow extends JFrame {
         switchMonitoringButton.addActionListener(e -> onSwitchMonitoring());
 
         initUserInfoPanelListeners();
+
+        initGraphicsPanelListeners();
+    }
+
+    private void initGraphicsPanelListeners() {
+        cpuSystemCheckBox.addActionListener(e -> serverMonitoringGraphics.setCpuSystemShow(cpuSystemCheckBox.isSelected()));
+        temperatureCpuServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setTemperatureServerShow(temperatureCpuServerCheckBox.isSelected()));
+        cpuServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setCpuServerShow(cpuServerCheckBox.isSelected()));
+        ramServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setRamServerShow(ramServerCheckBox.isSelected()));
+        usersCheckBox.addActionListener(e -> serverMonitoringGraphics.setUsersShow(usersCheckBox.isSelected()));
     }
 
     private void fillAdminConstantsPanel() {
@@ -1473,7 +1490,7 @@ public class ServerMainWindow extends JFrame {
         final int width = graphicsDataPanel.getWidth();
         final int height = 210; // must to be hardcoded or it will rise
 
-        XYChart chart = new ServerMonitoringGraphics().getChart(width, height);
+        XYChart chart = serverMonitoringGraphics.getChart(width, height);
         XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
         if (graphicsDataPanel.getComponents().length > 0) {
             graphicsDataPanel.removeAll();
@@ -1653,11 +1670,41 @@ public class ServerMainWindow extends JFrame {
         applicationVersionArea.setEditable(false);
         panel8.add(applicationVersionArea, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(250, -1), null, 0, false));
         graphicsPanel = new JPanel();
-        graphicsPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        graphicsPanel.setLayout(new GridLayoutManager(2, 6, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane.addTab("График", graphicsPanel);
         graphicsDataPanel = new JPanel();
         graphicsDataPanel.setLayout(new BorderLayout(0, 0));
-        graphicsPanel.add(graphicsDataPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(500, 210), null, null, 0, false));
+        graphicsPanel.add(graphicsDataPanel, new GridConstraints(0, 0, 1, 6, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(500, 210), null, null, 0, false));
+        final Spacer spacer8 = new Spacer();
+        graphicsPanel.add(spacer8, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        cpuSystemCheckBox = new JCheckBox();
+        cpuSystemCheckBox.setSelected(true);
+        cpuSystemCheckBox.setText("ЦП (система)");
+        cpuSystemCheckBox.setMnemonic('П');
+        cpuSystemCheckBox.setDisplayedMnemonicIndex(1);
+        graphicsPanel.add(cpuSystemCheckBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        ramServerCheckBox = new JCheckBox();
+        ramServerCheckBox.setSelected(true);
+        ramServerCheckBox.setText("ОЗУ (сервер)");
+        ramServerCheckBox.setMnemonic('О');
+        ramServerCheckBox.setDisplayedMnemonicIndex(0);
+        graphicsPanel.add(ramServerCheckBox, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cpuServerCheckBox = new JCheckBox();
+        cpuServerCheckBox.setSelected(true);
+        cpuServerCheckBox.setText("ЦП (сервер)");
+        cpuServerCheckBox.setMnemonic('Ц');
+        cpuServerCheckBox.setDisplayedMnemonicIndex(0);
+        graphicsPanel.add(cpuServerCheckBox, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        usersCheckBox = new JCheckBox();
+        usersCheckBox.setSelected(true);
+        usersCheckBox.setText("Пользователи");
+        graphicsPanel.add(usersCheckBox, new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        temperatureCpuServerCheckBox = new JCheckBox();
+        temperatureCpuServerCheckBox.setSelected(true);
+        temperatureCpuServerCheckBox.setText("Температура С° ЦП");
+        temperatureCpuServerCheckBox.setMnemonic('Т');
+        temperatureCpuServerCheckBox.setDisplayedMnemonicIndex(0);
+        graphicsPanel.add(temperatureCpuServerCheckBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         logPanel = new JPanel();
         logPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane.addTab("История сеанса", logPanel);
@@ -1687,8 +1734,8 @@ public class ServerMainWindow extends JFrame {
         onlineUserList.setLayoutOrientation(0);
         onlineUserList.setSelectionMode(0);
         scrollPane1.setViewportView(onlineUserList);
-        final Spacer spacer8 = new Spacer();
-        panel9.add(spacer8, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer9 = new Spacer();
+        panel9.add(spacer9, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JToolBar toolBar1 = new JToolBar();
         toolBar1.setFloatable(false);
         toolBar1.setOrientation(1);
@@ -1717,21 +1764,21 @@ public class ServerMainWindow extends JFrame {
         label15.setText("");
         label15.setToolTipText("Онлайн");
         panel10.add(label15, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer9 = new Spacer();
-        panel10.add(spacer9, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer10 = new Spacer();
+        panel10.add(spacer10, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         onlineUsersCount2 = new JLabel();
         onlineUsersCount2.setText("0");
         panel10.add(onlineUsersCount2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, new Dimension(50, -1), 0, false));
-        final Spacer spacer10 = new Spacer();
-        panel9.add(spacer10, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer11 = new Spacer();
-        adminServerPanel.add(spacer11, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel9.add(spacer11, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer12 = new Spacer();
+        adminServerPanel.add(spacer12, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel11 = new JPanel();
         panel11.setLayout(new GridLayoutManager(4, 2, new Insets(10, 0, 0, 0), -1, -1));
         adminServerPanel.add(panel11, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel11.setBorder(BorderFactory.createTitledBorder("Управление сервером"));
-        final Spacer spacer12 = new Spacer();
-        panel11.add(spacer12, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer13 = new Spacer();
+        panel11.add(spacer13, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         powerServerButton = new JButton();
         powerServerButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/power.png")));
         powerServerButton.setText("Выключить");
@@ -1739,8 +1786,8 @@ public class ServerMainWindow extends JFrame {
         powerServerButton.setDisplayedMnemonicIndex(0);
         powerServerButton.setToolTipText("Выключить сервер (CTRL+Q)");
         panel11.add(powerServerButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer13 = new Spacer();
-        panel11.add(spacer13, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, new Dimension(521, 11), null, 0, false));
+        final Spacer spacer14 = new Spacer();
+        panel11.add(spacer14, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, new Dimension(521, 11), null, 0, false));
         final JPanel panel12 = new JPanel();
         panel12.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel11.add(panel12, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -1752,8 +1799,8 @@ public class ServerMainWindow extends JFrame {
         openLogFolderButton.setDisplayedMnemonicIndex(0);
         openLogFolderButton.setToolTipText("Открыть папку с логами для анализа работы сервера и поиска ошибок");
         panel12.add(openLogFolderButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer14 = new Spacer();
-        panel12.add(spacer14, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer15 = new Spacer();
+        panel12.add(spacer15, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         switchMonitoringButton = new JButton();
         switchMonitoringButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/monitoring16.png")));
         switchMonitoringButton.setText("Отключить мониторинг");
@@ -1768,8 +1815,8 @@ public class ServerMainWindow extends JFrame {
         openClientGuideButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/extensions/pdfFileFormat.png")));
         openClientGuideButton.setText("Клиент");
         panel13.add(openClientGuideButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer15 = new Spacer();
-        panel13.add(spacer15, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer16 = new Spacer();
+        panel13.add(spacer16, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         openServerGuideButton = new JButton();
         openServerGuideButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/extensions/pdfFileFormat.png")));
         openServerGuideButton.setText("Сервер");
@@ -1782,8 +1829,8 @@ public class ServerMainWindow extends JFrame {
         registeredUserList = new JList();
         registeredUserList.setSelectionMode(0);
         scrollPane2.setViewportView(registeredUserList);
-        final Spacer spacer16 = new Spacer();
-        adminUsersPanel.add(spacer16, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer17 = new Spacer();
+        adminUsersPanel.add(spacer17, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         currentUserPanel = new JPanel();
         currentUserPanel.setLayout(new GridLayoutManager(10, 4, new Insets(0, 0, 0, 0), -1, -1));
         adminUsersPanel.add(currentUserPanel, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -1792,8 +1839,8 @@ public class ServerMainWindow extends JFrame {
         label16.setText("Имя пользователя:");
         label16.setToolTipText("Имя пользователя");
         currentUserPanel.add(label16, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer17 = new Spacer();
-        currentUserPanel.add(spacer17, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer18 = new Spacer();
+        currentUserPanel.add(spacer18, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label17 = new JLabel();
         label17.setText("Пароль:");
         currentUserPanel.add(label17, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -1866,8 +1913,8 @@ public class ServerMainWindow extends JFrame {
         isActiveCheckBox.setDisplayedMnemonicIndex(7);
         isActiveCheckBox.setToolTipText("Пользователь активный или нет (вместо удаления, для архивирования)");
         currentUserPanel.add(isActiveCheckBox, new GridConstraints(7, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer18 = new Spacer();
-        adminUsersPanel.add(spacer18, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer19 = new Spacer();
+        adminUsersPanel.add(spacer19, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JToolBar toolBar2 = new JToolBar();
         toolBar2.setFloatable(false);
         adminUsersPanel.add(toolBar2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
@@ -1893,8 +1940,8 @@ public class ServerMainWindow extends JFrame {
         final JLabel label23 = new JLabel();
         label23.setText("URL подключения:");
         adminSettingsPanel.add(label23, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer19 = new Spacer();
-        adminSettingsPanel.add(spacer19, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer20 = new Spacer();
+        adminSettingsPanel.add(spacer20, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JLabel label24 = new JLabel();
         label24.setText("Логин:");
         adminSettingsPanel.add(label24, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -1918,21 +1965,21 @@ public class ServerMainWindow extends JFrame {
         label26.setText("");
         label26.setToolTipText("Важная настройка системы. Будьте осторожны, применяя изменения.");
         adminSettingsPanel.add(label26, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer20 = new Spacer();
-        adminSettingsPanel.add(spacer20, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer21 = new Spacer();
+        adminSettingsPanel.add(spacer21, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         adminConstantsPanel = new JPanel();
         adminConstantsPanel.setLayout(new GridLayoutManager(3, 4, new Insets(10, 10, 10, 10), -1, -1));
         adminPane.addTab("Константы", adminConstantsPanel);
-        final Spacer spacer21 = new Spacer();
-        adminConstantsPanel.add(spacer21, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer22 = new Spacer();
+        adminConstantsPanel.add(spacer22, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         updateServerConstantsButton = new JButton();
         updateServerConstantsButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/save.png")));
         updateServerConstantsButton.setText("Сохранить");
         updateServerConstantsButton.setMnemonic('С');
         updateServerConstantsButton.setDisplayedMnemonicIndex(0);
         adminConstantsPanel.add(updateServerConstantsButton, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer22 = new Spacer();
-        adminConstantsPanel.add(spacer22, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer23 = new Spacer();
+        adminConstantsPanel.add(spacer23, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JLabel label27 = new JLabel();
         label27.setIcon(new ImageIcon(getClass().getResource("/img/gui/warningOrange16.png")));
         label27.setText("");
