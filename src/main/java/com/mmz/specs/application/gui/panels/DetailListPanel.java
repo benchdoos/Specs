@@ -931,7 +931,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         detailInfoPanel.add(label8, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         noticeInfoButton = new JButton();
         noticeInfoButton.setBorderPainted(false);
-        noticeInfoButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/info.png")));
+        noticeInfoButton.setContentAreaFilled(false);
+        noticeInfoButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/goRigth16.png")));
         noticeInfoButton.setIconTextGap(0);
         noticeInfoButton.setMargin(new Insets(2, 2, 2, 2));
         noticeInfoButton.setOpaque(false);

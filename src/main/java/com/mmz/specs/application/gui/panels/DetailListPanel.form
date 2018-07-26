@@ -169,7 +169,8 @@
                 </constraints>
                 <properties>
                   <borderPainted value="false"/>
-                  <icon value="img/gui/info.png"/>
+                  <contentAreaFilled value="false"/>
+                  <icon value="img/gui/goRigth16.png"/>
                   <iconTextGap value="0"/>
                   <margin top="2" left="2" bottom="2" right="2"/>
                   <opaque value="false"/>

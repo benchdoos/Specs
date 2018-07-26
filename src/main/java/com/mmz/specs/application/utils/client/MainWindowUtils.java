@@ -63,14 +63,13 @@ public class MainWindowUtils {
         ArrayList<DetailEntity> roots = getRootObjects(listEntities);
         final String rootUnitCode = ".00.000";
 
-        System.out.println("roots: ");
         for (DetailEntity e : roots) {
             if (e.getCode().contains(rootUnitCode)) {
                 result.add(new DefaultMutableTreeNode(e));
                 System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
             }
         }
-        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
         return result;
     }
 
@@ -108,13 +107,12 @@ public class MainWindowUtils {
 
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
         ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
-        System.out.println(">>> roots: ");
         System.out.println(roots);
         for (DetailEntity entity : roots) {
             DefaultMutableTreeNode node = getChildren(entity);
             result.add(node);
         }
-        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        log.info("Counting tree by entity cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
         return result;
     }
 
