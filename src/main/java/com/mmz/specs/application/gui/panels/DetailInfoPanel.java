@@ -163,17 +163,21 @@ public class DetailInfoPanel extends JPanel {
         final int MAGIC_CONSTANT_GAP = 56;
         final int windowWidth = FrameUtils.findWindow(this).getSize().width;
         final int detailInfoPanelWidth = detailInfoPanel.getWidth();
-        final int c = image.getHeight() / image.getWidth();
-        if (c >= 0.7) {
-            final int size = FrameUtils.findWindow(this).getSize().height - 140;
-            final int actualWidth = c * size;
-            if (actualWidth + detailInfoPanelWidth <= windowWidth) {
-                return size;
+        try {
+            final int c = image.getHeight() / image.getWidth();
+            if (c >= 0.7) {
+                final int size = FrameUtils.findWindow(this).getSize().height - 140;
+                final int actualWidth = c * size;
+                if (actualWidth + detailInfoPanelWidth <= windowWidth) {
+                    return size;
+                } else {
+                    return windowWidth - detailInfoPanelWidth;
+                }
             } else {
-                return windowWidth - detailInfoPanelWidth;
+                return windowWidth - detailInfoPanelWidth - MAGIC_CONSTANT_GAP;
             }
-        } else {
-            return windowWidth - detailInfoPanelWidth - MAGIC_CONSTANT_GAP;
+        } catch (Exception e) {
+            return 0;
         }
     }
 
