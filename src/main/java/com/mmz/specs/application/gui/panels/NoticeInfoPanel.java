@@ -19,18 +19,16 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
-import com.mmz.specs.application.gui.client.DetailInfoWindow;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
+import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.NoticeEntity;
 import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.List;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
@@ -137,19 +135,39 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     }
 
     private void initListeners() {
-        Component c = this;
         detailEffectedList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    if (detailEffectedList.getSelectedValue() != null) {
-                        DetailInfoWindow detailInfoWindow = new DetailInfoWindow(detailEffectedList.getSelectedValue());
-                        detailInfoWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), detailInfoWindow));
-                        detailInfoWindow.setVisible(true);
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (e.getClickCount() == 2) {
+                        openDetailInfo(true);
                     }
+                } else if (e.getButton() == MouseEvent.BUTTON2) {
+                    openDetailInfo(false);
                 }
             }
         });
+
+        detailEffectedList.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    openDetailInfo(true);
+                }
+            }
+        });
+    }
+
+    private void openDetailInfo(boolean select) {
+        final DetailEntity selectedDetail = detailEffectedList.getSelectedValue();
+        if (selectedDetail != null) {
+            DetailInfoPanel detailInfoPanel = new DetailInfoPanel(selectedDetail);
+            String iconPath = selectedDetail.isUnit() ? "/img/gui/tree/unitOpened.png" : "/img/gui/tree/detail.png";
+
+            new MainWindowUtils(session).getClientMainWindow(this).addTab("Информация о детали",
+                    new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource(iconPath))),
+                    detailInfoPanel, select);
+        }
     }
 
     private void updateNoticeInfo(NoticeEntity selectedValue) {

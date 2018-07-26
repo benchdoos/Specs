@@ -145,29 +145,32 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
-        log.debug("Getting latest DetailListEntity by parent: {} and child: {}", parent.toSimpleString(), child.toSimpleString());
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
-        Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
-        criteria.select(root);
-        criteria.where(builder.equal(root.get("detailByParentDetailId"), parent), builder.equal(root.get("detailByChildDetailId"), child));
-        criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate"))/*, builder.desc(root.get("noticeByNoticeId").get("date"))*/);
-
-        final Query<DetailListEntity> query = session.createQuery(criteria);
-
-        query.setFirstResult(0);
-        query.setMaxResults(1);
-        DetailListEntity entity = null;
         try {
-            entity = query.getSingleResult();
-            log.debug("Latest detailList successfully found by parent: {} and child: {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
-        } catch (javax.persistence.NoResultException e) {
-            log.warn("Can not find latest detailList found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), null);
+            log.trace("Getting latest DetailListEntity by parent: {} and child: {}", parent.toSimpleString(), child.toSimpleString());
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<DetailListEntity> criteria = builder.createQuery(DetailListEntity.class);
+            Root<DetailListEntity> root = criteria.from(DetailListEntity.class);
+            criteria.select(root);
+            criteria.where(builder.equal(root.get("detailByParentDetailId"), parent), builder.equal(root.get("detailByChildDetailId"), child));
+            criteria.orderBy(builder.asc(root.get("noticeByNoticeId").get("creationDate"))/*, builder.desc(root.get("noticeByNoticeId").get("date"))*/);
+
+            final Query<DetailListEntity> query = session.createQuery(criteria);
+
+            query.setFirstResult(0);
+            query.setMaxResults(1);
+            DetailListEntity entity = null;
+            try {
+                entity = query.getSingleResult();
+                log.trace("Latest detailList successfully found by parent: {} and child: {}; {}", parent.toSimpleString(), child.toSimpleString(), entity);
+            } catch (javax.persistence.NoResultException e) {
+                log.warn("Can not find latest detailList found by parent and child: {}, {}; {}", parent.toSimpleString(), child.toSimpleString(), null);
+            }
+
+            return entity;
+        } catch (Exception e) {
+            log.warn("Could not find latest notice for entities: {} and {}", parent, child, e);
+            return null;
         }
-
-
-        return entity;
-
     }
 
     @Override
