@@ -552,7 +552,7 @@ public class ServerMainWindow extends JFrame {
             }
 
             private void updateTemperatureInfoLabel() {
-                ArrayList<Float> cpuTemperatureValue = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValue();
+                ArrayList<Float> cpuTemperatureValue = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValues();
 
                 final int index = cpuTemperatureValue.size() - 1;
                 final double cpuTemperature = cpuTemperatureValue.size() > index && index >= 0 ? cpuTemperatureValue.get(index) : 0;

@@ -74,9 +74,11 @@ public class ServerMonitoringGraphics {
 
         ArrayList<Float> cpuServerData = ServerMonitoringBackgroundService.getInstance().getCpuLoadByServerValues();
 
-        ArrayList<Float> cpuTemperatureData = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValue();
+        ArrayList<Float> cpuTemperatureData = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValues();
 
-        XYSeries memory = chart.addSeries("ОЗУ (cервер)", xAges, memoryData);
+        ArrayList<Float> usersCountData = ServerMonitoringBackgroundService.getInstance().getUsersConnectedValues();
+
+        XYSeries memory = chart.addSeries("ОЗУ (сервер)", xAges, memoryData);
         memory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
         memory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN.darker());
         memory.setFillColor(Color.GREEN.darker());
@@ -89,6 +91,10 @@ public class ServerMonitoringGraphics {
         XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
         temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
         temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        XYSeries users = chart.addSeries("Пользователи", xAges, usersCountData);
+        users.setMarker(SeriesMarkers.NONE).setLineColor(Color.DARK_GRAY);
+        users.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
         XYSeries cpuSystem = chart.addSeries("ЦП (система)", xAges, cpuData);
         cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);

@@ -34,7 +34,8 @@ public class ServerMonitoringBackgroundService {
     private ArrayList<Float> memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
-    private ArrayList<Float> cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
+    private ArrayList<Float> cpuTemperatureValues = new ArrayList<>(MEMORY_LENGTH);
+    private ArrayList<Float> usersConnectedValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<ServerLogMessage> serverLogMessages = new ArrayList<>(MAXIMUM_LOG_HISTORY_LENGTH);
 
     private ServerMonitoringBackgroundService() {
@@ -63,6 +64,7 @@ public class ServerMonitoringBackgroundService {
             updateCpuLoadByServer();
             updateMemoryLoad();
             updateTemperature();
+            updateUsersCount();
 
         };
     }
@@ -86,7 +88,11 @@ public class ServerMonitoringBackgroundService {
     }
 
     private void updateTemperature() {
-        this.cpuTemperatureValue = updateGraphicValue(this.cpuTemperatureValue, getCpuTemperature());
+        this.cpuTemperatureValues = updateGraphicValue(this.cpuTemperatureValues, getCpuTemperature());
+    }
+
+    private void updateUsersCount() {
+        this.usersConnectedValues = updateGraphicValue(this.usersConnectedValues, ServerBackgroundService.getInstance().getOnlineUsersCount());
     }
 
     private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
@@ -119,8 +125,12 @@ public class ServerMonitoringBackgroundService {
         return this.cpuLoadByServerValues;
     }
 
-    public ArrayList<Float> getCpuTemperatureValue() {
-        return this.cpuTemperatureValue;
+    public ArrayList<Float> getCpuTemperatureValues() {
+        return this.cpuTemperatureValues;
+    }
+
+    public ArrayList<Float> getUsersConnectedValues() {
+        return this.usersConnectedValues;
     }
 
     public void startMonitoring() {
@@ -147,12 +157,14 @@ public class ServerMonitoringBackgroundService {
             memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
             cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
             cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
-            cpuTemperatureValue = new ArrayList<>(MEMORY_LENGTH);
+            cpuTemperatureValues = new ArrayList<>(MEMORY_LENGTH);
+            usersConnectedValues = new ArrayList<>(MEMORY_LENGTH);
 
             updateCpuLoad();
             updateCpuLoadByServer();
             updateMemoryLoad();
             updateTemperature();
+            updateUsersCount();
         }
         ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
                 "Успешно завершен сервис мониторинга состояния сервера",
