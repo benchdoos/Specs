@@ -1135,9 +1135,10 @@ public class ClientMainWindow extends JFrame {
         Font usernameLabelFont = this.$$$getFont$$$(null, Font.BOLD, 11, usernameLabel.getFont());
         if (usernameLabelFont != null) usernameLabel.setFont(usernameLabelFont);
         usernameLabel.setText(" ");
-        panel5.add(usernameLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel5.add(usernameLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(20, -1), null, null, 0, false));
         loginButton = new JButton();
         loginButton.setBorderPainted(false);
+        loginButton.setContentAreaFilled(false);
         loginButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/admin/locked.png")));
         loginButton.setMargin(new Insets(2, 2, 2, 2));
         loginButton.setOpaque(false);

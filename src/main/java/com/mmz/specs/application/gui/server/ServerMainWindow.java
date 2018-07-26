@@ -1500,6 +1500,7 @@ public class ServerMainWindow extends JFrame {
         panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonAdminLock = new JButton();
         buttonAdminLock.setBorderPainted(false);
+        buttonAdminLock.setContentAreaFilled(false);
         buttonAdminLock.setIcon(new ImageIcon(getClass().getResource("/img/gui/admin/locked.png")));
         buttonAdminLock.setMargin(new Insets(2, 2, 2, 2));
         buttonAdminLock.setOpaque(false);

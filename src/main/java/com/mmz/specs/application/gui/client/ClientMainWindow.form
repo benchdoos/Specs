@@ -180,7 +180,9 @@
             <children>
               <component id="26bf" class="javax.swing.JLabel" binding="usernameLabel">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                    <minimum-size width="20" height="-1"/>
+                  </grid>
                 </constraints>
                 <properties>
                   <font size="11" style="1"/>
@@ -193,6 +195,7 @@
                 </constraints>
                 <properties>
                   <borderPainted value="false"/>
+                  <contentAreaFilled value="false"/>
                   <icon value="img/gui/admin/locked.png"/>
                   <margin top="2" left="2" bottom="2" right="2"/>
                   <opaque value="false"/>
