@@ -138,10 +138,9 @@ public class DetailInfoPanel extends JPanel {
         if (image != null) {
             Component c = this;
             final int DEFAULT_IMAGE_SIZE = 256;
-            final int MAGIC_CONSTANT_GAP = 56;
             System.out.println(">>> " + detailIconLabel.getSize() + " " + detailIconLabel.getMinimumSize() + " " + detailIconLabel.getPreferredSize() + " " + detailIconLabel.getMaximumSize() + " ");
 
-            final int targetSize = FrameUtils.findWindow(this).getSize().width - detailInfoPanel.getWidth() - MAGIC_CONSTANT_GAP;
+            int targetSize = getImageSize(image);
             BufferedImage scaledImage = Scalr.resize(image, targetSize > 0 ? targetSize : DEFAULT_IMAGE_SIZE);
             detailIconLabel.setIcon(new ImageIcon(scaledImage));
             detailIconLabel.setText("");
@@ -149,7 +148,7 @@ public class DetailInfoPanel extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(c), true, image,
+                        FrameUtils.onShowImage(FrameUtils.findWindow(c), false, image,
                                 "Изображение " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
                     }
                 }
@@ -157,6 +156,24 @@ public class DetailInfoPanel extends JPanel {
         } else {
             detailIconLabel.setIcon(null);
             detailIconLabel.setText("Нет изображения");
+        }
+    }
+
+    private int getImageSize(BufferedImage image) {
+        final int MAGIC_CONSTANT_GAP = 56;
+        final int windowWidth = FrameUtils.findWindow(this).getSize().width;
+        final int detailInfoPanelWidth = detailInfoPanel.getWidth();
+        final int c = image.getHeight() / image.getWidth();
+        if (c >= 0.7) {
+            final int size = FrameUtils.findWindow(this).getSize().height - 140;
+            final int actualWidth = c * size;
+            if (actualWidth + detailInfoPanelWidth <= windowWidth) {
+                return size;
+            } else {
+                return windowWidth - detailInfoPanelWidth;
+            }
+        } else {
+            return windowWidth - detailInfoPanelWidth - MAGIC_CONSTANT_GAP;
         }
     }
 
