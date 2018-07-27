@@ -188,6 +188,13 @@ public class ServerDBConnectionPool {
     }
 
     public boolean equalsTransaction(Socket client) {
-        return transactionClient.equals(client);
+        if (transactionClient != null) {
+            return transactionClient.equals(client);
+        }
+        return false;
+    }
+
+    public boolean transactionAlive() {
+        return transactionClient != null;
     }
 }
