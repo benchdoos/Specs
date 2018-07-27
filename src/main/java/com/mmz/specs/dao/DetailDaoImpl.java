@@ -84,14 +84,6 @@ public class DetailDaoImpl implements DetailDao {
 
     @Override
     public DetailEntity getDetailByCode(String code) {
-       /* Query query = session.createQuery("from DetailEntity where code = :code");
-
-        query.setParameter("code", code);
-
-        final DetailEntity entity = (DetailEntity) query.uniqueResult();
-        log.debug("Detail found by code: " + code + " " + entity);
-        return entity;*/
-
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
         Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
@@ -145,19 +137,6 @@ public class DetailDaoImpl implements DetailDao {
 
     @Override
     public List<DetailEntity> listDetails() {
-        /*List list = session.createQuery("from DetailEntity").list();
-        log.debug("list: {}", list.size());
-        List<DetailEntity> result = new ArrayList<>(list.size());
-
-        for (Object detailEntity : list) {
-            if (detailEntity instanceof DetailEntity) {
-                result.add((DetailEntity) detailEntity);
-            } else {
-                log.warn("Not Detail from list: " + detailEntity);
-            }
-        }
-        return result;*/
-
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
         Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
