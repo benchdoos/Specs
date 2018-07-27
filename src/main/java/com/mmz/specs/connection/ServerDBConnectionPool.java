@@ -34,6 +34,7 @@ import org.hibernate.query.Query;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import javax.swing.*;
+import java.net.Socket;
 
 public class ServerDBConnectionPool {
     private static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -44,6 +45,7 @@ public class ServerDBConnectionPool {
     private static String dbConnectionUrl;
     private static String connectionUsername;
     private static String connectionPassword;
+    private Socket transactionClient = null;
 
     private ServerDBConnectionPool() {
         prepareServerSettings();
@@ -170,5 +172,22 @@ public class ServerDBConnectionPool {
     public void stopDBConnectionPool() {
         ourSessionFactory.close();
         ourSessionFactory = null;
+    }
+
+    public boolean bindTransaction(Socket client) {
+        if (transactionClient == null) {
+            transactionClient = client;
+            return true;
+        }
+        return false;
+    }
+
+    public void unbindTransaction() {
+        transactionClient = null;
+        log.info("Transaction successfully unbinded");
+    }
+
+    public boolean equalsTransaction(Socket client) {
+        return transactionClient.equals(client);
     }
 }

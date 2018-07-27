@@ -85,8 +85,18 @@ public class ServerSocketDialog implements Runnable {
                 break;
 
             case GIVE_SESSION:
-                log.info("User asking Session, giving it. Command: " + command);
+                log.info("Client asking Session, giving it. Command: " + command);
                 new ServerSocketDialogUtils(client).sendSessionInfo();
+                break;
+
+            case TRANSACTION_BIND:
+                log.info("Client asking for transaction bind.", client);
+                new ServerSocketDialogUtils(client).sendTransaction();
+                break;
+
+            case TRANSACTION_UNBIND:
+                log.info("Client asking to unbind transaction.", client);
+                ServerDBConnectionPool.getInstance().unbindTransaction();
                 break;
 
             case USER_LOGIN:

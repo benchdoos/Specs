@@ -17,6 +17,7 @@ package com.mmz.specs.socket;
 
 import com.mmz.specs.application.managers.ServerSettingsManager;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -27,7 +28,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import static com.mmz.specs.connection.HibernateConstants.*;
-import static com.mmz.specs.socket.SocketConstants.USER_PC_NAME;
+import static com.mmz.specs.socket.SocketConstants.*;
 
 class ServerSocketDialogUtils {
 
@@ -57,10 +58,6 @@ class ServerSocketDialogUtils {
         try {
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
             String serverDbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
-            /*serverDbConnectionUrl = serverDbConnectionUrl.replace("localhost", ServerSocketService.getInstance().getServerInetAddress());*/
-            /*out.writeUTF(serverDbConnectionUrl);
-            out.writeUTF(ServerSettingsManager.getInstance().getServerDbUsername());
-            out.writeUTF(ServerSettingsManager.getInstance().getServerDbPassword());*/
 
             JSONObject json = new JSONObject();
             json.put(CP_DB_CONNECTION_URL_KEY, serverDbConnectionUrl);
@@ -81,5 +78,24 @@ class ServerSocketDialogUtils {
             log.info("Could not read client's username", e);
         }
         return "Unknown";
+    }
+
+    void sendTransaction() {
+        final boolean b = ServerDBConnectionPool.getInstance().bindTransaction(client);
+        if (b) {
+            sendTransactionBindInfo(TRANSACTION_ACCESS_GRANTED);
+        } else {
+            sendTransactionBindInfo(TRANSACTION_ACCESS_DENIED);
+        }
+    }
+
+    private void sendTransactionBindInfo(String transactionAccessDenied) {
+        try {
+            DataOutputStream out = new DataOutputStream(client.getOutputStream());
+            out.writeUTF(transactionAccessDenied);
+        } catch (IOException e) {
+            log.warn("Could not send transaction bind info for client");
+            ServerDBConnectionPool.getInstance().unbindTransaction();
+        }
     }
 }

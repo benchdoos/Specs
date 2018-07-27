@@ -24,4 +24,11 @@ public interface SocketConstants {
 
     String USER_LOGIN = "user.login";
     String USER_LOGOUT = "user.logout";
+
+
+    String TRANSACTION_BIND = "transaction.bind";
+    String TRANSACTION_UNBIND = "transaction.unbind";
+    String TRANSACTION_ACCESS_GRANTED = "transaction.access.granted";
+    String TRANSACTION_ACCESS_DENIED = "transaction.access.denied";
+
 }

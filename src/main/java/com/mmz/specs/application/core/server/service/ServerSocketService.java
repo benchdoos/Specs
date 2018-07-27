@@ -17,6 +17,7 @@ package com.mmz.specs.application.core.server.service;
 
 import com.mmz.specs.application.core.server.ServerConstants;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.socket.ServerSocketConnectionPool;
 import com.mmz.specs.socket.ServerSocketDialog;
 import org.apache.logging.log4j.LogManager;
@@ -151,6 +152,9 @@ public class ServerSocketService {
     private void unregisterClientConnection(ClientConnection client) {
         client.setUser(null);
         System.out.println("removing " + client + " and contains:" + connections.containsKey(client));
+        if (ServerDBConnectionPool.getInstance().equalsTransaction(client.getSocket())) {
+            ServerDBConnectionPool.getInstance().unbindTransaction();
+        }
         this.connections.remove(client);
     }
 
@@ -189,6 +193,8 @@ public class ServerSocketService {
         int totalConnectionsCount = this.connections.size();
         this.connections.clear();
         if (connectionsCount.get() == totalConnectionsCount) {
+            log.info("Unbinding transaction");
+            ServerDBConnectionPool.getInstance().unbindTransaction();
             log.info("Closed: " + connectionsCount + " connections from total: " + totalConnectionsCount);
 
             ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(

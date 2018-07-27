@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.utils;
 
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -110,7 +111,7 @@ public class CommonUtils {
         return bimage;
     }
 
-    public static File getCurrentFile() {
+    private static File getCurrentFile() {
         try {
             return new File(CommonUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         } catch (URISyntaxException ignore) {
@@ -182,6 +183,9 @@ public class CommonUtils {
         } catch (Exception e) {
             log.warn("Could not rollback transaction", e);
         }
+        log.debug("Unbinding transaction");
+        ClientBackgroundService.getInstance().unbindTransaction();
+        log.debug("Transaction successfully unbinded");
     }
 
     public static Image getImageFromClipboard() throws Exception {

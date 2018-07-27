@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import static com.mmz.specs.connection.HibernateConstants.*;
+import static com.mmz.specs.socket.SocketConstants.TRANSACTION_ACCESS_GRANTED;
 
 public class ClientBackgroundService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -69,7 +70,7 @@ public class ClientBackgroundService {
                 outputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
                 return true;
             }
-        } catch (Throwable throwable) {
+        } catch (Throwable ignored) {
         }
         return false;
     }
@@ -109,7 +110,7 @@ public class ClientBackgroundService {
     private SessionFactory getSessionFactoryFromServer() {
         String params = null;
         try {
-            log.info("Asking server for session, command: " + SocketConstants.GIVE_SESSION);
+            log.info("Asking server for session, command: {}", SocketConstants.GIVE_SESSION);
             outputStream.writeUTF(SocketConstants.GIVE_SESSION);
             params = dataInputStream.readUTF();
             JSONObject obj = new JSONObject(params);
@@ -126,6 +127,27 @@ public class ClientBackgroundService {
         }
 
         return null;
+    }
+
+    public boolean bindTransaction() {
+        try {
+            log.info("Asking server for transaction");
+            outputStream.writeUTF(SocketConstants.TRANSACTION_BIND);
+            final String s = dataInputStream.readUTF();
+            return s.equalsIgnoreCase(TRANSACTION_ACCESS_GRANTED);
+        } catch (Throwable e) {
+            log.warn("Could not ask server for transaction", e);
+            return false;
+        }
+    }
+
+    public void unbindTransaction() {
+        try {
+            log.info("Asking server to unbind transaction");
+            outputStream.writeUTF(SocketConstants.TRANSACTION_UNBIND);
+        } catch (Throwable e) {
+            log.warn("Could not unbind transaction", e);
+        }
     }
 
     private SessionFactory createFactory(String dbAddress, String dbUsername, String dbPassword) {
@@ -150,6 +172,8 @@ public class ClientBackgroundService {
     public void closeConnection() throws IOException {
         log.info("Trying to close connection to server");
         if (isConnected()) {
+            log.info("Writing to server that we're unbinding all transactions");
+            outputStream.writeUTF(SocketConstants.TRANSACTION_UNBIND);
             log.info("Writing to server that we're quiting");
             outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
             socket.close();
