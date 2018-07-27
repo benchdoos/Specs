@@ -352,7 +352,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void showTransactionCreatingFailMessage() {
         JOptionPane.showMessageDialog(this, "Не удалось отредактировать данные, \n" +
-                "кто-то уже проводит изменения", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
+                        "кто-то уже проводит изменения", "Ошибка доступа", JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/warning.gif"))));
     }
 
     private void initSearchTextFieldKeysBindings() {
