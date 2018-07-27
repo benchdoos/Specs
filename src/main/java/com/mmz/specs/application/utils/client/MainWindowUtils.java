@@ -121,12 +121,10 @@ public class MainWindowUtils {
 
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
         ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
-        System.out.println(">>> roots: ");
-        System.out.println(roots);
         for (DetailEntity entity : roots) {
             result.add(new DefaultMutableTreeNode(entity));
         }
-        System.err.println("TOTAL: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        log.info("Counting tree by entity cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
         return result;
     }
 
@@ -334,9 +332,7 @@ public class MainWindowUtils {
                 final JPopupMenu popup = new JPopupMenu();
                 JMenuItem reload = new JMenuItem("Обновить",
                         new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
-                reload.addActionListener(e -> {
-                    reloadPath(selectedPath);
-                });
+                reload.addActionListener(e -> reloadPath(selectedPath));
                 popup.add(reload);
                 mainTree.setComponentPopupMenu(popup);
             }
