@@ -31,7 +31,8 @@ public class ServerMonitoringBackgroundService {
     private static volatile ServerMonitoringBackgroundService instance;
     private static Timer serverStateUpdateTimer;
     private final long serverStartDateSeconds = Calendar.getInstance().getTime().getTime() / 1000;
-    private ArrayList<Float> memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
+    private ArrayList<Float> serverMemoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
+    private ArrayList<Float> systemMemoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
     private ArrayList<Float> cpuTemperatureValues = new ArrayList<>(MEMORY_LENGTH);
@@ -62,7 +63,8 @@ public class ServerMonitoringBackgroundService {
 
             updateCpuLoad();
             updateCpuLoadByServer();
-            updateMemoryLoad();
+            updateServerMemoryLoad();
+            updateSystemMemoryLoad();
             updateTemperature();
             updateUsersCount();
 
@@ -78,13 +80,17 @@ public class ServerMonitoringBackgroundService {
         this.cpuLoadByServerValues = updateGraphicValue(this.cpuLoadByServerValues, cpuUsageByApplication);
     }
 
-    private void updateMemoryLoad() {
+    private void updateServerMemoryLoad() {
         final long runtimeUsedMemory = getRuntimeUsedMemory();
         final long runtimeMaxMemory = getRuntimeMaxMemory();
 
         double usedMemory = CommonUtils.round(runtimeUsedMemory / (double) runtimeMaxMemory * 100, 2);
 
-        this.memoryLoadValues = updateGraphicValue(this.memoryLoadValues, usedMemory);
+        this.serverMemoryLoadValues = updateGraphicValue(this.serverMemoryLoadValues, usedMemory);
+    }
+
+    private void updateSystemMemoryLoad() {
+        this.systemMemoryLoadValues = updateGraphicValue(this.systemMemoryLoadValues, getSystemUsedMemory());
     }
 
     private void updateTemperature() {
@@ -113,8 +119,12 @@ public class ServerMonitoringBackgroundService {
         return result;
     }
 
-    ArrayList<Float> getMemoryLoadValues() {
-        return this.memoryLoadValues;
+    public ArrayList<Float> getSystemMemoryLoadValues() {
+        return systemMemoryLoadValues;
+    }
+
+    ArrayList<Float> getServerMemoryLoadValues() {
+        return this.serverMemoryLoadValues;
     }
 
     public ArrayList<Float> getCpuLoadValues() {
@@ -154,7 +164,8 @@ public class ServerMonitoringBackgroundService {
 
         if (serverStateUpdateTimer.isRunning()) {
             serverStateUpdateTimer.stop();
-            memoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
+            serverMemoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
+            systemMemoryLoadValues = new ArrayList<>(MEMORY_LENGTH);
             cpuLoadValues = new ArrayList<>(MEMORY_LENGTH);
             cpuLoadByServerValues = new ArrayList<>(MEMORY_LENGTH);
             cpuTemperatureValues = new ArrayList<>(MEMORY_LENGTH);
@@ -162,7 +173,8 @@ public class ServerMonitoringBackgroundService {
 
             updateCpuLoad();
             updateCpuLoadByServer();
-            updateMemoryLoad();
+            updateSystemMemoryLoad();
+            updateServerMemoryLoad();
             updateTemperature();
             updateUsersCount();
         }

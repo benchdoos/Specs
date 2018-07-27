@@ -28,8 +28,8 @@ import java.lang.management.ManagementFactory;
 public class SystemMonitoringInfoUtils {
     private static final Runtime RUNTIME = Runtime.getRuntime();
     private static final SystemInfo SYSTEM_INFO = new SystemInfo();
-    private static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
     public static final OperatingSystem OPERATING_SYSTEM = SYSTEM_INFO.getOperatingSystem();
+    private static final HardwareAbstractionLayer HARDWARE_ABSTRACTION_LAYER = SYSTEM_INFO.getHardware();
     private static final int MEGABYTE = 1024 * 1024;
     private static final Sensors SENSORS = HARDWARE_ABSTRACTION_LAYER.getSensors();
     private static final CentralProcessor processor = HARDWARE_ABSTRACTION_LAYER.getProcessor();
@@ -81,6 +81,16 @@ public class SystemMonitoringInfoUtils {
 
     public static long getRuntimeUsedMemory() {
         return getRuntimeTotalMemory() - getRuntimeFreeMemory();
+    }
+
+    public static long getSystemUsedMemory() {
+        final long a = HARDWARE_TOTAL_RAM_MEMORY - HARDWARE_ABSTRACTION_LAYER.getMemory().getAvailable();
+        final double b = ((double) a / HARDWARE_TOTAL_RAM_MEMORY) * 100;
+        return (long) b;
+    }
+
+    private static long getUnusedMemory() {
+        return (long) (((double) HARDWARE_ABSTRACTION_LAYER.getMemory().getAvailable() / HARDWARE_TOTAL_RAM_MEMORY) * 100);
     }
 
     public static double getCpuTemperature() {
