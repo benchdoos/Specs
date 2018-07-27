@@ -545,6 +545,11 @@ public class ServerMainWindow extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                updateMonitoringByTimer();
+
+            }
+
+            private void updateMonitoringByTimer() {
                 updateOnlineUsersCount();
                 updateOnlineUsersList();
 
@@ -561,11 +566,12 @@ public class ServerMainWindow extends JFrame {
                 updateLogTextPane();
 
                 updateTransactionStatus();
-
             }
 
             private void updateTransactionStatus() {
-                transactionActiveLabel.setText(ServerDBConnectionPool.getInstance().transactionAlive() ? "активна" : "не активна");
+                final boolean alive = ServerDBConnectionPool.getInstance().transactionAlive();
+                transactionActiveLabel.setText(alive ? "активна" : "не активна");
+                unbindTransactionButton.setEnabled(alive);
             }
 
             private void updateServerOnlineTimeLabel() {
