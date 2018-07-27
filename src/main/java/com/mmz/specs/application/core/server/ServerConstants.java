@@ -21,5 +21,4 @@ public class ServerConstants {
 
     public static final int SERVER_DEFAULT_SOCKET_PORT = 43745;
 
-    public static final int SERVER_SOCKED_THREAD_POOL_SIZE = 20;
 }

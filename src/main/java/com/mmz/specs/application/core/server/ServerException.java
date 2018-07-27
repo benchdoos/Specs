@@ -18,15 +18,15 @@ package com.mmz.specs.application.core.server;
 import com.mmz.specs.application.ApplicationException;
 
 public class ServerException extends ApplicationException {
-    public ServerException() {
+    ServerException() {
         super();
     }
 
-    public ServerException(String message) {
+    ServerException(String message) {
         super(message);
     }
 
-    public ServerException(String message, Throwable cause) {
+    ServerException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -34,7 +34,7 @@ public class ServerException extends ApplicationException {
         super(cause);
     }
 
-    protected ServerException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    ServerException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
