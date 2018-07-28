@@ -32,7 +32,7 @@ public class ClientConnectionImpl implements ClientConnection {
     private Socket socket;
     private UsersEntity user;
 
-    ClientConnectionImpl() {
+    public ClientConnectionImpl() {
     }
 
     @Override

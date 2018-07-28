@@ -26,10 +26,12 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.io.IOException;
 import java.net.BindException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerSocketService {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -67,6 +69,16 @@ public class ServerSocketService {
         ClientConnection client = new ClientConnectionImpl();
         client.setSocket(ServerSocketConnectionPool.getInstance().getClient());
         return client;
+    }
+
+    public ClientConnection getRegisteredClientConnection(Socket socket) {
+        AtomicReference<ClientConnection> result = new AtomicReference<>();
+        this.connections.forEach((client, thread) -> {
+            if (client.getSocket().equals(socket)) {
+                result.set(client);
+            }
+        });
+        return result.get();
     }
 
 

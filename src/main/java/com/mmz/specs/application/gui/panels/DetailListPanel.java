@@ -201,7 +201,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                     if (detailEntity != null) {
                         JPopupMenu popupMenu = new JPopupMenu();
                         JMenuItem refresh = new JMenuItem("Обновить",
-                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
+                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
                         refresh.addActionListener(e1 -> {
                             detailIconLabel.setIcon(null);
                             updateDetailImage(detailEntity);

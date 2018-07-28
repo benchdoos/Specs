@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="8" y="12" width="1296" height="799"/>
+      <xy x="8" y="12" width="787" height="448"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -45,6 +45,7 @@
                 </constraints>
                 <properties>
                   <font size="11" style="1"/>
+                  <labelFor value="ad656"/>
                   <text value="username" noi18n="true"/>
                 </properties>
               </component>
@@ -78,7 +79,7 @@
             </properties>
             <border type="none"/>
             <children>
-              <grid id="8853" binding="monitorPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="8853" binding="monitorPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="Мониторинг" noi18n="true"/>
@@ -86,14 +87,9 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <hspacer id="67f89">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                  </hspacer>
                   <tabbedpane id="2a099">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
                         <preferred-size width="200" height="200"/>
                       </grid>
                     </constraints>
@@ -108,7 +104,7 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <grid id="dd9b0" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                          <grid id="dd9b0" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                             <margin top="0" left="0" bottom="0" right="0"/>
                             <constraints>
                               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -116,14 +112,9 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <vspacer id="51304">
-                                <constraints>
-                                  <grid row="2" column="1" row-span="2" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                              </vspacer>
                               <vspacer id="fe92">
                                 <constraints>
-                                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                                 </constraints>
                               </vspacer>
                               <hspacer id="8a1d4">
@@ -131,167 +122,18 @@
                                   <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                 </constraints>
                               </hspacer>
-                              <grid id="c7f6b" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                              <grid id="c7f6b" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                 <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="0" column="0" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
                                 <border type="none"/>
                                 <children>
-                                  <grid id="73c10" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                                    <margin top="0" left="0" bottom="0" right="0"/>
-                                    <constraints>
-                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                                    </constraints>
-                                    <properties>
-                                      <name value=""/>
-                                    </properties>
-                                    <border type="none" title="Система" noi18n="true"/>
-                                    <children>
-                                      <component id="c13a3" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="ОС:"/>
-                                        </properties>
-                                      </component>
-                                      <component id="e3c00" class="javax.swing.JLabel" binding="osInfoLabel">
-                                        <constraints>
-                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="_"/>
-                                          <toolTipText value="Версия операционной системы" noi18n="true"/>
-                                        </properties>
-                                      </component>
-                                      <component id="ecafb" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="Процессор:"/>
-                                        </properties>
-                                      </component>
-                                      <component id="1a027" class="javax.swing.JLabel" binding="usedCpuBySystemInfoLabel">
-                                        <constraints>
-                                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="_"/>
-                                          <toolTipText value="Физических (логических), нагрузка ЦП %"/>
-                                        </properties>
-                                      </component>
-                                      <component id="645fd" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="Температура:"/>
-                                        </properties>
-                                      </component>
-                                      <component id="ae9" class="javax.swing.JLabel" binding="temperatureInfoLabel">
-                                        <constraints>
-                                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="0"/>
-                                          <toolTipText value="Температура процессора" noi18n="true"/>
-                                        </properties>
-                                      </component>
-                                      <component id="76bb9" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="Всего доступно:"/>
-                                        </properties>
-                                      </component>
-                                      <component id="be156" class="javax.swing.JLabel" binding="totalMemoryInfoLabel">
-                                        <constraints>
-                                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="0"/>
-                                          <toolTipText value="Доступно для JVM / для системы"/>
-                                        </properties>
-                                      </component>
-                                      <component id="934c7" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="JVM:"/>
-                                        </properties>
-                                      </component>
-                                      <component id="60813" class="javax.swing.JLabel" binding="jvmInfoLabel">
-                                        <constraints>
-                                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="_"/>
-                                          <toolTipText value="Версия Java Virtual Machine" noi18n="true"/>
-                                        </properties>
-                                      </component>
-                                    </children>
-                                  </grid>
-                                  <grid id="35088" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                                    <margin top="0" left="0" bottom="0" right="0"/>
-                                    <constraints>
-                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                                    </constraints>
-                                    <properties/>
-                                    <border type="none" title="Сеть" noi18n="true"/>
-                                    <children>
-                                      <component id="47401" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="Сетевое имя:"/>
-                                        </properties>
-                                      </component>
-                                      <component id="c7046" class="javax.swing.JLabel" binding="networkNameInfoLabel">
-                                        <constraints>
-                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="_"/>
-                                        </properties>
-                                      </component>
-                                      <component id="1d8ad" class="javax.swing.JLabel">
-                                        <constraints>
-                                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="IP (v4/v6):"/>
-                                        </properties>
-                                      </component>
-                                      <component id="df0f0" class="javax.swing.JLabel" binding="ipAddressInfoLabel">
-                                        <constraints>
-                                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                        <properties>
-                                          <text value="_"/>
-                                        </properties>
-                                      </component>
-                                      <hspacer id="93c1c">
-                                        <constraints>
-                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                      </hspacer>
-                                      <hspacer id="ad056">
-                                        <constraints>
-                                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                        </constraints>
-                                      </hspacer>
-                                    </children>
-                                  </grid>
                                   <grid id="4c42e" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                     <margin top="0" left="0" bottom="0" right="0"/>
                                     <constraints>
-                                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                     <properties/>
                                     <border type="none" title="Сервер" noi18n="true"/>
@@ -409,7 +251,7 @@
                                       <component id="f54cc" class="javax.swing.JTextField" binding="applicationVersionArea">
                                         <constraints>
                                           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                                            <preferred-size width="250" height="-1"/>
+                                            <preferred-size width="160" height="-1"/>
                                           </grid>
                                         </constraints>
                                         <properties>
@@ -419,13 +261,175 @@
                                       </component>
                                     </children>
                                   </grid>
+                                  <grid id="a2e82" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none"/>
+                                    <children>
+                                      <grid id="35088" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="0" left="0" bottom="0" right="0"/>
+                                        <constraints>
+                                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties/>
+                                        <border type="none" title="Сеть" noi18n="true"/>
+                                        <children>
+                                          <component id="47401" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Сетевое имя:"/>
+                                            </properties>
+                                          </component>
+                                          <component id="c7046" class="javax.swing.JLabel" binding="networkNameInfoLabel">
+                                            <constraints>
+                                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="_"/>
+                                            </properties>
+                                          </component>
+                                          <component id="1d8ad" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="IP (v4/v6):"/>
+                                            </properties>
+                                          </component>
+                                          <component id="df0f0" class="javax.swing.JLabel" binding="ipAddressInfoLabel">
+                                            <constraints>
+                                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="_"/>
+                                            </properties>
+                                          </component>
+                                          <hspacer id="93c1c">
+                                            <constraints>
+                                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                          </hspacer>
+                                          <hspacer id="ad056">
+                                            <constraints>
+                                              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                          </hspacer>
+                                        </children>
+                                      </grid>
+                                      <grid id="73c10" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="0" left="0" bottom="0" right="0"/>
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <name value=""/>
+                                        </properties>
+                                        <border type="none" title="Система" noi18n="true"/>
+                                        <children>
+                                          <component id="c13a3" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="ОС:"/>
+                                            </properties>
+                                          </component>
+                                          <component id="e3c00" class="javax.swing.JLabel" binding="osInfoLabel">
+                                            <constraints>
+                                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                                <minimum-size width="250" height="-1"/>
+                                                <preferred-size width="250" height="-1"/>
+                                              </grid>
+                                            </constraints>
+                                            <properties>
+                                              <text value="нет данных"/>
+                                              <toolTipText value="Версия операционной системы" noi18n="true"/>
+                                            </properties>
+                                          </component>
+                                          <component id="ecafb" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Процессор:"/>
+                                            </properties>
+                                          </component>
+                                          <component id="1a027" class="javax.swing.JLabel" binding="usedCpuBySystemInfoLabel">
+                                            <constraints>
+                                              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="_"/>
+                                              <toolTipText value="Физических (логических), нагрузка ЦП %"/>
+                                            </properties>
+                                          </component>
+                                          <component id="645fd" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Температура:"/>
+                                            </properties>
+                                          </component>
+                                          <component id="ae9" class="javax.swing.JLabel" binding="temperatureInfoLabel">
+                                            <constraints>
+                                              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="0"/>
+                                              <toolTipText value="Температура процессора" noi18n="true"/>
+                                            </properties>
+                                          </component>
+                                          <component id="76bb9" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Всего доступно:"/>
+                                            </properties>
+                                          </component>
+                                          <component id="be156" class="javax.swing.JLabel" binding="totalMemoryInfoLabel">
+                                            <constraints>
+                                              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="0"/>
+                                              <toolTipText value="Доступно для JVM / для системы"/>
+                                            </properties>
+                                          </component>
+                                          <component id="934c7" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="JVM:"/>
+                                            </properties>
+                                          </component>
+                                          <component id="60813" class="javax.swing.JLabel" binding="jvmInfoLabel">
+                                            <constraints>
+                                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="_"/>
+                                              <toolTipText value="Версия Java Virtual Machine" noi18n="true"/>
+                                            </properties>
+                                          </component>
+                                        </children>
+                                      </grid>
+                                    </children>
+                                  </grid>
                                 </children>
                               </grid>
                             </children>
                           </grid>
                         </children>
                       </grid>
-                      <grid id="b9346" binding="graphicsPanel" layout-manager="GridLayoutManager" row-count="2" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                      <grid id="b9346" binding="graphicsPanel" layout-manager="GridLayoutManager" row-count="2" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                         <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints>
                           <tabbedpane title="История"/>
@@ -435,9 +439,7 @@
                         <children>
                           <grid id="270f8" binding="graphicsDataPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
                             <constraints>
-                              <grid row="0" column="0" row-span="1" col-span="8" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                                <minimum-size width="500" height="210"/>
-                              </grid>
+                              <grid row="0" column="0" row-span="1" col-span="7" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties/>
                             <border type="none"/>
@@ -495,14 +497,6 @@
                             <properties>
                               <selected value="true"/>
                               <text value="О&amp;ЗУ (система)"/>
-                            </properties>
-                          </component>
-                          <component id="f2a89" class="javax.swing.JLabel">
-                            <constraints>
-                              <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <text value="Статистика за 10 минут"/>
                             </properties>
                           </component>
                           <hspacer id="563e0">
@@ -570,83 +564,18 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <grid id="c6cc9" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                          <grid id="c6cc9" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                             <margin top="0" left="0" bottom="0" right="0"/>
                             <constraints>
                               <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties/>
-                            <border type="none" title="Управление текущими сеансами" noi18n="true"/>
+                            <border type="none"/>
                             <children>
-                              <scrollpane id="a7c09">
-                                <constraints>
-                                  <grid row="0" column="0" row-span="2" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                                    <minimum-size width="200" height="-1"/>
-                                    <preferred-size width="200" height="-1"/>
-                                  </grid>
-                                </constraints>
-                                <properties>
-                                  <horizontalScrollBarPolicy value="31"/>
-                                </properties>
-                                <border type="none"/>
-                                <children>
-                                  <component id="bc53a" class="javax.swing.JList" binding="onlineUserList">
-                                    <constraints/>
-                                    <properties>
-                                      <layoutOrientation value="0"/>
-                                      <selectionMode value="0"/>
-                                    </properties>
-                                  </component>
-                                </children>
-                              </scrollpane>
-                              <vspacer id="5ba99">
-                                <constraints>
-                                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                              </vspacer>
-                              <toolbar id="24eee">
-                                <constraints>
-                                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                                    <preferred-size width="-1" height="20"/>
-                                  </grid>
-                                </constraints>
-                                <properties>
-                                  <floatable value="false"/>
-                                  <orientation value="1"/>
-                                </properties>
-                                <border type="none"/>
-                                <children>
-                                  <component id="8a656" class="javax.swing.JButton" binding="buttonForceUserDisconnect">
-                                    <constraints/>
-                                    <properties>
-                                      <icon value="img/gui/disconnect.png"/>
-                                      <margin top="2" left="2" bottom="2" right="2"/>
-                                      <text value=""/>
-                                      <toolTipText value="Отключить пользователя (DELETE)" noi18n="true"/>
-                                    </properties>
-                                  </component>
-                                  <component id="9d237" class="javax.swing.JButton" binding="buttonForceAllUsersDisconnect">
-                                    <constraints/>
-                                    <properties>
-                                      <icon value="img/gui/disconnect_total.png"/>
-                                      <toolTipText value="Отключить всех пользователей(CTRL+SHIFT+DELETE)" noi18n="true"/>
-                                    </properties>
-                                  </component>
-                                  <component id="be46" class="javax.swing.JButton" binding="buttonUserInfo">
-                                    <constraints/>
-                                    <properties>
-                                      <icon value="img/gui/info.png"/>
-                                      <margin top="2" left="2" bottom="2" right="2"/>
-                                      <text value=""/>
-                                      <toolTipText value="Информация о подключенном пользователе (CTRL+I)" noi18n="true"/>
-                                    </properties>
-                                  </component>
-                                </children>
-                              </toolbar>
                               <grid id="e13e5" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                 <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
                                 <border type="none"/>
@@ -661,11 +590,6 @@
                                       <toolTipText value="Онлайн" noi18n="true"/>
                                     </properties>
                                   </component>
-                                  <hspacer id="94255">
-                                    <constraints>
-                                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                    </constraints>
-                                  </hspacer>
                                   <component id="5d6a2" class="javax.swing.JLabel" binding="onlineUsersCount2">
                                     <constraints>
                                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
@@ -676,22 +600,88 @@
                                       <text value="0"/>
                                     </properties>
                                   </component>
+                                  <hspacer id="e0f5c">
+                                    <constraints>
+                                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                  </hspacer>
                                 </children>
                               </grid>
-                              <hspacer id="d7fc8">
+                              <grid id="3f553" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
-                              </hspacer>
+                                <properties/>
+                                <border type="none"/>
+                                <children>
+                                  <scrollpane id="a7c09">
+                                    <constraints>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                                        <minimum-size width="128" height="-1"/>
+                                        <preferred-size width="128" height="-1"/>
+                                        <maximum-size width="128" height="-1"/>
+                                      </grid>
+                                    </constraints>
+                                    <properties>
+                                      <horizontalScrollBarPolicy value="30"/>
+                                    </properties>
+                                    <border type="none"/>
+                                    <children>
+                                      <component id="bcd9f" class="javax.swing.JList" binding="onlineUserList">
+                                        <constraints/>
+                                        <properties/>
+                                      </component>
+                                    </children>
+                                  </scrollpane>
+                                  <toolbar id="83386">
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <floatable value="false"/>
+                                      <orientation value="0"/>
+                                    </properties>
+                                    <border type="none"/>
+                                    <children>
+                                      <component id="bc8a4" class="javax.swing.JButton" binding="buttonForceUserDisconnect">
+                                        <constraints/>
+                                        <properties>
+                                          <icon value="img/gui/disconnect.png"/>
+                                          <margin top="2" left="2" bottom="2" right="2"/>
+                                          <text value=""/>
+                                          <toolTipText value="Отключить пользователя (DELETE)" noi18n="true"/>
+                                        </properties>
+                                      </component>
+                                      <component id="35b5a" class="javax.swing.JButton" binding="buttonForceAllUsersDisconnect">
+                                        <constraints/>
+                                        <properties>
+                                          <icon value="img/gui/disconnect_total.png"/>
+                                          <toolTipText value="Отключить всех пользователей(CTRL+SHIFT+DELETE)" noi18n="true"/>
+                                        </properties>
+                                      </component>
+                                      <component id="e5499" class="javax.swing.JButton" binding="buttonUserInfo">
+                                        <constraints/>
+                                        <properties>
+                                          <icon value="img/gui/info.png"/>
+                                          <margin top="2" left="2" bottom="2" right="2"/>
+                                          <text value=""/>
+                                          <toolTipText value="Информация о подключенном пользователе (CTRL+I)" noi18n="true"/>
+                                        </properties>
+                                      </component>
+                                    </children>
+                                  </toolbar>
+                                </children>
+                              </grid>
+                              <vspacer id="6e3a7">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                              </vspacer>
                             </children>
                           </grid>
-                          <hspacer id="e8975">
-                            <constraints>
-                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </hspacer>
-                          <grid id="d5a23" layout-manager="GridLayoutManager" row-count="5" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                            <margin top="10" left="0" bottom="0" right="0"/>
+                          <grid id="d5a23" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
                             <constraints>
                               <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                             </constraints>
@@ -700,20 +690,13 @@
                             <children>
                               <vspacer id="40f76">
                                 <constraints>
-                                  <grid row="4" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                                 </constraints>
                               </vspacer>
-                              <hspacer id="d2713">
-                                <constraints>
-                                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                                    <preferred-size width="521" height="11"/>
-                                  </grid>
-                                </constraints>
-                              </hspacer>
-                              <grid id="8af47" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                              <grid id="8af47" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                 <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="2" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
                                 <border type="none" title="Анализ" noi18n="true"/>
@@ -730,12 +713,12 @@
                                   </component>
                                   <hspacer id="df938">
                                     <constraints>
-                                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                   </hspacer>
                                   <component id="76f43" class="javax.swing.JButton" binding="switchMonitoringButton" default-binding="true">
                                     <constraints>
-                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                     </constraints>
                                     <properties>
                                       <icon value="img/gui/monitoring16.png"/>
@@ -747,7 +730,7 @@
                               <grid id="ba8d3" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                 <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="3" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
                                 <border type="none" title="Руководство пользователя"/>
@@ -777,35 +760,10 @@
                                   </component>
                                 </children>
                               </grid>
-                              <component id="2e65d" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="Транзакция:"/>
-                                </properties>
-                              </component>
-                              <component id="64c8e" class="javax.swing.JButton" binding="unbindTransactionButton">
-                                <constraints>
-                                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <icon value="img/gui/transaction.png"/>
-                                  <text value="О&amp;свободить транзакцию"/>
-                                </properties>
-                              </component>
-                              <component id="fb665" class="javax.swing.JLabel" binding="transactionActiveLabel">
-                                <constraints>
-                                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="не активна"/>
-                                </properties>
-                              </component>
                               <grid id="95513" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                 <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
                                 <properties/>
                                 <border type="none"/>
@@ -827,11 +785,81 @@
                                   </hspacer>
                                 </children>
                               </grid>
+                              <grid id="a3584" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
+                                <constraints>
+                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties/>
+                                <border type="none" title="Управление текущей транзакцией"/>
+                                <children>
+                                  <grid id="2244f" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none"/>
+                                    <children>
+                                      <component id="fb665" class="javax.swing.JLabel" binding="transactionActiveLabel">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="не активна"/>
+                                        </properties>
+                                      </component>
+                                      <component id="2e65d" class="javax.swing.JLabel">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <text value="Транзакция:"/>
+                                        </properties>
+                                      </component>
+                                      <hspacer id="9b404">
+                                        <constraints>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                      </hspacer>
+                                    </children>
+                                  </grid>
+                                  <grid id="5250d" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none"/>
+                                    <children>
+                                      <component id="64c8e" class="javax.swing.JButton" binding="unbindTransactionButton">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <icon value="img/gui/transaction.png"/>
+                                          <text value="О&amp;свободить транзакцию"/>
+                                        </properties>
+                                      </component>
+                                      <hspacer id="fd442">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                      </hspacer>
+                                    </children>
+                                  </grid>
+                                </children>
+                              </grid>
                             </children>
                           </grid>
+                          <hspacer id="b0833">
+                            <constraints>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                          </hspacer>
                         </children>
                       </grid>
-                      <grid id="3adfb" binding="adminUsersPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                      <grid id="3adfb" binding="adminUsersPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                         <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints>
                           <tabbedpane title="Пользователи" noi18n="true"/>
@@ -839,259 +867,318 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <scrollpane id="f2ba5">
-                            <constraints>
-                              <grid row="1" column="0" row-span="2" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                                <minimum-size width="200" height="-1"/>
-                                <preferred-size width="200" height="-1"/>
-                              </grid>
-                            </constraints>
-                            <properties/>
-                            <border type="none"/>
-                            <children>
-                              <component id="93625" class="javax.swing.JList" binding="registeredUserList">
-                                <constraints/>
-                                <properties>
-                                  <selectionMode value="0"/>
-                                </properties>
-                              </component>
-                            </children>
-                          </scrollpane>
-                          <hspacer id="6ae4d">
-                            <constraints>
-                              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </hspacer>
-                          <grid id="3c91e" binding="currentUserPanel" layout-manager="GridLayoutManager" row-count="10" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                          <grid id="3c91e" binding="currentUserPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                             <margin top="0" left="0" bottom="0" right="0"/>
                             <constraints>
-                              <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties/>
                             <border type="none" title="Пользователь"/>
                             <children>
-                              <component id="e3745" class="javax.swing.JLabel">
+                              <grid id="c600" layout-manager="GridLayoutManager" row-count="9" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
                                 <constraints>
-                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                 </constraints>
-                                <properties>
-                                  <labelFor value="2bf06"/>
-                                  <text value="Имя пользователя:"/>
-                                  <toolTipText value="Имя пользователя"/>
-                                </properties>
-                              </component>
-                              <vspacer id="db884">
+                                <properties/>
+                                <border type="none"/>
+                                <children>
+                                  <component id="e3745" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <labelFor value="2bf06"/>
+                                      <text value="Имя пользователя:"/>
+                                      <toolTipText value="Имя пользователя"/>
+                                    </properties>
+                                  </component>
+                                  <component id="af73a" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="Пароль:"/>
+                                    </properties>
+                                  </component>
+                                  <component id="bd051" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <labelFor value="34f69"/>
+                                      <text value="Имя:"/>
+                                    </properties>
+                                  </component>
+                                  <component id="34f69" class="javax.swing.JTextField" binding="nameTextField">
+                                    <constraints>
+                                      <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                        <preferred-size width="150" height="-1"/>
+                                      </grid>
+                                    </constraints>
+                                    <properties>
+                                      <toolTipText value="Имя пользователя"/>
+                                    </properties>
+                                  </component>
+                                  <component id="e0323" class="javax.swing.JButton" binding="resetPasswordButton" default-binding="true">
+                                    <constraints>
+                                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <icon value="img/gui/user/securityShield16.png"/>
+                                      <text value="С&amp;бросить" noi18n="true"/>
+                                      <toolTipText value="Сбросить пароль пользователя" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <component id="c2010" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="Отчество:"/>
+                                    </properties>
+                                  </component>
+                                  <component id="10798" class="javax.swing.JTextField" binding="patronymicTextField">
+                                    <constraints>
+                                      <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                        <preferred-size width="150" height="-1"/>
+                                      </grid>
+                                    </constraints>
+                                    <properties>
+                                      <toolTipText value="Отчество пользователя"/>
+                                    </properties>
+                                  </component>
+                                  <component id="29e56" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="Фамилия:"/>
+                                    </properties>
+                                  </component>
+                                  <component id="da4d" class="javax.swing.JTextField" binding="surnameTextField">
+                                    <constraints>
+                                      <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                        <preferred-size width="150" height="-1"/>
+                                      </grid>
+                                    </constraints>
+                                    <properties>
+                                      <text value=""/>
+                                      <toolTipText value="Фамилия пользователя"/>
+                                    </properties>
+                                  </component>
+                                  <component id="3af70" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="ID:"/>
+                                    </properties>
+                                  </component>
+                                  <component id="cb01d" class="javax.swing.JLabel" binding="userIdLabel">
+                                    <constraints>
+                                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                        <preferred-size width="300" height="-1"/>
+                                      </grid>
+                                    </constraints>
+                                    <properties>
+                                      <text value="id"/>
+                                    </properties>
+                                  </component>
+                                  <component id="2bf06" class="javax.swing.JTextField" binding="usernameTextField">
+                                    <constraints>
+                                      <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                        <preferred-size width="300" height="-1"/>
+                                      </grid>
+                                    </constraints>
+                                    <properties>
+                                      <text value=""/>
+                                      <toolTipText value="Имя пользователя в системе (login)"/>
+                                    </properties>
+                                  </component>
+                                  <component id="27c" class="javax.swing.JComboBox" binding="userTypeComboBox">
+                                    <constraints>
+                                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <toolTipText value="Тип пользователя" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <component id="6faf0" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <text value="Тип пользователя:"/>
+                                    </properties>
+                                  </component>
+                                  <grid id="41efd" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
+                                    <constraints>
+                                      <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties/>
+                                    <border type="none"/>
+                                    <children>
+                                      <component id="b97b" class="javax.swing.JCheckBox" binding="isActiveCheckBox">
+                                        <constraints>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <horizontalTextPosition value="10"/>
+                                          <text value="Действу&amp;ющий"/>
+                                          <toolTipText value="Пользователь активный или нет (вместо удаления, для архивирования)"/>
+                                        </properties>
+                                      </component>
+                                      <component id="5cb68" class="javax.swing.JCheckBox" binding="isAdminCheckBox">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <horizontalTextPosition value="10"/>
+                                          <text value="А&amp;дминистратор:"/>
+                                          <toolTipText value="Администратор имеет самые большие полномочия"/>
+                                        </properties>
+                                      </component>
+                                      <component id="4a12" class="javax.swing.JCheckBox" binding="isEditorCheckBox">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties>
+                                          <horizontalTextPosition value="10"/>
+                                          <text value="&amp;Редактор:" noi18n="true"/>
+                                          <toolTipText value="Редактор может вносить изменения в базе, за исключенем администрирования пользователей и сервера"/>
+                                        </properties>
+                                      </component>
+                                      <hspacer id="fd902">
+                                        <constraints>
+                                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                      </hspacer>
+                                    </children>
+                                  </grid>
+                                  <hspacer id="a52f1">
+                                    <constraints>
+                                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                  </hspacer>
+                                </children>
+                              </grid>
+                              <hspacer id="bcf83">
                                 <constraints>
-                                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                              </hspacer>
+                              <grid id="de57c" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
+                                <constraints>
+                                  <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties/>
+                                <border type="none"/>
+                                <children>
+                                  <component id="fa900" class="javax.swing.JButton" binding="saveUserButton">
+                                    <constraints>
+                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <icon value="img/gui/save.png"/>
+                                      <text value="&amp;Сохранить" noi18n="true"/>
+                                      <toolTipText value="Сохранить пользователя" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <hspacer id="ac99a">
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                  </hspacer>
+                                </children>
+                              </grid>
+                              <vspacer id="a6049">
+                                <constraints>
+                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                                 </constraints>
                               </vspacer>
-                              <component id="af73a" class="javax.swing.JLabel">
+                            </children>
+                          </grid>
+                          <grid id="7f254" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties/>
+                            <border type="none"/>
+                            <children>
+                              <scrollpane id="f2ba5">
                                 <constraints>
-                                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                                    <minimum-size width="128" height="-1"/>
+                                    <preferred-size width="128" height="-1"/>
+                                    <maximum-size width="128" height="-1"/>
+                                  </grid>
                                 </constraints>
-                                <properties>
-                                  <text value="Пароль:"/>
-                                </properties>
-                              </component>
-                              <component id="bd051" class="javax.swing.JLabel">
+                                <properties/>
+                                <border type="none"/>
+                                <children>
+                                  <component id="93625" class="javax.swing.JList" binding="registeredUserList">
+                                    <constraints/>
+                                    <properties>
+                                      <selectionMode value="0"/>
+                                    </properties>
+                                  </component>
+                                </children>
+                              </scrollpane>
+                              <toolbar id="53567">
                                 <constraints>
-                                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <labelFor value="34f69"/>
-                                  <text value="Имя:"/>
-                                </properties>
-                              </component>
-                              <component id="34f69" class="javax.swing.JTextField" binding="nameTextField">
-                                <constraints>
-                                  <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                                    <preferred-size width="150" height="-1"/>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                                    <preferred-size width="-1" height="20"/>
                                   </grid>
                                 </constraints>
                                 <properties>
-                                  <toolTipText value="Имя пользователя"/>
+                                  <floatable value="false"/>
                                 </properties>
-                              </component>
-                              <component id="e0323" class="javax.swing.JButton" binding="resetPasswordButton" default-binding="true">
-                                <constraints>
-                                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <icon value="img/gui/user/securityShield16.png"/>
-                                  <text value="С&amp;бросить" noi18n="true"/>
-                                  <toolTipText value="Сбросить пароль пользователя" noi18n="true"/>
-                                </properties>
-                              </component>
-                              <component id="c2010" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="Отчество:"/>
-                                </properties>
-                              </component>
-                              <component id="10798" class="javax.swing.JTextField" binding="patronymicTextField">
-                                <constraints>
-                                  <grid row="4" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                                    <preferred-size width="150" height="-1"/>
-                                  </grid>
-                                </constraints>
-                                <properties>
-                                  <toolTipText value="Отчество пользователя"/>
-                                </properties>
-                              </component>
-                              <component id="29e56" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="Фамилия:"/>
-                                </properties>
-                              </component>
-                              <component id="da4d" class="javax.swing.JTextField" binding="surnameTextField">
-                                <constraints>
-                                  <grid row="5" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                                    <preferred-size width="150" height="-1"/>
-                                  </grid>
-                                </constraints>
-                                <properties>
-                                  <toolTipText value="Фамилия пользователя"/>
-                                </properties>
-                              </component>
-                              <component id="3af70" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="ID:"/>
-                                </properties>
-                              </component>
-                              <component id="cb01d" class="javax.swing.JLabel" binding="userIdLabel">
-                                <constraints>
-                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="id"/>
-                                </properties>
-                              </component>
-                              <component id="2bf06" class="javax.swing.JTextField" binding="usernameTextField">
-                                <constraints>
-                                  <grid row="1" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                                    <preferred-size width="150" height="-1"/>
-                                  </grid>
-                                </constraints>
-                                <properties>
-                                  <text value=""/>
-                                  <toolTipText value="Имя пользователя в системе (login)"/>
-                                </properties>
-                              </component>
-                              <component id="4a12" class="javax.swing.JCheckBox" binding="isEditorCheckBox">
-                                <constraints>
-                                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <horizontalTextPosition value="10"/>
-                                  <text value="&amp;Редактор:" noi18n="true"/>
-                                  <toolTipText value="Редактор может вносить изменения в базе, за исключенем администрирования пользователей и сервера"/>
-                                </properties>
-                              </component>
-                              <component id="5cb68" class="javax.swing.JCheckBox" binding="isAdminCheckBox">
-                                <constraints>
-                                  <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <horizontalTextPosition value="10"/>
-                                  <text value="А&amp;дминистратор:"/>
-                                  <toolTipText value="Администратор имеет самые большие полномочия"/>
-                                </properties>
-                              </component>
-                              <component id="27c" class="javax.swing.JComboBox" binding="userTypeComboBox">
-                                <constraints>
-                                  <grid row="6" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <toolTipText value="Тип пользователя" noi18n="true"/>
-                                </properties>
-                              </component>
-                              <component id="6faf0" class="javax.swing.JLabel">
-                                <constraints>
-                                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <text value="Тип пользователя:"/>
-                                </properties>
-                              </component>
-                              <component id="fa900" class="javax.swing.JButton" binding="saveUserButton">
-                                <constraints>
-                                  <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <icon value="img/gui/save.png"/>
-                                  <text value="&amp;Сохранить" noi18n="true"/>
-                                  <toolTipText value="Сохранить пользователя" noi18n="true"/>
-                                </properties>
-                              </component>
-                              <component id="b97b" class="javax.swing.JCheckBox" binding="isActiveCheckBox">
-                                <constraints>
-                                  <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                                </constraints>
-                                <properties>
-                                  <horizontalTextPosition value="10"/>
-                                  <text value="Действу&amp;ющий"/>
-                                  <toolTipText value="Пользователь активный или нет (вместо удаления, для архивирования)"/>
-                                </properties>
-                              </component>
+                                <border type="none"/>
+                                <children>
+                                  <component id="3c41" class="javax.swing.JButton" binding="addUserButton">
+                                    <constraints/>
+                                    <properties>
+                                      <icon value="img/gui/edit/add.png"/>
+                                      <margin top="2" left="2" bottom="2" right="2"/>
+                                      <text value=""/>
+                                      <toolTipText value="Добавить пользователя (INSERT)" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <component id="acdb4" class="javax.swing.JButton" binding="removeUserButton">
+                                    <constraints/>
+                                    <properties>
+                                      <icon value="img/gui/edit/remove.png"/>
+                                      <text value=""/>
+                                      <toolTipText value="Удалить пользователя (только если он не внес никаких изменений) (DELETE)" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <component id="3db22" class="javax.swing.JButton" binding="refreshRegisteredUsersButton">
+                                    <constraints/>
+                                    <properties>
+                                      <icon value="img/gui/refresh.png"/>
+                                      <text value=""/>
+                                      <toolTipText value="Обновить список (CTRL+R)" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                </children>
+                              </toolbar>
                             </children>
                           </grid>
                           <hspacer id="a7cae">
                             <constraints>
-                              <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                             </constraints>
                           </hspacer>
-                          <toolbar id="53567">
-                            <constraints>
-                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                                <preferred-size width="-1" height="20"/>
-                              </grid>
-                            </constraints>
-                            <properties>
-                              <floatable value="false"/>
-                            </properties>
-                            <border type="none"/>
-                            <children>
-                              <component id="3c41" class="javax.swing.JButton" binding="addUserButton">
-                                <constraints/>
-                                <properties>
-                                  <icon value="img/gui/edit/add.png"/>
-                                  <margin top="2" left="2" bottom="2" right="2"/>
-                                  <text value=""/>
-                                  <toolTipText value="Добавить пользователя (INSERT)" noi18n="true"/>
-                                </properties>
-                              </component>
-                              <component id="acdb4" class="javax.swing.JButton" binding="removeUserButton">
-                                <constraints/>
-                                <properties>
-                                  <icon value="img/gui/edit/remove.png"/>
-                                  <text value=""/>
-                                  <toolTipText value="Удалить пользователя (только если он не внес никаких изменений) (DELETE)" noi18n="true"/>
-                                </properties>
-                              </component>
-                              <component id="3db22" class="javax.swing.JButton" binding="refreshRegisteredUsersButton">
-                                <constraints/>
-                                <properties>
-                                  <icon value="img/gui/refresh-left-arrow.png"/>
-                                  <text value=""/>
-                                  <toolTipText value="Обновить список (CTRL+R)" noi18n="true"/>
-                                </properties>
-                              </component>
-                            </children>
-                          </toolbar>
                         </children>
                       </grid>
-                      <grid id="a991f" binding="adminSettingsPanel" layout-manager="GridLayoutManager" row-count="6" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                        <margin top="10" left="10" bottom="10" right="10"/>
+                      <grid id="e00b4" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints>
-                          <tabbedpane title="Настройки" noi18n="true"/>
+                          <tabbedpane title="Настройки"/>
                         </constraints>
                         <properties/>
                         <border type="none"/>
@@ -1104,11 +1191,6 @@
                               <text value="URL подключения:" noi18n="true"/>
                             </properties>
                           </component>
-                          <vspacer id="6f8f2">
-                            <constraints>
-                              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </vspacer>
                           <component id="43b03" class="javax.swing.JLabel">
                             <constraints>
                               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -1125,18 +1207,9 @@
                               <text value="Пароль:" noi18n="true"/>
                             </properties>
                           </component>
-                          <component id="3096f" class="javax.swing.JButton" binding="saveSettingsToButton">
-                            <constraints>
-                              <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <icon value="img/gui/save.png"/>
-                              <text value="Сох&amp;ранить в..." noi18n="true"/>
-                            </properties>
-                          </component>
                           <component id="8910" class="javax.swing.JTextField" binding="connectionUrlTextField">
                             <constraints>
-                              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                 <preferred-size width="150" height="-1"/>
                               </grid>
                             </constraints>
@@ -1144,7 +1217,7 @@
                           </component>
                           <component id="de899" class="javax.swing.JTextField" binding="connectionLoginTextField">
                             <constraints>
-                              <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                 <preferred-size width="150" height="-1"/>
                               </grid>
                             </constraints>
@@ -1152,89 +1225,130 @@
                           </component>
                           <component id="65bdb" class="javax.swing.JPasswordField" binding="connectionPasswordField">
                             <constraints>
-                              <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                 <preferred-size width="150" height="-1"/>
                               </grid>
                             </constraints>
                             <properties/>
                           </component>
-                          <component id="a69c6" class="javax.swing.JLabel">
+                          <grid id="7ce09" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
                             <constraints>
-                              <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <icon value="img/gui/warningOrange16.png"/>
-                              <text value=""/>
-                              <toolTipText value="Важная настройка системы. Будьте осторожны, применяя изменения." noi18n="true"/>
-                            </properties>
-                          </component>
-                          <hspacer id="67610">
-                            <constraints>
-                              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </hspacer>
-                        </children>
-                      </grid>
-                      <grid id="6f08b" binding="adminConstantsPanel" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                        <margin top="10" left="10" bottom="10" right="10"/>
-                        <constraints>
-                          <tabbedpane title="Константы" noi18n="true"/>
-                        </constraints>
-                        <properties/>
-                        <border type="none"/>
-                        <children>
-                          <vspacer id="73ac4">
-                            <constraints>
-                              <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </vspacer>
-                          <component id="cff89" class="javax.swing.JButton" binding="updateServerConstantsButton">
-                            <constraints>
-                              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <icon value="img/gui/save.png"/>
-                              <text value="&amp;Сохранить" noi18n="true"/>
-                            </properties>
-                          </component>
-                          <hspacer id="a475a">
-                            <constraints>
-                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                          </hspacer>
-                          <component id="ac0eb" class="javax.swing.JLabel">
-                            <constraints>
-                              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <icon value="img/gui/warningOrange16.png"/>
-                              <text value=""/>
-                              <toolTipText value="Важная настройка системы. Будьте осторожны, применяя изменения." noi18n="true"/>
-                            </properties>
-                          </component>
-                          <component id="e15ea" class="javax.swing.JButton" binding="constantsRefreshButton" default-binding="true">
-                            <constraints>
-                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <icon value="img/gui/refresh-left-arrow.png"/>
-                              <text value="О&amp;бновить" noi18n="true"/>
-                              <toolTipText value="Обновить" noi18n="true"/>
-                            </properties>
-                          </component>
-                          <scrollpane id="61e5f">
-                            <constraints>
-                              <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                              <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="8f53a" class="javax.swing.JTable" binding="constantsTable">
+                              <component id="3096f" class="javax.swing.JButton" binding="saveSettingsToButton">
+                                <constraints>
+                                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <icon value="img/gui/save.png"/>
+                                  <text value="Сох&amp;ранить в..." noi18n="true"/>
+                                </properties>
+                              </component>
+                              <component id="a69c6" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <icon value="img/gui/warningOrange16.png"/>
+                                  <text value=""/>
+                                  <toolTipText value="Важная настройка системы. Будьте осторожны, применяя изменения." noi18n="true"/>
+                                </properties>
+                              </component>
+                              <hspacer id="856a5">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                              </hspacer>
+                              <vspacer id="47323">
+                                <constraints>
+                                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                              </vspacer>
+                            </children>
+                          </grid>
+                        </children>
+                      </grid>
+                      <grid id="f52b" binding="adminConstantsPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
+                        <constraints>
+                          <tabbedpane title="Константы"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <scrollpane id="ad656">
+                            <constraints>
+                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties/>
+                            <border type="none"/>
+                            <children>
+                              <component id="b9cf6" class="javax.swing.JTable" binding="constantsTable">
                                 <constraints/>
-                                <properties/>
+                                <properties>
+                                  <preferredScrollableViewportSize width="300" height="300"/>
+                                </properties>
                               </component>
                             </children>
                           </scrollpane>
+                          <grid id="73e1b" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties/>
+                            <border type="none"/>
+                            <children>
+                              <component id="c517b" class="javax.swing.JButton" binding="constantsRefreshButton" default-binding="true">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <icon value="img/gui/refresh.png"/>
+                                  <text value="О&amp;бновить" noi18n="true"/>
+                                  <toolTipText value="Обновить" noi18n="true"/>
+                                </properties>
+                              </component>
+                              <grid id="ccf44" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                <margin top="0" left="0" bottom="0" right="0"/>
+                                <constraints>
+                                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties/>
+                                <border type="none"/>
+                                <children>
+                                  <component id="8690c" class="javax.swing.JButton" binding="updateServerConstantsButton">
+                                    <constraints>
+                                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <icon value="img/gui/save.png"/>
+                                      <text value="&amp;Сохранить" noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                  <component id="34f61" class="javax.swing.JLabel">
+                                    <constraints>
+                                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                                    </constraints>
+                                    <properties>
+                                      <icon value="img/gui/warningOrange16.png"/>
+                                      <text value=""/>
+                                      <toolTipText value="Важная настройка системы. Будьте осторожны, применяя изменения." noi18n="true"/>
+                                    </properties>
+                                  </component>
+                                </children>
+                              </grid>
+                              <hspacer id="aa73f">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                              </hspacer>
+                            </children>
+                          </grid>
                         </children>
                       </grid>
                     </children>

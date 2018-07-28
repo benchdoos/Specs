@@ -182,6 +182,10 @@ public class ServerDBConnectionPool {
         return false;
     }
 
+    public Socket getTransactionClient() {
+        return transactionClient;
+    }
+
     public void unbindTransaction() {
         transactionClient = null;
         log.info("Transaction successfully unbinded");

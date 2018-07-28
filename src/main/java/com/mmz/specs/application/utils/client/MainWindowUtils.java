@@ -331,7 +331,7 @@ public class MainWindowUtils {
             private void addPopup(TreePath selectedPath) {
                 final JPopupMenu popup = new JPopupMenu();
                 JMenuItem reload = new JMenuItem("Обновить",
-                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh-left-arrow.png"))));
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
                 reload.addActionListener(e -> reloadPath(selectedPath));
                 popup.add(reload);
                 mainTree.setComponentPopupMenu(popup);

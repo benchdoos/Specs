@@ -21,6 +21,8 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
+import com.mmz.specs.application.core.server.service.ClientConnection;
+import com.mmz.specs.application.core.server.service.ClientConnectionImpl;
 import com.mmz.specs.application.gui.common.AboutApplicationWindow;
 import com.mmz.specs.application.gui.common.ButtonTabComponent;
 import com.mmz.specs.application.gui.common.LoginWindow;
@@ -371,8 +373,9 @@ public class ClientMainWindow extends JFrame {
 
     private void onUsernameInfo() {
         if (currentUser != null) {
-            UserInfoWindow userInfoWindow = new UserInfoWindow(currentUser);
-            userInfoWindow.pack();
+            ClientConnection connection = new ClientConnectionImpl();
+            connection.setUser(currentUser);
+            UserInfoWindow userInfoWindow = new UserInfoWindow(connection, true);
             userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
             userInfoWindow.setVisible(true);
         }

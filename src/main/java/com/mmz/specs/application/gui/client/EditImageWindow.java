@@ -309,7 +309,7 @@ public class EditImageWindow extends JDialog {
         buttonOK.setDisplayedMnemonicIndex(0);
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         restoreImageButton = new JButton();
-        restoreImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh-left-arrow.png")));
+        restoreImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/refresh.png")));
         restoreImageButton.setText("Восстановить");
         restoreImageButton.setMnemonic('В');
         restoreImageButton.setDisplayedMnemonicIndex(0);
