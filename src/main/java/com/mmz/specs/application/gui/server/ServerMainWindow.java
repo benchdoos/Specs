@@ -284,6 +284,18 @@ public class ServerMainWindow extends JFrame {
         clearCurrentUserPanel();
         fillAdminRegisteredUsersPanel();
         restoreTextFieldsColors();
+        restoreFields();
+    }
+
+    private void restoreFields() {
+        userIdLabel.setText("нет данных");
+        usernameTextField.setText("");
+        nameTextField.setText("");
+        patronymicTextField.setText("");
+        surnameTextField.setText("");
+        isEditorCheckBox.setSelected(false);
+        isAdminCheckBox.setSelected(false);
+        isActiveCheckBox.setSelected(false);
     }
 
     private void updateOnlineUsersCount() {
@@ -439,26 +451,10 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void clearCurrentUserPanel() {
-        userIdLabel.setText("");
+        FrameUtils.enableAllComponents(currentUserPanel, false);
+        FrameUtils.clearAllComponents(currentUserPanel);
 
-        for (Component component : currentUserPanel.getComponents()) {
-            if (component instanceof JTextField) {
-                JTextField textField = (JTextField) component;
-                textField.setText("");
-                component.setEnabled(false);
-            }
-            if (component instanceof JCheckBox) {
-                JCheckBox checkBox = (JCheckBox) component;
-                checkBox.setSelected(false);
-                component.setEnabled(false);
-            }
-
-            if (component instanceof JButton) {
-                component.setEnabled(false);
-            }
-        }
         userTypeComboBox.setSelectedItem(null);
-        userTypeComboBox.setEnabled(false);
 
         restoreTextFieldsColors();
 
@@ -727,6 +723,8 @@ public class ServerMainWindow extends JFrame {
                                     "Успех",
                                     JOptionPane.INFORMATION_MESSAGE);
                         }
+                        clearCurrentUserPanel();
+                        restoreFields();
 
                         DefaultListModel model = (DefaultListModel) registeredUserList.getModel();
                         int selectedIndex = registeredUserList.getSelectedIndex();
@@ -1361,9 +1359,8 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void updateCurrentUserPanel(UsersEntity entity) {
-        for (Component component : currentUserPanel.getComponents()) {
-            component.setEnabled(true);
-        }
+        FrameUtils.enableAllComponents(currentUserPanel, true);
+
 
         userIdLabel.setText(Integer.toString(entity.getId()));
         usernameTextField.setText(entity.getUsername());
@@ -1396,7 +1393,8 @@ public class ServerMainWindow extends JFrame {
                             "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (ObjectNotFoundException e) {
-                createNewUser(usersEntity);
+                final UsersEntity newUser = createNewUser(usersEntity);
+                registeredUserList.setSelectedValue(newUser, true);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
                         "Не удалось обновить пользователя: " + usersEntity.getUsername()
@@ -1411,20 +1409,22 @@ public class ServerMainWindow extends JFrame {
         }
     }
 
-    private void createNewUser(UsersEntity entity) {
+    private UsersEntity createNewUser(UsersEntity entity) {
         if (entity != null) {
             try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
                 try {
                     UsersService service = new UsersServiceImpl(session);
                     session.getTransaction().begin();
 
-                    service.addUser(entity);
+                    final int id = service.addUser(entity);
 
                     session.getTransaction().commit();
+
 
                     JOptionPane.showMessageDialog(this,
                             "Пользователь успешно сохранён: " + entity.getUsername(),
                             "Успех", JOptionPane.INFORMATION_MESSAGE);
+                    return service.getUserById(id);
                 } catch (ConstraintViolationException e) {
                     log.warn("Could not save user: {}", entity, e);
                     try {
@@ -1439,6 +1439,7 @@ public class ServerMainWindow extends JFrame {
                 SessionUtils.refreshSession(this.session, UsersEntity.class);
             }
         }
+        return null;
     }
 
     private void initOnlineUsersList() {
@@ -1923,7 +1924,7 @@ public class ServerMainWindow extends JFrame {
         adminUsersPanel.add(currentUserPanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         currentUserPanel.setBorder(BorderFactory.createTitledBorder("Пользователь"));
         final JPanel panel21 = new JPanel();
-        panel21.setLayout(new GridLayoutManager(9, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel21.setLayout(new GridLayoutManager(8, 3, new Insets(0, 0, 0, 0), -1, -1));
         currentUserPanel.add(panel21, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label17 = new JLabel();
         label17.setText("Имя пользователя:");

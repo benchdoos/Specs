@@ -112,6 +112,22 @@ public class NoticeDaoImpl implements NoticeDao {
                 log.warn("Not Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
             }
         }
+        if (result.size() == 0) {
+            Query query2 = session.createQuery("from NoticeEntity where authorByUserId =:user");
+            query2.setParameter("user", user);
+
+            List list2 = query2.list();
+
+            result = new ArrayList<>(list2.size());
+
+            for (Object noticeEntity : list2) {
+                if (noticeEntity instanceof NoticeEntity) {
+                    result.add((NoticeEntity) noticeEntity);
+                } else {
+                    log.warn("Not Notice edited by user: " + user.getUsername() + " from list: " + noticeEntity);
+                }
+            }
+        }
         return result;
     }
 

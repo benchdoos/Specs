@@ -23,6 +23,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class FrameUtils {
     public static final Dimension DEFAULT_DIMENSION = new Dimension(640, 480);
@@ -243,5 +244,43 @@ public class FrameUtils {
                 }
             }
         };
+    }
+
+    public static void enableAllComponents(Component component, boolean enable) {
+        final ArrayList<Component> components = getComponents(component);
+        for (Component c : components) {
+            c.setEnabled(enable);
+        }
+
+    }
+
+    private static ArrayList<Component> getComponents(Component component) {
+        ArrayList<Component> result = new ArrayList<>();
+        if (component instanceof Container) {
+            Container container = (Container) component;
+            final Component[] components = container.getComponents();
+            for (Component c : components) {
+                result.add(c);
+                result.addAll(getComponents(c));
+            }
+        } else {
+            result.add(component);
+        }
+        return result;
+    }
+
+
+    public static void clearAllComponents(Component component) {
+        final ArrayList<Component> components = getComponents(component);
+        for (Component c : components) {
+            if (component instanceof JTextField) {
+                JTextField textField = (JTextField) component;
+                textField.setText("");
+            }
+            if (component instanceof JCheckBox) {
+                JCheckBox checkBox = (JCheckBox) component;
+                checkBox.setSelected(false);
+            }
+        }
     }
 }

@@ -1013,7 +1013,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         status = SAVING;
 
         try {
-            CommonUtils.enableAllComponents(this, false);
+            FrameUtils.enableAllComponents(this, false);
             mainWindowUtils.updateMessage("/img/gui/animated/uploading.gif", "Обновляем изображения...");
             uploadImages();
 
@@ -1048,7 +1048,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
             }
         } catch (Exception e) {
-            CommonUtils.enableAllComponents(this, true);
+            FrameUtils.enableAllComponents(this, true);
 
             status = DEFAULT;
 
