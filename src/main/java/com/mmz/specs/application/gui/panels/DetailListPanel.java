@@ -266,18 +266,23 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                 }
                             } else {
                                 closeSession(newSession);
+                                ClientBackgroundService.getInstance().unbindTransaction();
                             }
                         } else {
                             closeSession(newSession);
+                            ClientBackgroundService.getInstance().unbindTransaction();
                         }
                     } else {
                         closeSession(newSession);
+                        ClientBackgroundService.getInstance().unbindTransaction();
                     }
                 } else {
                     closeSession(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
                 }
             } else {
                 closeSession(newSession);
+                ClientBackgroundService.getInstance().unbindTransaction();
             }
         } else {
             showTransactionCreatingFailMessage();
@@ -329,21 +334,27 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                     }
                                 } else {
                                     closeSession(newSession);
+                                    ClientBackgroundService.getInstance().unbindTransaction();
                                 }
                             } else {
                                 closeSession(newSession);
+                                ClientBackgroundService.getInstance().unbindTransaction();
                             }
                         } else {
                             closeSession(newSession);
+                            ClientBackgroundService.getInstance().unbindTransaction();
                         }
                     } else {
                         closeSession(newSession);
+                        ClientBackgroundService.getInstance().unbindTransaction();
                     }
                 } else {
                     closeSession(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
                 }
             } else {
                 closeSession(newSession);
+                ClientBackgroundService.getInstance().unbindTransaction();
             }
         } else {
             showTransactionCreatingFailMessage();
@@ -848,6 +859,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
                         } else {
                             closeSession(newSession);
+                            ClientBackgroundService.getInstance().unbindTransaction();
                         }
                     } else {
                         showTransactionCreatingFailMessage();
