@@ -53,6 +53,7 @@ public class SessionUtils {
     }
 
     public static void closeSessionSilently(Session session) {
+        log.debug("Closing session silently");
         if (session != null) {
             try {
                 final Transaction transaction = session.getTransaction();
@@ -64,6 +65,7 @@ public class SessionUtils {
             } finally {
                 try {
                     session.close();
+                    log.info("Session closed successfully");
                 } catch (HibernateException e) {
                     log.warn("Could not close session", e);
                 }

@@ -20,6 +20,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.client.ClientConstants;
+import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
@@ -35,6 +36,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -51,11 +53,10 @@ import java.awt.dnd.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.TooManyListenersException;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.COPY;
@@ -1041,6 +1042,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 log.info("New state of db is committed");
 
                 status = DEFAULT;
+                ClientBackgroundService.getInstance().unbindTransaction();
                 closeTab();
             } else {
                 JOptionPane.showMessageDialog(this, "Укажите извещение!",
@@ -1059,6 +1061,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(), "Ошибка сохранения",
                     JOptionPane.WARNING_MESSAGE,
                     new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
+        } finally {
+            SessionUtils.closeSessionSilently(session);
         }
     }
 
@@ -1118,6 +1122,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 UsersEntity currentUser = clientMainWindow.getCurrentUser();
                 if (currentUser != null) {
                     selectedItem.setUsersByProvidedByUserId(currentUser);
+                    selectedItem.setDate(new Date(Calendar.getInstance().getTime().getTime()));
                 }
             }
         } else {

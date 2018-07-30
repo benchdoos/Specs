@@ -36,7 +36,6 @@ import com.mmz.specs.model.*;
 import com.mmz.specs.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.imgscalr.Scalr;
 
@@ -259,43 +258,33 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                 try {
                                     mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
                                 } catch (IllegalStateException e) {
-                                    closeSession(newSession);
+                                    SessionUtils.closeSessionSilently(newSession);
                                     log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                     JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                             "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                                 }
                             } else {
-                                closeSession(newSession);
+                                SessionUtils.closeSessionSilently(newSession);
                                 ClientBackgroundService.getInstance().unbindTransaction();
                             }
                         } else {
-                            closeSession(newSession);
+                            SessionUtils.closeSessionSilently(newSession);
                             ClientBackgroundService.getInstance().unbindTransaction();
                         }
                     } else {
-                        closeSession(newSession);
+                        SessionUtils.closeSessionSilently(newSession);
                         ClientBackgroundService.getInstance().unbindTransaction();
                     }
                 } else {
-                    closeSession(newSession);
+                    SessionUtils.closeSessionSilently(newSession);
                     ClientBackgroundService.getInstance().unbindTransaction();
                 }
             } else {
-                closeSession(newSession);
+                SessionUtils.closeSessionSilently(newSession);
                 ClientBackgroundService.getInstance().unbindTransaction();
             }
         } else {
             showTransactionCreatingFailMessage();
-        }
-    }
-
-    private void closeSession(Session newSession) {
-        try {
-            log.debug("Closing session");
-            newSession.close();
-            log.info("Session successfully closed");
-        } catch (HibernateException e) {
-            log.warn("Could not close session", e);
         }
     }
 
@@ -327,33 +316,33 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                     try {
                                         mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
                                     } catch (IllegalStateException e) {
-                                        closeSession(newSession);
+                                        SessionUtils.closeSessionSilently(newSession);
                                         log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                         JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                                 "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                                     }
                                 } else {
-                                    closeSession(newSession);
+                                    SessionUtils.closeSessionSilently(newSession);
                                     ClientBackgroundService.getInstance().unbindTransaction();
                                 }
                             } else {
-                                closeSession(newSession);
+                                SessionUtils.closeSessionSilently(newSession);
                                 ClientBackgroundService.getInstance().unbindTransaction();
                             }
                         } else {
-                            closeSession(newSession);
+                            SessionUtils.closeSessionSilently(newSession);
                             ClientBackgroundService.getInstance().unbindTransaction();
                         }
                     } else {
-                        closeSession(newSession);
+                        SessionUtils.closeSessionSilently(newSession);
                         ClientBackgroundService.getInstance().unbindTransaction();
                     }
                 } else {
-                    closeSession(newSession);
+                    SessionUtils.closeSessionSilently(newSession);
                     ClientBackgroundService.getInstance().unbindTransaction();
                 }
             } else {
-                closeSession(newSession);
+                SessionUtils.closeSessionSilently(newSession);
                 ClientBackgroundService.getInstance().unbindTransaction();
             }
         } else {
@@ -851,14 +840,14 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                             try {
                                 mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
                             } catch (IllegalStateException e) {
-                                closeSession(newSession);
+                                SessionUtils.closeSessionSilently(newSession);
                                 log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
                                 JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
                                         "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                             }
 
                         } else {
-                            closeSession(newSession);
+                            SessionUtils.closeSessionSilently(newSession);
                             ClientBackgroundService.getInstance().unbindTransaction();
                         }
                     } else {
