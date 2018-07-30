@@ -77,9 +77,14 @@ public class DetailDaoImpl implements DetailDao {
 
     @Override
     public DetailEntity getDetailById(int id) {
-        DetailEntity detailEntity = session.load(DetailEntity.class, id);
-        log.debug("Detail found by id:" + id + " " + detailEntity);
-        return detailEntity;
+        try {
+            DetailEntity detailEntity = session.load(DetailEntity.class, id);
+            log.debug("Detail found by id:" + id + " " + detailEntity);
+            return detailEntity;
+        } catch (Exception e) {
+            log.warn("Could not find detail by id: {}", id, e);
+            return null;
+        }
     }
 
     @Override

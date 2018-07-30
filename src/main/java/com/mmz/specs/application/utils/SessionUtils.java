@@ -58,18 +58,24 @@ public class SessionUtils {
             try {
                 final Transaction transaction = session.getTransaction();
                 if (transaction.getStatus() == TransactionStatus.ACTIVE) {
+                    log.debug("Transaction is active, rolling back");
                     transaction.rollback();
+                    log.info("Transaction successfully rolled back");
                 }
             } catch (Exception e) {
                 log.warn("Could not rollback transaction", e);
             } finally {
                 try {
-                    session.close();
+                    if (session.isOpen()) {
+                        session.close();
+                    }
                     log.info("Session closed successfully");
                 } catch (HibernateException e) {
                     log.warn("Could not close session", e);
                 }
             }
+        } else {
+            log.info("Session is null, nothing to close!");
         }
     }
 

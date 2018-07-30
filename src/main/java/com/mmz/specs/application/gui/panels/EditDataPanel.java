@@ -24,9 +24,9 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.client.CreateMaterialWindow;
 import com.mmz.specs.application.gui.client.EditTitleWindow;
 import com.mmz.specs.application.gui.common.utils.Renders;
-import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.SessionUtils;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.DetailDaoImpl;
@@ -457,7 +457,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
                 new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
         log.debug("User wanted to rollback changes, user's choice is: " + result);
         if (result == 0) {
-            CommonUtils.rollbackAndCloseSession(session);
+            SessionUtils.closeSessionSilently(session);
             closeTab();
         }
     }

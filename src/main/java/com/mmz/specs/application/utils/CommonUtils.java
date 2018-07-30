@@ -160,13 +160,7 @@ public class CommonUtils {
 
     public static void rollbackAndCloseSession(Session session) {
         try {
-            log.debug("Rolling back transaction");
-            session.getTransaction().rollback();
-            log.debug("Transaction successfully rolled back");
-
-            log.debug("Closing session");
-            session.close();
-            log.info("Session successfully closed");
+            SessionUtils.closeSessionSilently(session);
         } catch (Exception e) {
             log.warn("Could not rollback transaction", e);
         }

@@ -257,11 +257,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                 ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                                 try {
                                     mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
-                                } catch (IllegalStateException e) {
+                                } catch (Exception e) {
+                                    ClientBackgroundService.getInstance().unbindTransaction();
                                     SessionUtils.closeSessionSilently(newSession);
                                     log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                    JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
-                                            "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                    JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
+                                            e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                                 }
                             } else {
                                 SessionUtils.closeSessionSilently(newSession);
@@ -315,11 +316,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                                     ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                                     try {
                                         mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
-                                    } catch (IllegalStateException e) {
+                                    } catch (Exception e) {
+                                        ClientBackgroundService.getInstance().unbindTransaction();
                                         SessionUtils.closeSessionSilently(newSession);
                                         log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                        JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
-                                                "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                        JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
+                                                e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                                     }
                                 } else {
                                     SessionUtils.closeSessionSilently(newSession);
@@ -839,11 +841,12 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                             ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                             try {
                                 mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
-                            } catch (IllegalStateException e) {
+                            } catch (Exception e) {
+                                ClientBackgroundService.getInstance().unbindTransaction();
                                 SessionUtils.closeSessionSilently(newSession);
                                 log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                JOptionPane.showMessageDialog(this, "Нельзя открыть тракзационную вкладку\n" +
-                                        "т.к. нельзя редактировать 2 извещения одновременно.", "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(this, "Не удалось открыть транзакционную вкладку\n" +
+                                        e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
                             }
 
                         } else {

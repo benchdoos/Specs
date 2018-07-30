@@ -430,7 +430,11 @@ public class MainWindowUtils {
                         return detailListTreeByDetailList;
                     } else {
                         DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                        detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                        if (detailService.getDetailById(detailEntity.getId()) == null) {
+                            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                        } else {
+                            detailEntity = detailService.getDetailById(detailEntity.getId());
+                        }
                         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
                         DefaultMutableTreeNode newChild = new DefaultMutableTreeNode();
                         newChild.setUserObject(detailEntity);

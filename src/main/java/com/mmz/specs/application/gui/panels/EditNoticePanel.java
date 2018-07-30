@@ -910,7 +910,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             final DefaultMutableTreeNode childAt = (DefaultMutableTreeNode) node.getChildAt(i);
             if (childAt.getUserObject().equals(entity)) {
                 contains = true;
-                return;
             }
         }
 
@@ -1464,8 +1463,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         mainTree.setModel(new DefaultTreeModel(detailListTreeByDetailList));
                     } else {
                         if (detailEntity != null) {
-                            DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                            DetailService detailService = new DetailServiceImpl(session);
+                            if (detailService.getDetailById(detailEntity.getId()) == null) {
+                                detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                            } else {
+                                detailEntity = detailService.getDetailById(detailEntity.getId());
+                            }
                             DefaultMutableTreeNode root = new DefaultMutableTreeNode();
                             DefaultMutableTreeNode newChild = new DefaultMutableTreeNode();
                             newChild.setUserObject(detailEntity);
