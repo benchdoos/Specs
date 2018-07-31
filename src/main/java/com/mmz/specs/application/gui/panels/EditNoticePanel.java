@@ -43,6 +43,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -92,7 +93,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     private JPanel changePanel;
     private JPanel noticePanel;
     private JPanel savePanel;
-    private JTextField detailQuantityTextField;
+    private JSpinner detailQuantitySpinner;
     private JButton editMaterialButton;
     private JLabel materialLabel;
     private JButton editImageButton;
@@ -171,6 +172,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         initMainTree();
 
+        initDetailQuantitySpinner();
+
         initTechProcessComboBox();
 
         fillTechProcessComboBox();
@@ -178,6 +181,22 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         fillEmptyDetailInfoPanel();
 
         initEditImageButton();
+    }
+
+    private void initDetailQuantitySpinner() {
+        SpinnerNumberModel model = new SpinnerNumberModel(1, 1, 1000, 1);
+        detailQuantitySpinner.setModel(model);
+
+        JComponent comp = detailQuantitySpinner.getEditor();
+        JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
+        DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
+        formatter.setCommitsOnValidEdit(true);
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                SwingUtilities.invokeLater(field::selectAll);
+            }
+        });
     }
 
     private void initUpdateUserIsActiveListeners() {
@@ -229,9 +248,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         onFail();
                     }
                     if (timer == null) {
-                        timer = new Timer(3000, e -> {
-                            editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
-                        });
+                        timer = new Timer(3000, e -> editImageButton.setIcon(new ImageIcon(
+                                getClass().getResource("/img/gui/pictureEdit16.png"))));
                         timer.setRepeats(false);
                         timer.start();
                     } else {
@@ -356,14 +374,18 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         copyButton.addActionListener(e -> onCopyButton());
         removeItemButton.addActionListener(e -> onRemoveItem());
 
-        detailQuantityTextField.getDocument().addDocumentListener(new DocumentListener() {
+        detailQuantitySpinner.addChangeListener(new ChangeListener() {
             final int MAX_VALUE = 1000;
-            private final String toolTip = detailQuantityTextField.getToolTipText();
+            private final String toolTip = detailQuantitySpinner.getToolTipText();
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                verifyInput();
+            }
 
             private void verifyInput() {
-                String text = detailQuantityTextField.getText();
                 try {
-                    Long number = Long.parseLong(text);
+                    Integer number = (Integer) detailQuantitySpinner.getValue();
                     if (number <= 0) {
                         showWarning();
                         return;
@@ -373,17 +395,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         return;
                     }
 
-                    detailQuantityTextField.setBorder(new JTextField().getBorder());
-                    detailQuantityTextField.setToolTipText(toolTip);
-                    updateEntity();
+                    detailQuantitySpinner.setBorder(new JSpinner().getBorder());
+                    detailQuantitySpinner.setToolTipText(toolTip);
                 } catch (Throwable throwable) {
                     showWarning();
                 }
+                updateEntity();
             }
 
             private void showWarning() {
-                detailQuantityTextField.setBorder(new LineBorder(Color.RED));
-                detailQuantityTextField.setToolTipText("Количетво должно состоять только из положительных цельных чисел, не должно превышать 1000.");
+                detailQuantitySpinner.setBorder(new LineBorder(Color.RED));
+                detailQuantitySpinner.setToolTipText("Количетво должно состоять только из положительных цельных чисел, не должно превышать 1000.");
             }
 
             private void updateEntity() {
@@ -396,19 +418,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     for (DetailListEntity entity : detailListEntitiesByParentAndChild) {
                         log.debug("Current entity: " + entity);
                         if (entity.isActive()) {
-                            String text = detailQuantityTextField.getText();
-                            try {
-                                int quantity = Integer.parseInt(text);
-                                if (quantity >= 1 && quantity <= 1000) {
-                                    entity.setQuantity(quantity);
-                                    entity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
-                                    log.debug("Added quantity: {}", quantity);
-                                    updateTreeDetail();
-                                }
-                            } catch (NumberFormatException ignored) {
-                                String parentInfo = entity.getDetailByParentDetailId().getCode() + entity.getDetailByParentDetailId().getDetailTitleByDetailTitleId().getTitle();
-                                String childInfo = entity.getDetailByChildDetailId().getCode() + entity.getDetailByChildDetailId().getDetailTitleByDetailTitleId().getTitle();
-                                log.warn("Could not set quantity: {}, for entity: (parent: {}, child: {})", detailQuantityTextField.getText(), parentInfo, childInfo);
+                            int quantity = (Integer) detailQuantitySpinner.getValue();
+                            if (quantity >= 1 && quantity <= 1000) {
+                                entity.setQuantity(quantity);
+                                entity.setNoticeByNoticeId((NoticeEntity) noticeComboBox.getSelectedItem());
+                                log.debug("Added quantity: {}", quantity);
+                                updateTreeDetail();
                             }
                         }
                     }
@@ -416,23 +431,15 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     log.debug("What to do here??? parent: {}, child: {}", parent, child);
                 }
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                verifyInput();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                verifyInput();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                verifyInput();
-            }
         });
 
+        final JFormattedTextField component = ((JFormattedTextField) detailQuantitySpinner.getEditor().getComponent(0));
+        component.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                System.out.println("?");
+            }
+        });
 
         unitCheckBox.addActionListener(e -> {
             DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
@@ -1226,10 +1233,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             if (currentUser != null) {
 
                 if (mentioned != null) {
-                    detailQuantityTextField.setText(mentioned.getQuantity() + "");
+                    detailQuantitySpinner.setValue(mentioned.getQuantity());
                     isInterchangeableCheckBox.setSelected(mentioned.isInterchangeableNode());
                 } else {
-                    detailQuantityTextField.setText("");
                     isInterchangeableCheckBox.setSelected(false);
                 }
                 if (detailEntity != null) {
@@ -1244,7 +1250,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         workpieceWeightTextField.setText("");
 
                         Border border = new JTextField().getBorder();
-                        detailQuantityTextField.setBorder(border);
                         finishedWeightTextField.setBorder(border);
                         workpieceWeightTextField.setBorder(border);
                     } else {
@@ -1273,7 +1278,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 updatePermissions();
             }
         }
-
+        detailQuantitySpinner.setBorder(new JSpinner().getBorder());
     }
 
     private void fillEmptyDetailInfoPanel() {
@@ -1283,7 +1288,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
         editDetailInfoButton.setEnabled(false);
 
-        detailQuantityTextField.setEnabled(false);
+        detailQuantitySpinner.setEnabled(false);
 
         unitCheckBox.setSelected(false);
         unitCheckBox.setEnabled(false);
@@ -1355,7 +1360,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 unitCheckBox.setEnabled(((currentUser.isAdmin() || isConstructor(currentUser)) && !isRoot)
                         && (new DetailListServiceImpl(session).getDetailListByParent(detailEntity).size() == 0));//testme
 
-                detailQuantityTextField.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
+                detailQuantitySpinner.setEnabled(!isRoot && (currentUser.isAdmin() || isConstructor(currentUser)));
 
                 finishedWeightTextField.setEnabled(!detailEntity.isUnit() && (currentUser.isAdmin() || isConstructor(currentUser)));
 
@@ -1382,7 +1387,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
             } else {
                 editDetailInfoButton.setEnabled(false);
                 unitCheckBox.setEnabled(false);
-                detailQuantityTextField.setEnabled(false);
+                detailQuantitySpinner.setEnabled(false);
                 finishedWeightTextField.setEnabled(false);
                 workpieceWeightTextField.setEnabled(false);
                 techProcessComboBox.setEnabled(false);
@@ -1852,8 +1857,8 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         final JLabel label14 = new JLabel();
         label14.setText("Количество:");
         panel3.add(label14, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        detailQuantityTextField = new JTextField();
-        panel3.add(detailQuantityTextField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(40, -1), new Dimension(40, -1), new Dimension(40, -1), 0, false));
+        detailQuantitySpinner = new JSpinner();
+        panel3.add(detailQuantitySpinner, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(60, -1), new Dimension(60, -1), new Dimension(60, -1), 0, false));
         detailCodeLabel = new JLabel();
         detailCodeLabel.setText("нет данных");
         panel3.add(detailCodeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(200, -1), null, 0, false));
@@ -1899,7 +1904,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         label10.setLabelFor(finishedWeightTextField);
         label11.setLabelFor(workpieceWeightTextField);
         label13.setLabelFor(techProcessComboBox);
-        label14.setLabelFor(detailQuantityTextField);
+        label14.setLabelFor(detailQuantitySpinner);
     }
 
     /**

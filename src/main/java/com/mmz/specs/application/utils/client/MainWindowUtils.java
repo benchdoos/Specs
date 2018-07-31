@@ -314,7 +314,6 @@ public class MainWindowUtils {
                 TreePath selPath = mainTree.getPathForLocation(e.getX(), e.getY());
                 if (selRow != -1) {
                     if (e.getClickCount() == 1) {
-                        System.out.println(e.getButton());
                         if (e.getButton() == MouseEvent.BUTTON3) {
                             final TreePath closestPathForLocation = mainTree.getClosestPathForLocation(e.getX(), e.getY());
                             mainTree.setSelectionPath(closestPathForLocation);
