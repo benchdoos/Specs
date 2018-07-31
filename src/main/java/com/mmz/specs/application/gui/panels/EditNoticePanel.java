@@ -1834,6 +1834,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         isActiveCheckBox.setText("Аннулирована:");
         isActiveCheckBox.setMnemonic('А');
         isActiveCheckBox.setDisplayedMnemonicIndex(0);
+        isActiveCheckBox.setToolTipText("Аннулирован/а");
         panel3.add(isActiveCheckBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         materialLabel = new JLabel();
         materialLabel.setText("нет данных");
@@ -1841,13 +1842,14 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         editImageButton = new JButton();
         editImageButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/pictureEdit16.png")));
         editImageButton.setText("");
-        editImageButton.setToolTipText("Редактировать изображение детали");
+        editImageButton.setToolTipText("Редактировать изображение");
         panel3.add(editImageButton, new GridConstraints(7, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         isInterchangeableCheckBox = new JCheckBox();
         isInterchangeableCheckBox.setHorizontalTextPosition(2);
         isInterchangeableCheckBox.setText("Замена (прим. в замен):");
         isInterchangeableCheckBox.setMnemonic('З');
         isInterchangeableCheckBox.setDisplayedMnemonicIndex(0);
+        isInterchangeableCheckBox.setToolTipText("Применяется в замен другого узла / детали");
         panel3.add(isInterchangeableCheckBox, new GridConstraints(7, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label14 = new JLabel();
         label14.setText("Количество:");
@@ -1863,11 +1865,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         editDetailInfoButton = new JButton();
         editDetailInfoButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editDetailInfoButton.setText("");
+        editDetailInfoButton.setToolTipText("Редактировать обозначение и наименование");
         panel3.add(editDetailInfoButton, new GridConstraints(0, 3, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         editMaterialButton = new JButton();
         editMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editMaterialButton.setText("");
-        editMaterialButton.setToolTipText("Добавить материал");
+        editMaterialButton.setToolTipText("Редактировать материал");
         panel3.add(editMaterialButton, new GridConstraints(5, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         unitCheckBox = new JCheckBox();
         unitCheckBox.setHorizontalTextPosition(2);

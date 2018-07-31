@@ -233,89 +233,31 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void onAddNewItem() {
-        if (ClientBackgroundService.getInstance().bindTransaction()) {
-            Session newSession = ClientBackgroundService.getInstance().getSession();
-            newSession.beginTransaction();
+        if (hasPermissionsToEditDB()) {
+            if (ClientBackgroundService.getInstance().bindTransaction()) {
+                Session newSession = ClientBackgroundService.getInstance().getSession();
+                newSession.beginTransaction();
 
-            SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, CREATE_SINGLE);
-            selectionDetailWindow.setLocation(FrameUtils
-                    .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-            selectionDetailWindow.setVisible(true);
-            ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
-            if (list != null) {
-                if (list.size() == 1) {
-                    DetailEntity entity = list.get(0);
-                    if (entity != null) {
-                        DetailService service = new DetailServiceImpl(newSession);
-                        final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
-                        if (detailByIndex == null) {
-                            entity.setActive(true);
-                            entity.setCode(entity.getCode().toUpperCase());
-
-                            ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
-                            if (mainWindow != null) {
-                                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                                try {
-                                    mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
-                                } catch (Exception e) {
-                                    ClientBackgroundService.getInstance().unbindTransaction();
-                                    SessionUtils.closeSessionSilently(newSession);
-                                    log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                    JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
-                                            e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
-                                }
-                            } else {
-                                SessionUtils.closeSessionSilently(newSession);
-                                ClientBackgroundService.getInstance().unbindTransaction();
-                            }
-                        } else {
-                            SessionUtils.closeSessionSilently(newSession);
-                            ClientBackgroundService.getInstance().unbindTransaction();
-                        }
-                    } else {
-                        SessionUtils.closeSessionSilently(newSession);
-                        ClientBackgroundService.getInstance().unbindTransaction();
-                    }
-                } else {
-                    SessionUtils.closeSessionSilently(newSession);
-                    ClientBackgroundService.getInstance().unbindTransaction();
-                }
-            } else {
-                SessionUtils.closeSessionSilently(newSession);
-                ClientBackgroundService.getInstance().unbindTransaction();
-            }
-        } else {
-            showTransactionCreatingFailMessage();
-        }
-    }
-
-    private void onCopyButton() {
-        if (ClientBackgroundService.getInstance().bindTransaction()) {
-            Session newSession = ClientBackgroundService.getInstance().getSession();
-            newSession.beginTransaction();
-
-            DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-            if (selectedEntity != null) {
-                if (selectedEntity.isUnit()) {
-                    SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, COPY);
-                    selectionDetailWindow.setLocation(FrameUtils
-                            .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-                    selectionDetailWindow.setVisible(true);
-                    ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
-
-                    if (list != null) {
-                        if (list.size() == 1) {
-                            DetailEntity entity = list.get(0);
-                            if (entity != null) {
-                                entity.setUnit(true);
+                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, CREATE_SINGLE);
+                selectionDetailWindow.setLocation(FrameUtils
+                        .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                selectionDetailWindow.setVisible(true);
+                ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+                if (list != null) {
+                    if (list.size() == 1) {
+                        DetailEntity entity = list.get(0);
+                        if (entity != null) {
+                            DetailService service = new DetailServiceImpl(newSession);
+                            final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
+                            if (detailByIndex == null) {
                                 entity.setActive(true);
+                                entity.setCode(entity.getCode().toUpperCase());
 
                                 ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
-
                                 if (mainWindow != null) {
                                     ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
                                     try {
-                                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
+                                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
                                     } catch (Exception e) {
                                         ClientBackgroundService.getInstance().unbindTransaction();
                                         SessionUtils.closeSessionSilently(newSession);
@@ -344,11 +286,73 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                     ClientBackgroundService.getInstance().unbindTransaction();
                 }
             } else {
-                SessionUtils.closeSessionSilently(newSession);
-                ClientBackgroundService.getInstance().unbindTransaction();
+                showTransactionCreatingFailMessage();
             }
-        } else {
-            showTransactionCreatingFailMessage();
+        }
+    }
+
+    private void onCopyButton() {
+        if (hasPermissionsToEditDB()) {
+            if (ClientBackgroundService.getInstance().bindTransaction()) {
+                Session newSession = ClientBackgroundService.getInstance().getSession();
+                newSession.beginTransaction();
+
+                DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                if (selectedEntity != null) {
+                    if (selectedEntity.isUnit()) {
+                        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, COPY);
+                        selectionDetailWindow.setLocation(FrameUtils
+                                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                        selectionDetailWindow.setVisible(true);
+                        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+
+                        if (list != null) {
+                            if (list.size() == 1) {
+                                DetailEntity entity = list.get(0);
+                                if (entity != null) {
+                                    entity.setUnit(true);
+                                    entity.setActive(true);
+
+                                    ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
+
+                                    if (mainWindow != null) {
+                                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                                        try {
+                                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
+                                        } catch (Exception e) {
+                                            ClientBackgroundService.getInstance().unbindTransaction();
+                                            SessionUtils.closeSessionSilently(newSession);
+                                            log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                                            JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
+                                                    e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                        }
+                                    } else {
+                                        SessionUtils.closeSessionSilently(newSession);
+                                        ClientBackgroundService.getInstance().unbindTransaction();
+                                    }
+                                } else {
+                                    SessionUtils.closeSessionSilently(newSession);
+                                    ClientBackgroundService.getInstance().unbindTransaction();
+                                }
+                            } else {
+                                SessionUtils.closeSessionSilently(newSession);
+                                ClientBackgroundService.getInstance().unbindTransaction();
+                            }
+                        } else {
+                            SessionUtils.closeSessionSilently(newSession);
+                            ClientBackgroundService.getInstance().unbindTransaction();
+                        }
+                    } else {
+                        SessionUtils.closeSessionSilently(newSession);
+                        ClientBackgroundService.getInstance().unbindTransaction();
+                    }
+                } else {
+                    SessionUtils.closeSessionSilently(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
+                }
+            } else {
+                showTransactionCreatingFailMessage();
+            }
         }
     }
 
@@ -826,39 +830,44 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     private void onEditDetail(boolean select) {
         ClientMainWindow mainWindow = new MainWindowUtils(session).getClientMainWindow(this);
+        if (hasPermissionsToEditDB()) {
+            if (ClientBackgroundService.getInstance().bindTransaction()) {
+                Session newSession = ClientBackgroundService.getInstance().getSession();
+                newSession.beginTransaction();
+
+                final DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                if (entityFromTree != null) {
+
+                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                    try {
+                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
+                    } catch (Exception e) {
+                        ClientBackgroundService.getInstance().unbindTransaction();
+                        SessionUtils.closeSessionSilently(newSession);
+                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                        JOptionPane.showMessageDialog(this, "Не удалось открыть транзакционную вкладку\n" +
+                                e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                    }
+
+                } else {
+                    SessionUtils.closeSessionSilently(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
+                }
+            } else {
+                showTransactionCreatingFailMessage();
+            }
+        }
+    }
+
+    private boolean hasPermissionsToEditDB() {
+        ClientMainWindow mainWindow = new MainWindowUtils(session).getClientMainWindow(this);
         if (mainWindow != null) {
             final UsersEntity currentUser = mainWindow.getCurrentUser();
             if (currentUser != null) {
-                if ((currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive()) {
-
-                    if (ClientBackgroundService.getInstance().bindTransaction()) {
-                        Session newSession = ClientBackgroundService.getInstance().getSession();
-                        newSession.beginTransaction();
-
-                        final DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                        if (entityFromTree != null) {
-
-                            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                            try {
-                                mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
-                            } catch (Exception e) {
-                                ClientBackgroundService.getInstance().unbindTransaction();
-                                SessionUtils.closeSessionSilently(newSession);
-                                log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                JOptionPane.showMessageDialog(this, "Не удалось открыть транзакционную вкладку\n" +
-                                        e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
-                            }
-
-                        } else {
-                            SessionUtils.closeSessionSilently(newSession);
-                            ClientBackgroundService.getInstance().unbindTransaction();
-                        }
-                    } else {
-                        showTransactionCreatingFailMessage();
-                    }
-                }
+                return (currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive();
             }
         }
+        return false;
     }
 
     private void createUIComponents() {
