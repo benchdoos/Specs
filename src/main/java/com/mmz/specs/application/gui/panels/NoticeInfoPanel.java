@@ -244,8 +244,8 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         contentPane = new JPanel();
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
         final JSplitPane splitPane1 = new JSplitPane();
-        splitPane1.setDividerLocation(158);
-        splitPane1.setLastDividerLocation(128);
+        splitPane1.setDividerLocation(100);
+        splitPane1.setLastDividerLocation(64);
         contentPane.add(splitPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));

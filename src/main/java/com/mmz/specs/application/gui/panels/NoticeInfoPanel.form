@@ -15,8 +15,8 @@
           </grid>
         </constraints>
         <properties>
-          <dividerLocation value="158"/>
-          <lastDividerLocation value="128"/>
+          <dividerLocation value="100"/>
+          <lastDividerLocation value="64"/>
         </properties>
         <border type="none"/>
         <children>
