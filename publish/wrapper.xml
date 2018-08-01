@@ -24,13 +24,10 @@
     <chdir>.</chdir>
     <priority>normal</priority>
     <downloadUrl>http://java.com/download</downloadUrl>
-    <supportUrl></supportUrl>
     <stayAlive>false</stayAlive>
     <restartOnCrash>false</restartOnCrash>
-    <manifest></manifest>
     <icon>F:\Developer\JAVA\Specs\publish\Specs\client.ico</icon>
     <jre>
-        <path></path>
         <bundledJre64Bit>false</bundledJre64Bit>
         <bundledJreAsFallback>false</bundledJreAsFallback>
         <minVersion>1.8</minVersion>
@@ -45,17 +42,16 @@
         <timeoutErr>true</timeoutErr>
     </splash>
     <versionInfo>
-        <fileVersion>0.2.2.136</fileVersion>
-        <txtFileVersion>0.2.2.136</txtFileVersion>
+        <fileVersion>0.2.4.139</fileVersion>
+        <txtFileVersion>0.2.4.139</txtFileVersion>
         <fileDescription>Спецификации</fileDescription>
         <copyright>Евгений Зражевский</copyright>
-        <productVersion>0.2.2.136</productVersion>
-        <txtProductVersion>0.2.2.136</txtProductVersion>
+        <productVersion>0.2.4.139</productVersion>
+        <txtProductVersion>0.2.4.139</txtProductVersion>
         <productName>Specs</productName>
         <companyName>ООО &quot;Майкопский машиностроительный завод&quot;</companyName>
         <internalName>com.mmz.specs</internalName>
         <originalFilename>Specs.exe</originalFilename>
-        <trademarks></trademarks>
         <language>RUSSIAN</language>
     </versionInfo>
     <messages>
