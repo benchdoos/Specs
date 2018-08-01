@@ -63,7 +63,7 @@ public class DetailJTree extends JTree {
         addTreeSelectionListener(e -> FrameUtils.getNotifyUserIsActiveActionListener(this).actionPerformed(null));
     }
 
-    public DefaultTreeCellRenderer getRenderer() {
+    private DefaultTreeCellRenderer getRenderer() {
         return new DefaultTreeCellRenderer() {
 
 
@@ -82,40 +82,41 @@ public class DetailJTree extends JTree {
                     if (value instanceof DefaultMutableTreeNode) {
                         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
                         if (node.getUserObject() instanceof DetailEntity) {
-                            DetailEntity detailEntity = (DetailEntity) node.getUserObject();
+                            DetailEntity child = (DetailEntity) node.getUserObject();
 
                             if (row >= 0) {
                                 if (tree.getPathForRow(row) != null) {
                                     Object[] pathForRow = tree.getPathForRow(row).getParentPath().getPath();
                                     if (pathForRow.length > 1) {
-                                        DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) pathForRow[pathForRow.length - 1];
-                                        DetailEntity parent = (DetailEntity) mutableTreeNode.getUserObject();
-                                        try {
-                                            DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, detailEntity);
-                                            updateBackgroundColor(selected, detailListEntity);
-                                            updateIcon(detailEntity);
+                                        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) ((DefaultMutableTreeNode) value).getParent();
+                                        final DetailEntity parent = (DetailEntity) parentNode.getUserObject();
 
-                                            updateSearch(detailEntity);
+                                        try {
+                                            DetailListEntity detailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, child);
+                                            updateBackgroundColor(selected, detailListEntity);
+                                            updateIcon(child);
+
+                                            updateSearch(child);
 
                                             if (detailListEntity != null) {
-                                                String data = detailEntity.getCode() + " (" + detailListEntity.getQuantity() + ") " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                                String data = child.getCode() + " (" + detailListEntity.getQuantity() + ") " + child.getDetailTitleByDetailTitleId().getTitle();
                                                 return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                                             } else {
-                                                String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                                String data = child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle();
                                                 return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                                             }
                                         } catch (Exception e) {
                                             log.warn("Got exception while data update", e);
-                                            String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                                            String data = child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle();
                                             return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                                         }
                                     }
                                 }
                             }
-                            updateIcon(detailEntity);
-                            updateSearch(detailEntity);
+                            updateIcon(child);
+                            updateSearch(child);
 
-                            final String data = detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle();
+                            final String data = child.getCode() + " " + child.getDetailTitleByDetailTitleId().getTitle();
                             return super.getTreeCellRendererComponent(tree, data, selected, expanded, leaf, row, hasFocus);
                         }
                     }

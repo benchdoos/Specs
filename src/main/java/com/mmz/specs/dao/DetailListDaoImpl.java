@@ -236,32 +236,21 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public List<DetailListEntity> getDetailListBySearch(String searchText) {
-        log.debug("User is searching: {}", searchText);
-        Query query = session.createQuery("from DetailEntity where code like '%" + searchText + "%'");
-        ArrayList<DetailEntity> details = new ArrayList<>();
+        try {
+            log.debug("User is searching: {}", searchText);
+            Query query = session.createQuery("from DetailEntity where code like '%" + searchText + "%'");
+            ArrayList<DetailEntity> details = new ArrayList<>();
 
-        List list = query.list();
-        for (Object o : list) {
-            details.add((DetailEntity) o);
-        }
-
-
-        List<DetailListEntity> result = new ArrayList<>();
-
-        for (DetailEntity entity : details) {
-            Query query1 = session.createQuery("from DetailListEntity where detailByChildDetailId = " + entity.getId());
-            List list1 = query1.list();
-            for (Object o : list1) {
-                DetailListEntity detailListEntity = (DetailListEntity) o;
-                if (detailListEntity.isActive()) {
-                    result.add(detailListEntity);
-                }
+            List list = query.list();
+            for (Object o : list) {
+                details.add((DetailEntity) o);
             }
-        }
 
-        if (result.isEmpty()) {
+
+            List<DetailListEntity> result = new ArrayList<>();
+
             for (DetailEntity entity : details) {
-                Query query1 = session.createQuery("from DetailListEntity where detailByParentDetailId = " + entity.getId());
+                Query query1 = session.createQuery("from DetailListEntity where detailByChildDetailId = " + entity.getId());
                 List list1 = query1.list();
                 for (Object o : list1) {
                     DetailListEntity detailListEntity = (DetailListEntity) o;
@@ -270,11 +259,27 @@ public class DetailListDaoImpl implements DetailListDao {
                     }
                 }
             }
+
+            if (result.isEmpty()) {
+                for (DetailEntity entity : details) {
+                    Query query1 = session.createQuery("from DetailListEntity where detailByParentDetailId = " + entity.getId());
+                    List list1 = query1.list();
+                    for (Object o : list1) {
+                        DetailListEntity detailListEntity = (DetailListEntity) o;
+                        if (detailListEntity.isActive()) {
+                            result.add(detailListEntity);
+                        }
+                    }
+                }
+            }
+
+            log.debug("Search result for {} is: (size: {}), {}", searchText, result.size(), result);
+
+            return result;
+        } catch (Exception e) {
+            log.warn("Could not get result by search: {}", searchText, e);
+            return null;
         }
-
-        log.debug("Search result for {} is: (size: {}), {}", searchText, result.size(), result);
-
-        return result;
     }
 
     @Override
@@ -295,26 +300,32 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public List<DetailEntity> listParents(DetailEntity child) {
-        Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
-        query.setParameter("child", child);
+        log.debug("Getting list parents for child: {}", child);
+        try {
+            Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
+            query.setParameter("child", child);
 
-        List list = query.list();
+            List list = query.list();
 
-        List<DetailListEntity> detailListEntities = new ArrayList<>(list.size());
-        for (Object object : list) {
-            if (object instanceof DetailListEntity) {
-                detailListEntities.add((DetailListEntity) object);
+            List<DetailListEntity> detailListEntities = new ArrayList<>(list.size());
+            for (Object object : list) {
+                if (object instanceof DetailListEntity) {
+                    detailListEntities.add((DetailListEntity) object);
+                }
             }
-        }
 
-        List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
+            List<DetailEntity> result = new ArrayList<>(detailListEntities.size());
 
-        for (DetailListEntity entity : detailListEntities) {
-            if (doesNotContainEntityInList(result, entity.getDetailByParentDetailId())) {
-                result.add(entity.getDetailByParentDetailId());
+            for (DetailListEntity entity : detailListEntities) {
+                if (doesNotContainEntityInList(result, entity.getDetailByParentDetailId())) {
+                    result.add(entity.getDetailByParentDetailId());
+                }
             }
+            return result;
+        } catch (Exception e) {
+            log.warn("Could not load list parents for child: {}", child, e);
+            return null;
         }
-        return result;
     }
 
     @Override
