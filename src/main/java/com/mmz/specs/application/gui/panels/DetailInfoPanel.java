@@ -55,9 +55,7 @@ public class DetailInfoPanel extends JPanel {
         setLayout(new GridLayout());
         add(contentPane);
 
-        Timer updateIconTimer = new Timer(500, e -> {
-            updateIcon();
-        });
+        Timer updateIconTimer = new Timer(500, e -> updateIcon());
         updateIconTimer.setRepeats(false);
 
         addComponentListener(new ComponentAdapter() {
@@ -138,7 +136,6 @@ public class DetailInfoPanel extends JPanel {
         if (image != null) {
             Component c = this;
             final int DEFAULT_IMAGE_SIZE = 256;
-            System.out.println(">>> " + detailIconLabel.getSize() + " " + detailIconLabel.getMinimumSize() + " " + detailIconLabel.getPreferredSize() + " " + detailIconLabel.getMaximumSize() + " ");
 
             int targetSize = getImageSize(image);
             BufferedImage scaledImage = Scalr.resize(image, targetSize > 0 ? targetSize : DEFAULT_IMAGE_SIZE);
