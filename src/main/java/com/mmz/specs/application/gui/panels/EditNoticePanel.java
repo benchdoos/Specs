@@ -491,8 +491,13 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         text = text.replaceAll(",", ".");
                         double weight = Double.parseDouble(text);
                         child.setFinishedWeight(weight);
+
+                        updateDetail(child);
+
                         updateLatestDetailListEntity(parent, child);
+
                         updateTreeDetail();
+                        log.debug("Final weigth is: " + weight + " and detail: " + child.getFinishedWeight());
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -512,9 +517,11 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         text = text.replaceAll(",", ".");
                         double weight = Double.parseDouble(text);
                         child.setWorkpieceWeight(weight);
+                        updateDetail(child);
                         updateLatestDetailListEntity(parent, child);
 
                         updateTreeDetail();
+                        log.debug("Final weigth is: " + weight + " and detail: " + child.getWorkpieceWeight());
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -558,14 +565,23 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         editImageButton.addActionListener(e -> onEditDetailImage());
     }
 
+    private void updateDetail(DetailEntity detail) {
+        DetailService service = new DetailServiceImpl(session);
+        service.updateDetail(detail);
+    }
+
 
     private void updateLatestDetailListEntity(DetailEntity parent, DetailEntity child) {
-        final DetailListServiceImpl service = new DetailListServiceImpl(session);
-        final DetailListEntity detailList = service.getLatestDetailListEntityByParentAndChild(parent, child);
-        final NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
-        if (selectedItem != null) {
-            detailList.setNoticeByNoticeId(selectedItem);
-            service.updateDetailList(detailList);
+        if (parent != null && child != null) {
+            final DetailListServiceImpl service = new DetailListServiceImpl(session);
+            final DetailListEntity detailList = service.getLatestDetailListEntityByParentAndChild(parent, child);
+            final NoticeEntity selectedItem = (NoticeEntity) noticeComboBox.getSelectedItem();
+            if (selectedItem != null && detailList != null) {
+                detailList.setNoticeByNoticeId(selectedItem);
+                service.updateDetailList(detailList);
+            }
+        } else {
+            log.warn("Could not update notice for pair - something is null; parent: {} and child: {}", parent, child);
         }
     }
 
@@ -1942,16 +1958,17 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                     throw new IllegalArgumentException("This textfield can not have d (double thing): " + text);
                 }
 
+                System.out.println("> " + text);
                 double value = Double.parseDouble(text);
-
                 if (value < 0) {
                     throw new IllegalArgumentException("Value is < 0, value is: " + value);
                 }
+
                 textField.setBorder(new JTextField().getBorder());
                 textField.setToolTipText(defaultTooltipText);
                 updateEntity();
             } catch (Throwable throwable) {
-                if (!(throwable instanceof NumberFormatException && throwable.getMessage().equals("empty String"))) {
+                if (!(throwable instanceof NumberFormatException)) {
                     log.warn("Value is incorrect", throwable);
                 }
                 Object lastSelectedPathComponent = mainTree.getLastSelectedPathComponent();
