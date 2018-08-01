@@ -497,7 +497,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         updateLatestDetailListEntity(parent, child);
 
                         updateTreeDetail();
-                        log.debug("Final weigth is: " + weight + " and detail: " + child.getFinishedWeight());
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -521,7 +520,6 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                         updateLatestDetailListEntity(parent, child);
 
                         updateTreeDetail();
-                        log.debug("Final weigth is: " + weight + " and detail: " + child.getWorkpieceWeight());
                     }
                 } catch (NumberFormatException ignored) {
                 }
