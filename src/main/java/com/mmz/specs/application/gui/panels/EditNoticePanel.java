@@ -1149,40 +1149,44 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
         log.debug("Starting updating images");
         DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
         List<DetailEntity> detailEntities = service.listDetailsByEditedImage();
-        log.debug("Total details count: {}", detailEntities.size());
-        for (DetailEntity entity : detailEntities) {
-            log.trace("Checking detail: {}", entity.toSimpleString());
-            try {
-                if (entity.getImagePath() != null) {
-                    if (!entity.getImagePath().isEmpty()) {
-                        if (!entity.getImagePath().equalsIgnoreCase(ClientConstants.IMAGE_REMOVE_KEY)) {
-                            File file = new File(entity.getImagePath());
-                            if (file.exists()) {
-                                try {
-                                    final FtpUtils ftpUtils = FtpUtils.getInstance();
-                                    ftpUtils.uploadImage(entity.getId(), file);
-                                } catch (Exception e) {
-                                    log.warn("Could not upload image for entity: {}", entity, e);
+        if (detailEntities != null) {
+            log.debug("Total details count: {}", detailEntities.size());
+            for (DetailEntity entity : detailEntities) {
+                log.trace("Checking detail: {}", entity.toSimpleString());
+                try {
+                    if (entity.getImagePath() != null) {
+                        if (!entity.getImagePath().isEmpty()) {
+                            if (!entity.getImagePath().equalsIgnoreCase(ClientConstants.IMAGE_REMOVE_KEY)) {
+                                File file = new File(entity.getImagePath());
+                                if (file.exists()) {
+                                    try {
+                                        final FtpUtils ftpUtils = FtpUtils.getInstance();
+                                        ftpUtils.uploadImage(entity.getId(), file);
+                                    } catch (Exception e) {
+                                        log.warn("Could not upload image for entity: {}", entity, e);
+                                    }
+                                } else {
+                                    log.warn("Could not find file for entity: {}, file: {}", entity, file);
                                 }
                             } else {
-                                log.warn("Could not find file for entity: {}, file: {}", entity, file);
+                                try {
+                                    FtpUtils.getInstance().deleteImage(entity.getId());
+                                } catch (IOException e) {
+                                    log.warn("Could not delete image for {}", entity, e);
+                                }
                             }
+                            entity.setImagePath(null);
                         } else {
-                            try {
-                                FtpUtils.getInstance().deleteImage(entity.getId());
-                            } catch (IOException e) {
-                                log.warn("Could not delete image for {}", entity, e);
-                            }
+                            entity.setImagePath(null);
+                            service.updateDetail(entity);
                         }
-                        entity.setImagePath(null);
-                    } else {
-                        entity.setImagePath(null);
-                        service.updateDetail(entity);
                     }
+                } catch (Exception e) {
+                    log.warn("Can not upload image for detail: {}", entity, e);
                 }
-            } catch (Exception e) {
-                log.warn("Can not upload image for detail: {}", entity, e);
             }
+        } else {
+            log.info("Details with edited images not found!");
         }
     }
 

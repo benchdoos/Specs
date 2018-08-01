@@ -135,9 +135,14 @@ public class DetailDaoImpl implements DetailDao {
         criteriaQuery.select(root);
         criteriaQuery.where(builder.notEqual(root.get("imagePath"), ""));
         Query<DetailEntity> q = session.createQuery(criteriaQuery);
-        final List<DetailEntity> result = q.list();
-        log.debug("Details found with edited image: ({}), {} ", result.size(), result);
-        return result;
+        try {
+            final List<DetailEntity> result = q.list();
+            log.debug("Details found with edited image: ({}), {} ", result.size(), result);
+            return result;
+        } catch (Exception e) {
+            log.warn("Could not find details with edited image", e);
+            return null;
+        }
     }
 
     @Override
