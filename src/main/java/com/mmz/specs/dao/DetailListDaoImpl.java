@@ -300,7 +300,6 @@ public class DetailListDaoImpl implements DetailListDao {
 
     @Override
     public List<DetailEntity> listParents(DetailEntity child) {
-        log.debug("Getting list parents for child: {}", child);
         try {
             Query query = this.session.createQuery("from DetailListEntity where detailByChildDetailId= :child");
             query.setParameter("child", child);
