@@ -124,6 +124,11 @@ public class ClientSettingsManager {
         return ClientConstants.MAIN_WINDOW_DEFAULT_EXTENDED;
     }
 
+    public void setClientMainWindowExtended(boolean extended) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_EXTENDED, Boolean.toString(extended));
+        updateSettingsFile();
+    }
+
     Point getClientMainWindowLocation() {
         try {
             String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_POSITION);
@@ -154,8 +159,18 @@ public class ClientSettingsManager {
         updateSettingsFile();
     }
 
-    public void setClientMainWindowExtended(boolean extended) throws IOException {
-        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_EXTENDED, Boolean.toString(extended));
+    public boolean getBoostRootUnitsLoading() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING);
+            return Boolean.valueOf(property);
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.BOOST_ROOT_UNITS_DEFAULT_LOADING;
+    }
+
+    public void setBoostRootUnitsLoading(boolean boost) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING, Boolean.toString(boost));
         updateSettingsFile();
     }
 }

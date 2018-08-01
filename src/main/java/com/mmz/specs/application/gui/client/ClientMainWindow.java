@@ -843,8 +843,8 @@ public class ClientMainWindow extends JFrame {
         JMenu editMenu = getEditMenu();
         mainMenuBar.add(editMenu);
 
-        JMenu connectionMenu = getConnectionMenu();
-        mainMenuBar.add(connectionMenu);
+        JMenu settingsMenu = getSettingsMenu();
+        mainMenuBar.add(settingsMenu);
 
         JMenu about = getHelpMenu();
         mainMenuBar.add(about);
@@ -852,13 +852,12 @@ public class ClientMainWindow extends JFrame {
         setJMenuBar(mainMenuBar);
     }
 
+
     private JMenu getHelpMenu() {
         JMenu help = new JMenu("Справка");
 
         JMenuItem userGuide = new JMenuItem("Руководство пользователя");
-        userGuide.addActionListener(e -> {
-            CommonUtils.openClientGuide();
-        });
+        userGuide.addActionListener(e -> CommonUtils.openClientGuide());
         userGuide.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/guide.png"))));
 
         help.add(userGuide);
@@ -998,11 +997,41 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
+
+    private JMenu getSettingsMenu() {
+        JMenu menu = new JMenu("Параметры");
+
+        JMenuItem settings = getSettingsMenuItem();
+        menu.add(settings);
+
+        JMenu connectionMenu = getConnectionMenu();
+        menu.add(connectionMenu);
+
+        return menu;
+    }
+
+    private JMenuItem getSettingsMenuItem() {
+        JMenuItem settings = new JMenuItem("Настройки");
+        settings.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/settings.png"))));
+        settings.setIconTextGap(0);
+        settings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, InputEvent.CTRL_DOWN_MASK));
+        settings.addActionListener(e -> onClientSettings());
+        return settings;
+    }
+
+    private void onClientSettings() {
+        ClientSettingsWindow clientSettingsWindow = new ClientSettingsWindow();
+        clientSettingsWindow.setLocation(FrameUtils.getFrameOnCenter(this, clientSettingsWindow));
+        clientSettingsWindow.setVisible(true);
+    }
+
     private JMenu getConnectionMenu() {
         JMenu menu = new JMenu("Подключение");
+        menu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/connectionSettings.png"))));
+        menu.setIconTextGap(0);
 
         JMenuItem connectionSettings = new JMenuItem("Настройки подключения");
-        connectionSettings.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/settings.png"))));
+        connectionSettings.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/connectionSettings.png"))));
         connectionSettings.setIconTextGap(0);
         connectionSettings.addActionListener(e -> onConnectionSettings());
         menu.add(connectionSettings);
