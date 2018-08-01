@@ -451,22 +451,27 @@ public class EditMaterialListWindow extends JDialog {
         addMaterialButton = new JButton();
         addMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/add.png")));
         addMaterialButton.setText("");
+        addMaterialButton.setToolTipText("Добавить материал");
         toolBar1.add(addMaterialButton);
         removeMaterial = new JButton();
         removeMaterial.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/remove.png")));
         removeMaterial.setText("");
+        removeMaterial.setToolTipText("Удалить материал");
         toolBar1.add(removeMaterial);
         editMaterialButton = new JButton();
         editMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editMaterialButton.setText("");
+        editMaterialButton.setToolTipText("Редактировать выбранный материал");
         toolBar1.add(editMaterialButton);
         copyMaterialButton = new JButton();
         copyMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/copy.png")));
         copyMaterialButton.setText("");
+        copyMaterialButton.setToolTipText("Создать новый материал на основе существующего");
         toolBar1.add(copyMaterialButton);
         createNewMaterialButton = new JButton();
         createNewMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/materialNew16.png")));
         createNewMaterialButton.setText("");
+        createNewMaterialButton.setToolTipText("Создать новый материал");
         toolBar1.add(createNewMaterialButton);
     }
 
