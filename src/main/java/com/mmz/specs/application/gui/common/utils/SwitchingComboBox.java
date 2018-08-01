@@ -18,38 +18,21 @@ package com.mmz.specs.application.gui.common.utils;
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Vector;
 
 public abstract class SwitchingComboBox<E> extends JComboBox<E> {
     private String typedItem = "";
     private Timer timeoutTimer = new Timer(1000, e -> typedItem = "");
 
-    public SwitchingComboBox(E[] items) {
-        super(items);
-        initSwitchingComboBox();
-    }
-
-    public SwitchingComboBox(Vector<E> items) {
-        super(items);
-        initSwitchingComboBox();
-    }
-
-    public SwitchingComboBox() {
+    protected SwitchingComboBox() {
         super();
         initSwitchingComboBox();
     }
 
-    public SwitchingComboBox(ComboBoxModel<E> aModel) {
-        super(aModel);
-        initSwitchingComboBox();
-    }
-
-
     private void initSwitchingComboBox() {
         KeyAdapter keyAdapter = new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
-                if (e.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
+            public void keyPressed(KeyEvent e) {
+                if (e.getExtendedKeyCode() != KeyEvent.VK_BACK_SPACE) {
                     typedItem = typedItem + e.getKeyChar();
                     selectTypedItem();
                     timeoutTimer.restart();

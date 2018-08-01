@@ -19,7 +19,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.gui.common.LoginWindow;
-import com.mmz.specs.application.gui.common.SmartJTextField;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.DateLabelFormatter;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.NoticeDaoImpl;
@@ -81,7 +81,7 @@ public class CreateNoticeWindow extends JDialog {
     }
 
     private void initNumberTextField() {
-        ((SmartJTextField) numberTextField).setChildComboBox(authorComboBox);
+        numberTextField.addKeyListener(CommonUtils.getSmartKeyListener(authorComboBox));
     }
 
     private void initAuthorComboBox() {
@@ -382,7 +382,6 @@ public class CreateNoticeWindow extends JDialog {
     }
 
     private void createUIComponents() {
-        numberTextField = new SmartJTextField();
         createdDatePicker = getDatePicker();
     }
 
@@ -438,6 +437,7 @@ public class CreateNoticeWindow extends JDialog {
         Font noticeDescriptionTextAreaFont = this.$$$getFont$$$("Consolas", -1, 14, noticeDescriptionTextArea.getFont());
         if (noticeDescriptionTextAreaFont != null) noticeDescriptionTextArea.setFont(noticeDescriptionTextAreaFont);
         scrollPane1.setViewportView(noticeDescriptionTextArea);
+        numberTextField = new JTextField();
         panel3.add(numberTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer3 = new Spacer();
         panel3.add(spacer3, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));

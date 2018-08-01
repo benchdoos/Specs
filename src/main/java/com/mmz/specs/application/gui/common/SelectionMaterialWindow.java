@@ -19,6 +19,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.gui.common.utils.SwitchingComboBox;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.dao.MaterialDaoImpl;
 import com.mmz.specs.model.MaterialEntity;
@@ -126,6 +127,8 @@ public class SelectionMaterialWindow extends JDialog {
 
     private void initListeners() {
         buttonOK.addActionListener(e -> onOK());
+        buttonOK.addKeyListener(CommonUtils.getSmartKeyListener(materialComboBox));
+
 
         buttonCancel.addActionListener(e -> onCancel());
     }

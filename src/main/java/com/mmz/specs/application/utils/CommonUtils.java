@@ -25,6 +25,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -198,5 +201,18 @@ public class CommonUtils {
         } catch (Exception e) {
             log.warn("Could not delete folder: {}", file, e);
         }
+    }
+
+    public static KeyListener getSmartKeyListener(Component component) {
+        return new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    if (component != null) {
+                        component.dispatchEvent(e);
+                    }
+                }
+            }
+        };
     }
 }
