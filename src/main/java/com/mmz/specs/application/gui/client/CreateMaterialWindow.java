@@ -82,6 +82,7 @@ public class CreateMaterialWindow extends JDialog {
             setTitle("Добавить новый материал");
         } else {
             setTitle("Редактировать материал");
+            activeCheckBox.setEnabled(true);
         }
 
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/materialNew16.png")));
@@ -254,6 +255,7 @@ public class CreateMaterialWindow extends JDialog {
         longProfileTextField = new JTextField();
         panel3.add(longProfileTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         activeCheckBox = new JCheckBox();
+        activeCheckBox.setEnabled(false);
         activeCheckBox.setHorizontalTextPosition(2);
         activeCheckBox.setSelected(true);
         activeCheckBox.setText("Активна:");

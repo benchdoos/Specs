@@ -80,9 +80,14 @@ public class MaterialDaoImpl implements MaterialDao {
     @Override
     @Transactional
     public MaterialEntity getMaterialById(int id) {
-        MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
-        log.debug("Material successfully found by id:" + id + " " + materialEntity);
-        return materialEntity;
+        try {
+            MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
+            log.debug("Material successfully found by id: {}, {}", id, materialEntity);
+            return materialEntity;
+        } catch (Exception e) {
+            log.warn("Could not get Material by id: {}", id, e);
+            return null;
+        }
     }
 
     @Override

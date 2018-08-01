@@ -27,6 +27,8 @@ import com.mmz.specs.model.MaterialEntity;
 import com.mmz.specs.model.MaterialListEntity;
 import com.mmz.specs.service.MaterialListService;
 import com.mmz.specs.service.MaterialListServiceImpl;
+import com.mmz.specs.service.MaterialService;
+import com.mmz.specs.service.MaterialServiceImpl;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -52,6 +54,7 @@ public class EditMaterialListWindow extends JDialog {
     private JButton createNewMaterialButton;
     private JButton editMaterialButton;
     private JCheckBox mainCheckBox;
+    private JButton copyMaterialButton;
     private DetailEntity detailEntity;
     private boolean isCanceled = false;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
@@ -229,7 +232,37 @@ public class EditMaterialListWindow extends JDialog {
         addMaterialButton.addActionListener(e -> onAddMaterial());
         removeMaterial.addActionListener(e -> onRemoveMaterial());
         editMaterialButton.addActionListener(e -> onEditMaterial());
+        copyMaterialButton.addActionListener(e -> onCopyMaterial());
         createNewMaterialButton.addActionListener(e -> onCreateNewMaterial());
+    }
+
+    private void onCopyMaterial() {
+        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow(session);
+        selectionMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(this, selectionMaterialWindow));
+        selectionMaterialWindow.setVisible(true);
+        final MaterialEntity selectedValue = selectionMaterialWindow.getSelectedValue();
+        if (selectedValue != null) {
+            final MaterialEntity savedMaterial = copyMaterial(selectedValue);
+
+            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, savedMaterial);
+            createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+            createMaterialWindow.setVisible(true);
+
+            final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
+            addMaterialToDetail(materialEntity);
+        }
+    }
+
+    private MaterialEntity copyMaterial(MaterialEntity selectedValue) {
+        MaterialEntity entity = new MaterialEntity();
+        entity.setLongMark(selectedValue.getLongMark());
+        entity.setShortMark(selectedValue.getShortMark());
+        entity.setLongProfile(selectedValue.getLongProfile());
+        entity.setShortProfile(selectedValue.getShortProfile());
+        entity.setActive(true);
+        MaterialService service = new MaterialServiceImpl(session);
+        final int id = service.addMaterial(entity);
+        return service.getMaterialById(id);
     }
 
     private void onCreateNewMaterial() {
@@ -238,6 +271,10 @@ public class EditMaterialListWindow extends JDialog {
         createMaterialWindow.setVisible(true);
 
         final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
+        addMaterialToDetail(materialEntity);
+    }
+
+    private void addMaterialToDetail(MaterialEntity materialEntity) {
         if (materialEntity != null) {
             DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
 
@@ -363,7 +400,7 @@ public class EditMaterialListWindow extends JDialog {
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JSplitPane splitPane1 = new JSplitPane();
-        splitPane1.setDividerLocation(128);
+        splitPane1.setDividerLocation(158);
         panel3.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(6, 2, new Insets(0, 0, 0, 0), -1, -1));
@@ -423,6 +460,10 @@ public class EditMaterialListWindow extends JDialog {
         editMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/edit.png")));
         editMaterialButton.setText("");
         toolBar1.add(editMaterialButton);
+        copyMaterialButton = new JButton();
+        copyMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/edit/copy.png")));
+        copyMaterialButton.setText("");
+        toolBar1.add(copyMaterialButton);
         createNewMaterialButton = new JButton();
         createNewMaterialButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/materialNew16.png")));
         createNewMaterialButton.setText("");
