@@ -15,7 +15,6 @@
 
 package com.mmz.specs.application.gui.panels;
 
-import com.google.common.collect.ComparisonChain;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -26,6 +25,7 @@ import com.mmz.specs.application.gui.client.SelectDetailEntityWindow;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
+import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
@@ -482,19 +482,18 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void fillMainTreeFully() {
         Thread thread = Thread.currentThread();
         if (session != null && !thread.isInterrupted()) {
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            final List<DetailListEntity> askedListRoot = service.listDetailLists();
-            if (!thread.isInterrupted()) {
-                askedListRoot.sort((o1, o2) -> ComparisonChain.start()
-                        .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
-                        .compareTrueFirst(o1.isActive(), o2.isActive())
-                        .result());
+            if (ClientSettingsManager.getInstance().isBoostRootUnitsLoading()) {
+                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getBoostedModuleDetailListFullTree();
+                if (!Thread.currentThread().isInterrupted()) {
+                    mainTree.setModel(new DefaultTreeModel(detailListFullTree));
+                }
+            } else {
+                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree();
+                if (!Thread.currentThread().isInterrupted()) {
+                    mainTree.setModel(new DefaultTreeModel(detailListFullTree));
+                }
             }
 
-            if (!thread.isInterrupted()) {
-                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree(askedListRoot);
-                mainTree.setModel(new DefaultTreeModel(detailListFullTree));
-            }
         }
 
         if (thread.isInterrupted()) {

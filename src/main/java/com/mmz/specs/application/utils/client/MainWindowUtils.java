@@ -48,6 +48,7 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class MainWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final long NANO_TIME = 1000000;
+    private static final String ROOT_UNIT_CODE = ".00.000";
     private final Session session;
     private ClientMainWindow clientMainWindow = null;
 
@@ -57,20 +58,62 @@ public class MainWindowUtils {
     }
 
 
-    public DefaultMutableTreeNode getModuleDetailListFullTree(List<DetailListEntity> listEntities) {
+    public DefaultMutableTreeNode getModuleDetailListFullTree() {
         final long time = System.nanoTime();
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        ArrayList<DetailEntity> roots = getRootObjects(listEntities);
-        final String rootUnitCode = ".00.000";
 
-        for (DetailEntity e : roots) {
-            if (e.getCode().contains(rootUnitCode)) {
-                result.add(new DefaultMutableTreeNode(e));
-                System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
+        if (!Thread.currentThread().isInterrupted()) {
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            final List<DetailListEntity> askedListRoot = service.listDetailLists();
+            askedListRoot.sort((o1, o2) -> ComparisonChain.start()
+                    .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
+                    .compareTrueFirst(o1.isActive(), o2.isActive())
+                    .result());
+
+            if (!Thread.currentThread().isInterrupted()) {
+                DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+                ArrayList<DetailEntity> roots = getRootObjects(askedListRoot);
+
+
+                for (DetailEntity e : roots) {
+                    if (e.getCode().contains(ROOT_UNIT_CODE)) {
+                        result.add(new DefaultMutableTreeNode(e));
+                        System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
+                    }
+                }
+                log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+                return result;
             }
         }
-        log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
-        return result;
+        return null;
+    }
+
+    public DefaultMutableTreeNode getBoostedModuleDetailListFullTree() {
+        final long time = System.nanoTime();
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+
+        DetailService service = new DetailServiceImpl(session);
+
+        if (!Thread.currentThread().isInterrupted()) {
+            ArrayList<DetailEntity> roots = (ArrayList<DetailEntity>) service.getDetailsBySearch(ROOT_UNIT_CODE);
+
+            if (!Thread.currentThread().isInterrupted()) {
+                roots.sort((o1, o2) -> ComparisonChain.start()
+                        .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                        .compare(o1.getCode(), o2.getCode())
+                        .compareTrueFirst(o1.isActive(), o2.isActive())
+                        .result());
+
+                for (DetailEntity e : roots) {
+                    if (e.getCode().contains(ROOT_UNIT_CODE)) {
+                        result.add(new DefaultMutableTreeNode(e));
+                        System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
+                    }
+                }
+                log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+                return result;
+            }
+        }
+        return null;
     }
 
     private ArrayList<DetailEntity> getRootObjects(List<DetailListEntity> listEntities) {
@@ -99,7 +142,7 @@ public class MainWindowUtils {
     /**
      * Gives full tree for listEntities, ignoring search (if there is so)
      *
-     * @deprecated Use {@link #getModuleDetailListFullTree(List)} instead
+     * @deprecated Use {@link #getModuleDetailListFullTree()} instead
      */
     @Deprecated
     public DefaultMutableTreeNode getDetailListTreeByEntityList(List<DetailListEntity> listEntities) {

@@ -22,11 +22,11 @@ public class ClientConstants {
     public static final String MAIN_WINDOW_DIMENSION = "window.dimension";
     public static final String MAIN_WINDOW_POSITION = "window.position";
     public static final String MAIN_WINDOW_EXTENDED = "window.extended";
-    public static final String BOOST_ROOT_UNITS_LOADING = "window.extended";
+    public static final String BOOST_ROOT_UNITS_LOADING = "settings.tree.loading.boosted";
 
     public static final Dimension MAIN_WINDOW_DEFAULT_DIMENSION = new Dimension(640, 540);
     public static final boolean MAIN_WINDOW_DEFAULT_EXTENDED = false;
-    public static final boolean BOOST_ROOT_UNITS_DEFAULT_LOADING = false;
+    public static final boolean BOOST_ROOT_UNITS_DEFAULT_LOADING = true;
 
 
     public static final String IMAGE_REMOVE_KEY = "remove";

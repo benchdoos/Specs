@@ -159,7 +159,7 @@ public class ClientSettingsManager {
         updateSettingsFile();
     }
 
-    public boolean getBoostRootUnitsLoading() {
+    public boolean isBoostRootUnitsLoading() {
         try {
             String property = CLIENT_SETTINGS.getProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING);
             return Boolean.valueOf(property);

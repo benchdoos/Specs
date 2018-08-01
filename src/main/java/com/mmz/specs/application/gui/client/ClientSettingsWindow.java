@@ -45,21 +45,6 @@ public class ClientSettingsWindow extends JDialog {
         $$$setupUI$$$();
     }
 
-    public ClientSettingsWindow() {
-        initGui();
-
-        initListeners();
-
-        initKeyBindings();
-
-        initSettingsFields();
-
-        setMinimumSize(new Dimension(400, 200));
-
-        pack();
-
-    }
-
     private void initKeyBindings() {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -78,8 +63,19 @@ public class ClientSettingsWindow extends JDialog {
         buttonCancel.addActionListener(e -> onCancel());
     }
 
-    private void initSettingsFields() {
-        boostRootUnitsLoadingCheckBox.setSelected(ClientSettingsManager.getInstance().getBoostRootUnitsLoading());
+    ClientSettingsWindow() {
+        initGui();
+
+        initListeners();
+
+        initKeyBindings();
+
+        initSettingsFields();
+
+        setMinimumSize(new Dimension(400, 200));
+
+        pack();
+
     }
 
     private void initGui() {
@@ -107,6 +103,10 @@ public class ClientSettingsWindow extends JDialog {
 
     private void onCancel() {
         dispose();
+    }
+
+    private void initSettingsFields() {
+        boostRootUnitsLoadingCheckBox.setSelected(ClientSettingsManager.getInstance().isBoostRootUnitsLoading());
     }
 
     /**
@@ -154,6 +154,8 @@ public class ClientSettingsWindow extends JDialog {
         boostRootUnitsLoadingCheckBox = new JCheckBox();
         boostRootUnitsLoadingCheckBox.setHorizontalTextPosition(2);
         boostRootUnitsLoadingCheckBox.setText("Быстрая загрузка корневых узлов:");
+        boostRootUnitsLoadingCheckBox.setMnemonic('Б');
+        boostRootUnitsLoadingCheckBox.setDisplayedMnemonicIndex(0);
         panel5.add(boostRootUnitsLoadingCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
         panel5.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
