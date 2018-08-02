@@ -162,6 +162,12 @@ public class MainWindowUtils {
     public DefaultMutableTreeNode getModuleDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
         final long time = System.nanoTime();
 
+        listEntities.sort((o1, o2) -> ComparisonChain.start()
+                .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
+                .compareTrueFirst(o1.isActive(), o2.isActive())
+                .result());
+
+
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
         ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
         for (DetailEntity entity : roots) {
@@ -341,6 +347,13 @@ public class MainWindowUtils {
     }
 
     public TreeNode getDetailsTreeByDetails(List<DetailEntity> detailsBySearch) {
+        detailsBySearch.sort((o1, o2) -> ComparisonChain.start()
+                .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                .compare(o1.getCode(), o2.getCode())
+                .compare(o1.getDetailTitleByDetailTitleId().getTitle(), o2.getDetailTitleByDetailTitleId().getTitle())
+                .compareTrueFirst(o1.isActive(), o2.isActive())
+                .result());
+
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
         for (DetailEntity e : detailsBySearch) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(e);

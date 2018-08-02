@@ -29,7 +29,6 @@ import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
-import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.dao.MaterialListDaoImpl;
 import com.mmz.specs.model.*;
@@ -76,6 +75,8 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private JButton refreshSessionButton;
     private JButton addButton;
     private Session session;
+    private MouseListener ml = null;
+    private KeyListener kl = null;
     private JButton editButton;
     private JLabel materialMarkLabel;
     private JLabel materialProfileLabel;
@@ -548,7 +549,13 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
                 mainTree.setModel(model);
 
-                SessionUtils.refreshSession(session, DetailListEntity.class);
+                SessionUtils.closeSessionSilently(session);
+                session = ClientBackgroundService.getInstance().getSession();
+
+                refreshMainTreeListeners();
+                DetailJTree tree = (DetailJTree) mainTree;
+                tree.setSession(session);
+
                 fillMainTreeFully();
 
                 mainWindowUtils.updateMessage(null, null);
@@ -592,7 +599,6 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 } else {
                     DetailService detailService = new DetailServiceImpl(session);
                     final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
-
                     if (!thread.isInterrupted()) {
                         if (detailsBySearch != null && detailsBySearch.size() > 0) {
                             final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch);
@@ -815,18 +821,28 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         mainTree.addTreeSelectionListener(e -> {
             DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
             if (selectedEntity != null) {
-                DetailServiceImpl detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                DetailServiceImpl detailService = new DetailServiceImpl(session);
                 DetailEntity loadedEntity = detailService.getDetailById(selectedEntity.getId());
 
                 updateDetailInfoPanel(loadedEntity);
             }
         });
 
-        MouseListener ml = new MainWindowUtils(session).getMouseListener(mainTree);
-        mainTree.addMouseListener(ml);
-        KeyListener k1 = new MainWindowUtils(session).getArrowKeyListener(mainTree);
-        mainTree.addKeyListener(k1);
 
+        refreshMainTreeListeners();
+
+    }
+
+    private void refreshMainTreeListeners() {
+        mainTree.removeMouseListener(ml);
+        mainTree.removeKeyListener(kl);
+
+        ml = new MainWindowUtils(session).getMouseListener(mainTree);
+        kl = new MainWindowUtils(session).getArrowKeyListener(mainTree);
+
+
+        mainTree.addMouseListener(ml);
+        mainTree.addKeyListener(kl);
     }
 
     private void onEditDetail(boolean select) {
