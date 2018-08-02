@@ -482,7 +482,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private void fillMainTreeFully() {
         Thread thread = Thread.currentThread();
         if (session != null && !thread.isInterrupted()) {
-            if (ClientSettingsManager.getInstance().isBoostRootUnitsLoading()) {
+            final boolean boostRootUnitsLoading = ClientSettingsManager.getInstance().isBoostRootUnitsLoading();
+            log.info("Loading full main tree in boots mode: {}", boostRootUnitsLoading);
+            if (boostRootUnitsLoading) {
                 final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getBoostedModuleDetailListFullTree();
                 if (!Thread.currentThread().isInterrupted()) {
                     mainTree.setModel(new DefaultTreeModel(detailListFullTree));
