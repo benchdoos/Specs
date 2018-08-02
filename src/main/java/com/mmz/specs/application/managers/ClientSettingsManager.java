@@ -162,7 +162,9 @@ public class ClientSettingsManager {
     public boolean isBoostRootUnitsLoading() {
         try {
             String property = CLIENT_SETTINGS.getProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING);
-            return Boolean.valueOf(property);
+            if (property != null) {
+                return Boolean.valueOf(property);
+            }
         } catch (Exception ignore) {
             /*NOP*/
         }
