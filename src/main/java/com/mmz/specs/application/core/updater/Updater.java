@@ -103,11 +103,6 @@ public class Updater {
                 log.info("New version of file successfully downloaded: {}", downloadedFile.getAbsolutePath());
                 log.info("Starting updating to new version.");
 
-               /* String command = "java -jar \"" + downloadedFile.getAbsolutePath() + "\" " + ApplicationArgumentsConstants.UPDATE
-                        + " " + currentPath;*/
-
-                //String taskCommand = getCurrentTaskCommand(argument);
-
                 String command = "\"" + downloadedFile.getAbsolutePath() + "\"" + " /verysilent " /*+ taskCommand*/;
                 log.info("Starting new version with command: {}", command);
                 window.dispose();
