@@ -24,6 +24,7 @@ import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.gui.client.*;
 import com.mmz.specs.application.gui.common.DetailJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
+import com.mmz.specs.application.gui.panels.service.InitializationPanel;
 import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
@@ -335,12 +336,12 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
 
                         if (selectedIndex == 2) {
                             savePreviewPanel.removeAll();
-                            final JLabel label = new JLabel("Инициализация...");
-                            savePreviewPanel.add(label);
+                            InitializationPanel panel = new InitializationPanel();
+                            savePreviewPanel.add(panel);
                             SwingUtilities.invokeLater(() -> {
                                 final DetailListPanel comp = new DetailListPanel(session, rootEntity);
                                 savePreviewPanel.add(comp);
-                                savePreviewPanel.remove(label);
+                                savePreviewPanel.remove(panel);
                             });
                         }
                     }
