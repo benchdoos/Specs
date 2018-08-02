@@ -95,6 +95,9 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void initKeyBindings() {
+        contentPane.registerKeyboardAction(e -> closeWindow(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         contentPane.registerKeyboardAction(e -> onLogin(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -586,51 +589,20 @@ public class ClientMainWindow extends JFrame {
     private void initWindowListeners() {
         Component c = this;
         addWindowListener(new WindowAdapter() {
-            private ArrayList<Transactional> getTransactionalTabs() {
-                ArrayList<Transactional> result = new ArrayList<>();
-                for (int i = 0; i < clientMainTabbedPane.getTabCount(); i++) {
-                    try {
-                        Component component = clientMainTabbedPane.getComponentAt(i);
-                        Transactional transactional = (Transactional) component;
-                        result.add(transactional);
-                    } catch (ClassCastException ignore) {
-                        /*NOP*/
-                    }
-                }
-                return result;
-            }
+
 
             @Override
             public void windowClosing(WindowEvent e) {
-                try {
-                    if (getTransactionalTabs().isEmpty()) {
-                        dispose();
-                    } else {
-                        ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
-                        for (Transactional transactional : transactionalTabList) {
-                            if (ClientBackgroundService.getInstance().isConnected()) {
-                                if (currentUser != null) {
-                                    transactional.rollbackTransaction();
-                                } else {
-                                    JOptionPane.showMessageDialog(c, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
-                                            "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
-                                }
-                            } else {
-                                transactional.rollbackTransaction();
-                            }
-                        }
-                        if (getTransactionalTabs().isEmpty()) {
-                            dispose();
-                        }
-                    }
-                } catch (HeadlessException e1) {
-                    log.warn("Could not close window properly... closing anyway", e1);
-                    dispose();
-                }
+                closeWindow();
             }
+
 
             @Override
             public void windowClosed(WindowEvent e) {
+                saveWindowLocation();
+            }
+
+            private void saveWindowLocation() {
                 try {
                     log.debug("Closing client window, saving location and dimension");
                     ClientSettingsManager.getInstance().setClientMainWindowLocation(getLocation());
@@ -644,10 +616,52 @@ public class ClientMainWindow extends JFrame {
 
                     log.debug("Successfully saved client window location and dimension");
                 } catch (IOException e1) {
-                    log.warn("Could not save client window location or dimension", e);
+                    log.warn("Could not save client window location or dimension", e1);
                 }
             }
         });
+    }
+
+    private ArrayList<Transactional> getTransactionalTabs() {
+        ArrayList<Transactional> result = new ArrayList<>();
+        for (int i = 0; i < clientMainTabbedPane.getTabCount(); i++) {
+            try {
+                Component component = clientMainTabbedPane.getComponentAt(i);
+                Transactional transactional = (Transactional) component;
+                result.add(transactional);
+            } catch (ClassCastException ignore) {
+                /*NOP*/
+            }
+        }
+        return result;
+    }
+
+    private void closeWindow() {
+        try {
+            if (getTransactionalTabs().isEmpty()) {
+                dispose();
+            } else {
+                ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
+                for (Transactional transactional : transactionalTabList) {
+                    if (ClientBackgroundService.getInstance().isConnected()) {
+                        if (currentUser != null) {
+                            transactional.rollbackTransaction();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
+                                    "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
+                        }
+                    } else {
+                        transactional.rollbackTransaction();
+                    }
+                }
+                if (getTransactionalTabs().isEmpty()) {
+                    dispose();
+                }
+            }
+        } catch (HeadlessException e1) {
+            log.warn("Could not close window properly... closing anyway", e1);
+            dispose();
+        }
     }
 
     private void onViewDetailList(final boolean select) {
