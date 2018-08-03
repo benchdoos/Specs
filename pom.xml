@@ -21,7 +21,7 @@
 
     <groupId>com.mmz</groupId>
     <artifactId>Specs</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
     <packaging>jar</packaging>
 
     <name>Specs</name>
@@ -348,15 +348,6 @@
             <artifactId>json</artifactId>
             <version>20180130</version>
         </dependency>
-
-        <!-- Balloon ToolTip-->
-        <!-- https://mvnrepository.com/artifact/net.java.balloontip/balloontip -->
-        <dependency>
-            <groupId>net.java.balloontip</groupId>
-            <artifactId>balloontip</artifactId>
-            <version>1.2.4.1</version>
-        </dependency>
-
 
     </dependencies>
 
