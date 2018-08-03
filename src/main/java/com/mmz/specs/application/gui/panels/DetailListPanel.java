@@ -392,6 +392,9 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
         finishedWeightLabel.setText("");
         workpieceWeightLabel.setText("");
 
+        materialProfileLabel.setText("");
+        materialMarkLabel.setText("");
+
         techProcessLabel.setToolTipText("");
         techProcessLabel.setText("");
 
