@@ -18,8 +18,9 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.gui.panels.service.MaterialPanel;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.application.utils.client.CommonWindowUtils;
+import com.mmz.specs.model.MaterialEntity;
 import com.mmz.specs.model.MaterialListEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,9 +37,9 @@ public class MaterialListWindow extends JDialog {
     private JButton buttonOK;
     private JList<MaterialListEntity> materialList;
     private JLabel shortMaterialLabel;
-    private JLabel longMaterialLabel;
     private JLabel isActiveLabel;
     private JLabel isMainLabel;
+    private MaterialPanel materialPanel;
     private List<MaterialListEntity> rootList;
 
     public MaterialListWindow(List<MaterialListEntity> rootList) {
@@ -101,16 +102,13 @@ public class MaterialListWindow extends JDialog {
     private void fillDetailInfo() {
         MaterialListEntity entity = materialList.getSelectedValue();
         if (entity != null) {
-            String shortMaterialText = entity.getMaterialByMaterialId().getShortMark() + " " + entity.getMaterialByMaterialId().getShortProfile();
+            final MaterialEntity material = entity.getMaterialByMaterialId();
+            String shortMaterialText = material.getShortMark() + " " + material.getShortProfile();
             shortMaterialText = shortMaterialText.replace("null", "");
             shortMaterialLabel.setText(shortMaterialText);
 
-            String longMark = entity.getMaterialByMaterialId().getLongMark();
-            String longProfile = entity.getMaterialByMaterialId().getLongProfile();
-            String delimiter = CommonWindowUtils.createDelimiter(longProfile, longMark);
-            String text = "<html> <p style=\"line-height: 0.2em;\">" + longProfile + "<br>" + delimiter + "<br>" + longMark + "</p></html>";
-            text = text.replace("null", "");
-            longMaterialLabel.setText(text);
+            materialPanel.setMaxStringSize(50);
+            materialPanel.setMaterialEntity(material);
 
             isActiveLabel.setText(entity.isActive() ? "да" : "нет");
             isMainLabel.setText(entity.isMainMaterial() ? "да" : "нет");
@@ -174,9 +172,6 @@ public class MaterialListWindow extends JDialog {
         panel3.add(shortMaterialLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
         panel3.add(spacer4, new GridConstraints(5, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        longMaterialLabel = new JLabel();
-        longMaterialLabel.setText("нет данных");
-        panel3.add(longMaterialLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Активный:");
         panel3.add(label2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -189,6 +184,8 @@ public class MaterialListWindow extends JDialog {
         isMainLabel = new JLabel();
         isMainLabel.setText("нет данных");
         panel3.add(isMainLabel, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        materialPanel = new MaterialPanel();
+        panel3.add(materialPanel.$$$getRootComponent$$$(), new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     }
 
     /**
