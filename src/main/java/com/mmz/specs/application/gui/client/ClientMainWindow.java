@@ -35,7 +35,9 @@ import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.connection.DaoConstants;
 import com.mmz.specs.dao.ConstantsDaoImpl;
 import com.mmz.specs.dao.NoticeDaoImpl;
-import com.mmz.specs.model.*;
+import com.mmz.specs.model.ConstantsEntity;
+import com.mmz.specs.model.NoticeEntity;
+import com.mmz.specs.model.UsersEntity;
 import com.mmz.specs.service.ConstantsService;
 import com.mmz.specs.service.ConstantsServiceImpl;
 import com.mmz.specs.service.NoticeServiceImpl;
@@ -695,12 +697,6 @@ public class ClientMainWindow extends JFrame {
         mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем редактирование данных...");
         new Thread(() -> {
             try {
-                SessionUtils.refreshSession(session, DetailTitleEntity.class);
-                SessionUtils.refreshSession(session, MaterialEntity.class);
-                SessionUtils.refreshSession(session, DetailEntity.class);
-                SessionUtils.refreshSession(session, NoticeEntity.class);
-                SessionUtils.refreshSession(session, TechProcessEntity.class);
-
                 ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/databaseEdit16.png")));
                 addTab("Редактирование данных", icon, new EditDataPanel(), select);
                 mainWindowUtils.updateMessage(null, null);

@@ -29,7 +29,6 @@ import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SessionUtils;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
-import com.mmz.specs.dao.DetailDaoImpl;
 import com.mmz.specs.dao.DetailTitleDaoImpl;
 import com.mmz.specs.dao.MaterialDaoImpl;
 import com.mmz.specs.model.DetailEntity;
@@ -288,7 +287,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
 
     private int getTitleUsage(DetailTitleEntity selectedValue) {
         if (selectedValue != null) {
-            DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+            DetailService service = new DetailServiceImpl(session);
             final ArrayList<DetailEntity> detailsByTitle = (ArrayList<DetailEntity>) service.getDetailsByTitle(selectedValue);
             if (detailsByTitle != null) {
                 return detailsByTitle.size();
@@ -321,10 +320,10 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
             final DetailTitleEntity selectedValue = titleList.getSelectedValue();
             final int selectedIndex = titleList.getSelectedIndex();
             if (selectedValue != null) {
-                DetailService service = new DetailServiceImpl(new DetailDaoImpl(session));
+                DetailService service = new DetailServiceImpl(session);
                 final ArrayList<DetailEntity> detailsByTitle = (ArrayList<DetailEntity>) service.getDetailsByTitle(selectedValue);
                 if (detailsByTitle.isEmpty()) {
-                    new DetailTitleServiceImpl(new DetailTitleDaoImpl(session)).removeDetailTitle(selectedValue.getId());
+                    new DetailTitleServiceImpl(session).removeDetailTitle(selectedValue.getId());
 
                     final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
                     model.removeElement(selectedValue);
@@ -370,7 +369,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
     private void fillMaterialList() {
         DefaultListModel<MaterialEntity> model = new DefaultListModel<>();
 
-        MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
+        MaterialService service = new MaterialServiceImpl(session);
         final ArrayList<MaterialEntity> materialListEntities = (ArrayList<MaterialEntity>) service.listMaterials();
 
         Collections.sort(materialListEntities);
