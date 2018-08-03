@@ -245,9 +245,6 @@ public class CommonUtils {
     public static String getHtmlToolTip(MaterialEntity materialByMaterialId) {
         StringBuilder builder = new StringBuilder();
 
-        String longProfile;
-        longProfile = getLongProfile(materialByMaterialId);
-
         try {
             URL url = Resources.getResource("html/MaterialFullText.html");
             URLConnection con = url.openConnection();
@@ -262,7 +259,10 @@ public class CommonUtils {
         }
 
         String result = builder.toString();
-        result = result.replace("{LongProfile}", longProfile);
+        if (materialByMaterialId != null) {
+            result = result.replace("{LongProfile}", materialByMaterialId.getLongProfile());
+            result = result.replace("{LongMark}", materialByMaterialId.getLongMark());
+        }
 
         return result;
     }
