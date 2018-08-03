@@ -242,9 +242,8 @@ public class CommonUtils {
         return builder.toString();
     }
 
-    public static String getHtml(MaterialEntity materialByMaterialId) {
+    public static String getHtmlToolTip(MaterialEntity materialByMaterialId) {
         StringBuilder builder = new StringBuilder();
-        String firstWord;
 
         String longProfile;
         longProfile = getLongProfile(materialByMaterialId);
