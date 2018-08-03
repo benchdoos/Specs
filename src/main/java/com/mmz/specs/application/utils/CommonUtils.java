@@ -15,7 +15,9 @@
 
 package com.mmz.specs.application.utils;
 
+import com.google.common.io.Resources;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
+import com.mmz.specs.model.MaterialEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -29,11 +31,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.io.InputStreamReader;
+import java.net.*;
 
 public class CommonUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -214,5 +216,55 @@ public class CommonUtils {
                 }
             }
         };
+    }
+
+    public static String getFirstWordText(MaterialEntity materialByMaterialId) {
+        String firstWord;
+        try {
+            firstWord = materialByMaterialId.getLongProfile().split(" ")[0];
+        } catch (Exception ignore) {
+            firstWord = materialByMaterialId.getLongProfile();
+        }
+        return firstWord;
+    }
+
+    public static String getLongProfile(MaterialEntity materialByMaterialId) {
+        StringBuilder builder = new StringBuilder();
+        final String[] split = materialByMaterialId.getLongProfile().split(" ");
+        for (int i = 0; i < split.length; i++) {
+            if (i > 0) {
+                builder.append(split[i]);
+                if (i != split.length - 1) {
+                    builder.append(" ");
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String getHtml(MaterialEntity materialByMaterialId) {
+        StringBuilder builder = new StringBuilder();
+        String firstWord;
+
+        String longProfile;
+        longProfile = getLongProfile(materialByMaterialId);
+
+        try {
+            URL url = Resources.getResource("html/MaterialFullText.html");
+            URLConnection con = url.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                builder.append(line);
+                builder.append("\n");
+            }
+        } catch (IOException e) {
+            log.warn("Could not load html for material", e);
+        }
+
+        String result = builder.toString();
+        result = result.replace("{LongProfile}", longProfile);
+
+        return result;
     }
 }
