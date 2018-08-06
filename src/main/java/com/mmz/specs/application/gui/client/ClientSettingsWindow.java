@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -39,6 +40,7 @@ public class ClientSettingsWindow extends JDialog {
     private JButton buttonCancel;
     private JCheckBox boostRootUnitsLoadingCheckBox;
     private JLabel boostRootUnitsLoadingWarnLabel;
+    private JCheckBox autoUpdateCheckBox;
 
     ClientSettingsWindow() {
         initGui();
@@ -88,6 +90,7 @@ public class ClientSettingsWindow extends JDialog {
 
     private void saveSettings() {
         try {
+            ClientSettingsManager.getInstance().setAutoUpdateEnabled(autoUpdateCheckBox.isSelected());
             ClientSettingsManager.getInstance().setBoostRootUnitsLoading(boostRootUnitsLoadingCheckBox.isSelected());
         } catch (IOException e) {
             log.warn("Could not save settings", e);
@@ -101,7 +104,12 @@ public class ClientSettingsWindow extends JDialog {
     }
 
     private void initSettingsFields() {
+        initAutoUpdate();
         initBoostRootUnitsLoading();
+    }
+
+    private void initAutoUpdate() {
+        autoUpdateCheckBox.setSelected(ClientSettingsManager.getInstance().isAutoUpdateEnabled());
     }
 
     private void initBoostRootUnitsLoading() {
@@ -148,14 +156,15 @@ public class ClientSettingsWindow extends JDialog {
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.LEFT, TitledBorder.DEFAULT_POSITION));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         scrollPane1.setViewportView(panel4);
         final Spacer spacer2 = new Spacer();
-        panel4.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(387, 14), null, 0, false));
+        panel4.add(spacer2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(387, 14), null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
-        panel4.add(panel5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel4.add(panel5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel5.setBorder(BorderFactory.createTitledBorder("Загрузка данных"));
         boostRootUnitsLoadingCheckBox = new JCheckBox();
         boostRootUnitsLoadingCheckBox.setHorizontalTextPosition(2);
@@ -169,6 +178,23 @@ public class ClientSettingsWindow extends JDialog {
         boostRootUnitsLoadingWarnLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/warningOrange16.png")));
         boostRootUnitsLoadingWarnLabel.setToolTipText(ResourceBundle.getBundle("messages/common/ClientSettingsWindow").getString("boost"));
         panel5.add(boostRootUnitsLoadingWarnLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel6 = new JPanel();
+        panel6.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.add(panel6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel6.setBorder(BorderFactory.createTitledBorder("Основные настройки:"));
+        autoUpdateCheckBox = new JCheckBox();
+        autoUpdateCheckBox.setHorizontalTextPosition(2);
+        autoUpdateCheckBox.setSelected(true);
+        autoUpdateCheckBox.setText("Автоматическое обновление приложения:");
+        autoUpdateCheckBox.setMnemonic('А');
+        autoUpdateCheckBox.setDisplayedMnemonicIndex(0);
+        panel6.add(autoUpdateCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer4 = new Spacer();
+        panel6.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setIcon(new ImageIcon(getClass().getResource("/img/gui/warningOrange16.png")));
+        label1.setToolTipText(ResourceBundle.getBundle("messages/common/ClientSettingsWindow").getString("update"));
+        panel6.add(label1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
