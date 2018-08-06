@@ -28,6 +28,9 @@ public class ClientConstants {
     public static final boolean MAIN_WINDOW_DEFAULT_EXTENDED = false;
     public static final boolean BOOST_ROOT_UNITS_DEFAULT_LOADING = true;
 
+    public static final String AUTO_UPDATE_ENABLED = "application.update";
+    public static final boolean AUTO_UPDATE_DEFAULT_ENABLED = true;
+
 
     public static final String IMAGE_REMOVE_KEY = "remove";
 }

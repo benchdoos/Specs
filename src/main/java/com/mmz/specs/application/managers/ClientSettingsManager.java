@@ -175,4 +175,21 @@ public class ClientSettingsManager {
         CLIENT_SETTINGS.setProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING, Boolean.toString(boost));
         updateSettingsFile();
     }
+
+    public boolean isAutoUpdateEnabled() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.AUTO_UPDATE_ENABLED);
+            if (property != null) {
+                return Boolean.valueOf(property);
+            }
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.AUTO_UPDATE_DEFAULT_ENABLED;
+    }
+
+    public void setAutoUpdateEnabled(boolean enabled) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.AUTO_UPDATE_ENABLED, Boolean.toString(enabled));
+        updateSettingsFile();
+    }
 }

@@ -17,15 +17,13 @@ package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.ApplicationException;
 import com.mmz.specs.application.core.ApplicationArgumentsConstants;
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.service.ServerBackgroundService;
 import com.mmz.specs.application.core.updater.Updater;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.server.ServerConfigurationWindow;
 import com.mmz.specs.application.gui.server.ServerMainWindow;
-import com.mmz.specs.application.managers.ClientManager;
-import com.mmz.specs.application.managers.CommonSettingsManager;
-import com.mmz.specs.application.managers.ModeManager;
-import com.mmz.specs.application.managers.ServerSettingsManager;
+import com.mmz.specs.application.managers.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,11 +51,7 @@ public class CoreUtils {
                 ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
                 startClient();
             } else {
-                try {
-                    Updater.getInstance().startUpdate(CLIENT);
-                } catch (ApplicationException e) {
-                    startClient();
-                }
+                loadClient();
             }
         }
     }
@@ -107,11 +101,26 @@ public class CoreUtils {
         if (Updater.getInstance().isUpdateNotAvailable()) {
             startClient();
         } else {
+            loadClient();
+        }
+    }
+
+    private static void loadClient() {
+        if (ClientSettingsManager.getInstance().isAutoUpdateEnabled()) {
             try {
                 Updater.getInstance().startUpdate(CLIENT);
             } catch (ApplicationException e) {
                 startClient();
             }
+        } else {
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
+                    "Доступно новое обновление, но вы отключили авто-обновление\n" +
+                            "приложения, что крайне не рекомендуется!\n" +
+                            "Рекомендуется открыть настройки приложения и включить\n" +
+                            "авто-обновление приложения!\n",
+                    "Обновление приложения " + ApplicationConstants.APPLICATION_NAME,
+                    JOptionPane.WARNING_MESSAGE));
+            startClient();
         }
     }
 
