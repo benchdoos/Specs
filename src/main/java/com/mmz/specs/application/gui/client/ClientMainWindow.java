@@ -33,8 +33,6 @@ import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.connection.DaoConstants;
-import com.mmz.specs.dao.ConstantsDaoImpl;
-import com.mmz.specs.dao.NoticeDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.model.UsersEntity;
@@ -53,6 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import static com.mmz.specs.application.core.ApplicationConstants.TMP_IMAGE_FOLDER;
 
@@ -511,18 +510,30 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    private void initFtp() {
+    private synchronized void initFtp() {
         try {
             if (session != null) {
-                ftpUtils = FtpUtils.getInstance();
+                if (session.isOpen()) {
+                    ftpUtils = FtpUtils.getInstance();
 
-                String url = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_CONNECTION_URL_KEY).getValue();
-                String username = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_USERNAME_KEY).getValue();
-                String password = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_PASSWORD_KEY).getValue();
-                String postfix = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_LOCATION_POSTFIX_KEY).getValue();
-                ftpUtils.connect(url, username, password);
+                    final ConstantsService service = new ConstantsServiceImpl(session);
+                    final List<ConstantsEntity> constantsEntities = service.listConstants();
+                    Properties constants = new Properties();
+                    for (ConstantsEntity e : constantsEntities) {
+                        constants.put(e.getKey(), e.getValue());
+                    }
+                    log.debug("Found constants: {}", constantsEntities);
 
-                ftpUtils.setPostfix(postfix);
+                    String url = constants.getProperty(DaoConstants.BLOB_CONNECTION_URL_KEY);
+                    String username = constants.getProperty(DaoConstants.BLOB_ACCESS_USERNAME_KEY);
+                    String password = constants.getProperty(DaoConstants.BLOB_ACCESS_PASSWORD_KEY);
+                    String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
+
+                    if (ftpUtils != null) {
+                        ftpUtils.connect(url, username, password);
+                        ftpUtils.setPostfix(postfix);
+                    }
+                }
             }
         } catch (Exception e) {
             log.warn("Can not init ftp again", e);
@@ -895,7 +906,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onListNoticeInfo(boolean select) {
-        List<NoticeEntity> noticeEntities = new NoticeServiceImpl(new NoticeDaoImpl(session)).listNotices();
+        List<NoticeEntity> noticeEntities = new NoticeServiceImpl(session).listNotices();
         Collections.sort(noticeEntities);
         NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
