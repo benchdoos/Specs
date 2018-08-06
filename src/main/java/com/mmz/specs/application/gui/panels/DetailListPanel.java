@@ -457,6 +457,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                         searchThread = new Thread(() -> {
                             fillMainTreeFully();
                             updateMainTreeSelectors(null);
+                            updateDetailInfoPanelWithEmptyEntity();
                         });
                         searchThread.start();
                     } else {
@@ -467,6 +468,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                         searchThread = new Thread(() -> {
                             fillMainTreeFully();
                             updateMainTreeSelectors(null);
+                            updateDetailInfoPanelWithEmptyEntity();
                         });
                         searchThread.start();
                     }
