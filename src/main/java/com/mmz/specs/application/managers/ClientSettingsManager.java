@@ -74,7 +74,7 @@ public class ClientSettingsManager {
         updateSettingsFile();
     }
 
-    private void updateSettingsFile() throws IOException {
+    private synchronized void updateSettingsFile() throws IOException {
         log.info("Updating / saving settings file: " + connectionFileLocation);
         CLIENT_SETTINGS.storeToXML(new FileOutputStream(connectionFileLocation),
                 ApplicationConstants.INTERNAL_FULL_NAME + " client settings file", ApplicationConstants.DEFAULT_FILE_ENCODING);
