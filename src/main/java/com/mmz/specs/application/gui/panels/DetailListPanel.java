@@ -28,6 +28,7 @@ import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.gui.panels.service.MaterialPanel;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.*;
+import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.dao.DetailListDaoImpl;
 import com.mmz.specs.model.*;
@@ -191,7 +192,30 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 }
             }
         });
+
+        addCopyPopupMenu(numberLabel);
+
+        addCopyPopupMenu(titleLabel);
+
+        addCopyPopupMenu(workpieceWeightLabel);
+
+        addCopyPopupMenu(finishedWeightLabel);
     }
+
+    private void addCopyPopupMenu(JLabel titleLabel) {
+        titleLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    if (mainTree.getLastSelectedPathComponent() != null) {
+                        JPopupMenu menu = CommonWindowUtils.getCopyPopupMenu(titleLabel.getText());
+                        titleLabel.setComponentPopupMenu(menu);
+                    }
+                }
+            }
+        });
+    }
+
 
     private void updateDetailIconLabelListener() {
         detailIconLabel.addMouseListener(new MouseAdapter() {

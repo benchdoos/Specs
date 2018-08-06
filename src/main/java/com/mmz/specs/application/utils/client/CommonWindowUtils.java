@@ -75,24 +75,29 @@ public class CommonWindowUtils {
         String s = CoreUtils.getApplicationVersionString();
         if (s != null) {
             textField.setText(s);
-            textField.setComponentPopupMenu(getVersionTextFieldPopupMenu(textField));
+            textField.setComponentPopupMenu(getCopyPopupMenu(textField.getText()));
         } else {
             textField.setText(null);
             textField.setVisible(false);
         }
     }
 
-    private static JPopupMenu getVersionTextFieldPopupMenu(JTextField textField) {
+    public static JPopupMenu getCopyPopupMenu(String text) {
         JPopupMenu menu = new JPopupMenu();
+        JMenuItem copy = getCopyMenuItem(text);
+        menu.add(copy);
+        return menu;
+    }
+
+    private static JMenuItem getCopyMenuItem(String text) {
         JMenuItem copy = new JMenuItem("Копировать");
         copy.addActionListener(e -> {
-            StringSelection stringSelection = new StringSelection(textField.getText());
+            StringSelection stringSelection = new StringSelection(text);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, stringSelection);
         });
         copy.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(CommonWindowUtils.class.getResource("/img/gui/edit/copy.png"))));
-        menu.add(copy);
-        return menu;
+        return copy;
     }
 
     public static int getIndexByValue(JList list, Object value) {
