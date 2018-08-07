@@ -546,11 +546,11 @@ public class ClientMainWindow extends JFrame {
                 case UNKNOWN:
                     return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/gray12.png")));
                 case PARTLY_CONNECTED:
-                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/orange12.png")));
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/orange16.png")));
                 case CONNECTED:
-                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/green12.png")));
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/green16.png")));
                 case DISCONNECTED:
-                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/red12.png")));
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/red16.png")));
                 default:
                     return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/gray12.png")));
             }
@@ -1174,7 +1174,7 @@ public class ClientMainWindow extends JFrame {
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 4, 0, 0), -1, -1));
         panel3.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         statusLabel = new JLabel();
-        statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red12.png")));
+        statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red16.png")));
         panel4.add(statusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         applicationVersionTextField = new JTextField();
         applicationVersionTextField.setBackground(new Color(-855310));
