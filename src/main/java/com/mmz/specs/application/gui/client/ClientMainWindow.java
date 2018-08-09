@@ -252,9 +252,9 @@ public class ClientMainWindow extends JFrame {
         boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
         boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
         boolean isSessionOnline = ClientBackgroundService.getInstance().isDBAvailable();
-        String serverInfo = isServerOnline ? "Сервер подключён" : "Сервер отключён";
-        String ftpInfo = isFtpOnline ? "FTP подключён" : "FTP отключён";
-        String sessionInfo = isSessionOnline ? "БД подключена" : "БД отключена";
+        String serverInfo = isServerOnline ? "Сервер онлайн" : "Сервер оффлайн";
+        String ftpInfo = isFtpOnline ? "FTP онлайн" : "FTP оффлайн";
+        String sessionInfo = isSessionOnline ? "БД онлайн" : "БД оффлайн";
         statusLabel.setToolTipText(serverInfo + " | " + ftpInfo + " | " + sessionInfo);
 
         updateStatusLabelIcon(isServerOnline, isFtpOnline, isSessionOnline);
