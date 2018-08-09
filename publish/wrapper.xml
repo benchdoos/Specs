@@ -30,12 +30,12 @@
     <timeoutErr>true</timeoutErr>
   </splash>
   <versionInfo>
-    <fileVersion>0.3.2.143</fileVersion>
-    <txtFileVersion>0.3.2.143</txtFileVersion>
+    <fileVersion>0.3.3.147</fileVersion>
+    <txtFileVersion>0.3.3.147</txtFileVersion>
     <fileDescription>Спецификации</fileDescription>
     <copyright>Евгений Зражевский</copyright>
-    <productVersion>0.3.2.143</productVersion>
-    <txtProductVersion>0.3.2.143</txtProductVersion>
+    <productVersion>0.3.3.147</productVersion>
+    <txtProductVersion>0.3.3.147</txtProductVersion>
     <productName>Specs</productName>
     <companyName>ООО &quot;Майкопский машиностроительный завод&quot;</companyName>
     <internalName>com.mmz.specs</internalName>

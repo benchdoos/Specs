@@ -37,6 +37,11 @@ public class ClientSettingsManager {
 
     private ClientSettingsManager() {
         log.info("Loading settings...");
+        try {
+            loadSettingsFile();
+        } catch (IOException e) {
+            log.warn("Could not load settings", e);
+        }
     }
 
     public static ClientSettingsManager getInstance() {
@@ -180,7 +185,9 @@ public class ClientSettingsManager {
         try {
             String property = CLIENT_SETTINGS.getProperty(ClientConstants.AUTO_UPDATE_ENABLED);
             if (property != null) {
-                return Boolean.valueOf(property);
+                final Boolean b = Boolean.valueOf(property);
+                log.debug("Auto-update enabled: {}", b);
+                return b;
             }
         } catch (Exception ignore) {
             /*NOP*/

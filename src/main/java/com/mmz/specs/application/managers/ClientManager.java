@@ -29,11 +29,13 @@ public class ClientManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static volatile ClientManager instance;
 
+    private ClientMainWindow clientMainWindow;
+
     @SuppressWarnings("MethodRefCanBeReplacedWithLambda")
     private ClientManager() {
         loadClientSettings();
 
-        ClientMainWindow clientMainWindow = new ClientMainWindow();
+        clientMainWindow = new ClientMainWindow();
         if (ClientSettingsManager.getInstance().getClientMainWindowLocation().equals(new Point(-1, -1))) {
             clientMainWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientMainWindow));
         } else {
@@ -53,6 +55,10 @@ public class ClientManager {
             }
         }
         return localInstance;
+    }
+
+    public ClientMainWindow getClientMainWindow() {
+        return clientMainWindow;
     }
 
     private void loadClientSettings() {

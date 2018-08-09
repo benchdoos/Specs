@@ -46,12 +46,14 @@ public class CoreUtils {
             log.debug("Got arguments: " + Arrays.toString(args));
             switchMode(args, firstArgument);
         } else {
-            if (Updater.getInstance().isUpdateNotAvailable()) {
+            final boolean updateAvailable = Updater.getInstance().isUpdateAvailable();
+            log.info("Update available: {}", updateAvailable);
+            if (updateAvailable) {
+                loadClientWithUpdate();
+            } else {
                 log.debug("Found no arguments. Starting default mode: " + ModeManager.DEFAULT_MODE);
                 ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
                 startClient();
-            } else {
-                loadClientWithUpdate();
             }
         }
     }
@@ -63,14 +65,16 @@ public class CoreUtils {
                 break;
             }
             case SERVER: {
-                if (Updater.getInstance().isUpdateNotAvailable()) {
-                    startServer();
-                } else {
+                final boolean updateAvailable = Updater.getInstance().isUpdateAvailable();
+                log.info("Update available: {}", updateAvailable);
+                if (updateAvailable) {
                     try {
-                        Updater.getInstance().startUpdate(SERVER);
+                        Updater.getInstance().startUpdate();
                     } catch (ApplicationException e) {
                         startServer();
                     }
+                } else {
+                    startServer();
                 }
                 break;
             }
@@ -98,29 +102,33 @@ public class CoreUtils {
     }
 
     private static void initClient() {
-        if (Updater.getInstance().isUpdateNotAvailable()) {
-            startClient();
-        } else {
+        final boolean updateAvailable = Updater.getInstance().isUpdateAvailable();
+        log.info("Update available: {}", updateAvailable);
+        if (updateAvailable) {
             loadClientWithUpdate();
+        } else {
+            startClient();
         }
     }
 
     private static void loadClientWithUpdate() {
-        if (ClientSettingsManager.getInstance().isAutoUpdateEnabled()) {
+        final boolean autoUpdateEnabled = ClientSettingsManager.getInstance().isAutoUpdateEnabled();
+        if (autoUpdateEnabled) {
             try {
-                Updater.getInstance().startUpdate(CLIENT);
+                Updater.getInstance().startUpdate();
             } catch (ApplicationException e) {
                 startClient();
             }
         } else {
-            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
+            ClientManager clientManager = ClientManager.getInstance();
+            final ClientMainWindow clientMainWindow = clientManager.getClientMainWindow();
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(clientMainWindow,
                     "Доступно новое обновление, но вы отключили авто-обновление\n" +
                             "приложения, что крайне не рекомендуется!\n" +
                             "Рекомендуется открыть настройки приложения и включить\n" +
                             "авто-обновление приложения!\n",
                     "Обновление приложения " + ApplicationConstants.APPLICATION_NAME,
                     JOptionPane.WARNING_MESSAGE));
-            startClient();
         }
     }
 

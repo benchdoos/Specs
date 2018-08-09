@@ -42,12 +42,11 @@ import java.util.Arrays;
 import java.util.Properties;
 
 public class Updater {
-    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-
-    private static final String GITHUB_URL = "https://api.github.com/repos/benchdoos/Specs/releases/latest";
-    private static final String DEFAULT_ENCODING = "UTF-8";
     public static final File INSTALLER_FILE = new File(ApplicationConstants.APPLICATION_SETTINGS_FOLDER_LOCATION
             + File.separator + ApplicationConstants.APPLICATION_FINAL_NAME);
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static final String GITHUB_URL = "https://api.github.com/repos/benchdoos/Specs/releases/latest";
+    private static final String DEFAULT_ENCODING = "UTF-8";
     private static volatile Updater instance;
     private HttpsURLConnection connection = null;
     private ApplicationVersion serverVersion;
@@ -75,20 +74,20 @@ public class Updater {
         return localInstance;
     }
 
-    public boolean isUpdateNotAvailable() {
+    public boolean isUpdateAvailable() {
         try {
             getServerApplicationVersion();
             if (serverVersion != null) {
-                return !compareVersionsAndUpdate();
+                return compareVersionsAndUpdate();
             }
         } catch (Throwable t) {
             log.warn("Could not check update", t);
-            return true;
+            return false;
         }
-        return true;
+        return false;
     }
 
-    public void startUpdate(String argument) throws ApplicationException {
+    public void startUpdate() throws ApplicationException {
         UpdaterWindow window = new UpdaterWindow(serverVersion);
         SwingUtilities.invokeLater(() -> {
             log.info("Showing message to user about update");
@@ -203,14 +202,15 @@ public class Updater {
     }
 
     private boolean compareVersionsAndUpdate() {
-
         String currentVersion = getCurrentVersion();
-        log.debug("Current version: {}, server version: {}", currentVersion, serverVersion.getVersion());
+        log.debug("Comparing current application version: {} and server version: {}", currentVersion, serverVersion.getVersion());
         if (Internal.versionCompare(currentVersion, serverVersion.getVersion()) < 0) {
             log.info("Got new version for application: {}, current is: {}.", serverVersion.getVersion(), currentVersion);
             return true;
+        } else {
+            log.info("Current application is up-to-date: {} (server: {})", currentVersion, serverVersion.getVersion());
+            return false;
         }
-        return false;
     }
 
     private String getCurrentVersion() {
