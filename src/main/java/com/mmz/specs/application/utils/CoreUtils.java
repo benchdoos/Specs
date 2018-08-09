@@ -51,7 +51,7 @@ public class CoreUtils {
                 ModeManager.setCurrentMode(ModeManager.DEFAULT_MODE);
                 startClient();
             } else {
-                loadClient();
+                loadClientWithUpdate();
             }
         }
     }
@@ -101,11 +101,11 @@ public class CoreUtils {
         if (Updater.getInstance().isUpdateNotAvailable()) {
             startClient();
         } else {
-            loadClient();
+            loadClientWithUpdate();
         }
     }
 
-    private static void loadClient() {
+    private static void loadClientWithUpdate() {
         if (ClientSettingsManager.getInstance().isAutoUpdateEnabled()) {
             try {
                 Updater.getInstance().startUpdate(CLIENT);
