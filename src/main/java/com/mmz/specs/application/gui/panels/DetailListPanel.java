@@ -539,7 +539,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
         DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (selectedEntity != null) {
-            DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            DetailListService detailListService = new DetailListServiceImpl(session);
             List<DetailListEntity> list;
 
             if (detailListService.getDetailListByParent(selectedEntity).size() > 0) {

@@ -33,8 +33,6 @@ import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.connection.DaoConstants;
-import com.mmz.specs.dao.ConstantsDaoImpl;
-import com.mmz.specs.dao.NoticeDaoImpl;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.NoticeEntity;
 import com.mmz.specs.model.UsersEntity;
@@ -53,6 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import static com.mmz.specs.application.core.ApplicationConstants.TMP_IMAGE_FOLDER;
 
@@ -511,18 +510,30 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    private void initFtp() {
+    private synchronized void initFtp() {
         try {
             if (session != null) {
-                ftpUtils = FtpUtils.getInstance();
+                if (session.isOpen()) {
+                    ftpUtils = FtpUtils.getInstance();
 
-                String url = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_CONNECTION_URL_KEY).getValue();
-                String username = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_USERNAME_KEY).getValue();
-                String password = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_ACCESS_PASSWORD_KEY).getValue();
-                String postfix = new ConstantsServiceImpl(new ConstantsDaoImpl(session)).getConstantByKey(DaoConstants.BLOB_LOCATION_POSTFIX_KEY).getValue();
-                ftpUtils.connect(url, username, password);
+                    final ConstantsService service = new ConstantsServiceImpl(session);
+                    final List<ConstantsEntity> constantsEntities = service.listConstants();
+                    Properties constants = new Properties();
+                    for (ConstantsEntity e : constantsEntities) {
+                        constants.put(e.getKey(), e.getValue());
+                    }
+                    log.debug("Found constants: {}", constantsEntities);
 
-                ftpUtils.setPostfix(postfix);
+                    String url = constants.getProperty(DaoConstants.BLOB_CONNECTION_URL_KEY);
+                    String username = constants.getProperty(DaoConstants.BLOB_ACCESS_USERNAME_KEY);
+                    String password = constants.getProperty(DaoConstants.BLOB_ACCESS_PASSWORD_KEY);
+                    String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
+
+                    if (ftpUtils != null) {
+                        ftpUtils.connect(url, username, password);
+                        ftpUtils.setPostfix(postfix);
+                    }
+                }
             }
         } catch (Exception e) {
             log.warn("Can not init ftp again", e);
@@ -535,11 +546,11 @@ public class ClientMainWindow extends JFrame {
                 case UNKNOWN:
                     return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/gray12.png")));
                 case PARTLY_CONNECTED:
-                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/orange12.png")));
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/orange16.png")));
                 case CONNECTED:
-                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/green12.png")));
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/green16.png")));
                 case DISCONNECTED:
-                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/red12.png")));
+                    return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/red16.png")));
                 default:
                     return new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/status/gray12.png")));
             }
@@ -895,7 +906,7 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onListNoticeInfo(boolean select) {
-        List<NoticeEntity> noticeEntities = new NoticeServiceImpl(new NoticeDaoImpl(session)).listNotices();
+        List<NoticeEntity> noticeEntities = new NoticeServiceImpl(session).listNotices();
         Collections.sort(noticeEntities);
         NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
@@ -1163,7 +1174,7 @@ public class ClientMainWindow extends JFrame {
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 4, 0, 0), -1, -1));
         panel3.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         statusLabel = new JLabel();
-        statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red12.png")));
+        statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red16.png")));
         panel4.add(statusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         applicationVersionTextField = new JTextField();
         applicationVersionTextField.setBackground(new Color(-855310));

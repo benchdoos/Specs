@@ -18,6 +18,7 @@ package com.mmz.specs.application.gui.common;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.updater.ApplicationVersion;
 import com.mmz.specs.application.core.updater.Updater;
 import com.mmz.specs.application.utils.CommonUtils;
@@ -46,7 +47,7 @@ public class UpdaterWindow extends JFrame {
 
     public UpdaterWindow(ApplicationVersion serverVersion) {
         setContentPane(contentPane);
-        setTitle("Обновление");
+        setTitle(ApplicationConstants.APPLICATION_NAME + " — Обновление приложения");
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/update.png")));
 
 

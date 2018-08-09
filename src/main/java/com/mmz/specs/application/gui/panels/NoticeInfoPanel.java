@@ -67,6 +67,7 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         setLayout(new GridLayout());
         add(contentPane);
 
+        initNoticeList();
         updateNoticeList();
         initDetailEffectedList();
 
@@ -94,6 +95,14 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
         }
         noticeList.setModel(model);
 
+
+        if (noticeList.getModel().getSize() >= 0) {
+            noticeList.setSelectedIndex(0);
+        }
+
+    }
+
+    private void initNoticeList() {
         noticeList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -114,11 +123,6 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
                 updateNoticeInfo(null);
             }
         });
-
-        if (noticeList.getModel().getSize() >= 0) {
-            noticeList.setSelectedIndex(0);
-        }
-
     }
 
     private void initDetailEffectedList() {
