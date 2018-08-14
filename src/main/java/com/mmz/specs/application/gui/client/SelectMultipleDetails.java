@@ -324,6 +324,7 @@ public class SelectMultipleDetails extends JDialog {
         final DefaultListModel defaultListModel1 = new DefaultListModel();
         mainList.setModel(defaultListModel1);
         scrollPane.setViewportView(mainList);
+        searchTextField.setToolTipText("Пролистывает список деталей до искомого текста");
         panel4.add(searchTextField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         importButton = new JButton();
         importButton.setBorderPainted(false);
@@ -331,6 +332,7 @@ public class SelectMultipleDetails extends JDialog {
         importButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/import16.png")));
         importButton.setMargin(new Insets(2, 2, 2, 2));
         importButton.setText("");
+        importButton.setToolTipText("Импортирует номера деталей с буфера обмена");
         panel4.add(importButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         panel3.add(spacer2, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
