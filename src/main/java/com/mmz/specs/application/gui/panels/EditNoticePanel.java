@@ -792,7 +792,9 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                 System.out.println("Got string: " + string);
                 DetailEntity detailEntity = new StringUtils(session).getDetailEntityFromString(string);
                 System.out.println("Detail from clipboard: " + detailEntity);
-                addDetailToTree(detailEntity);
+                if (detailEntity != null) {
+                    addDetailToTree(detailEntity);
+                }
             } catch (UnsupportedFlavorException | IOException ignore) {
             }
         }
