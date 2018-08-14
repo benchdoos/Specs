@@ -19,23 +19,32 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.utils.CommonUtils;
+import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.service.DetailService;
 import com.mmz.specs.service.DetailServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static com.mmz.specs.application.core.ApplicationConstants.NO_DATA_STRING;
 
 public class SelectMultipleDetails extends JDialog {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private final Session session;
     private JPanel contentPane;
     private JButton buttonOK;
@@ -44,6 +53,7 @@ public class SelectMultipleDetails extends JDialog {
     private JLabel unitLabel;
     private JLabel weightLabel;
     private JLabel activeLabel;
+    private JScrollPane scrollPane;
 
     private ArrayList<DetailEntity> selectedDetailEntities;
 
@@ -61,7 +71,7 @@ public class SelectMultipleDetails extends JDialog {
     }
 
     private void fillList() {
-        DefaultComboBoxModel<DetailEntity> model = new DefaultComboBoxModel<>();
+        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
 
         DetailService service = new DetailServiceImpl(session);
         ArrayList<DetailEntity> list = (ArrayList<DetailEntity>) service.listDetails();
@@ -91,8 +101,10 @@ public class SelectMultipleDetails extends JDialog {
             JList list = (JList) e.getSource();
             int selected = list.getSelectedIndex();
 
-            final DetailEntity current = mainList.getModel().getElementAt(selected);
-            fillDetailInfo(current);
+            if (selected > 0 && selected < list.getModel().getSize()) {
+                final DetailEntity current = mainList.getModel().getElementAt(selected);
+                fillDetailInfo(current);
+            }
 
         });
     }
@@ -129,6 +141,83 @@ public class SelectMultipleDetails extends JDialog {
 
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onPaste(), KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void onPaste() {
+        try {
+            String data = (String) Toolkit.getDefaultToolkit()
+                    .getSystemClipboard().getData(DataFlavor.stringFlavor);
+            if (data != null && !data.isEmpty()) {
+                ArrayList<String> detailCodes = getDetailCodesFromString(data);
+                ArrayList<String> broken = new ArrayList<>();
+                ArrayList<Integer> indexes = new ArrayList<>();
+                for (String string : detailCodes) {
+                    DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) mainList.getModel();
+                    boolean isOk = addIndex(indexes, string, model);
+                    if (!broken.contains(string) && !isOk) {
+                        broken.add(string);
+                    }
+                }
+
+                selectIndexes(indexes);
+
+                if (broken.size() > 0) {
+                    showBrokenCodesWarning(broken);
+                }
+            }
+        } catch (UnsupportedFlavorException | IOException e) {
+            log.warn("Could not get details from clipboard", e);
+        }
+    }
+
+    private void selectIndexes(ArrayList<Integer> indexes) {
+        Integer[] integers = indexes.toArray(new Integer[0]);
+        int[] realIndexes = Arrays.stream(integers).mapToInt(Integer::intValue).toArray();
+
+        mainList.setSelectedIndices(realIndexes);
+        if (realIndexes.length > 1) {
+            mainList.ensureIndexIsVisible(realIndexes[realIndexes.length - 1]);
+        }
+    }
+
+    private boolean addIndex(ArrayList<Integer> indexes, String string, DefaultListModel<DetailEntity> model) {
+        boolean isOk = false;
+        for (int i = 0; i < model.size(); i++) {
+            final DetailEntity entity = model.getElementAt(i);
+
+            final String code = entity.getCode();
+
+            if (code.equalsIgnoreCase(string)) {
+                indexes.add(i);
+                isOk = true;
+            }
+        }
+        return isOk;
+    }
+
+    private void showBrokenCodesWarning(ArrayList<String> broken) {
+        StringBuilder builder = new StringBuilder();
+        for (String s : broken) {
+            builder.append(s);
+            builder.append("\n");
+        }
+        JOptionPane.showMessageDialog(this, "Не удалось найти обозначения:\n" +
+                builder.toString(), "Ошибка во время выбора нескольких деталей", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private ArrayList<String> getDetailCodesFromString(String data) {
+        ArrayList<String> result = new ArrayList<>();
+        log.debug("Got data from clipboard: {}", data);
+        if (data != null) {
+            final String[] split = data.split("\n");
+            for (String code : split) {
+                code = code.replace(" ", "");
+                result.add(code);
+            }
+        }
+        return result;
     }
 
     private void initListeners() {
@@ -238,12 +327,12 @@ public class SelectMultipleDetails extends JDialog {
         final JPanel panel6 = new JPanel();
         panel6.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(panel6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(200, 300), new Dimension(200, 300), null, 0, false));
-        final JScrollPane scrollPane1 = new JScrollPane();
-        panel6.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane = new JScrollPane();
+        panel6.add(scrollPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         mainList = new JList();
         final DefaultListModel defaultListModel1 = new DefaultListModel();
         mainList.setModel(defaultListModel1);
-        scrollPane1.setViewportView(mainList);
+        scrollPane.setViewportView(mainList);
         final Spacer spacer3 = new Spacer();
         panel3.add(spacer3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
