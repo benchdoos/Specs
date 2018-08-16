@@ -214,6 +214,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
     }
 
     private void initEditImageButton() {
+        Component component = this;
         final DropTarget dropTarget = new DropTarget() {
             Timer timer = null;
 
@@ -235,7 +236,15 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             if (file.exists() && extension) {
                                 final DetailEntity selectedDetailEntityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
                                 if (selectedDetailEntityFromTree != null) {
-                                    onSuccess(file, selectedDetailEntityFromTree);
+                                    if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
+                                        onSuccess(file, selectedDetailEntityFromTree);
+                                    } else {
+                                        SwingUtilities.invokeLater(() ->
+                                                JOptionPane.showMessageDialog(component,
+                                                        "Размер файла изображения больше 5 мегабайт!",
+                                                        "Ошибка", JOptionPane.WARNING_MESSAGE));
+                                        onFail();
+                                    }
                                 } else {
                                     onFail();
                                 }
@@ -1176,11 +1185,15 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             if (!entity.getImagePath().equalsIgnoreCase(ClientConstants.IMAGE_REMOVE_KEY)) {
                                 File file = new File(entity.getImagePath());
                                 if (file.exists()) {
-                                    try {
-                                        final FtpUtils ftpUtils = FtpUtils.getInstance();
-                                        ftpUtils.uploadImage(entity.getId(), file);
-                                    } catch (Exception e) {
-                                        log.warn("Could not upload image for entity: {}", entity, e);
+                                    if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
+                                        try {
+                                            final FtpUtils ftpUtils = FtpUtils.getInstance();
+                                            ftpUtils.uploadImage(entity.getId(), file);
+                                        } catch (Exception e) {
+                                            log.warn("Could not upload image for entity: {}", entity, e);
+                                        }
+                                    } else {
+                                        log.warn("Image file for entity: {} ({}) size is: {} and this is more then 5MB ({})", entity, file, file.length(), FtpUtils.MAX_IMAGE_FILE_SIZE);
                                     }
                                 } else {
                                     log.warn("Could not find file for entity: {}, file: {}", entity, file);
