@@ -4,7 +4,6 @@ target/
 ### CURRENT PROJECT ###
 db
 publish/Installer
-publish/Specs
 *.ini
 *.lnk
 mvnw*
