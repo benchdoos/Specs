@@ -196,8 +196,14 @@ public class EditImageWindow extends JDialog {
             File file = chooser.getSelectedFile();
             if (file.exists()) {
                 if (file.isFile()) {
-                    log.debug("User dropped a file: {}", file);
-                    detailEntity.setImagePath(file.getAbsolutePath());
+                    if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
+                        log.debug("User dropped a file: {}", file);
+                        detailEntity.setImagePath(file.getAbsolutePath());
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Размер файла изображения больше 5 мегабайт!",
+                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                    }
                 }
             }
         }
@@ -217,7 +223,7 @@ public class EditImageWindow extends JDialog {
     }
 
     private void initDragAndDrop() {
-        Component c = this;
+        Component component = this;
         final DropTarget dropTarget = new DropTarget() {
             @Override
             public synchronized void drop(DropTargetDropEvent evt) {
@@ -230,9 +236,15 @@ public class EditImageWindow extends JDialog {
                         if (list.get(0) instanceof File) {
                             File file = (File) list.get(0);
                             if (file.exists() && FtpUtils.getInstance().isImage(file)) {
-                                detailEntity.setImagePath(file.getAbsolutePath());
+                                if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
+                                    detailEntity.setImagePath(file.getAbsolutePath());
+                                } else {
+                                    JOptionPane.showMessageDialog(component,
+                                            "Размер файла изображения больше 5 мегабайт!",
+                                            "Ошибка", JOptionPane.WARNING_MESSAGE);
+                                }
                             } else {
-                                JOptionPane.showMessageDialog(c, "Возможна загрузка только изображений форматов:\n" +
+                                JOptionPane.showMessageDialog(component, "Возможна загрузка только изображений форматов:\n" +
                                         Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS), "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
                             }
                         }
