@@ -385,7 +385,7 @@ public class ClientMainWindow extends JFrame {
             }
             if (ClientBackgroundService.getInstance().isConnected()) {
                 session = ClientBackgroundService.getInstance().getSession();
-                initFtp();
+//                initFtp();
                 updateMessage("/img/gui/animated/connection_completed.gif", "Соединение установлено");
                 blockMessage();
             }
@@ -449,12 +449,6 @@ public class ClientMainWindow extends JFrame {
         onDisconnectFromFtp();
 
         SessionUtils.closeSessionSilently(session);
-    }
-
-    public void notifyConnectionError() {
-        JOptionPane.showMessageDialog(this,
-                "Не установлена связь с сервером, ошибка. Звоните фиксикам.",
-                "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
     }
 
     public void addTab(String title, Icon icon, JPanel panel, boolean select) {
