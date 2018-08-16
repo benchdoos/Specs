@@ -107,7 +107,12 @@ public class FtpUtils {
     }
 
     public boolean isConnected() {
-        return ftpClient.isConnected();
+        try {
+            boolean answer = ftpClient.sendNoOp();
+            return ftpClient.isConnected() && ftpClient.isAvailable() && answer;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public void disconnect() throws IOException {

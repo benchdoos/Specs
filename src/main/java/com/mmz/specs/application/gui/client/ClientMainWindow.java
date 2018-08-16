@@ -205,50 +205,6 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void updateStatusLabel() {
-        /*if (ClientBackgroundService.getInstance().isConnected()) {
-            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
-            statusLabel.setToolTipText("Сервер подключен");
-
-            if (session == null) {
-                //todo
-            } else {
-                if (session.isConnected()) {
-                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.CONNECTED));
-                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД подключена");
-                } else {
-                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.PARTLY_CONNECTED));
-                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД не подключена");
-                }
-            }
-
-            setButtonsEnabled(true);
-            unlockTabsAndUIs();
-        } else {
-            statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-            statusLabel.setToolTipText("Сервер отключен");
-
-            if (session != null) {
-                if (session.isConnected()) {
-                    try {
-                        session.disconnect();
-                        session = null;
-                    } catch (Exception e) {
-                        log.warn("Could not disconnect", e);
-                    }
-
-                    statusLabel.setIcon(getResizedStatusImage(ConnectionStatus.DISCONNECTED));
-                    statusLabel.setToolTipText(statusLabel.getToolTipText() + " | БД отключена");
-                }
-            }
-
-            setButtonsEnabled(false);
-            unlockTabsAndUIs();
-            unlockAdminTools(false);
-            if (currentUser != null) {
-                onLogin();
-            }
-        }*/
-
         boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
         boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
         boolean isSessionOnline = ClientBackgroundService.getInstance().isDBAvailable();
