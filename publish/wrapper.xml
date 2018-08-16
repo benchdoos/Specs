@@ -15,58 +15,58 @@
   -->
 
 <launch4jConfig>
-  <dontWrapJar>false</dontWrapJar>
-  <headerType>gui</headerType>
-  <jar>F:\Developer\JAVA\Specs\target\Specs.jar</jar>
-  <outfile>F:\Developer\JAVA\Specs\publish\Specs\Specs.exe</outfile>
-  <errTitle></errTitle>
-  <cmdLine></cmdLine>
-  <chdir>.</chdir>
-  <priority>normal</priority>
-  <downloadUrl>http://java.com/download</downloadUrl>
-  <supportUrl></supportUrl>
-  <stayAlive>false</stayAlive>
-  <restartOnCrash>false</restartOnCrash>
-  <manifest></manifest>
-  <icon>F:\Developer\JAVA\Specs\publish\Specs\client.ico</icon>
-  <jre>
-    <path></path>
-    <bundledJre64Bit>false</bundledJre64Bit>
-    <bundledJreAsFallback>false</bundledJreAsFallback>
-    <minVersion>1.8</minVersion>
-    <maxVersion>1.9</maxVersion>
-    <jdkPreference>preferJre</jdkPreference>
-    <runtimeBits>32/64</runtimeBits>
-  </jre>
-  <splash>
-    <file>F:\Developer\JAVA\Specs\publish\Specs\screen.bmp</file>
-    <waitForWindow>true</waitForWindow>
-    <timeout>60</timeout>
-    <timeoutErr>true</timeoutErr>
-  </splash>
-  <versionInfo>
-      <fileVersion>0.3.3.151</fileVersion>
-      <txtFileVersion>0.3.3.151</txtFileVersion>
-    <fileDescription>Спецификации</fileDescription>
-    <copyright>Евгений Зражевский</copyright>
-      <productVersion>0.3.3.151</productVersion>
-      <txtProductVersion>0.3.3.151</txtProductVersion>
-    <productName>Specs</productName>
-    <companyName>ООО &quot;Майкопский машиностроительный завод&quot;</companyName>
-    <internalName>com.mmz.specs</internalName>
-    <originalFilename>Specs.exe</originalFilename>
-    <trademarks></trademarks>
-    <language>RUSSIAN</language>
-  </versionInfo>
-  <messages>
-    <startupErr>Произошла ошибка во время запуска приложения.</startupErr>
-    <bundledJreErr>Это приложение запускается при наличии Java Runtime Environment, но оно отсутствует или
+    <dontWrapJar>false</dontWrapJar>
+    <headerType>gui</headerType>
+    <jar>F:\Developer\JAVA\Specs\target\Specs.jar</jar>
+    <outfile>F:\Developer\JAVA\Specs\publish\Specs\Specs.exe</outfile>
+    <errTitle></errTitle>
+    <cmdLine></cmdLine>
+    <chdir>.</chdir>
+    <priority>normal</priority>
+    <downloadUrl>http://java.com/download</downloadUrl>
+    <supportUrl></supportUrl>
+    <stayAlive>false</stayAlive>
+    <restartOnCrash>false</restartOnCrash>
+    <manifest></manifest>
+    <icon>F:\Developer\JAVA\Specs\publish\Specs\client.ico</icon>
+    <jre>
+        <path></path>
+        <bundledJre64Bit>false</bundledJre64Bit>
+        <bundledJreAsFallback>false</bundledJreAsFallback>
+        <minVersion>1.8</minVersion>
+        <maxVersion>1.9</maxVersion>
+        <jdkPreference>preferJre</jdkPreference>
+        <runtimeBits>32/64</runtimeBits>
+    </jre>
+    <splash>
+        <file>F:\Developer\JAVA\Specs\publish\Specs\screen.bmp</file>
+        <waitForWindow>true</waitForWindow>
+        <timeout>60</timeout>
+        <timeoutErr>true</timeoutErr>
+    </splash>
+    <versionInfo>
+        <fileVersion>0.3.3.153</fileVersion>
+        <txtFileVersion>0.3.3.153</txtFileVersion>
+        <fileDescription>Спецификации</fileDescription>
+        <copyright>Евгений Зражевский</copyright>
+        <productVersion>0.3.3.153</productVersion>
+        <txtProductVersion>0.3.3.153</txtProductVersion>
+        <productName>Specs</productName>
+        <companyName>ООО &quot;Майкопский машиностроительный завод&quot;</companyName>
+        <internalName>com.mmz.specs</internalName>
+        <originalFilename>Specs.exe</originalFilename>
+        <trademarks></trademarks>
+        <language>RUSSIAN</language>
+    </versionInfo>
+    <messages>
+        <startupErr>Произошла ошибка во время запуска приложения.</startupErr>
+        <bundledJreErr>Это приложение запускается при наличии Java Runtime Environment, но оно отсутствует или
             повреждено.
         </bundledJreErr>
-    <jreVersionErr>Этому приложению необходимо Java Runtime Environment</jreVersionErr>
-    <launcherErr>Реестр ссылается на несуществующую установку Java Runtime Environment или среда выполнения
+        <jreVersionErr>Этому приложению необходимо Java Runtime Environment</jreVersionErr>
+        <launcherErr>Реестр ссылается на несуществующую установку Java Runtime Environment или среда выполнения
             повреждена.
         </launcherErr>
-    <instanceAlreadyExistsMsg>Приложение уже запущено.</instanceAlreadyExistsMsg>
-  </messages>
+        <instanceAlreadyExistsMsg>Приложение уже запущено.</instanceAlreadyExistsMsg>
+    </messages>
 </launch4jConfig>
