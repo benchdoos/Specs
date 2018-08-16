@@ -64,6 +64,18 @@ public class LoginWindow extends JDialog {
         });
 
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        final KeyStroke CTRL_BACK_SPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_DOWN_MASK, false);
+
+        loginTextField.registerKeyboardAction(e -> clearField(loginTextField), CTRL_BACK_SPACE,
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        passwordField.registerKeyboardAction(e -> clearField(passwordField), CTRL_BACK_SPACE,
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+    }
+
+    private void clearField(JTextField textField) {
+        textField.setText("");
     }
 
     private void initGui() {
