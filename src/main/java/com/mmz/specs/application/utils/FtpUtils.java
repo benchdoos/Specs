@@ -34,9 +34,8 @@ public class FtpUtils {
     public static final int MAX_IMAGE_FILE_SIZE = 1024 * 1024 * 5; //5MB
 
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    private static volatile FtpUtils instance;
     private static final int FTP_PORT = 21;
-    private static int getImageCounter = 0;
+    private static volatile FtpUtils instance;
     private final FTPClient ftpClient = new FTPClient();
     private int counter = 0;
     private String postfix;
@@ -81,7 +80,6 @@ public class FtpUtils {
             int replyCode = ftpClient.getReplyCode();
             if (!FTPReply.isPositiveCompletion(replyCode)) {
                 log.warn("Operation failed. Server reply code: " + replyCode);
-                return;
             }
             boolean success = ftpClient.login(username, password);
             if (!success) {
@@ -120,39 +118,76 @@ public class FtpUtils {
         this.postfix = postfix;
     }
 
-    public BufferedImage getImage(int id) {
-        getImageCounter++;
-        log.info("Loading image for DetailEntity id: " + id);
+    public synchronized BufferedImage getImage(int id) {
+        final String path = postfix + id + FTP_IMAGE_FILE_EXTENSION;
 
-        if (getImageCounter <= 5) {
-            if (!ftpClient.isConnected()) return null;
-            try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        log.debug("Loading image for detail with id: {}, path should be: {}", id, path);
+        log.debug("FTP is connected: {}", ftpClient.isConnected());
 
-                final String s = postfix + id + FTP_IMAGE_FILE_EXTENSION;
-                log.debug("Loading image at path: " + connectionUrl + s);
-                ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
-                byte[] data = output.toByteArray();
-                ByteArrayInputStream input = new ByteArrayInputStream(data);
-                BufferedImage image = ImageIO.read(input);
+        if (!ftpClient.isConnected()) return null;
 
-                log.info("Got image for DetailEntity id: " + id + " " + image);
+        ByteArrayInputStream input = null;
 
-                input.close();
-                getImageCounter = 0;
-                return image;
-            } catch (IOException e) {
-                log.warn("Could not return image, trying to create connection again", e);
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            retrieveFile(id, output);
+            input = new ByteArrayInputStream(output.toByteArray());
+            BufferedImage image = ImageIO.read(input);
+
+            String imageInfo = getImageInfo(image);
+            log.info("Got image for detail with id: {} image: {}", id, imageInfo);
+
+            input.close();
+            return image;
+        } catch (IOException e) {
+            log.warn("Could not load image, checking connection", e);
+            final boolean connected = ftpClient.isConnected();
+            log.debug("FTP connected: {}", connected);
+            if (!connected) {
                 connect(connectionUrl, username, password);
-                return getImage(id);
             }
-        } else return null;
+
+        } finally {
+            try {
+                if (input != null) {
+                    input.close();
+                }
+            } catch (IOException e) {
+                log.warn("Could not close input stream", e);
+            }
+        }
+        log.warn("Could not load image for id: {}, on path: {}", id, path);
+        return null;
+    }
+
+    private void retrieveFile(int id, ByteArrayOutputStream output) throws IOException {
+        try {
+            ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
+        } catch (IOException e) {
+            ftpClient.disconnect();
+            createFtpConnection(connectionUrl, username, password);
+            ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
+        }
+    }
+
+    private String getImageInfo(BufferedImage image) {
+        if (image != null) {
+            return image.getWidth() + "x" + image.getHeight();
+        }
+        return null;
     }
 
     public void uploadImage(int id, File localFile) throws IOException {
         if (localFile == null) {
             throw new IllegalArgumentException("Uploading local file can not be null");
         }
-        final String path = localFile.getAbsolutePath().toLowerCase();
+        if (!localFile.exists()) {
+            throw new IllegalArgumentException("File does not exist! id: " + id + " path: " + localFile);
+        }
+
+        if (localFile.length() > MAX_IMAGE_FILE_SIZE) {
+            throw new IOException("File " + localFile + " size (" + localFile.length() + " bites)is bigger then maximum (" + MAX_IMAGE_FILE_SIZE + " bites)");
+        }
+
         if (!isImage(localFile)) {
             throw new IOException("Uploading image should be one of this extensions: " + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS) + " extension");
         }
@@ -165,12 +200,6 @@ public class FtpUtils {
 
 
         deleteImage(id);
-
-/*
-        try (FileInputStream fis = new FileInputStream(localFile)) {
-            ftpClient.storeFile(remoteFile, fis);
-        }
-*/
 
         try (InputStream inputStream = new FileInputStream(localFile);
              OutputStream outputStream = ftpClient.storeFileStream(remoteFile)) {
