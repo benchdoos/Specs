@@ -93,7 +93,7 @@ public class AboutApplicationWindow extends JDialog {
         label1.setText(" ООО \"Майкопский машиностроительный завод\"");
         panel1.add(label1, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        Font label2Font = this.$$$getFont$$$(null, Font.BOLD, 14, label2.getFont());
+        Font label2Font = this.$$$getFont$$$(null, Font.BOLD, 16, label2.getFont());
         if (label2Font != null) label2.setFont(label2Font);
         label2.setText("Спецификации");
         panel1.add(label2, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -105,7 +105,7 @@ public class AboutApplicationWindow extends JDialog {
         panel1.add(scrollBar, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         textArea = new JTextArea();
         textArea.setEditable(false);
-        Font textAreaFont = this.$$$getFont$$$("Segoe UI", -1, 14, textArea.getFont());
+        Font textAreaFont = UIManager.getFont("Label.font");
         if (textAreaFont != null) textArea.setFont(textAreaFont);
         textArea.setText("Разработка: Зражевский Евгений\nКурирование: Татаренко Александр\n© 2018");
         scrollBar.setViewportView(textArea);
