@@ -95,8 +95,28 @@ public class ClientSettingsManager {
     }
 
     public Dimension getClientMainWindowDimension() {
+        return getDimension(ClientConstants.MAIN_WINDOW_DIMENSION);
+    }
+
+    public void setClientMainWindowDimension(Dimension dimension) throws IOException {
+        String value = dimension.width + "," + dimension.height;
+        CLIENT_SETTINGS.setProperty(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, value);
+        updateSettingsFile();
+    }
+
+    public Dimension getImagePreviewWindowDimension() {
+        return getDimension(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION);
+    }
+
+    public void setImagePreviewWindowDimension(Dimension dimension) throws IOException {
+        String value = dimension.width + "," + dimension.height;
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_DIMENSION, value);
+        updateSettingsFile();
+    }
+
+    private Dimension getDimension(String imagePreviewWindowDimension) {
         try {
-            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_DIMENSION);
+            String property = CLIENT_SETTINGS.getProperty(imagePreviewWindowDimension);
             String[] strings = property.split(",");
             if (strings.length == 2) {
                 try {
@@ -111,12 +131,6 @@ public class ClientSettingsManager {
             /*NOP*/
         }
         return ClientConstants.MAIN_WINDOW_DEFAULT_DIMENSION;
-    }
-
-    public void setClientMainWindowDimension(Dimension dimension) throws IOException {
-        String value = dimension.width + "," + dimension.height;
-        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_DIMENSION, value);
-        updateSettingsFile();
     }
 
     public boolean isClientMainWindowExtended() {
@@ -135,8 +149,30 @@ public class ClientSettingsManager {
     }
 
     Point getClientMainWindowLocation() {
+        return getPoint(ClientConstants.MAIN_WINDOW_POSITION);
+    }
+
+    public void setClientMainWindowLocation(Point point) throws IOException {
+        String value = point.x + "," + point.y;
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_POSITION, value);
+        updateSettingsFile();
+    }
+
+    Point getImagePreviewWindowLocation() {
+        return getPoint(ClientConstants.IMAGE_PREVIEW_WINDOW_POSITION);
+    }
+
+    public void setImagePreviewWindowLocation(Point point) throws IOException {
+        if (point != null) {
+            String value = point.x + "," + point.y;
+            CLIENT_SETTINGS.setProperty(ClientConstants.IMAGE_PREVIEW_WINDOW_POSITION, value);
+            updateSettingsFile();
+        } else throw new IOException("Point can not be null");
+    }
+
+    private Point getPoint(String imagePreviewWindowPosition) {
         try {
-            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_POSITION);
+            String property = CLIENT_SETTINGS.getProperty(imagePreviewWindowPosition);
             String[] strings = property.split(",");
             if (strings.length == 2) {
                 try {
@@ -156,12 +192,6 @@ public class ClientSettingsManager {
             /*NOP*/
         }
         return new Point(-1, -1);
-    }
-
-    public void setClientMainWindowLocation(Point point) throws IOException {
-        String value = point.x + "," + point.y;
-        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_POSITION, value);
-        updateSettingsFile();
     }
 
     public boolean isBoostRootUnitsLoading() {
