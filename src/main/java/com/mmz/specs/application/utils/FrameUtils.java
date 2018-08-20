@@ -16,18 +16,22 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.managers.ClientSettingsManager;
 import hu.kazocsaba.imageviewer.ImageViewer;
-import hu.kazocsaba.imageviewer.ResizeStrategy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class FrameUtils {
-    public static final Dimension DEFAULT_DIMENSION = new Dimension(640, 480);
     private static final Timer timer = new Timer(60, null);
+    private final static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
 
     /**
      * Finds window on component given.
@@ -187,29 +191,32 @@ public class FrameUtils {
         final ImageViewer imageViewer = new ImageViewer(image);
         imageViewer.setPixelatedZoom(true);
 
-        final JDialog imageFrame = new JDialog();
+        JDialog imageFrame;
+        if (modal) {
+            imageFrame = new JDialog(parent);
+        } else {
+            imageFrame = new JDialog();
+        }
         imageFrame.setModal(modal);
         imageFrame.setTitle(title);
+
         imageFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(FrameUtils.class.getResource("/img/gui/picture64.png")));
         imageFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         imageFrame.add(imageViewer.getComponent());
 
-        imageFrame.setSize(FrameUtils.DEFAULT_DIMENSION);
         imageFrame.setMinimumSize(new Dimension(256, 256));
-        imageFrame.setLocation(FrameUtils.getFrameOnCenter(parent, imageFrame));
+        imageFrame.setSize(ClientSettingsManager.getInstance().getImagePreviewWindowDimension());
+        imageFrame.setLocation(ClientSettingsManager.getInstance().getImagePreviewWindowLocation());
 
-        imageFrame.addMouseWheelListener(new MouseAdapter() {
+        imageFrame.addWindowListener(new WindowAdapter() {
             @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {//FIXME zooming not working correctly
-                if (e.isControlDown()) {
-                    if (e.getWheelRotation() < 0) {
-                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
-                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() + 0.1);
-                    } else {
-                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
-                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() - 0.1);
-                    }
+            public void windowClosing(WindowEvent e) {
+                try {
+                    ClientSettingsManager.getInstance().setImagePreviewWindowDimension(imageFrame.getSize());
+                    ClientSettingsManager.getInstance().setImagePreviewWindowLocation(imageFrame.getLocation());
+                } catch (IOException e1) {
+                    log.warn("Could not save image preview location / dimension", e);
                 }
             }
         });

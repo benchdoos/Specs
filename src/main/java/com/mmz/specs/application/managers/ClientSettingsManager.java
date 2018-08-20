@@ -95,26 +95,26 @@ public class ClientSettingsManager {
     }
 
     public Dimension getClientMainWindowDimension() {
-        return getDimension(ClientConstants.MAIN_WINDOW_DIMENSION);
+        return getDimension(ClientConstants.MAIN_WINDOW_DIMENSION, ClientConstants.MAIN_WINDOW_DEFAULT_DIMENSION);
     }
 
     public void setClientMainWindowDimension(Dimension dimension) throws IOException {
-        String value = dimension.width + "," + dimension.height;
-        CLIENT_SETTINGS.setProperty(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, value);
-        updateSettingsFile();
-    }
-
-    public Dimension getImagePreviewWindowDimension() {
-        return getDimension(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION);
-    }
-
-    public void setImagePreviewWindowDimension(Dimension dimension) throws IOException {
         String value = dimension.width + "," + dimension.height;
         CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_DIMENSION, value);
         updateSettingsFile();
     }
 
-    private Dimension getDimension(String imagePreviewWindowDimension) {
+    public Dimension getImagePreviewWindowDimension() {
+        return getDimension(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, ClientConstants.IMAGE_PREVIEW_WINDOW_DEFAULT_DIMENSION);
+    }
+
+    public void setImagePreviewWindowDimension(Dimension dimension) throws IOException {
+        String value = dimension.width + "," + dimension.height;
+        CLIENT_SETTINGS.setProperty(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, value);
+        updateSettingsFile();
+    }
+
+    private Dimension getDimension(String imagePreviewWindowDimension, Dimension defaultDimension) {
         try {
             String property = CLIENT_SETTINGS.getProperty(imagePreviewWindowDimension);
             String[] strings = property.split(",");
@@ -130,7 +130,7 @@ public class ClientSettingsManager {
         } catch (Exception ignore) {
             /*NOP*/
         }
-        return ClientConstants.MAIN_WINDOW_DEFAULT_DIMENSION;
+        return defaultDimension;
     }
 
     public boolean isClientMainWindowExtended() {
@@ -158,7 +158,7 @@ public class ClientSettingsManager {
         updateSettingsFile();
     }
 
-    Point getImagePreviewWindowLocation() {
+    public Point getImagePreviewWindowLocation() {
         return getPoint(ClientConstants.IMAGE_PREVIEW_WINDOW_POSITION);
     }
 
