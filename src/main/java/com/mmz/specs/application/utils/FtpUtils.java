@@ -75,11 +75,12 @@ public class FtpUtils {
                     connectionUrl, username, password.length(), postfix);
         }
         try {
-            ftpClient.connect(connectionUrl, FTP_PORT);
-
-            int replyCode = ftpClient.getReplyCode();
-            if (!FTPReply.isPositiveCompletion(replyCode)) {
-                log.warn("Operation failed. Server reply code: " + replyCode);
+            if (!isConnected()) {
+                ftpClient.connect(connectionUrl, FTP_PORT);
+                int replyCode = ftpClient.getReplyCode();
+                if (!FTPReply.isPositiveCompletion(replyCode)) {
+                    log.warn("Operation failed. Server reply code: " + replyCode);
+                }
             }
             boolean success = ftpClient.login(username, password);
             if (!success) {
@@ -161,11 +162,17 @@ public class FtpUtils {
 
     private void retrieveFile(int id, ByteArrayOutputStream output) throws IOException {
         try {
-            ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
+            if (ftpClient != null) {
+                ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
+            }
         } catch (IOException e) {
-            ftpClient.disconnect();
+            if (ftpClient != null) {
+                ftpClient.disconnect();
+            }
             createFtpConnection(connectionUrl, username, password);
-            ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
+            if (ftpClient != null) {
+                ftpClient.retrieveFile(postfix + id + FTP_IMAGE_FILE_EXTENSION, output);
+            }
         }
     }
 
