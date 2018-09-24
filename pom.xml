@@ -21,7 +21,7 @@
 
     <groupId>com.mmz</groupId>
     <artifactId>Specs</artifactId>
-    <version>0.3.4</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
     <name>Specs</name>
