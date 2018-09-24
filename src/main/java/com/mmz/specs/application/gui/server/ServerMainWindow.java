@@ -22,6 +22,7 @@ import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.server.ServerConstants;
 import com.mmz.specs.application.core.server.ServerException;
 import com.mmz.specs.application.core.server.service.*;
+import com.mmz.specs.application.gui.common.ExportDataWindow;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.PasswordChangeWindow;
 import com.mmz.specs.application.gui.common.UserInfoWindow;
@@ -158,6 +159,7 @@ public class ServerMainWindow extends JFrame {
     private JButton unbindTransactionButton;
     private JLabel transactionActiveLabel;
     private JPanel adminConstantsPanel;
+    private JButton exportDataButton;
 
     public ServerMainWindow() {
         session = ServerDBConnectionPool.getInstance().getSession();
@@ -179,6 +181,8 @@ public class ServerMainWindow extends JFrame {
     private void initListeners() {
 
         powerServerButton.addActionListener(e -> onPowerServerButton());
+
+        exportDataButton.addActionListener(e -> onExportDataButton());
 
         unbindTransactionButton.addActionListener(e -> onUnbindTransactionButton());
 
@@ -232,6 +236,12 @@ public class ServerMainWindow extends JFrame {
         initUserInfoPanelListeners();
 
         initGraphicsPanelListeners();
+    }
+
+    private void onExportDataButton() {
+        ExportDataWindow exportDataWindow = new ExportDataWindow();
+        exportDataWindow.setLocation(FrameUtils.getFrameOnCenter(this, exportDataWindow));
+        exportDataWindow.setVisible(true);
     }
 
     private void onUnbindTransactionButton() {
@@ -1877,7 +1887,7 @@ public class ServerMainWindow extends JFrame {
         openServerGuideButton.setText("Сервер");
         panel16.add(openServerGuideButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel17 = new JPanel();
-        panel17.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel17.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel14.add(panel17, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         powerServerButton = new JButton();
         powerServerButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/power.png")));
@@ -1887,7 +1897,13 @@ public class ServerMainWindow extends JFrame {
         powerServerButton.setToolTipText("Выключить сервер (CTRL+Q)");
         panel17.add(powerServerButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer12 = new Spacer();
-        panel17.add(spacer12, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel17.add(spacer12, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        exportDataButton = new JButton();
+        exportDataButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/menu/export.png")));
+        exportDataButton.setText("Экспорт данных");
+        exportDataButton.setMnemonic('Э');
+        exportDataButton.setDisplayedMnemonicIndex(0);
+        panel17.add(exportDataButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel18 = new JPanel();
         panel18.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel14.add(panel18, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
