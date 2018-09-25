@@ -16,10 +16,16 @@
 package com.mmz.specs.io;
 
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
+import com.mmz.specs.application.utils.Logging;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SPTreeIOManager implements IOManager {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     private ProgressManager progressManager;
     private boolean isInterrupted;
 
@@ -28,8 +34,22 @@ public class SPTreeIOManager implements IOManager {
     }
 
     @Override
-    public void exportData(File file) {
+    public void exportData(File file) throws IOException {
+        log.info("Starting export of tree (SPT) to file: {}", file);
+        log.debug("Checking ability to create file: {}", file);
+        progressManager.setText("Проверка доступности файла");
+        if (!file.canWrite()) {
+            log.warn("Can not create file: {}", file);
+            throw new IOException("Can not write data to file: " + file);
+        }
 
+        createTreeJSON();
+        progressManager.setTotalProgress(1);
+
+    }
+
+    private void createTreeJSON() {
+        
     }
 
     @Override
