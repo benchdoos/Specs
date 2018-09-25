@@ -114,6 +114,8 @@ public class ExportDataWindow extends JDialog {
 
             currentProgressBar.setValue(progressManager.getCurrentProgress());
             currentProgressBar.setIndeterminate(progressManager.isCurrentIndeterminate());
+
+            operationInfoLabel.setText(progressManager.getText());
         });
         progressTimer.setRepeats(true);
         progressTimer.restart();

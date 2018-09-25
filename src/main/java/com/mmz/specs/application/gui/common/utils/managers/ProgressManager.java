@@ -23,6 +23,8 @@ public class ProgressManager {
 
     private int totalMaxValue = 3;
 
+    private String text = "";
+
     public int getTotalProgress() {
         return totalProgress;
     }
@@ -61,5 +63,13 @@ public class ProgressManager {
 
     public void setTotalMaxValue(int totalMaxValue) {
         this.totalMaxValue = totalMaxValue;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }
