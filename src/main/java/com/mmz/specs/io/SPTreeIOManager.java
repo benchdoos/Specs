@@ -13,21 +13,32 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.application.utils;
+package com.mmz.specs.io;
 
-public class SupportedExtensionsConstants {
-    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "png", "bmp", "gif"};
+import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 
-    public static final String FTP_IMAGE_FILE_EXTENSION = ".spi";
+import java.io.File;
 
-    public static final String NOTICE_DUMP_FILE_EXTENSION = ".spn";
+public class SPTreeIOManager implements IOManager {
+    private ProgressManager progressManager;
+    private boolean isInterrupted;
 
-    public static final String EXPORT_TREE_EXTENSION = ".spt";
+    public SPTreeIOManager(ProgressManager progressManager) {
+        this.progressManager = progressManager;
+    }
 
-    public static final String EXPORT_GDB_EXTENSION = ".gdb";
+    @Override
+    public void exportData(File file) {
 
-    public static final String EXPORT_SQL_EXTENSION = ".sql";
+    }
 
-    public static final String EXPORT_BACKUP_EXTENSION = ".spb";
+    @Override
+    public Object importData(File file) {
+        return null;
+    }
 
+    @Override
+    public void interrupt() {
+        isInterrupted = true;
+    }
 }

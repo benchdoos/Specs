@@ -24,8 +24,10 @@ public class ApplicationConstants {
     public static final String APPLICATION_NAME_POSTFIX_SERVER = " — Сервер";
     public static final String APPLICATION_NAME_POSTFIX_CLIENT = " — Клиент";
     public static final String USER_HOME_LOCATION = System.getProperty("user.home");
-    public static final String APPLICATION_SETTINGS_FOLDER_LOCATION = System
-            .getProperty("user.home") + File.separator + INTERNAL_FULL_NAME + File.separator;
+    public static final String APPLICATION_SETTINGS_FOLDER_LOCATION = USER_HOME_LOCATION + File.separator + INTERNAL_FULL_NAME + File.separator;
+
+    public static final String APPLICATION_EXPORT_FOLDER_LOCATION = USER_HOME_LOCATION + File.separator + INTERNAL_FULL_NAME + File.separator +
+            "Export" + File.separator;
 
     public static final String APPLICATION_FINAL_NAME = "SpecsSetup.exe";
 

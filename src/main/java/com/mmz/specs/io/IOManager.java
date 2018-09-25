@@ -13,21 +13,15 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.application.utils;
+package com.mmz.specs.io;
 
-public class SupportedExtensionsConstants {
-    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "png", "bmp", "gif"};
+import java.io.File;
+import java.io.IOException;
 
-    public static final String FTP_IMAGE_FILE_EXTENSION = ".spi";
+public interface IOManager {
+    void exportData(File file) throws IOException;
 
-    public static final String NOTICE_DUMP_FILE_EXTENSION = ".spn";
+    Object importData(File file) throws IOException;
 
-    public static final String EXPORT_TREE_EXTENSION = ".spt";
-
-    public static final String EXPORT_GDB_EXTENSION = ".gdb";
-
-    public static final String EXPORT_SQL_EXTENSION = ".sql";
-
-    public static final String EXPORT_BACKUP_EXTENSION = ".spb";
-
+    void interrupt();
 }
