@@ -167,9 +167,12 @@ public class ServerMainWindow extends JFrame {
 
         initKeyBindings();
 
-        final Dimension minimumSize = new Dimension(740, 381);
-        setSize(minimumSize);
-        setMinimumSize(minimumSize);
+//        final Dimension minimumSize = new Dimension(740, 381);
+//        setSize(minimumSize);
+//        setMinimumSize(minimumSize);
+
+        pack();
+        setMinimumSize(getSize());
 
         setLocation(FrameUtils.getFrameOnCenter(null, this));
 
@@ -368,7 +371,7 @@ public class ServerMainWindow extends JFrame {
                 /*NOP*/
             }
         } else {
-            label.setForeground(Color.BLACK);
+            label.setForeground(new JLabel().getForeground());
             label.setIcon(null);
         }
     }
@@ -1320,15 +1323,19 @@ public class ServerMainWindow extends JFrame {
                 userActionsUpdateTimer.stop();
             }
         }
-        if (!isWindowClosing) {
-            createServerTrayIcon();
-        }
         try {
-            session.close();
-        } catch (Exception e) {
-            log.warn("Could not close session", e);
+            if (!isWindowClosing) {
+                createServerTrayIcon();
+            }
+            try {
+                session.close();
+            } catch (Exception e) {
+                log.warn("Could not close session", e);
+            }
+            super.dispose();
+        } catch (UnsupportedOperationException e) {
+            this.setState(Frame.ICONIFIED);
         }
-        super.dispose();
     }
 
     private void updateOnlineUsersList() {
