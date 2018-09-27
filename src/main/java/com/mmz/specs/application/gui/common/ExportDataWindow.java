@@ -21,8 +21,10 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.SystemUtils;
 import com.mmz.specs.io.IOManager;
 import com.mmz.specs.io.SPTreeIOManager;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -197,7 +199,14 @@ public class ExportDataWindow extends JDialog {
             final String filePath = filePathTextField.getText() + exportDateLabel.getText() + EXPORT_TREE_EXTENSION;
             try {
                 manager.exportData(new File(filePath));
-            } catch (IOException e) {
+                dispose();
+
+                if (SystemUtils.isWindows()) {
+                    Runtime.getRuntime().exec("explorer.exe /select," + filePath);
+                } else if (SystemUtils.isUnix()) {
+                    //add for unix
+                }
+            } catch (IOException | ZipException e) {
                 log.warn("Could not export tree to file: {}", filePath, e);
                 JOptionPane.showMessageDialog(this, "Во время экспорта произошла ошибка:\n"
                         + e.getLocalizedMessage(), "Ошибка при экспорте данных", JOptionPane.WARNING_MESSAGE);

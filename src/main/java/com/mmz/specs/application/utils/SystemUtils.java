@@ -36,21 +36,21 @@ public class SystemUtils {
         return System.getProperty("os.name").toLowerCase();
     }
 
-    private static boolean isWindows() {
+    public static boolean isWindows() {
         return (getOsName().contains("win"));
     }
 
-    private static boolean isMac() {
+    public static boolean isMac() {
         return (getOsName().contains("mac"));
     }
 
-    private static boolean isUnix() {
+    public static boolean isUnix() {
         return (getOsName().contains("nix")
                 || getOsName().contains("nux")
                 || getOsName().contains("aix"));
     }
 
-    private static boolean isSolaris() {
+    public static boolean isSolaris() {
         return (getOsName().contains("sunos"));
     }
 }

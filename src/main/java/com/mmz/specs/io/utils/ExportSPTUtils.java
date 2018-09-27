@@ -36,7 +36,8 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.mmz.specs.application.utils.SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
-import static com.mmz.specs.io.IOConstants.DEFAULT_TREE_TYPE;
+import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.OPERATING_SYSTEM;
+import static com.mmz.specs.io.IOConstants.*;
 
 public class ExportSPTUtils {
     public static final String DETAIL = "detail";
@@ -104,7 +105,25 @@ public class ExportSPTUtils {
         return result;
     }
 
-    public JSONArray getFullTree() {
+    public JSONObject createTreeJSON() {
+        log.info("Creating JSON file");
+        progressManager.setText("Формирование структуры базы данных");
+        progressManager.setCurrentProgress(0);
+
+        JSONObject root = new JSONObject();
+        root.put(TYPE, DEFAULT_TREE_TYPE);
+        root.put(TIMESTAMP, Calendar.getInstance().getTime());
+        root.put(AUTHOR, OPERATING_SYSTEM.getNetworkParams().getHostName());
+
+        final JSONArray fullTree = getFullTree();
+        root.put(TREE, fullTree);
+        System.out.println("TREE:\n" + root.toString(1));
+
+        progressManager.setCurrentIndeterminate(false);
+        return root;
+    }
+
+    private JSONArray getFullTree() {
         log.info("Creating root entities");
         progressManager.setText("Формирование корневых каталогов");
 

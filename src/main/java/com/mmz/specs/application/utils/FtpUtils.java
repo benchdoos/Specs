@@ -260,14 +260,12 @@ public class FtpUtils {
 
     public void downloadFile(int id, File file) throws IOException {
         String ftpFilePath = postfix + id + FTP_IMAGE_FILE_EXTENSION;
-        log.debug("Downloading file: {} to {}", ftpFilePath, file);
-
         final boolean fileExistsOnFtpServer = ftpClient.listFiles(ftpFilePath).length > 0;
 
         if (fileExistsOnFtpServer) {
             try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
                 ftpClient.retrieveFile(ftpFilePath, fileOutputStream);
-                log.info("Successfully downloaded file: {}", ftpFilePath);
+                log.info("Successfully downloaded file from: {} to {}", ftpFilePath, file);
             }
         } else {
             log.debug("Could not find file: {}", ftpFilePath);

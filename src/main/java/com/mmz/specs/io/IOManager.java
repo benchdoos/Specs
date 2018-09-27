@@ -15,11 +15,13 @@
 
 package com.mmz.specs.io;
 
+import net.lingala.zip4j.exception.ZipException;
+
 import java.io.File;
 import java.io.IOException;
 
 public interface IOManager {
-    void exportData(File file) throws IOException;
+    void exportData(File file) throws IOException, ZipException;
 
     Object importData(File file) throws IOException;
 

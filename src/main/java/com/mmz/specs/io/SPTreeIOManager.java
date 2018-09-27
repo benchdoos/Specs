@@ -15,26 +15,32 @@
 
 package com.mmz.specs.io;
 
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.ServerDBConnectionPool;
 import com.mmz.specs.io.utils.ExportSPTUtils;
 import com.mmz.specs.model.DetailEntity;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
 import static com.mmz.specs.application.core.ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION;
-import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.OPERATING_SYSTEM;
-import static com.mmz.specs.io.IOConstants.*;
+import static com.mmz.specs.io.IOConstants.DEFAULT_TREE_TYPE;
+import static com.mmz.specs.io.IOConstants.TYPE;
 
 public class SPTreeIOManager implements IOManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -52,16 +58,54 @@ public class SPTreeIOManager implements IOManager {
     }
 
     @Override
-    public void exportData(File file) throws IOException {
+    public void exportData(File file) throws IOException, ZipException {
         log.info("Starting export of tree (SPT) to file: {}", file);
         checkCreate(file);
 
-        final JSONObject treeJSON = createTreeJSON();
+        final File folder = createFolder(file);
+
+        final JSONObject treeJSON = new ExportSPTUtils(session, progressManager).createTreeJSON();
+        final File jsonFile = exportTree(folder, treeJSON);
+
         progressManager.setTotalProgress(1);
 
-        final File folder = file.getParentFile();
         File imagesFolder = downloadImages(folder, treeJSON);
         progressManager.setTotalProgress(2);
+
+        createSPTFile(file, jsonFile, imagesFolder);
+        progressManager.setTotalProgress(3);
+
+        removeTrash(folder);
+        progressManager.setText("Экспорт успено проведён");
+        progressManager.setTotalProgress(4);
+        progressManager.setCurrentProgress(100);
+    }
+
+    private void removeTrash(File folder) {
+        log.debug("Deleting temp folder: {}", folder);
+        progressManager.setText("Удаляем временные файлы");
+        progressManager.setCurrentProgress(0);
+        try {
+            FileUtils.deleteDirectory(folder);
+            progressManager.setCurrentProgress(100);
+        } catch (IOException e) {
+            log.warn("Could not delete folder: {}", folder, e);
+        }
+    }
+
+    private File exportTree(File folder, JSONObject treeJSON) throws IOException {
+        progressManager.setText("Экспорт дерева");
+        final File jsonFile = new File(folder + File.separator + "tree.json");
+        try (FileWriter writer = new FileWriter(jsonFile)) {
+            treeJSON.write(writer);
+        }
+        return jsonFile;
+    }
+
+    private File createFolder(File file) {
+        final File folder = new File(file.getParentFile() + File.separator + dateFormatter.format(Calendar.getInstance().getTime()).replace(" ", "_"));
+        folder.mkdirs();
+        return folder;
     }
 
     private void checkCreate(File file) throws IOException {
@@ -79,7 +123,7 @@ public class SPTreeIOManager implements IOManager {
     }
 
     private File downloadImages(File folder, JSONObject treeJSON) {
-        File result = new File(folder + File.separator + dateFormatter.format(Calendar.getInstance().getTime()).replace(" ", "_"), "images");
+        File result = new File(folder, "images");
         log.debug("Starting downloading images to folder: {}", folder);
         progressManager.setCurrentProgress(0);
         progressManager.setText("Определяем список деталей");
@@ -109,25 +153,19 @@ public class SPTreeIOManager implements IOManager {
 
     }
 
-    private JSONObject createTreeJSON() {
-        log.info("Creating JSON file");
-        progressManager.setText("Формирование структуры базы данных");
-        progressManager.setCurrentProgress(0);
+    private void createSPTFile(File file, File jsonFile, File imagesFolder) throws ZipException {
+        ZipFile zipFile = new ZipFile(file);
 
-        JSONObject root = new JSONObject();
-        root.put(TYPE, DEFAULT_TREE_TYPE);
-        root.put(TIMESTAMP, Calendar.getInstance().getTime());
-        root.put(AUTHOR, OPERATING_SYSTEM.getNetworkParams().getHostName());
+        ZipParameters parameters = new ZipParameters();
+        parameters.setEncryptFiles(true);
+        parameters.setEncryptionMethod(Zip4jConstants.ENC_METHOD_AES);
+        parameters.setAesKeyStrength(Zip4jConstants.AES_STRENGTH_256);
+        parameters.setPassword(ApplicationConstants.INTERNAL_FULL_NAME);
 
-        final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
-
-        final JSONArray fullTree = exportSPTUtils.getFullTree();
-        root.put(TREE, fullTree);
-        System.out.println("TREE:\n" + root.toString(1));
-
-        progressManager.setCurrentIndeterminate(false);
-        return root;
+        zipFile.addFile(jsonFile, parameters);
+        zipFile.addFolder(imagesFolder, parameters);
     }
+
 
     @Override
     public Object importData(File file) {
