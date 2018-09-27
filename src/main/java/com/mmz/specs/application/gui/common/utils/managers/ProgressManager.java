@@ -70,6 +70,11 @@ public class ProgressManager {
     }
 
     public void setText(String text) {
-        this.text = text;
+        final int TEXT_MAX_LENGTH = 45;
+        if (text.length() > TEXT_MAX_LENGTH) {
+            this.text = text.substring(0, TEXT_MAX_LENGTH) + "...";
+        } else {
+            this.text = text;
+        }
     }
 }
