@@ -1360,7 +1360,6 @@ public class ServerMainWindow extends JFrame {
         if (!isMonitoringActive) {
             ServerMonitoringBackgroundService.getInstance().startMonitoring();
             tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), true);
-            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(graphicsPanel), true);
             if (tabbedPane.getSelectedIndex() == tabbedPane.getComponentZOrder(monitorPanel)) {
                 tabbedPane.setSelectedComponent(logPanel);
             }
