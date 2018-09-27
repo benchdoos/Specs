@@ -69,7 +69,7 @@ public class FtpUtils {
         new Thread(() -> createFtpConnection(connectionUrl, username, password)).start();
     }
 
-    private void createFtpConnection(String connectionUrl, String username, String password) {
+    public void createFtpConnection(String connectionUrl, String username, String password) {
         if (counter > 20) {
             log.debug("Creating FTP connection at: {} user: {} password: ({}) postfix: {}",
                     connectionUrl, username, password.length(), postfix);
@@ -256,5 +256,22 @@ public class FtpUtils {
         log.debug("Removing image by id: {}" + id);
         ftpClient.deleteFile(postfix + id + FTP_IMAGE_FILE_EXTENSION);
         log.info("Image was successfully removed: " + postfix + id + FTP_IMAGE_FILE_EXTENSION);
+    }
+
+    public void downloadFile(int id, File file) throws IOException {
+        String ftpFilePath = postfix + id + FTP_IMAGE_FILE_EXTENSION;
+        log.debug("Downloading file: {} to {}", ftpFilePath, file);
+
+        final boolean fileExistsOnFtpServer = ftpClient.listFiles(ftpFilePath).length > 0;
+
+        if (fileExistsOnFtpServer) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                ftpClient.retrieveFile(ftpFilePath, fileOutputStream);
+                log.info("Successfully downloaded file: {}", ftpFilePath);
+            }
+        } else {
+            log.debug("Could not find file: {}", ftpFilePath);
+        }
+
     }
 }

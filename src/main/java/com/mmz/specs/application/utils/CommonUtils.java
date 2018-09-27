@@ -17,7 +17,10 @@ package com.mmz.specs.application.utils;
 
 import com.google.common.io.Resources;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
+import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.MaterialEntity;
+import com.mmz.specs.service.ConstantsService;
+import com.mmz.specs.service.ConstantsServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -36,6 +39,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
+import java.util.List;
+import java.util.Properties;
 
 public class CommonUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -265,5 +270,15 @@ public class CommonUtils {
         }
 
         return result;
+    }
+
+    public static Properties getConstantsToProperties(Session session) {
+        final ConstantsService service = new ConstantsServiceImpl(session);
+        final List<ConstantsEntity> constantsEntities = service.listConstants();
+        Properties constants = new Properties();
+        for (ConstantsEntity e : constantsEntities) {
+            constants.put(e.getKey(), e.getValue());
+        }
+        return constants;
     }
 }

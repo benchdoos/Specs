@@ -466,12 +466,7 @@ public class ClientMainWindow extends JFrame {
                 if (session.isOpen()) {
                     ftpUtils = FtpUtils.getInstance();
 
-                    final ConstantsService service = new ConstantsServiceImpl(session);
-                    final List<ConstantsEntity> constantsEntities = service.listConstants();
-                    Properties constants = new Properties();
-                    for (ConstantsEntity e : constantsEntities) {
-                        constants.put(e.getKey(), e.getValue());
-                    }
+                    Properties constants = CommonUtils.getConstantsToProperties(session);
                     String url = constants.getProperty(DaoConstants.BLOB_CONNECTION_URL_KEY);
                     String username = constants.getProperty(DaoConstants.BLOB_ACCESS_USERNAME_KEY);
                     String password = constants.getProperty(DaoConstants.BLOB_ACCESS_PASSWORD_KEY);

@@ -16,7 +16,11 @@
 package com.mmz.specs.io.utils;
 
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
+import com.mmz.specs.application.utils.CommonUtils;
+import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.connection.DaoConstants;
+import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.MaterialListEntity;
@@ -27,10 +31,19 @@ import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static com.mmz.specs.application.utils.SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
+import static com.mmz.specs.io.IOConstants.DEFAULT_TREE_TYPE;
 
 public class ExportSPTUtils {
+    public static final String DETAIL = "detail";
+    public static final String QUANTITY = "quantity";
+    public static final String MATERIALS = "materials";
+    public static final String INTERCHANGEABLE = "interchangeable";
+    public static final String CHILDREN = "children";
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session;
     private ProgressManager progressManager;
@@ -38,6 +51,57 @@ public class ExportSPTUtils {
     public ExportSPTUtils(Session session, ProgressManager progressManager) {
         this.session = session;
         this.progressManager = progressManager;
+    }
+
+    public static ArrayList<DetailEntity> listDetailsFromJSON(JSONObject treeJSON) {
+        log.debug("Starting searching details in JSON");
+        final String jsonType = treeJSON.getString(IOConstants.TYPE);
+        if (!jsonType.equalsIgnoreCase(IOConstants.DEFAULT_TREE_TYPE)) {
+            throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
+        }
+
+        ArrayList<DetailEntity> result = new ArrayList<>();
+
+        JSONArray tree = treeJSON.getJSONArray(IOConstants.TREE);
+        log.debug("Found tree size: {}", tree.length());
+
+        for (int i = 0; i < tree.length(); i++) {
+            JSONObject record = tree.getJSONObject(i);
+            DetailEntity entity = (DetailEntity) record.get(DETAIL);
+            result.add(entity);
+            result.addAll(getChildrenFromJSON(record));
+        }
+
+        result = removeDuplicates(result);
+
+        log.debug("Totally fount details: {}", result.size());
+        for (DetailEntity e : result) {
+            System.out.println("Found: " + e.toSimpleString());
+        }
+        return result;
+    }
+
+    private static ArrayList<DetailEntity> removeDuplicates(ArrayList<DetailEntity> result) {
+        Set<DetailEntity> set = new LinkedHashSet<>(result);
+        result.clear();
+        result.addAll(set);
+        return result;
+    }
+
+    private static ArrayList<DetailEntity> getChildrenFromJSON(JSONObject record) {
+        ArrayList<DetailEntity> result = new ArrayList<>();
+        final JSONArray children = record.getJSONArray(CHILDREN);
+        for (int j = 0; j < children.length(); j++) {
+            JSONObject object = children.getJSONObject(j);
+            DetailEntity entity = (DetailEntity) object.get(DETAIL);
+
+            result.add(entity);
+
+            if (entity.isUnit()) {
+                result.addAll(getChildrenFromJSON(object));
+            }
+        }
+        return result;
     }
 
     public JSONArray getFullTree() {
@@ -59,11 +123,11 @@ public class ExportSPTUtils {
                 progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
 
                 JSONObject object = new JSONObject();
-                object.put("detail", entity);
-                object.put("quantity", 1);
+                object.put(DETAIL, entity);
+                object.put(QUANTITY, 1);
                 final JSONArray allChildrenForEntity = getAllChildrenForEntity(entity);
                 log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.length(), allChildrenForEntity);
-                object.put("children", allChildrenForEntity);
+                object.put(CHILDREN, allChildrenForEntity);
 
                 array.put(object);
 
@@ -91,12 +155,12 @@ public class ExportSPTUtils {
                         if (lastDetailListEntity != null) {
                             if (lastDetailListEntity.isActive()) {
                                 JSONObject record = new JSONObject();
-                                record.put("quantity", lastDetailListEntity.getQuantity());
-                                record.put("detail", child);
-                                record.put("materials", getAllMaterialsForEntity(child));
-                                record.put("interchangeable", lastDetailListEntity.isInterchangeableNode());
+                                record.put(DETAIL, child);
+                                record.put(QUANTITY, lastDetailListEntity.getQuantity());
+                                record.put(MATERIALS, getAllMaterialsForEntity(child));
+                                record.put(INTERCHANGEABLE, lastDetailListEntity.isInterchangeableNode());
                                 if (child.isUnit()) {
-                                    record.put("children", getAllChildrenForEntity(child));
+                                    record.put(CHILDREN, getAllChildrenForEntity(child));
                                 }
                                 result.put(record);
                             }
@@ -121,6 +185,39 @@ public class ExportSPTUtils {
             }
         }
         return result;
+    }
+
+    public void downloadFromFTP(File result, ArrayList<DetailEntity> details) {
+        Properties constants = CommonUtils.getConstantsToProperties(session);
+        String url = constants.getProperty(DaoConstants.BLOB_CONNECTION_URL_KEY);
+        String username = constants.getProperty(DaoConstants.BLOB_ACCESS_USERNAME_KEY);
+        String password = constants.getProperty(DaoConstants.BLOB_ACCESS_PASSWORD_KEY);
+        String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
+
+        final FtpUtils ftpUtils = FtpUtils.getInstance();
+        ftpUtils.createFtpConnection(url, username, password);
+        ftpUtils.setPostfix(postfix);
+
+        for (int i = 0; i < details.size(); i++) {
+            DetailEntity entity = details.get(i);
+
+            int progress = (int) (((double) i / (details.size() - 1)) * 100);
+            progressManager.setCurrentProgress(progress);
+
+
+            String fileName = entity.getId() + FTP_IMAGE_FILE_EXTENSION;
+            File localFile = new File(result + File.separator + fileName);
+            try {
+                ftpUtils.downloadFile(entity.getId(), localFile);
+            } catch (IOException e) {
+                log.warn("Could not write a file to {}", localFile, e);
+            }
+        }
+        try {
+            ftpUtils.disconnect();
+        } catch (IOException e) {
+            log.warn("Could not close ftp connection", e);
+        }
     }
 
 
