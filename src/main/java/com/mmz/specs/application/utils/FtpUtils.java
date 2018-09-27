@@ -64,12 +64,10 @@ public class FtpUtils {
         this.connectionUrl = connectionUrl;
         this.username = username;
         this.password = password;
-
-
-        new Thread(() -> createFtpConnection(connectionUrl, username, password)).start();
+        createFtpConnection(connectionUrl, username, password);
     }
 
-    public void createFtpConnection(String connectionUrl, String username, String password) {
+    private void createFtpConnection(String connectionUrl, String username, String password) {
         if (counter > 20) {
             log.debug("Creating FTP connection at: {} user: {} password: ({}) postfix: {}",
                     connectionUrl, username, password.length(), postfix);

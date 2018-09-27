@@ -214,7 +214,7 @@ public class ExportSPTUtils {
         String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
 
         final FtpUtils ftpUtils = FtpUtils.getInstance();
-        ftpUtils.createFtpConnection(url, username, password);
+        ftpUtils.connect(url, username, password);
         ftpUtils.setPostfix(postfix);
 
         for (int i = 0; i < details.size(); i++) {

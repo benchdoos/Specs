@@ -473,8 +473,10 @@ public class ClientMainWindow extends JFrame {
                     String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
 
                     if (ftpUtils != null) {
-                        ftpUtils.connect(url, username, password);
-                        ftpUtils.setPostfix(postfix);
+                        new Thread(() -> {
+                            ftpUtils.connect(url, username, password);
+                            ftpUtils.setPostfix(postfix);
+                        }).start();
                     }
                 }
             }
