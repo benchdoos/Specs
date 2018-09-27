@@ -41,6 +41,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mmz.specs.service.CommonServiceUtils.getRootObjects;
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -48,7 +49,7 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class MainWindowUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final long NANO_TIME = 1000000;
-    private static final String ROOT_UNIT_CODE = ".00.000";
+    public static final String ROOT_UNIT_CODE = ".00.000";
     private final Session session;
     private ClientMainWindow clientMainWindow = null;
 
@@ -62,27 +63,20 @@ public class MainWindowUtils {
         final long time = System.nanoTime();
 
         if (!Thread.currentThread().isInterrupted()) {
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            final List<DetailListEntity> askedListRoot = service.listDetailLists();
-            askedListRoot.sort((o1, o2) -> ComparisonChain.start()
-                    .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
-                    .compareTrueFirst(o1.isActive(), o2.isActive())
-                    .result());
-
-            if (!Thread.currentThread().isInterrupted()) {
-                DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-                ArrayList<DetailEntity> roots = getRootObjects(askedListRoot);
+            DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+            ArrayList<DetailEntity> roots = getRootObjects(session);
 
 
-                for (DetailEntity e : roots) {
-                    if (e.getCode().contains(ROOT_UNIT_CODE)) {
+            for (DetailEntity e : roots) {
+                if (e.getCode().contains(ROOT_UNIT_CODE)) {
+                    if (e.isActive()) {
                         result.add(new DefaultMutableTreeNode(e));
-                        System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
                     }
+                    System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
                 }
-                log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
-                return result;
             }
+            log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+            return result;
         }
         return null;
     }
@@ -116,28 +110,6 @@ public class MainWindowUtils {
         return null;
     }
 
-    private ArrayList<DetailEntity> getRootObjects(List<DetailListEntity> listEntities) {
-        DetailListService service = new DetailListServiceImpl(session);
-
-        ArrayList<DetailEntity> roots = new ArrayList<>();
-        ArrayList<DetailEntity> children = new ArrayList<>();
-
-        for (DetailListEntity current : listEntities) {
-            final DetailEntity parentDetailEntity = current.getDetailByParentDetailId();
-
-            if (!roots.contains(parentDetailEntity)) {
-                if (!children.contains(parentDetailEntity)) {
-                    List<DetailEntity> parents = service.listParents(parentDetailEntity);
-                    if (parents.size() == 0) {
-                        roots.add(parentDetailEntity);
-                    } else {
-                        children.add(parentDetailEntity);
-                    }
-                }
-            }
-        }
-        return roots;
-    }
 
     /**
      * Gives full tree for listEntities, ignoring search (if there is so)
@@ -209,13 +181,14 @@ public class MainWindowUtils {
             if (children.size() > 0) {
                 log.trace("Parent {} has children count: {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), children.size());
 
-                if (children.size() > 1) {
+               /* if (children.size() > 1) {
                     children.sort((o1, o2) -> ComparisonChain.start()
                             .compareTrueFirst(o1.isUnit(), o2.isUnit())
                             .compare(o1.getCode(), o2.getCode())
                             .compareTrueFirst(o1.isActive(), o2.isActive())
                             .result());
-                }
+                }*/
+                CommonServiceUtils.sortDetailEntityArray(children);
 
                 for (DetailEntity child : children) {
                     if (child != null) {

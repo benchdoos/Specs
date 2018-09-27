@@ -18,14 +18,19 @@ package com.mmz.specs.io;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.ServerDBConnectionPool;
+import com.mmz.specs.io.utils.ExportSPTUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 
 import static com.mmz.specs.application.core.ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION;
+import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.OPERATING_SYSTEM;
 
 public class SPTreeIOManager implements IOManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -59,11 +64,26 @@ public class SPTreeIOManager implements IOManager {
             log.warn("Can not create file: {}", file);
             throw new IOException("Can not write data to file: " + file);
         } else {
-            file.delete();
+            log.debug("Testing file deleted: " + file.delete());
         }
     }
 
     private void createTreeJSON(File file) {
+        log.info("Creating JSON file");
+        progressManager.setText("Формирование структуры базы данных");
+        progressManager.setCurrentProgress(0);
+        JSONObject root = new JSONObject();
+        root.put("type", "com.mmz.specs.tree");
+        root.put("timestamp", Calendar.getInstance().getTime());
+        root.put("author", OPERATING_SYSTEM.getNetworkParams().getHostName());
+
+        final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
+
+        final JSONArray fullTree = exportSPTUtils.getFullTree();
+        root.put("tree", fullTree);
+        System.out.println("TREE:\n" + root.toString(1));
+
+        progressManager.setCurrentIndeterminate(false);
 
     }
 
