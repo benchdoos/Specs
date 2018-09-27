@@ -56,7 +56,7 @@ public class ExportDataWindow extends JDialog {
     private JButton browseButton;
     private MODE selectedMode = MODE.SPT;
     private Timer progressTimer;
-    private String datePattern = "dd.MM.yyyy";
+    private String datePattern = "dd.MM.yyyy HH.mm";
     private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
 
     private IOManager manager = null;
