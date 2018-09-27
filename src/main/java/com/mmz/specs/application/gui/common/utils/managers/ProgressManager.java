@@ -21,7 +21,7 @@ public class ProgressManager {
     private boolean totalIndeterminate = false;
     private boolean currentIndeterminate = false;
 
-    private int totalMaxValue = 3;
+    private int totalMaxValue = 4;
 
     private String text = "";
 
