@@ -48,10 +48,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
 
 [Files]
-;Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Specs.exe"; DestDir: "{app}";
-Source: "F:\Developer\JAVA\Specs\publish\Specs\client.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server;
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Client User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Server User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server
 Source: "F:\Developer\JAVA\Specs\publish\Specs\icons.icl"; DestDir: "{app}"; Flags: ignoreversion;
@@ -63,24 +60,23 @@ Root: HKCR; Subkey: ".spt"; ValueType: string; ValueName: ""; ValueData: "com.mm
 Root: HKCR; Subkey: "Specs"; ValueType: string; ValueName: ""; ValueData: "Specs Tree"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "Specs\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppIconsFile},3"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "Specs\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
 
 [Icons]
-Name: "{group}\{#MyAppNameEnglish}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\client.ico"
-Name: "{group}\{#MyAppServerRusName}"; Filename: "{app}\{#MyAppExeName}";Parameters: "-server"; IconFilename: "{app}\server.ico"; Tasks: server
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppIconsFile}"; IconIndex: 1;
+Name: "{group}\{#MyAppServerRusName}"; Filename: "{app}\{#MyAppExeName}";Parameters: "-server"; IconFilename: "{app}\{#MyAppIconsFile}"; IconIndex: 2; Tasks: server
 Name: "{group}\Руководство пользователя"; Filename: "{app}\Client User Guide.pdf"
 Name: "{group}\Руководство администратора"; Filename: "{app}\Server User Guide.pdf"; Tasks: server
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\client.ico"; Tasks: desktopicon
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppIconsFile}"; IconIndex: 1; Tasks: desktopicon
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
-[Registry]
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall unchecked
 Filename: "{app}\{#MyAppExeName}"; Parameters:"-server"; Description: "{#MyAppServerRusName}"; Flags: shellexec postinstall; Tasks: server
-;Filename: "{app}\{#MyAppExeName}"; Parameters:"-update -server"; Description: "{cm:LaunchProgram,{#MyAppServerRusName}}"; Flags: shellexec postinstall hidewizard; Tasks: updateServer
-;Filename: "{app}\{#MyAppExeName}"; Parameters:"-update"; Description: "{cm:LaunchProgram,{#MyAppName} - После обновления}"; Flags: shellexec postinstall hidewizard; Tasks: updateClient
+
 
 [InstallDelete]
 ;Deletes old files
 Type: files; Name: "{app}\Specs.jar"
+Type: files; Name: "{group}\Specs.lnk"
