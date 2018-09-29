@@ -1041,6 +1041,8 @@ public class ServerMainWindow extends JFrame {
         };
         model.addColumn("Параметр");
         model.addColumn("Значение");
+
+        constantsTable.getTableHeader().setReorderingAllowed(false);
     }
 
     private void initAdminSettingsPanel() {
