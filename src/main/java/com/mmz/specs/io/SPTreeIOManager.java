@@ -49,7 +49,6 @@ public class SPTreeIOManager implements IOManager {
     private String datePattern = "dd.MM.yyyy HH.mm";
     private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
     private ProgressManager progressManager;
-    private boolean isInterrupted;
 
 
     public SPTreeIOManager(ProgressManager progressManager) {
@@ -64,21 +63,35 @@ public class SPTreeIOManager implements IOManager {
 
         final File folder = createFolder(file);
 
-        final JSONObject treeJSON = new ExportSPTUtils(session, progressManager).createTreeJSON();
-        final File jsonFile = exportTree(folder, treeJSON);
+        final JSONObject treeJSON;
+        final File jsonFile;
+        if (!Thread.currentThread().isInterrupted()) {
+            treeJSON = new ExportSPTUtils(session, progressManager).createTreeJSON();
+            jsonFile = exportTree(folder, treeJSON);
 
-        progressManager.setTotalProgress(1);
+            progressManager.setTotalProgress(1);
 
-        File imagesFolder = downloadImages(folder, treeJSON);
-        progressManager.setTotalProgress(2);
+            if (!Thread.currentThread().isInterrupted()) {
+                File imagesFolder = downloadImages(folder, treeJSON);
+                progressManager.setTotalProgress(2);
 
-        createSPTFile(file, jsonFile, imagesFolder);
-        progressManager.setTotalProgress(3);
+                if (!Thread.currentThread().isInterrupted()) {
+                    createSPTFile(file, jsonFile, imagesFolder);
+                    progressManager.setTotalProgress(3);
+                }
 
-        removeTrash(folder);
-        progressManager.setText("Экспорт успено проведён");
-        progressManager.setTotalProgress(4);
-        progressManager.setCurrentProgress(100);
+                if (!Thread.currentThread().isInterrupted()) {
+                    removeTrash(folder);
+                    progressManager.setText("Экспорт успено проведён");
+                    progressManager.setTotalProgress(4);
+                    progressManager.setCurrentProgress(100);
+                }
+            }
+        }
+        if (Thread.currentThread().isInterrupted()) {
+            removeTrash(folder);
+            progressManager.reset();
+        }
     }
 
     private void removeTrash(File folder) {
@@ -170,10 +183,5 @@ public class SPTreeIOManager implements IOManager {
     @Override
     public Object importData(File file) {
         return null;
-    }
-
-    @Override
-    public void interrupt() {
-        isInterrupted = true;
     }
 }

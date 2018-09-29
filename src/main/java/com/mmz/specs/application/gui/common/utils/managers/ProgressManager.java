@@ -77,4 +77,13 @@ public class ProgressManager {
             this.text = text;
         }
     }
+
+    public void reset() {
+        totalProgress = 0;
+        currentProgress = 0;
+        totalIndeterminate = false;
+        currentIndeterminate = false;
+        totalMaxValue = 4;
+        text = "";
+    }
 }

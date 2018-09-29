@@ -60,6 +60,7 @@ public class ExportDataWindow extends JDialog {
     private Timer progressTimer;
     private String datePattern = "dd.MM.yyyy HH.mm";
     private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+    private Thread managerThread;
 
     private IOManager manager = null;
 
@@ -169,21 +170,20 @@ public class ExportDataWindow extends JDialog {
         }
     }
 
-    private void resetProgressManager() {
-        progressManager.setTotalProgress(0);
-        progressManager.setTotalIndeterminate(false);
-        progressManager.setCurrentProgress(0);
-        progressManager.setCurrentIndeterminate(false);
-    }
-
     private void onCancel() {
         int result = JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите остановить экспорт данных?",
                 "Подтверждение действий", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == 0) {
-            if (manager != null) {
-                manager.interrupt();
+            if (managerThread != null) {
+                if (managerThread.isAlive()) {
+                    managerThread.interrupt();
+                    enableControls(true);
+                } else {
+                    dispose();
+                }
+            } else {
+                dispose();
             }
-            dispose();
         }
     }
 
@@ -199,32 +199,45 @@ public class ExportDataWindow extends JDialog {
             final String filePath = filePathTextField.getText() + exportDateLabel.getText() + EXPORT_TREE_EXTENSION;
             try {
                 manager.exportData(new File(filePath));
-                dispose();
+                if (!Thread.currentThread().isInterrupted()) {
+                    dispose();
 
-                if (SystemUtils.isWindows()) {
-                    Runtime.getRuntime().exec("explorer.exe /select," + filePath);
-                } else if (SystemUtils.isUnix()) {
-                    //add for unix
+                    if (SystemUtils.isWindows()) {
+                        Runtime.getRuntime().exec("explorer.exe /select," + filePath);
+                    } else if (SystemUtils.isUnix()) {
+                        final File folder = new File(filePath).getParentFile();
+                        try {
+                            Desktop.getDesktop().open(folder);
+                        } catch (IOException e) {
+                            log.warn("Could not open folder: {}, showing message to user", e);
+                            JOptionPane.showMessageDialog(this, "Файл успешно экспортирован:\n" +
+                                    folder, "Экспорт завершен", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
                 }
             } catch (IOException | ZipException e) {
                 log.warn("Could not export tree to file: {}", filePath, e);
                 JOptionPane.showMessageDialog(this, "Во время экспорта произошла ошибка:\n"
                         + e.getLocalizedMessage(), "Ошибка при экспорте данных", JOptionPane.WARNING_MESSAGE);
-                resetProgressManager();
+                progressManager.reset();
             }
         };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        managerThread = new Thread(runnable);
+        managerThread.start();
     }
 
     private void onOK() {
-        filePathTextField.setEnabled(false);
-        browseButton.setEnabled(false);
-        buttonOK.setEnabled(false);
+        enableControls(false);
         selectedMode = getSelectedMode();
         log.info("Starting exporting data. Export mode is: " + selectedMode);
         startExport();
 
+    }
+
+    private void enableControls(boolean enable) {
+        filePathTextField.setEnabled(enable);
+        browseButton.setEnabled(enable);
+        buttonOK.setEnabled(enable);
     }
 
     {

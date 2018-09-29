@@ -115,11 +115,13 @@ public class ExportSPTUtils {
         root.put(TIMESTAMP, Calendar.getInstance().getTime());
         root.put(AUTHOR, OPERATING_SYSTEM.getNetworkParams().getHostName());
 
-        final JSONArray fullTree = getFullTree();
-        root.put(TREE, fullTree);
-        System.out.println("TREE:\n" + root.toString(1));
+        if (!Thread.currentThread().isInterrupted()) {
+            final JSONArray fullTree = getFullTree();
+            root.put(TREE, fullTree);
+            System.out.println("TREE:\n" + root.toString(1));
 
-        progressManager.setCurrentIndeterminate(false);
+            progressManager.setCurrentIndeterminate(false);
+        }
         return root;
     }
 
@@ -134,24 +136,27 @@ public class ExportSPTUtils {
         JSONArray array = new JSONArray();
         if (root != null) {
             for (int i = 0; i < root.size(); i++) {
+                if (!Thread.currentThread().isInterrupted()) {
+                    DetailEntity entity = root.get(i);
 
-                DetailEntity entity = root.get(i);
+                    log.debug("Creating tree for root entity: {}", entity.toSimpleString());
 
-                log.debug("Creating tree for root entity: {}", entity.toSimpleString());
+                    progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
 
-                progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
+                    JSONObject object = new JSONObject();
+                    object.put(DETAIL, entity);
+                    object.put(QUANTITY, 1);
+                    final JSONArray allChildrenForEntity = getAllChildrenForEntity(entity);
+                    log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.length(), allChildrenForEntity);
+                    object.put(CHILDREN, allChildrenForEntity);
 
-                JSONObject object = new JSONObject();
-                object.put(DETAIL, entity);
-                object.put(QUANTITY, 1);
-                final JSONArray allChildrenForEntity = getAllChildrenForEntity(entity);
-                log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.length(), allChildrenForEntity);
-                object.put(CHILDREN, allChildrenForEntity);
+                    array.put(object);
 
-                array.put(object);
-
-                int progress = (int) (((double) i / (root.size() - 1)) * 100);
-                progressManager.setCurrentProgress(progress);
+                    int progress = (int) (((double) i / (root.size() - 1)) * 100);
+                    progressManager.setCurrentProgress(progress);
+                } else {
+                    break;
+                }
             }
         } else {
             progressManager.setText("Не удалось найти корневые каталоги");
@@ -168,23 +173,27 @@ public class ExportSPTUtils {
             CommonServiceUtils.sortDetailEntityArray(totalChildrenList);
 
             for (DetailEntity child : totalChildrenList) {
-                if (child != null) {
-                    if (child.isActive()) {
-                        DetailListEntity lastDetailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, child);
-                        if (lastDetailListEntity != null) {
-                            if (lastDetailListEntity.isActive()) {
-                                JSONObject record = new JSONObject();
-                                record.put(DETAIL, child);
-                                record.put(QUANTITY, lastDetailListEntity.getQuantity());
-                                record.put(MATERIALS, getAllMaterialsForEntity(child));
-                                record.put(INTERCHANGEABLE, lastDetailListEntity.isInterchangeableNode());
-                                if (child.isUnit()) {
-                                    record.put(CHILDREN, getAllChildrenForEntity(child));
+                if (!Thread.currentThread().isInterrupted()) {
+                    if (child != null) {
+                        if (child.isActive()) {
+                            DetailListEntity lastDetailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, child);
+                            if (lastDetailListEntity != null) {
+                                if (lastDetailListEntity.isActive()) {
+                                    JSONObject record = new JSONObject();
+                                    record.put(DETAIL, child);
+                                    record.put(QUANTITY, lastDetailListEntity.getQuantity());
+                                    record.put(MATERIALS, getAllMaterialsForEntity(child));
+                                    record.put(INTERCHANGEABLE, lastDetailListEntity.isInterchangeableNode());
+                                    if (child.isUnit()) {
+                                        record.put(CHILDREN, getAllChildrenForEntity(child));
+                                    }
+                                    result.put(record);
                                 }
-                                result.put(record);
                             }
                         }
                     }
+                } else {
+                    break;
                 }
             }
         }
@@ -218,18 +227,22 @@ public class ExportSPTUtils {
         ftpUtils.setPostfix(postfix);
 
         for (int i = 0; i < details.size(); i++) {
-            DetailEntity entity = details.get(i);
+            if (!Thread.currentThread().isInterrupted()) {
+                DetailEntity entity = details.get(i);
 
-            int progress = (int) (((double) i / (details.size() - 1)) * 100);
-            progressManager.setCurrentProgress(progress);
+                int progress = (int) (((double) i / (details.size() - 1)) * 100);
+                progressManager.setCurrentProgress(progress);
 
 
-            String fileName = entity.getId() + FTP_IMAGE_FILE_EXTENSION;
-            File localFile = new File(result + File.separator + fileName);
-            try {
-                ftpUtils.downloadFile(entity.getId(), localFile);
-            } catch (IOException e) {
-                log.warn("Could not write a file to {}", localFile, e);
+                String fileName = entity.getId() + FTP_IMAGE_FILE_EXTENSION;
+                File localFile = new File(result + File.separator + fileName);
+                try {
+                    ftpUtils.downloadFile(entity.getId(), localFile);
+                } catch (IOException e) {
+                    log.warn("Could not write a file to {}", localFile, e);
+                }
+            } else {
+                break;
             }
         }
         try {

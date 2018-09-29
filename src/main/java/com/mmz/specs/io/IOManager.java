@@ -24,6 +24,4 @@ public interface IOManager {
     void exportData(File file) throws IOException, ZipException;
 
     Object importData(File file) throws IOException;
-
-    void interrupt();
 }
