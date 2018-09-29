@@ -220,6 +220,7 @@ public class ExportDataWindow extends JDialog {
                 JOptionPane.showMessageDialog(this, "Во время экспорта произошла ошибка:\n"
                         + e.getLocalizedMessage(), "Ошибка при экспорте данных", JOptionPane.WARNING_MESSAGE);
                 progressManager.reset();
+                enableControls(true);
             }
         };
         managerThread = new Thread(runnable);
