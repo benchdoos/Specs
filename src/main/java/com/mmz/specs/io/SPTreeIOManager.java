@@ -129,7 +129,8 @@ public class SPTreeIOManager implements IOManager {
 
         if (!file.createNewFile()) {
             log.warn("Can not create file: {}", file);
-            throw new IOException("Can not write data to file: " + file);
+            log.warn("File exists: {}", file.exists());
+            throw new IOException("Can not write data to file: " + file + ". File exists: " + file.exists());
         } else {
             log.debug("Testing file deleted: " + file.delete());
         }

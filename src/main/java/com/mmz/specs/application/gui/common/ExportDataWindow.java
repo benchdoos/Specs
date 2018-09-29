@@ -174,6 +174,7 @@ public class ExportDataWindow extends JDialog {
         int result = JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите остановить экспорт данных?",
                 "Подтверждение действий", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == 0) {
+            log.warn("User canceled export!");
             if (managerThread != null) {
                 if (managerThread.isAlive()) {
                     managerThread.interrupt();
