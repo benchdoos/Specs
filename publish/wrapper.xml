@@ -45,17 +45,17 @@
         <timeoutErr>true</timeoutErr>
     </splash>
     <versionInfo>
-        <fileVersion>0.3.4.159</fileVersion>
-        <txtFileVersion>0.3.4.159</txtFileVersion>
-        <fileDescription>Спецификации</fileDescription>
-        <copyright>Евгений Зражевский</copyright>
-        <productVersion>0.3.4.159</productVersion>
-        <txtProductVersion>0.3.4.159</txtProductVersion>
+        <fileVersion>0.4.0.165</fileVersion>
+        <txtFileVersion>0.4.0.165</txtFileVersion>
+        <fileDescription>Specifications</fileDescription>
+        <copyright>Eugene Zrazhevsky</copyright>
+        <productVersion>0.4.0.165</productVersion>
+        <txtProductVersion>0.4.0.165</txtProductVersion>
         <productName>Specs</productName>
-        <companyName>ООО &quot;Майкопский машиностроительный завод&quot;</companyName>
+        <companyName>OOO &quot;Maikop Machine-Building Plant&quot;</companyName>
         <internalName>com.mmz.specs</internalName>
         <originalFilename>Specs.exe</originalFilename>
-        <trademarks></trademarks>
+        <trademarks>MAYMAN</trademarks>
         <language>RUSSIAN</language>
     </versionInfo>
     <messages>

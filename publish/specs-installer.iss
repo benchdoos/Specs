@@ -5,10 +5,10 @@
 #define MyAppNameEnglish "Specs"
 #define MyAppPublisher "ООО Майкопский машиностроительный завод"
 #define MyAppURL "http://maykop-mmz.com/"
-;#define MyAppExeName "Specs.jar"
 #define MyAppExeName "Specs.exe"
 #define MyAppServerRusName "Спецификации — Сервер"
 #define ApplicationVersion GetFileVersion('F:\Developer\JAVA\Specs\publish\Specs\Specs.exe')
+#define MyAppIconsFile "icons.icl"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -46,9 +46,6 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 Name: "server"; Description: "Сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
-;Name: "updateServer"; Description: "После обновления сервер"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
-;Name: "updateClient"; Description: "После обновления клиент"; GroupDescription: "Дополнительные возможности:"; Flags: unchecked
-
 
 [Files]
 ;Source: "F:\Developer\JAVA\Specs\target\Specs.jar"; DestDir: "{app}";
@@ -57,7 +54,15 @@ Source: "F:\Developer\JAVA\Specs\publish\Specs\client.ico"; DestDir: "{app}"; Fl
 Source: "F:\Developer\JAVA\Specs\publish\Specs\server.ico"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server;
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Client User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Developer\JAVA\Specs\publish\Specs\Server User Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion; Tasks: server
+Source: "F:\Developer\JAVA\Specs\publish\Specs\icons.icl"; DestDir: "{app}"; Flags: ignoreversion;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Registry]
+; File association
+Root: HKCR; Subkey: ".spt"; ValueType: string; ValueName: ""; ValueData: "com.mmz.specs.tree"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "Specs"; ValueType: string; ValueName: ""; ValueData: "Specs Tree"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "Specs\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppIconsFile},3"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "Specs\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletevalue
 
 [Icons]
 Name: "{group}\{#MyAppNameEnglish}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\client.ico"
