@@ -46,16 +46,17 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Properties;
 
 import static com.mmz.specs.application.core.ApplicationConstants.TMP_IMAGE_FOLDER;
 
@@ -764,6 +765,8 @@ public class ClientMainWindow extends JFrame {
         initKeyBindings();
         unlockButtonIconUpdate(false);
 
+        initDropTarget();
+
         CommonWindowUtils.initApplicationVersionArea(applicationVersionTextField);
 
         updateMessage(null, null);
@@ -773,6 +776,60 @@ public class ClientMainWindow extends JFrame {
         pack();
         setSize(ClientSettingsManager.getInstance().getClientMainWindowDimension());
         setExtendedState(ClientSettingsManager.getInstance().isClientMainWindowExtended() ? JFrame.MAXIMIZED_BOTH : JFrame.NORMAL);
+    }
+
+    private void initDropTarget() {
+        final DropTarget dropTarget = new DropTarget() {
+            @Override
+            public synchronized void drop(DropTargetDropEvent evt) {
+                onDrop(evt);
+            }
+
+            private void onDrop(DropTargetDropEvent evt) {
+                try {
+                    contentPane.setBorder(null);
+                    evt.acceptDrop(DnDConstants.ACTION_COPY);
+                    final Object transferData = evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    List<?> list = (List<?>) transferData;
+                    for (Object o : list) {
+                        if (o instanceof File) {
+                            File file = (File) o;
+                            if (CommonUtils.getFileExtension(file)
+                                    .equalsIgnoreCase(SupportedExtensionsConstants.EXPORT_TREE_EXTENSION)) {
+                                openFile(file);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    log.warn("Can not open files from drop", ex);
+                }
+            }
+
+        };
+        contentPane.setDropTarget(dropTarget);
+
+        try {
+            dropTarget.addDropTargetListener(new DropTargetAdapter() {
+                @Override
+                public void drop(DropTargetDropEvent dtde) {
+                    contentPane.setBorder(null);
+                }
+
+                @Override
+                public void dragEnter(DropTargetDragEvent dtde) {
+                    contentPane.setBorder(BorderFactory.createLineBorder(Color.RED));
+                    super.dragEnter(dtde);
+                }
+
+                @Override
+                public void dragExit(DropTargetEvent dte) {
+                    contentPane.setBorder(null);
+                    super.dragExit(dte);
+                }
+            });
+        } catch (TooManyListenersException e) {
+            log.warn("Can not init drag and drop dropTarget", e);
+        }
     }
 
     private void initStatusEaster() {
