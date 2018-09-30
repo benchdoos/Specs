@@ -44,6 +44,7 @@ public class FileViewPanel extends JPanel {
     public void setContent(JPanel panel) {
         contentPane.removeAll();
         contentPane.add(panel);
+        contentPane.updateUI();
     }
 
     {
