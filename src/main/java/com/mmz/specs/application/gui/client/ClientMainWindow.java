@@ -27,6 +27,7 @@ import com.mmz.specs.application.gui.common.AboutApplicationWindow;
 import com.mmz.specs.application.gui.common.ButtonTabComponent;
 import com.mmz.specs.application.gui.common.LoginWindow;
 import com.mmz.specs.application.gui.common.UserInfoWindow;
+import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.gui.panels.*;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.*;
@@ -1049,6 +1050,21 @@ public class ClientMainWindow extends JFrame {
 
     public void openFile(File file) {
         log.info("Got file to open: {}", file);
+        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/extensions/sptFileFormat.png")));
+
+        FileViewPanel panel = new FileViewPanel();
+
+        ProgressManager manager = new ProgressManager();
+
+        final OpeningFileProcessPanel processPanel = new OpeningFileProcessPanel(file, manager);
+
+        addTab(CommonUtils.getSmallFileName(file).toLowerCase(), icon, panel, true);
+        panel.setContent(processPanel);
+
+        manager.setTotalMaxValue(4);
+        manager.setTotalProgress(1);
+
+
     }
 
     {

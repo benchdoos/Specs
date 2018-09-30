@@ -295,4 +295,12 @@ public class CommonUtils {
         }
         return extension;
     }
+
+    public static String getSmallFileName(File file) {
+        String fileName = file.getName();
+        if (fileName.length() > 30) {
+            return fileName = fileName.substring(0, 27) + "..." + getFileExtension(file);
+        }
+        return fileName;
+    }
 }
