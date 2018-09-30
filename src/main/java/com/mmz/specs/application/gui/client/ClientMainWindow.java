@@ -545,6 +545,13 @@ public class ClientMainWindow extends JFrame {
         if (selectedIndex > 0) {
 
             try {
+                Cleanable cleanable = (Cleanable) clientMainTabbedPane.getComponentAt(selectedIndex);
+                cleanable.clean();
+            } catch (ClassCastException ignore) {
+                /*NOP*/
+            }
+
+            try {
                 Transactional transactional = (Transactional) clientMainTabbedPane.getComponentAt(selectedIndex);
                 transactional.rollbackTransaction();
             } catch (ClassCastException e) {
@@ -621,29 +628,46 @@ public class ClientMainWindow extends JFrame {
 
     private void closeWindow() {
         try {
-            if (getTransactionalTabs().isEmpty()) {
-                dispose();
-            } else {
-                ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
-                for (Transactional transactional : transactionalTabList) {
-                    if (ClientBackgroundService.getInstance().isConnected()) {
-                        if (currentUser != null) {
-                            transactional.rollbackTransaction();
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
-                                    "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
-                        }
-                    } else {
-                        transactional.rollbackTransaction();
-                    }
-                }
-                if (getTransactionalTabs().isEmpty()) {
-                    dispose();
-                }
-            }
+            clearCleanableTabs();
+            clearTransactionalTabs();
         } catch (HeadlessException e1) {
             log.warn("Could not close window properly... closing anyway", e1);
             dispose();
+        }
+    }
+
+    private void clearCleanableTabs() {
+        for (Component c : clientMainTabbedPane.getComponents()) {
+            try {
+                Cleanable cleanable = (Cleanable) c;
+                cleanable.clean();
+                closeTab(c);
+            } catch (ClassCastException ignore) {
+                /*NOP*/
+            }
+        }
+    }
+
+    private void clearTransactionalTabs() {
+        if (getTransactionalTabs().isEmpty()) {
+            dispose();
+        } else {
+            ArrayList<Transactional> transactionalTabList = getTransactionalTabs();
+            for (Transactional transactional : transactionalTabList) {
+                if (ClientBackgroundService.getInstance().isConnected()) {
+                    if (currentUser != null) {
+                        transactional.rollbackTransaction();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Невозможно закрыть окно, пока существует транзакционная вкладка\n" +
+                                "Войдите в систему, чтобы закрыть её.", "Ошибка", JOptionPane.WARNING_MESSAGE);
+                    }
+                } else {
+                    transactional.rollbackTransaction();
+                }
+            }
+            if (getTransactionalTabs().isEmpty()) {
+                dispose();
+            }
         }
     }
 

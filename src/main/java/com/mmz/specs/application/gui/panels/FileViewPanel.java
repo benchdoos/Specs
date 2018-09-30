@@ -17,11 +17,15 @@ package com.mmz.specs.application.gui.panels;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.mmz.specs.application.utils.Logging;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class FileViewPanel extends JPanel {
+public class FileViewPanel extends JPanel implements Cleanable {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private JPanel contentPane;
 
     public FileViewPanel() {
@@ -45,6 +49,21 @@ public class FileViewPanel extends JPanel {
         contentPane.removeAll();
         contentPane.add(panel);
         contentPane.updateUI();
+    }
+
+    @Override
+    public void clean() {
+        if (contentPane.getComponents().length > 0) {
+            final Component component = contentPane.getComponents()[0];
+            if (component instanceof SptFileViewPanel) {
+                try {
+                    Cleanable cleanable = (Cleanable) component;
+                    cleanable.clean();
+                } catch (Exception e) {
+                    log.warn("Could not clear trash", e);
+                }
+            }
+        }
     }
 
     {

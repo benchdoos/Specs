@@ -16,6 +16,7 @@
 package com.mmz.specs.application.gui.common;
 
 
+import com.mmz.specs.application.gui.panels.Cleanable;
 import com.mmz.specs.application.gui.panels.Transactional;
 import com.mmz.specs.application.utils.Logging;
 import org.apache.logging.log4j.LogManager;
@@ -85,6 +86,11 @@ public class ButtonTabComponent extends JPanel {
         transactional.rollbackTransaction();
     }
 
+    private void manageCleanable(int i) {
+        Cleanable cleanable = (Cleanable) pane.getComponentAt(i);
+        cleanable.clean();
+    }
+
     private class TabButton extends JButton implements ActionListener {
         TabButton() {
             int size = 10;
@@ -112,6 +118,11 @@ public class ButtonTabComponent extends JPanel {
                     try {
                         manageTransactions(i);
                     } catch (ClassCastException ex) {
+                        try {
+                            manageCleanable(i);
+                        } catch (Exception ignore) {
+                            /*NOP*/
+                        }
                         pane.remove(i);
                     } catch (Exception ex) {
                         log.warn("Could not rollback transaction for tab: {}", i, ex);
