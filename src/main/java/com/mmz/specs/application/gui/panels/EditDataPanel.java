@@ -136,7 +136,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
                 final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
                 mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
                 Runnable runnable = () -> {
-                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListPanel(selectedValue.getCode()), true);
+                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListViewPanel(selectedValue.getCode()), true);
                     mainWindowUtils.updateMessage(null, null);
                 };
                 new Thread(runnable).start();
@@ -521,7 +521,7 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
                 final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
                 mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
                 Runnable runnable = () -> {
-                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListPanel(selectedValue.getTitle()), true);
+                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListViewPanel(selectedValue.getTitle()), true);
                     mainWindowUtils.updateMessage(null, null);
                 };
                 new Thread(runnable).start();

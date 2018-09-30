@@ -56,7 +56,7 @@ import static com.mmz.specs.application.core.client.ClientConstants.IMAGE_REMOVE
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.COPY;
 import static com.mmz.specs.application.gui.client.SelectDetailEntityWindow.MODE.CREATE_SINGLE;
 
-public class DetailListPanel extends JPanel implements AccessPolicy {
+public class DetailListViewPanel extends JPanel implements AccessPolicy {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final int MAXIMUM_STRING_LENGTH = 35;
     private JPanel detailListPanel;
@@ -85,7 +85,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
     private Thread searchThread = null;
 
-    public DetailListPanel() {
+    public DetailListViewPanel() {
         $$$setupUI$$$();
         session = ClientBackgroundService.getInstance().getSession();
 
@@ -94,7 +94,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
-    DetailListPanel(Session session, DetailEntity rootEntity) {
+    DetailListViewPanel(Session session, DetailEntity rootEntity) {
         $$$setupUI$$$();
         this.session = session;
 
@@ -104,7 +104,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
 
     }
 
-    DetailListPanel(String searchText) {
+    DetailListViewPanel(String searchText) {
         $$$setupUI$$$();
         session = ClientBackgroundService.getInstance().getSession();
 
@@ -149,7 +149,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
     }
 
     private void initListeners() {
-        DetailListPanel panel = this;
+        DetailListViewPanel panel = this;
         final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
         noticeInfoButton.addActionListener(e -> {
             mainWindowUtils.setClientMainWindow(panel);
@@ -765,7 +765,7 @@ public class DetailListPanel extends JPanel implements AccessPolicy {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListPanel.super.getRootPane()), false,
+                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListViewPanel.super.getRootPane()), false,
                                 image, "Изображение " + detailEntity.getCode() + " "
                                         + detailEntity.getDetailTitleByDetailTitleId().getTitle());
                     }

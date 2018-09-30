@@ -348,7 +348,7 @@ public class EditNoticePanel extends JPanel implements AccessPolicy, Transaction
                             InitializationPanel panel = new InitializationPanel();
                             savePreviewPanel.add(panel);
                             SwingUtilities.invokeLater(() -> {
-                                final DetailListPanel comp = new DetailListPanel(session, rootEntity);
+                                final DetailListViewPanel comp = new DetailListViewPanel(session, rootEntity);
                                 savePreviewPanel.add(comp);
                                 savePreviewPanel.remove(panel);
                             });

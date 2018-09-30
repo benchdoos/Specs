@@ -651,7 +651,7 @@ public class ClientMainWindow extends JFrame {
         try {
             updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
             Runnable runnable = () -> {
-                addTab("Просмотр вложенности", icon, new DetailListPanel(), select);
+                addTab("Просмотр вложенности", icon, new DetailListViewPanel(), select);
                 updateMessage(null, null);
             };
             new Thread(runnable).start();
