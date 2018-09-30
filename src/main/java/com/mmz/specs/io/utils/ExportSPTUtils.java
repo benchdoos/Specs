@@ -15,16 +15,22 @@
 
 package com.mmz.specs.io.utils;
 
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.DaoConstants;
 import com.mmz.specs.io.IOConstants;
+import com.mmz.specs.io.SPTreeIOManager;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.MaterialListEntity;
 import com.mmz.specs.service.*;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -252,5 +258,53 @@ public class ExportSPTUtils {
         }
     }
 
+    public File downloadImages(File folder, JSONObject treeJSON) {
+        File result = new File(folder, SPTreeIOManager.IMAGES_FOLDER_FILE_NAME);
+        log.debug("Starting downloading images to folder: {}", folder);
+        progressManager.setCurrentProgress(0);
+        progressManager.setText("Определяем список деталей");
+        progressManager.setCurrentIndeterminate(true);
+
+        final String jsonType = treeJSON.getString(TYPE);
+        if (!jsonType.equalsIgnoreCase(DEFAULT_TREE_TYPE)) {
+            throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
+        }
+        log.debug("Starting finding all details in JSON");
+        ArrayList<DetailEntity> details = ExportSPTUtils.listDetailsFromJSON(treeJSON);
+
+        progressManager.setCurrentIndeterminate(false);
+        progressManager.setText("Загружаем изображения с FTP");
+
+        if (details != null) {
+            log.debug("Got details: {}", details.size());
+            log.debug("Starting downloading {} details images to {}", details.size(), result);
+            result.mkdirs();
+
+            final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
+            exportSPTUtils.downloadFromFTP(result, details);
+
+            return result;
+        }
+        return null;
+
+    }
+
+    public void createSPTFile(File file, File jsonFile, File imagesFolder) throws ZipException {
+        ZipFile zipFile = new ZipFile(file);
+
+        ZipParameters parameters = getDefaultZipParameters();
+
+        zipFile.addFile(jsonFile, parameters);
+        zipFile.addFolder(imagesFolder, parameters);
+    }
+
+    private ZipParameters getDefaultZipParameters() {
+        ZipParameters parameters = new ZipParameters();
+        parameters.setEncryptFiles(true);
+        parameters.setEncryptionMethod(Zip4jConstants.ENC_METHOD_AES);
+        parameters.setAesKeyStrength(Zip4jConstants.AES_STRENGTH_256);
+        parameters.setPassword(ApplicationConstants.INTERNAL_FULL_NAME);
+        return parameters;
+    }
 
 }

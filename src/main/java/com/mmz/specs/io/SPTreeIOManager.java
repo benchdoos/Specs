@@ -15,16 +15,13 @@
 
 package com.mmz.specs.io;
 
-import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
+import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.connection.ServerDBConnectionPool;
+import com.mmz.specs.application.utils.SupportedExtensionsConstants;
 import com.mmz.specs.io.utils.ExportSPTUtils;
-import com.mmz.specs.model.DetailEntity;
-import net.lingala.zip4j.core.ZipFile;
+import com.mmz.specs.io.utils.ImportSPTUtils;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,25 +32,30 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import static com.mmz.specs.application.core.ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION;
-import static com.mmz.specs.io.IOConstants.DEFAULT_TREE_TYPE;
-import static com.mmz.specs.io.IOConstants.TYPE;
 
 public class SPTreeIOManager implements IOManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    public static final String JSON_FILE_NAME = "tree.json";
+    public static final String IMAGES_FOLDER_FILE_NAME = "images";
 
-    private final Session session;
+
+    private Session session = null;
     private String datePattern = "dd.MM.yyyy HH.mm";
     private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
     private ProgressManager progressManager;
 
 
+    public SPTreeIOManager(Session session, ProgressManager progressManager) {
+        this.progressManager = progressManager;
+        this.session = session;
+    }
+
     public SPTreeIOManager(ProgressManager progressManager) {
         this.progressManager = progressManager;
-        this.session = ServerDBConnectionPool.getInstance().getSession();
+        this.session = null;
     }
 
     @Override
@@ -66,17 +68,18 @@ public class SPTreeIOManager implements IOManager {
         final JSONObject treeJSON;
         final File jsonFile;
         if (!Thread.currentThread().isInterrupted()) {
-            treeJSON = new ExportSPTUtils(session, progressManager).createTreeJSON();
+            final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
+            treeJSON = exportSPTUtils.createTreeJSON();
             jsonFile = exportTree(folder, treeJSON);
 
             progressManager.setTotalProgress(1);
 
             if (!Thread.currentThread().isInterrupted()) {
-                File imagesFolder = downloadImages(folder, treeJSON);
+                File imagesFolder = exportSPTUtils.downloadImages(folder, treeJSON);
                 progressManager.setTotalProgress(2);
 
                 if (!Thread.currentThread().isInterrupted()) {
-                    createSPTFile(file, jsonFile, imagesFolder);
+                    exportSPTUtils.createSPTFile(file, jsonFile, imagesFolder);
                     progressManager.setTotalProgress(3);
                 }
 
@@ -108,7 +111,7 @@ public class SPTreeIOManager implements IOManager {
 
     private File exportTree(File folder, JSONObject treeJSON) throws IOException {
         progressManager.setText("Экспорт дерева");
-        final File jsonFile = new File(folder + File.separator + "tree.json");
+        final File jsonFile = new File(folder + File.separator + JSON_FILE_NAME);
         try (FileWriter writer = new FileWriter(jsonFile)) {
             treeJSON.write(writer);
         }
@@ -136,53 +139,33 @@ public class SPTreeIOManager implements IOManager {
         }
     }
 
-    private File downloadImages(File folder, JSONObject treeJSON) {
-        File result = new File(folder, "images");
-        log.debug("Starting downloading images to folder: {}", folder);
-        progressManager.setCurrentProgress(0);
-        progressManager.setText("Определяем список деталей");
-        progressManager.setCurrentIndeterminate(true);
-
-        final String jsonType = treeJSON.getString(TYPE);
-        if (!jsonType.equalsIgnoreCase(DEFAULT_TREE_TYPE)) {
-            throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
-        }
-        log.debug("Starting finding all details in JSON");
-        ArrayList<DetailEntity> details = ExportSPTUtils.listDetailsFromJSON(treeJSON);
-
-        progressManager.setCurrentIndeterminate(false);
-        progressManager.setText("Загружаем изображения с FTP");
-
-        if (details != null) {
-            log.debug("Got details: {}", details.size());
-            log.debug("Starting downloading {} details images to {}", details.size(), result);
-            result.mkdirs();
-
-            final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
-            exportSPTUtils.downloadFromFTP(result, details);
-
-            return result;
-        }
-        return null;
-
-    }
-
-    private void createSPTFile(File file, File jsonFile, File imagesFolder) throws ZipException {
-        ZipFile zipFile = new ZipFile(file);
-
-        ZipParameters parameters = new ZipParameters();
-        parameters.setEncryptFiles(true);
-        parameters.setEncryptionMethod(Zip4jConstants.ENC_METHOD_AES);
-        parameters.setAesKeyStrength(Zip4jConstants.AES_STRENGTH_256);
-        parameters.setPassword(ApplicationConstants.INTERNAL_FULL_NAME);
-
-        zipFile.addFile(jsonFile, parameters);
-        zipFile.addFolder(imagesFolder, parameters);
-    }
-
 
     @Override
-    public Object importData(File file) {
+    public Object importData(File sptFile) throws IOException {
+        log.info("Starting import of sptFile: {}", sptFile);
+        if (!isFileSPT(sptFile)) {
+            throw new IOException("Can not open sptFile: " + sptFile);
+        }
+
+
+        final ImportSPTUtils importSPTUtils = new ImportSPTUtils(progressManager);
+        try {
+            final File folder = importSPTUtils.openSPTFile(sptFile);
+            log.info("SPT sptFile {} extracted to {}", sptFile, folder);
+            return folder;
+        } catch (ZipException e) {
+            log.warn("Could not extract spt sptFile: {}", sptFile, e);
+        }
         return null;
+    }
+
+    private boolean isFileSPT(File file) {
+        if (file != null) {
+            if (file.exists()) {
+                return CommonUtils.getFileExtension(file).equalsIgnoreCase(
+                        SupportedExtensionsConstants.EXPORT_TREE_EXTENSION);
+            }
+        }
+        return false;
     }
 }
