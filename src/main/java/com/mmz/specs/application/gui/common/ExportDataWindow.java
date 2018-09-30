@@ -42,7 +42,7 @@ import static com.mmz.specs.application.utils.SupportedExtensionsConstants.EXPOR
 
 public class ExportDataWindow extends JDialog {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
-    public ProgressManager progressManager = new ProgressManager();
+    private ProgressManager progressManager = new ProgressManager();
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -110,7 +110,7 @@ public class ExportDataWindow extends JDialog {
     }
 
     private void onBrowseFolder() {
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
         if (!new File(filePathTextField.getText()).exists() && new File(filePathTextField.getText()).isFile()) {
             chooser.setCurrentDirectory(new File(ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION));
         } else {

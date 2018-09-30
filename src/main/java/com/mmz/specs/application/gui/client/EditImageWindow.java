@@ -18,6 +18,7 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.security.SecurityManager;
 import com.mmz.specs.application.utils.CommonUtils;
@@ -182,7 +183,7 @@ public class EditImageWindow extends JDialog {
     }
 
     private void onUpload() {
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
         chooser.setDialogTitle("Выберите изображение (" + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS) + ")");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);

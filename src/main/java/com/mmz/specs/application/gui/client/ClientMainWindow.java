@@ -44,6 +44,8 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -166,11 +168,13 @@ public class ClientMainWindow extends JFrame {
 
         JMenuItem openFileMenu = new JMenuItem("Открыть");
         openFileMenu.addActionListener(e -> onOpenFileMenu());
+        openFileMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         menu.add(openFileMenu);
 
-        JMenuItem saveFileMenu = new JMenuItem("Сохранить");
+        /*JMenuItem saveFileMenu = new JMenuItem("Сохранить");
         saveFileMenu.addActionListener(e -> onSaveFileMenu());
-        menu.add(saveFileMenu);
+        saveFileMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        menu.add(saveFileMenu);*/
 
         return menu;
     }
@@ -361,7 +365,26 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void onOpenFileMenu() {
-        System.out.println("Open file menu is not supported yet");
+        log.debug("Showing open menu");
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
+        chooser.setDialogTitle("Открытие");
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setMultiSelectionEnabled(true);
+
+        FileFilter fileFilter = new FileNameExtensionFilter("Слепок базы данных",
+                SupportedExtensionsConstants.EXPORT_TREE_EXTENSION.replace(".", ""));
+        chooser.setFileFilter(fileFilter);
+        int returnValue = chooser.showDialog(this, "OK");
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File[] files = chooser.getSelectedFiles();
+            for (File file : files) {
+                if (file.exists()) {
+                    if (file.isFile()) {
+                        openFile(file);
+                    }
+                }
+            }
+        }
     }
 
     private void onSaveFileMenu() {
@@ -800,7 +823,6 @@ public class ClientMainWindow extends JFrame {
         JMenuBar mainMenuBar = new JMenuBar();
 
         JMenu fileMenu = getFileMenu();
-        fileMenu.setEnabled(false);//unsupported yet!
 
         mainMenuBar.add(fileMenu);
 

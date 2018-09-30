@@ -1528,7 +1528,7 @@ public class ServerMainWindow extends JFrame {
     }
 
     private void onSaveSettingsToButton() {
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
         chooser.setDialogTitle("Сохранить файл конфигурации (.xml)");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setMultiSelectionEnabled(false);
