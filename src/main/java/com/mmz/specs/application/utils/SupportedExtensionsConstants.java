@@ -15,8 +15,12 @@
 
 package com.mmz.specs.application.utils;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class SupportedExtensionsConstants {
     public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "png", "bmp", "gif"};
+
 
     public static final String FTP_IMAGE_FILE_EXTENSION = ".spi";
 
@@ -30,4 +34,11 @@ public class SupportedExtensionsConstants {
 
     public static final String EXPORT_BACKUP_EXTENSION = ".spb";
 
+    public static final String[] SUPPORTED_FILE_EXTENSIONS = {EXPORT_TREE_EXTENSION, FTP_IMAGE_FILE_EXTENSION};
+
+    public static boolean contains(String[] extensions, String extension) {
+        extension = extension.toLowerCase();
+        final List<String> list = Arrays.asList(extensions);
+        return list.contains(extension);
+    }
 }

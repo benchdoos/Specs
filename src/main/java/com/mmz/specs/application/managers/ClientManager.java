@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
+import java.io.File;
 
 public class ClientManager {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -75,6 +76,12 @@ public class ClientManager {
             ClientConfigurationWindow clientConfigurationWindow = new ClientConfigurationWindow();
             clientConfigurationWindow.setLocation(FrameUtils.getFrameOnCenter(null, clientConfigurationWindow));
             clientConfigurationWindow.setVisible(true);
+        }
+    }
+
+    public void openFile(File file) {
+        if (file.exists() && file.isFile()) {
+            clientMainWindow.openFile(file);
         }
     }
 }

@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
@@ -39,6 +40,8 @@ import static com.mmz.specs.application.core.ApplicationArgumentsConstants.SERVE
 
 public class CoreUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    private static ClientManager clientManager;
+
 
     public static void manageArguments(final String[] args) {
         if (args.length > 0) {
@@ -94,11 +97,30 @@ public class CoreUtils {
             }
             default: {
                 log.debug("Unknown argument: " + firstArgument);
+
+                final boolean supportedFile = isSupportedFile(firstArgument);
+
                 log.debug("Starting default mode: " + ModeManager.DEFAULT_MODE);
                 initClient();
+                if (supportedFile) {
+                    clientManager.openFile(new File(firstArgument));
+                }
                 break;
             }
         }
+    }
+
+    private static boolean isSupportedFile(String firstArgument) {
+        log.info("Checking if argument: {} is file", firstArgument);
+        final File file = new File(firstArgument);
+        if (file.exists() && file.isFile()) {
+            final String fileExtension = CommonUtils.getFileExtension(file);
+            if (SupportedExtensionsConstants.contains(SupportedExtensionsConstants.SUPPORTED_FILE_EXTENSIONS,
+                    fileExtension)) {
+                return fileExtension.equalsIgnoreCase(SupportedExtensionsConstants.EXPORT_TREE_EXTENSION);
+            }
+        }
+        return false;
     }
 
     private static void initClient() {
@@ -146,7 +168,7 @@ public class CoreUtils {
     private static void startClient() {
         log.debug("Argument is for " + ModeManager.MODE.CLIENT);
 
-        ClientManager clientManager = ClientManager.getInstance();
+        clientManager = ClientManager.getInstance();
     }
 
     private static void loadServerSettings() {

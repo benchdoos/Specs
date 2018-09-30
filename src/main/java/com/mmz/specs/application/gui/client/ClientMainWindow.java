@@ -816,7 +816,6 @@ public class ClientMainWindow extends JFrame {
         setJMenuBar(mainMenuBar);
     }
 
-
     private JMenu getHelpMenu() {
         JMenu help = new JMenu("Справка");
 
@@ -961,7 +960,6 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-
     private JMenu getSettingsMenu() {
         JMenu menu = new JMenu("Параметры");
 
@@ -1025,6 +1023,10 @@ public class ClientMainWindow extends JFrame {
 
         menu.setIconTextGap(0);
         return menu;
+    }
+
+    public void openFile(File file) {
+        log.info("Got file to open: {}", file);
     }
 
     {
