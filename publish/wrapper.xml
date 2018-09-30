@@ -45,12 +45,12 @@
         <timeoutErr>true</timeoutErr>
     </splash>
     <versionInfo>
-        <fileVersion>0.4.0.165</fileVersion>
-        <txtFileVersion>0.4.0.165</txtFileVersion>
+        <fileVersion>0.4.0.166</fileVersion>
+        <txtFileVersion>0.4.0.166</txtFileVersion>
         <fileDescription>Specifications</fileDescription>
         <copyright>Eugene Zrazhevsky</copyright>
-        <productVersion>0.4.0.165</productVersion>
-        <txtProductVersion>0.4.0.165</txtProductVersion>
+        <productVersion>0.4.0.166</productVersion>
+        <txtProductVersion>0.4.0.166</txtProductVersion>
         <productName>Specs</productName>
         <companyName>OOO &quot;Maikop Machine-Building Plant&quot;</companyName>
         <internalName>com.mmz.specs</internalName>
@@ -58,15 +58,4 @@
         <trademarks>MAYMAN</trademarks>
         <language>RUSSIAN</language>
     </versionInfo>
-    <messages>
-        <startupErr>Произошла ошибка во время запуска приложения.</startupErr>
-        <bundledJreErr>Это приложение запускается при наличии Java Runtime Environment, но оно отсутствует или
-            повреждено.
-        </bundledJreErr>
-        <jreVersionErr>Этому приложению необходимо Java Runtime Environment</jreVersionErr>
-        <launcherErr>Реестр ссылается на несуществующую установку Java Runtime Environment или среда выполнения
-            повреждена.
-        </launcherErr>
-        <instanceAlreadyExistsMsg>Приложение уже запущено.</instanceAlreadyExistsMsg>
-    </messages>
 </launch4jConfig>
