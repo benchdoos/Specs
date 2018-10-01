@@ -18,15 +18,25 @@ package com.mmz.specs.io.utils;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.io.formats.SPTFileFormat;
+import com.mmz.specs.io.formats.TreeSPTRecord;
+import com.mmz.specs.io.formats.TreeSPTRecordBuilder;
+import com.mmz.specs.model.DetailEntity;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static com.mmz.specs.io.formats.SPTFileFormat.DETAIL;
 
 public class ImportSPTUtils {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -34,6 +44,41 @@ public class ImportSPTUtils {
 
     public ImportSPTUtils(ProgressManager progressManager) {
         this.progressManager = progressManager;
+    }
+
+    public static DefaultMutableTreeNode getDefaultTreeModelFromJSONObject(JSONArray array) {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+        for (int i = 0; i < array.length(); i++) {
+            final JSONObject jsonObject = array.getJSONObject(i);
+            TreeSPTRecordBuilder builder = new TreeSPTRecordBuilder();
+            /*DetailEntity entity = JsonUtils.getDetailEntity(jsonObject.getString(DETAIL));*/
+            DetailEntity entity = null;
+            try {
+                entity = FromStringBuilder.stringToObject(jsonObject.getString(DETAIL), DetailEntity.class);
+            } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                e.printStackTrace();
+            }
+            builder.setDetail(entity)
+                    .setQuantity(jsonObject.getInt(SPTFileFormat.QUANTITY))
+                    .setInterchangeable(jsonObject.getBoolean(SPTFileFormat.INTERCHANGEABLE));
+
+            final JSONArray jsonArray = jsonObject.getJSONArray(SPTFileFormat.MATERIALS);
+            builder.setMaterials(jsonArray.toList());
+            final TreeSPTRecord treeSPTRecord = builder.getTreeSPTRecord();
+            final DefaultMutableTreeNode detail = new DefaultMutableTreeNode(treeSPTRecord);
+            /*if (treeSPTRecord.getDetail().isUnit()) {
+            }*/
+            root.add(detail);
+
+
+            /*final JSONArray jsonArray = jsonObject.getJSONArray(SPTFileFormat.CHILDREN);
+            for (int j = 0; j < jsonArray.length(); j++) {
+                JSONObject o = jsonArray.getJSONObject(i);
+                root.add(getDefaultTreeModelFromJSONObject(o));
+            }*/
+
+        }
+        return root;
     }
 
     public File openSPTFile(File file) throws ZipException, IOException {

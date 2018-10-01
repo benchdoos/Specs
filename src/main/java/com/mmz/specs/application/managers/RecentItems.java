@@ -132,7 +132,6 @@ public class RecentItems {
     private void removeDuplicate(String path) {
         final Set<String> strings = properties.stringPropertyNames();
         for (String key : strings) {
-            System.out.println("> " + properties.getProperty(key) + " " + path);
             if (properties.getProperty(key).equalsIgnoreCase(path)) {
                 properties.remove(key);
             }

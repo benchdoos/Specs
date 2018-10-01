@@ -166,6 +166,12 @@ public class SPTreeIOManager implements IOManager {
         return null;
     }
 
+    public static JSONObject loadJsonFromFile(File file) throws IOException {
+        String content = FileUtils.readFileToString(file, "utf-8");
+        return new JSONObject(content);
+
+    }
+
     private boolean isFileSPT(File file) {
         if (file != null) {
             if (file.exists()) {

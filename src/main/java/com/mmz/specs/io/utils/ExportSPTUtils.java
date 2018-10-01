@@ -15,6 +15,7 @@
 
 package com.mmz.specs.io.utils;
 
+import com.google.common.collect.ComparisonChain;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.CommonUtils;
@@ -23,6 +24,7 @@ import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.DaoConstants;
 import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.io.SPTreeIOManager;
+import com.mmz.specs.io.formats.SPTFileFormat;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.DetailListEntity;
 import com.mmz.specs.model.MaterialListEntity;
@@ -52,13 +54,10 @@ import java.util.*;
 import static com.mmz.specs.application.utils.SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
 import static com.mmz.specs.application.utils.SystemMonitoringInfoUtils.OPERATING_SYSTEM;
 import static com.mmz.specs.io.IOConstants.*;
+import static com.mmz.specs.io.formats.SPTFileFormat.*;
 
 public class ExportSPTUtils {
-    public static final String DETAIL = "detail";
-    public static final String QUANTITY = "quantity";
-    public static final String MATERIALS = "materials";
-    public static final String INTERCHANGEABLE = "interchangeable";
-    public static final String CHILDREN = "children";
+
 
     private static final int DEFAULT_MAX_FILE_LENGTH = 500 * 1000;
     private static final float DEFAULT_COMPRESSION_VALUE = 0.8f;
@@ -76,7 +75,7 @@ public class ExportSPTUtils {
     public static ArrayList<DetailEntity> listDetailsFromJSON(JSONObject treeJSON) {
         log.debug("Starting searching details in JSON");
         final String jsonType = treeJSON.getString(IOConstants.TYPE);
-        if (!jsonType.equalsIgnoreCase(IOConstants.DEFAULT_TREE_TYPE)) {
+        if (!jsonType.equalsIgnoreCase(SPTFileFormat.DEFAULT_TREE_TYPE)) {
             throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
         }
 
@@ -131,7 +130,7 @@ public class ExportSPTUtils {
 
         JSONObject root = new JSONObject();
         root.put(TYPE, DEFAULT_TREE_TYPE);
-        root.put(TIMESTAMP, Calendar.getInstance().getTime());
+        root.put(TIMESTAMP, Calendar.getInstance().getTime().getTime());
         root.put(AUTHOR, OPERATING_SYSTEM.getNetworkParams().getHostName());
 
         if (!Thread.currentThread().isInterrupted()) {
@@ -153,32 +152,28 @@ public class ExportSPTUtils {
         log.debug("Root entities: ({}) {}", root.size(), root);
 
         JSONArray array = new JSONArray();
-        if (root != null) {
-            for (int i = 0; i < root.size(); i++) {
-                if (!Thread.currentThread().isInterrupted()) {
-                    DetailEntity entity = root.get(i);
+        for (int i = 0; i < root.size(); i++) {
+            if (!Thread.currentThread().isInterrupted()) {
+                DetailEntity entity = root.get(i);
 
-                    log.debug("Creating tree for root entity: {}", entity.toSimpleString());
+                log.debug("Creating tree for root entity: {}", entity.toSimpleString());
 
-                    progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
+                progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
 
-                    JSONObject object = new JSONObject();
-                    object.put(DETAIL, entity);
-                    object.put(QUANTITY, 1);
-                    final JSONArray allChildrenForEntity = getAllChildrenForEntity(entity);
-                    log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.length(), allChildrenForEntity);
-                    object.put(CHILDREN, allChildrenForEntity);
+                JSONObject object = new JSONObject();
+                object.put(DETAIL, entity);
+                object.put(QUANTITY, 1);
+                final JSONArray allChildrenForEntity = getAllChildrenForEntity(entity);
+                log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.length(), allChildrenForEntity);
+                object.put(CHILDREN, allChildrenForEntity);
 
-                    array.put(object);
+                array.put(object);
 
-                    int progress = (int) (((double) i / (root.size() - 1)) * 100);
-                    progressManager.setCurrentProgress(progress);
-                } else {
-                    break;
-                }
+                int progress = (int) (((double) i / (root.size() - 1)) * 100);
+                progressManager.setCurrentProgress(progress);
+            } else {
+                break;
             }
-        } else {
-            progressManager.setText("Не удалось найти корневые каталоги");
         }
         return array;
     }
@@ -224,6 +219,18 @@ public class ExportSPTUtils {
         JSONArray result = new JSONArray();
         MaterialListService service = new MaterialListServiceImpl(session);
         final List<MaterialListEntity> materialListByDetail = service.getMaterialListByDetail(child);
+        materialListByDetail.sort((o1, o2) -> {
+            if (o2 != null) {
+                return ComparisonChain.start()
+                        .compareTrueFirst(o1.isMainMaterial(), o2.isMainMaterial())
+                        .compare(o1.getMaterialByMaterialId().getLongMark(), o2.getMaterialByMaterialId().getLongMark())
+                        .compare(o1.getMaterialByMaterialId().getLongProfile(), o2.getMaterialByMaterialId().getLongProfile())
+                        .result();
+            } else {
+                return -1;
+            }
+        });
+
         for (MaterialListEntity entity : materialListByDetail) {
             if (entity.isActive()) {
                 if (entity.getMaterialByMaterialId().isActive()) {
@@ -349,7 +356,7 @@ public class ExportSPTUtils {
         progressManager.setCurrentProgress(100);
     }
 
-    private void compressImage(File inputFile, File outputFile, float compresstion) throws IOException {
+    private void compressImage(File inputFile, File outputFile, float compression) throws IOException {
         BufferedImage image = ImageIO.read(inputFile);
 
         OutputStream os = new FileOutputStream(outputFile);
@@ -363,7 +370,7 @@ public class ExportSPTUtils {
         ImageWriteParam param = writer.getDefaultWriteParam();
 
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(compresstion);  // Change the quality value you prefer
+        param.setCompressionQuality(compression);  // Change the quality value you prefer
         writer.write(null, new IIOImage(image, null, null), param);
 
         os.close();

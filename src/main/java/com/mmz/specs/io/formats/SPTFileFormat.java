@@ -13,12 +13,16 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.io;
+package com.mmz.specs.io.formats;
 
-public class IOConstants {
+public class SPTFileFormat {
+    public final static String DEFAULT_TREE_TYPE = "com.mmz.specs.tree";
 
-    public final static String TYPE = "type";
-    public final static String TIMESTAMP = "timestamp";
-    public final static String AUTHOR = "author";
-    public final static String TREE = "tree";
+
+    //Tree
+    public static final String DETAIL = "detail";
+    public static final String QUANTITY = "quantity";
+    public static final String MATERIALS = "materials";
+    public static final String INTERCHANGEABLE = "interchangeable";
+    public static final String CHILDREN = "children";
 }

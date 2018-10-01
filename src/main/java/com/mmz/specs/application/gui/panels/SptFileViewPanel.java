@@ -21,14 +21,23 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.gui.panels.service.MaterialPanel;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.io.IOConstants;
+import com.mmz.specs.io.SPTreeIOManager;
+import com.mmz.specs.io.formats.SPTFileFormat;
+import com.mmz.specs.io.utils.ImportSPTUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 public class SptFileViewPanel extends JPanel implements Cleanable {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -44,17 +53,62 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private JLabel materialTextLabel;
     private MaterialPanel materialPanel;
     private File folder;
+    private File jsonFile;
+    private JSONObject rootJsonObject;
+
+    public SptFileViewPanel(File folder) {
+        $$$setupUI$$$();
+        this.folder = folder;
+
+        try {
+            initBusinessLogic();
+            printTreeInformation();
+            initGui();
+        } catch (Exception e) {
+            log.warn("Could not open SPT folder: {}", folder, e);
+            JOptionPane.showMessageDialog(this, "Не удалось открыть файл\n" +
+                    e.getLocalizedMessage(), "Ошибка открытия", JOptionPane.WARNING_MESSAGE);
+        }
+    }
 
     private void initGui() {
         setLayout(new GridLayout());
         add(contentPane);
+
+        initTree();
     }
 
-    public SptFileViewPanel(File folder) {
-        $$$setupUI$$$();
-        
-        this.folder = folder;
-        initGui();
+    private void initTree() {
+        final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJSONObject(rootJsonObject.getJSONArray(IOConstants.TREE));
+        DefaultTreeModel model = new DefaultTreeModel(node);
+        tree.setModel(model);
+    }
+
+    private void initBusinessLogic() throws IOException {
+        jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
+        log.info("Loading json tree from: {}", jsonFile);
+        JSONObject object = SPTreeIOManager.loadJsonFromFile(jsonFile);
+        final String string;
+        try {
+            string = object.getString(IOConstants.TYPE);
+        } catch (JSONException e) {
+            throw new IOException("JSON file " + jsonFile + " is not an STP file!");
+        }
+
+        if (string.equalsIgnoreCase(SPTFileFormat.DEFAULT_TREE_TYPE)) {
+            rootJsonObject = object;
+        } else {
+            throw new IOException("JSON file " + jsonFile + " is not an STP file!");
+        }
+        log.info("Successfully loaded json tree from: {}, size is: {}", jsonFile, rootJsonObject.length());
+    }
+
+    private void printTreeInformation() {
+        final String type = rootJsonObject.getString(IOConstants.TYPE);
+        Date date = new Date(rootJsonObject.getLong(IOConstants.TIMESTAMP));
+        final String author = rootJsonObject.getString(IOConstants.AUTHOR);
+        log.info("File {} information:", jsonFile);
+        log.info("Type: {}, Author: {}, Date: {}", type, author, date);
     }
 
     @Override
