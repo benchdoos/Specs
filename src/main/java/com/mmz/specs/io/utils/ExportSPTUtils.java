@@ -37,8 +37,16 @@ import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 import static com.mmz.specs.application.utils.SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
@@ -51,6 +59,11 @@ public class ExportSPTUtils {
     public static final String MATERIALS = "materials";
     public static final String INTERCHANGEABLE = "interchangeable";
     public static final String CHILDREN = "children";
+
+    private static final int DEFAULT_MAX_FILE_LENGTH = 500 * 1000;
+    private static final float DEFAULT_COMPRESSION_VALUE = 0.8f;
+
+
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session;
     private ProgressManager progressManager;
@@ -307,4 +320,54 @@ public class ExportSPTUtils {
         return parameters;
     }
 
+    public void optimizeImages(File folder) {
+        log.info("Starting optimization for images at folder: {}", folder);
+        progressManager.setCurrentProgress(0);
+        progressManager.setText("Оптимизация изображений");
+
+        if (folder.isDirectory()) {
+            final File[] files = folder.listFiles();
+            if (files != null) {
+                for (int i = 0; i < files.length; i++) {
+                    progressManager.setText("Оптимизация изображения " + (i + 1) + " из " + files.length);
+                    File file = files[i];
+                    final long length = file.length();
+                    log.debug("File length: {}/max:{} ({})", length, DEFAULT_MAX_FILE_LENGTH, file);
+                    if (length > DEFAULT_MAX_FILE_LENGTH) {
+                        try {
+                            compressImage(file, file, DEFAULT_COMPRESSION_VALUE);
+                        } catch (IOException e) {
+                            log.warn("Could not compress file: {}", file, e);
+                        }
+                    }
+                    int progress = (int) (((double) i / (files.length - 1)) * 100);
+                    progressManager.setCurrentProgress(progress);
+                }
+            }
+        }
+
+        progressManager.setCurrentProgress(100);
+    }
+
+    private void compressImage(File inputFile, File outputFile, float compresstion) throws IOException {
+        BufferedImage image = ImageIO.read(inputFile);
+
+        OutputStream os = new FileOutputStream(outputFile);
+
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        ImageWriter writer = writers.next();
+
+        ImageOutputStream ios = ImageIO.createImageOutputStream(os);
+        writer.setOutput(ios);
+
+        ImageWriteParam param = writer.getDefaultWriteParam();
+
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(compresstion);  // Change the quality value you prefer
+        writer.write(null, new IIOImage(image, null, null), param);
+
+        os.close();
+        ios.close();
+        writer.dispose();
+    }
 }

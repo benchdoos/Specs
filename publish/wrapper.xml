@@ -45,12 +45,12 @@
         <timeoutErr>true</timeoutErr>
     </splash>
     <versionInfo>
-        <fileVersion>0.4.0.166</fileVersion>
-        <txtFileVersion>0.4.0.166</txtFileVersion>
+        <fileVersion>0.4.0.167</fileVersion>
+        <txtFileVersion>0.4.0.167</txtFileVersion>
         <fileDescription>Specifications</fileDescription>
         <copyright>Eugene Zrazhevsky</copyright>
-        <productVersion>0.4.0.166</productVersion>
-        <txtProductVersion>0.4.0.166</txtProductVersion>
+        <productVersion>0.4.0.167</productVersion>
+        <txtProductVersion>0.4.0.167</txtProductVersion>
         <productName>Specs</productName>
         <companyName>OOO &quot;Maikop Machine-Building Plant&quot;</companyName>
         <internalName>com.mmz.specs</internalName>

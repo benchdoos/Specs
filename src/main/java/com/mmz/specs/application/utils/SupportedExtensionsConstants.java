@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SupportedExtensionsConstants {
-    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "png", "bmp", "gif"};
+    public static final String[] SUPPORTED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "bmp", "gif"};
 
 
     public static final String FTP_IMAGE_FILE_EXTENSION = ".spi";

@@ -190,7 +190,7 @@ public class EditImageWindow extends JDialog {
 
         FileFilter fileFilter = new FileNameExtensionFilter("Изображения "
                 + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS),
-                "jpg", "png", "bmp", "gif");
+                "jpg", "jpeg", "png", "bmp", "gif");
         chooser.setFileFilter(fileFilter);
         int returnValue = chooser.showDialog(this, "OK");
         if (returnValue == JFileChooser.APPROVE_OPTION) {

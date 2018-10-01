@@ -56,7 +56,7 @@ Source: "F:\Developer\JAVA\Specs\publish\Specs\icons.icl"; DestDir: "{app}"; Fla
 
 [Registry]
 ; File association
-Root: HKCR; Subkey: ".spt"; ValueType: string; ValueName: ""; ValueData: "com.mmz.specs.tree"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: ".spt"; ValueType: string; ValueName: ""; ValueData: "Specs"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "Specs"; ValueType: string; ValueName: ""; ValueData: "Specs Tree"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "Specs\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppIconsFile},3"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "Specs\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletevalue

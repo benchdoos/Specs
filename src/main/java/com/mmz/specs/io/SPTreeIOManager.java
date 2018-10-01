@@ -49,6 +49,7 @@ public class SPTreeIOManager implements IOManager {
 
 
     public SPTreeIOManager(Session session, ProgressManager progressManager) {
+        progressManager.setTotalMaxValue(5);
         this.progressManager = progressManager;
         this.session = session;
     }
@@ -72,21 +73,27 @@ public class SPTreeIOManager implements IOManager {
             treeJSON = exportSPTUtils.createTreeJSON();
             jsonFile = exportTree(folder, treeJSON);
 
-            progressManager.setTotalProgress(1);
+            progressManager.setTotalProgress(progressManager.getTotalProgress() + 1);
 
             if (!Thread.currentThread().isInterrupted()) {
                 File imagesFolder = exportSPTUtils.downloadImages(folder, treeJSON);
-                progressManager.setTotalProgress(2);
+                progressManager.setTotalProgress(progressManager.getTotalProgress() + 1);
+
+
+                if (!Thread.currentThread().isInterrupted()) {
+                    exportSPTUtils.optimizeImages(new File(folder + File.separator + IMAGES_FOLDER_FILE_NAME));
+                    progressManager.setTotalProgress(progressManager.getTotalProgress() + 1);
+                }
 
                 if (!Thread.currentThread().isInterrupted()) {
                     exportSPTUtils.createSPTFile(file, jsonFile, imagesFolder);
-                    progressManager.setTotalProgress(3);
+                    progressManager.setTotalProgress(progressManager.getTotalProgress() + 1);
                 }
 
                 if (!Thread.currentThread().isInterrupted()) {
                     removeTrash(folder);
                     progressManager.setText("Экспорт успено проведён");
-                    progressManager.setTotalProgress(4);
+                    progressManager.setTotalProgress(progressManager.getTotalProgress() + 1);
                     progressManager.setCurrentProgress(100);
                 }
             }
