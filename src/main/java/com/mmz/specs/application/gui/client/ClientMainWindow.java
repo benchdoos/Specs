@@ -180,6 +180,8 @@ public class ClientMainWindow extends JFrame {
         menu.add(openFileMenu);
 
         JMenu recentItemsMenu = getRecentItemsMenu();
+        recentItemsMenu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
+                .getImage(getClass().getResource("/img/gui/menu/recent.png"))));
         menu.add(recentItemsMenu);
 
         /*JMenuItem saveFileMenu = new JMenuItem("Сохранить");
