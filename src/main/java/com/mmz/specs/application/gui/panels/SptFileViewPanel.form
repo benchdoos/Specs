@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.mmz.specs.application.gui.panels.SptFileViewPanel">
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-    <margin top="10" left="10" bottom="10" right="10"/>
+    <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="48" y="54" width="644" height="297"/>
+      <xy x="48" y="54" width="709" height="421"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -16,15 +16,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="66398" class="javax.swing.JTree" binding="tree">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="150" height="50"/>
-              </grid>
-            </constraints>
-            <properties/>
-          </component>
-          <grid id="7b753" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="7b753" layout-manager="GridLayoutManager" row-count="9" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -32,7 +24,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="36318" class="javax.swing.JTextField" binding="searchTextField">
+              <component id="36318" class="javax.swing.JTextField" binding="searchTextField" custom-create="true">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
@@ -42,12 +34,12 @@
               </component>
               <vspacer id="1d2c1">
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
               </vspacer>
               <component id="1df58" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Обозначение:"/>
@@ -55,14 +47,122 @@
               </component>
               <component id="8f075" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Label"/>
+                  <text value="нет данных"/>
                 </properties>
               </component>
+              <component id="ede49" class="javax.swing.JLabel" binding="imageLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                    <minimum-size width="128" height="128"/>
+                    <preferred-size width="128" height="128"/>
+                    <maximum-size width="128" height="128"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <foreground color="-10395295"/>
+                  <horizontalAlignment value="0"/>
+                  <text value="нет изображения"/>
+                </properties>
+              </component>
+              <component id="587f1" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Наименование:" noi18n="true"/>
+                </properties>
+              </component>
+              <component id="4f6ef" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Узел:" noi18n="true"/>
+                </properties>
+              </component>
+              <component id="578bb" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Масса готовой детали:"/>
+                </properties>
+              </component>
+              <component id="440c9" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Норма расхода:"/>
+                </properties>
+              </component>
+              <component id="99bc5" class="javax.swing.JLabel" binding="titleLabel">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <preferred-size width="210" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <text value="нет данных"/>
+                </properties>
+              </component>
+              <component id="ef52c" class="javax.swing.JLabel" binding="unitLabel">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="нет данных"/>
+                </properties>
+              </component>
+              <component id="8f09c" class="javax.swing.JLabel" binding="finishedWeightLabel">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="нет данных"/>
+                </properties>
+              </component>
+              <component id="27ede" class="javax.swing.JLabel" binding="workpieceWeightLabel">
+                <constraints>
+                  <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="нет данных"/>
+                </properties>
+              </component>
+              <component id="b3fa" class="javax.swing.JLabel" binding="materialTextLabel">
+                <constraints>
+                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Материал:" noi18n="true"/>
+                </properties>
+              </component>
+              <nested-form id="402a2" form-file="com/mmz/specs/application/gui/panels/service/MaterialPanel.form" binding="materialPanel">
+                <constraints>
+                  <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <minimum-size width="-1" height="40"/>
+                  </grid>
+                </constraints>
+              </nested-form>
             </children>
           </grid>
+          <scrollpane id="c7101">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none" title="Узлы"/>
+            <children>
+              <component id="66398" class="javax.swing.JTree" binding="tree">
+                <constraints/>
+                <properties/>
+              </component>
+            </children>
+          </scrollpane>
         </children>
       </grid>
     </children>

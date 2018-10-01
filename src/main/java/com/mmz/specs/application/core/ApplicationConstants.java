@@ -37,7 +37,8 @@ public class ApplicationConstants {
 
     public static final String TMP_IMAGE_FOLDER = APPLICATION_SETTINGS_FOLDER_LOCATION + "images";
 
-    public static final String SETTINGS_FILE_PATH = new File(LOG_FOLDER).getParent() + File.separator + "settings.xml";
+    public static final String SETTINGS_FILE_PATH = APPLICATION_SETTINGS_FOLDER_LOCATION + "settings.xml";
+    public static final String RECENT_ITEMS_LIST_FILE_PATH = APPLICATION_SETTINGS_FOLDER_LOCATION + "recent_files.xml";
     public static final String DEFAULT_FILE_ENCODING = "UTF-8";
 
     public static final String LOG_PREFIX_SERVER = File.separator + "server_";
