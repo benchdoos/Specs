@@ -488,11 +488,13 @@ public class ClientMainWindow extends JFrame {
     }
 
     public void addTab(String title, Icon icon, JPanel panel, boolean select) {
-        clientMainTabbedPane.addTab(title, new ImageIcon(CommonUtils.getScaledImage(CommonUtils.iconToImage(icon), 12, 12)), panel);
-        int index = clientMainTabbedPane.getTabCount() - 1;
-        clientMainTabbedPane.setTabComponentAt(index, new ButtonTabComponent(clientMainTabbedPane));
-        if (select) {
-            clientMainTabbedPane.setSelectedIndex(index);
+        synchronized (clientMainTabbedPane) {
+            clientMainTabbedPane.addTab(title, new ImageIcon(CommonUtils.getScaledImage(CommonUtils.iconToImage(icon), 12, 12)), panel);
+            int index = clientMainTabbedPane.getTabCount() - 1;
+            clientMainTabbedPane.setTabComponentAt(index, new ButtonTabComponent(clientMainTabbedPane));
+            if (select) {
+                clientMainTabbedPane.setSelectedIndex(index);
+            }
         }
     }
 
@@ -1182,39 +1184,45 @@ public class ClientMainWindow extends JFrame {
         return menu;
     }
 
-    public void openFile(File file) {
-        log.info("Got file to open: {}", file);
-        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/extensions/sptFileFormat.png")));
+    public void openFile(final File file) {
+        Component component = this;
+        Runnable runnable = new Runnable() {
+            public void run() {
+                log.info("Got file to open: {}", file);
+                ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/extensions/sptFileFormat.png")));
 
-        FileViewPanel panel = new FileViewPanel();
+                FileViewPanel panel = new FileViewPanel();
 
-        ProgressManager progressManager = new ProgressManager();
+                ProgressManager progressManager = new ProgressManager();
 
-        final OpeningFileProcessPanel processPanel = new OpeningFileProcessPanel(file, progressManager);
+                final OpeningFileProcessPanel processPanel = new OpeningFileProcessPanel(file, progressManager);
 
-        addTab(CommonUtils.getSmallFileName(file).toLowerCase(), icon, panel, true);
-        panel.setContent(processPanel);
+                addTab(CommonUtils.getSmallFileName(file).toLowerCase(), icon, panel, true);
+                panel.setContent(processPanel);
 
-        SPTreeIOManager spTreeIOManager = new SPTreeIOManager(progressManager);
-        try {
-            final File folder = (File) spTreeIOManager.importData(file);
-            progressManager.setTotalProgress(3);
-            log.debug("Opening SPT file at  {}", folder);
+                SPTreeIOManager spTreeIOManager = new SPTreeIOManager(progressManager);
+                try {
+                    final File folder = (File) spTreeIOManager.importData(file);
+                    progressManager.setTotalProgress(3);
+                    log.debug("Opening SPT file at  {}", folder);
 
-            SptFileViewPanel sptFileViewPanel = new SptFileViewPanel(folder);
-            progressManager.setTotalProgress(4);
+                    SptFileViewPanel sptFileViewPanel = new SptFileViewPanel(folder);
+                    progressManager.setTotalProgress(4);
 
-            RecentItems.getInstance().put(file);
+                    RecentItems.getInstance().put(file);
 
-            processPanel.prepareToClose();
-            panel.setContent(sptFileViewPanel);
-        } catch (IOException e) {
-            log.warn("Could not import spt file: {}", file, e);
-            processPanel.prepareToClose();
-            closeTab(panel);
-            JOptionPane.showMessageDialog(this, "Не удалось открыть файл " + file.getName(),
-                    "Ошибка открытия", JOptionPane.ERROR_MESSAGE);
-        }
+                    processPanel.prepareToClose();
+                    panel.setContent(sptFileViewPanel);
+                } catch (IOException e) {
+                    log.warn("Could not import spt file: {}", file, e);
+                    processPanel.prepareToClose();
+                    closeTab(panel);
+                    JOptionPane.showMessageDialog(component, "Не удалось открыть файл " + file.getName(),
+                            "Ошибка открытия", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        new Thread(runnable).start();
     }
 
     {
