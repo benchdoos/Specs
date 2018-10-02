@@ -24,7 +24,9 @@ import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.gui.panels.service.MaterialPanel;
 import com.mmz.specs.application.utils.CommonUtils;
+import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
+import com.mmz.specs.application.utils.SupportedExtensionsConstants;
 import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.io.SPTreeIOManager;
 import com.mmz.specs.io.formats.SPTFileFormat;
@@ -35,12 +37,16 @@ import com.mmz.specs.model.MaterialEntity;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.imgscalr.Scalr;
 import org.json.JSONException;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -114,7 +120,6 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void fillInfo(TreeSPTRecord treeSPTRecord) {
-        final String NO_DATA_STRING = "нет данных";
 
         DetailEntity detailEntity = treeSPTRecord.getDetail();
 
@@ -128,18 +133,24 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
 
         unitLabel.setText(Boolean.toString(detailEntity.isUnit())
                 .replace("false", "нет").replace("true", "да"));
+
+        fillDetailWeight(detailEntity);
+        fillMaterialInfoLabel(treeSPTRecord.getMaterials());
+        new Thread(() -> fillDetailImage(detailEntity)).start();
+    }
+
+    private void fillDetailWeight(DetailEntity detailEntity) {
         if (detailEntity.getWorkpieceWeight() != null && !detailEntity.isUnit()) {
             workpieceWeightLabel.setText((Double.toString(detailEntity.getWorkpieceWeight())));
         } else {
-            workpieceWeightLabel.setText(NO_DATA_STRING);
+            workpieceWeightLabel.setText("");
         }
 
         if (detailEntity.getFinishedWeight() != null && !detailEntity.isUnit()) {
             finishedWeightLabel.setText((Double.toString(detailEntity.getFinishedWeight())));
         } else {
-            finishedWeightLabel.setText(NO_DATA_STRING);
+            finishedWeightLabel.setText("");
         }
-        fillMaterialInfoLabel(treeSPTRecord.getMaterials());
     }
 
     private void fillMaterialInfoLabel(ArrayList<MaterialEntity> materials) {
@@ -162,7 +173,64 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         unitLabel.setText(NO_DATA_STRING);
         workpieceWeightLabel.setText(NO_DATA_STRING);
         finishedWeightLabel.setText(NO_DATA_STRING);
+        fillDetailImage(null);
         clearDetailMaterialInfo();
+    }
+
+    private void fillDetailImage(DetailEntity entity) {
+        Component component = this;
+        if (entity == null) {
+            imageLabel.setIcon(null);
+            imageLabel.setText("нет изображения");
+        } else {
+            final String filePath = folder + File.separator + "images" + File.separator + entity.getId() + SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
+            try {
+                log.debug("Loading image for id: {} at: {}", entity.getId(), filePath);
+                final File img = new File(filePath);
+                if (img.exists()) {
+                    final BufferedImage bufferedImage = CommonUtils.getBufferedImage(img);
+                    if (bufferedImage != null) {
+                        final TreeSPTRecord selectedTreeSptRecord = JTreeUtils.getSelectedTreeSptRecord(tree);
+                        if (selectedTreeSptRecord != null) {
+
+                            DetailEntity current = selectedTreeSptRecord.getDetail();
+                            BufferedImage scaledImage = Scalr.resize(bufferedImage, 128);
+
+                            if (entity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
+                                imageLabel.setIcon(new ImageIcon(scaledImage));
+                                imageLabel.setText("");
+                                imageLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+                                FrameUtils.removeAllComponentListeners(imageLabel);
+                                imageLabel.addMouseListener(new MouseAdapter() {
+                                    @Override
+                                    public void mouseClicked(MouseEvent e) {
+                                        if (e.getButton() == MouseEvent.BUTTON1) {
+                                            FrameUtils.onShowImage(FrameUtils.findWindow(component), false,
+                                                    bufferedImage, "Изображение " + entity.getCode() + " "
+                                                            + entity.getDetailTitleByDetailTitleId().getTitle());
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    } else {
+                        restoreImageLabel();
+                    }
+                } else {
+                    restoreImageLabel();
+                }
+            } catch (Exception e) {
+                log.debug("Can not load image: {}", filePath, e.getLocalizedMessage());
+                restoreImageLabel();
+            }
+        }
+    }
+
+    private void restoreImageLabel() {
+        imageLabel.setIcon(null);
+        imageLabel.setText("нет изображения");
+        imageLabel.setCursor(null);
     }
 
     private void clearDetailMaterialInfo() {
