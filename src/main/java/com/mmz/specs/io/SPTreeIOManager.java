@@ -15,6 +15,9 @@
 
 package com.mmz.specs.io;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -66,7 +69,7 @@ public class SPTreeIOManager implements IOManager {
 
         final File folder = createFolder(file);
 
-        final JSONObject treeJSON;
+        final JsonObject treeJSON;
         final File jsonFile;
         if (!Thread.currentThread().isInterrupted()) {
             final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
@@ -116,11 +119,12 @@ public class SPTreeIOManager implements IOManager {
         }
     }
 
-    private File exportTree(File folder, JSONObject treeJSON) throws IOException {
+    private File exportTree(File folder, JsonObject treeJSON) throws IOException {
         progressManager.setText("Экспорт дерева");
         final File jsonFile = new File(folder + File.separator + JSON_FILE_NAME);
         try (FileWriter writer = new FileWriter(jsonFile)) {
-            treeJSON.write(writer);
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(treeJSON, writer);
         }
         return jsonFile;
     }

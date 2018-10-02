@@ -16,18 +16,27 @@
 package com.mmz.specs.io.utils;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.DaoConstants;
+import com.mmz.specs.deserializer.DetailEntityDeserializer;
+import com.mmz.specs.deserializer.DetailTitleEntityDeserializer;
+import com.mmz.specs.deserializer.MaterialEntityDeserializer;
 import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.io.SPTreeIOManager;
+import com.mmz.specs.io.formats.HibernateProxyTypeAdapter;
 import com.mmz.specs.io.formats.SPTFileFormat;
-import com.mmz.specs.model.DetailEntity;
-import com.mmz.specs.model.DetailListEntity;
-import com.mmz.specs.model.MaterialListEntity;
+import com.mmz.specs.model.*;
+import com.mmz.specs.serializer.DetailEntitySerializer;
+import com.mmz.specs.serializer.DetailTitleEntitySerializer;
+import com.mmz.specs.serializer.MaterialEntitySerializer;
 import com.mmz.specs.service.*;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -36,8 +45,6 @@ import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -72,21 +79,30 @@ public class ExportSPTUtils {
         this.progressManager = progressManager;
     }
 
-    public static ArrayList<DetailEntity> listDetailsFromJSON(JSONObject treeJSON) {
+    public static ArrayList<DetailEntity> listDetailsFromJSON(JsonObject treeJSON) {
         log.debug("Starting searching details in JSON");
-        final String jsonType = treeJSON.getString(IOConstants.TYPE);
+        final String jsonType = treeJSON.getAsJsonPrimitive(IOConstants.TYPE).getAsString();
         if (!jsonType.equalsIgnoreCase(SPTFileFormat.DEFAULT_TREE_TYPE)) {
             throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
         }
 
         ArrayList<DetailEntity> result = new ArrayList<>();
 
-        JSONArray tree = treeJSON.getJSONArray(IOConstants.TREE);
-        log.debug("Found tree size: {}", tree.length());
+        JsonArray tree = treeJSON.getAsJsonArray(IOConstants.TREE);
+        log.debug("Found tree size: {}", tree.size());
 
-        for (int i = 0; i < tree.length(); i++) {
-            JSONObject record = tree.getJSONObject(i);
-            DetailEntity entity = (DetailEntity) record.get(DETAIL);
+        for (int i = 0; i < tree.size(); i++) {
+            JsonObject record = tree.get(i).getAsJsonObject();
+            GsonBuilder builder = new GsonBuilder();
+            builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+            builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
+            builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
+            builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
+            Gson gson = builder.create();
+
+            final DetailEntity entity = gson.fromJson(record.get("detail"), DetailEntity.class);
+
+//            DetailEntity entity = (DetailEntity) record.get(DETAIL);
             result.add(entity);
             result.addAll(getChildrenFromJSON(record));
         }
@@ -107,12 +123,21 @@ public class ExportSPTUtils {
         return result;
     }
 
-    private static ArrayList<DetailEntity> getChildrenFromJSON(JSONObject record) {
+    private static ArrayList<DetailEntity> getChildrenFromJSON(JsonObject record) {
         ArrayList<DetailEntity> result = new ArrayList<>();
-        final JSONArray children = record.getJSONArray(CHILDREN);
-        for (int j = 0; j < children.length(); j++) {
-            JSONObject object = children.getJSONObject(j);
-            DetailEntity entity = (DetailEntity) object.get(DETAIL);
+        final JsonArray children = record.getAsJsonArray(CHILDREN);
+        for (int j = 0; j < children.size(); j++) {
+            JsonObject object = children.get(j).getAsJsonObject();
+
+            GsonBuilder builder = new GsonBuilder();
+            builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+            builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
+            builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
+            builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
+            Gson gson = builder.create();
+            final DetailEntity entity = gson.fromJson(object.get(DETAIL), DetailEntity.class);
+
+//            DetailEntity entity = (DetailEntity) object.get(DETAIL);
 
             result.add(entity);
 
@@ -123,27 +148,27 @@ public class ExportSPTUtils {
         return result;
     }
 
-    public JSONObject createTreeJSON() {
+    public JsonObject createTreeJSON() {
         log.info("Creating JSON file");
         progressManager.setText("Формирование структуры базы данных");
         progressManager.setCurrentProgress(0);
 
-        JSONObject root = new JSONObject();
-        root.put(TYPE, DEFAULT_TREE_TYPE);
-        root.put(TIMESTAMP, Calendar.getInstance().getTime().getTime());
-        root.put(AUTHOR, OPERATING_SYSTEM.getNetworkParams().getHostName());
+        JsonObject root = new JsonObject();
+        root.addProperty(TYPE, DEFAULT_TREE_TYPE);
+        root.addProperty(TIMESTAMP, Calendar.getInstance().getTime().getTime());
+        root.addProperty(AUTHOR, OPERATING_SYSTEM.getNetworkParams().getHostName());
 
         if (!Thread.currentThread().isInterrupted()) {
-            final JSONArray fullTree = getFullTree();
-            root.put(TREE, fullTree);
-            System.out.println("TREE:\n" + root.toString(1));
+            final JsonArray fullTree = getFullTree();
+            root.add(TREE, fullTree);
+            System.out.println("TREE:\n" + root.toString());
 
             progressManager.setCurrentIndeterminate(false);
         }
         return root;
     }
 
-    private JSONArray getFullTree() {
+    private JsonArray getFullTree() {
         log.info("Creating root entities");
         progressManager.setText("Формирование корневых каталогов");
 
@@ -151,7 +176,7 @@ public class ExportSPTUtils {
 
         log.debug("Root entities: ({}) {}", root.size(), root);
 
-        JSONArray array = new JSONArray();
+        JsonArray array = new JsonArray();
         for (int i = 0; i < root.size(); i++) {
             if (!Thread.currentThread().isInterrupted()) {
                 DetailEntity entity = root.get(i);
@@ -160,14 +185,23 @@ public class ExportSPTUtils {
 
                 progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
 
-                JSONObject object = new JSONObject();
-                object.put(DETAIL, entity);
-                object.put(QUANTITY, 1);
-                final JSONArray allChildrenForEntity = getAllChildrenForEntity(entity);
-                log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.length(), allChildrenForEntity);
-                object.put(CHILDREN, allChildrenForEntity);
+                JsonObject object = new JsonObject();
 
-                array.put(object);
+                GsonBuilder builder = new GsonBuilder();
+                builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+                builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
+                builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
+                builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
+                Gson gson = builder.create();
+
+                object.add(DETAIL, gson.toJsonTree(entity));
+
+                object.addProperty(QUANTITY, 1);
+                final JsonArray allChildrenForEntity = getAllChildrenForEntity(entity);
+                log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.size(), allChildrenForEntity);
+                object.add(CHILDREN, allChildrenForEntity);
+
+                array.add(object);
 
                 int progress = (int) (((double) i / (root.size() - 1)) * 100);
                 progressManager.setCurrentProgress(progress);
@@ -178,8 +212,8 @@ public class ExportSPTUtils {
         return array;
     }
 
-    private JSONArray getAllChildrenForEntity(DetailEntity parent) {
-        JSONArray result = new JSONArray();
+    private JsonArray getAllChildrenForEntity(DetailEntity parent) {
+        JsonArray result = new JsonArray();
         DetailListService service = new DetailListServiceImpl(session);
         final ArrayList<DetailEntity> totalChildrenList = (ArrayList<DetailEntity>) service.listChildren(parent);
         if (totalChildrenList.size() > 0) {
@@ -193,15 +227,25 @@ public class ExportSPTUtils {
                             DetailListEntity lastDetailListEntity = service.getLatestDetailListEntityByParentAndChild(parent, child);
                             if (lastDetailListEntity != null) {
                                 if (lastDetailListEntity.isActive()) {
-                                    JSONObject record = new JSONObject();
-                                    record.put(DETAIL, child);
-                                    record.put(QUANTITY, lastDetailListEntity.getQuantity());
-                                    record.put(MATERIALS, getAllMaterialsForEntity(child));
-                                    record.put(INTERCHANGEABLE, lastDetailListEntity.isInterchangeableNode());
+                                    JsonObject record = new JsonObject();
+
+                                    GsonBuilder builder = new GsonBuilder();
+                                    builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+                                    builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
+                                    builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
+                                    builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
+                                    Gson gson = builder.create();
+
+                                    record.add(DETAIL, gson.toJsonTree(child));
+                                    record.addProperty(QUANTITY, lastDetailListEntity.getQuantity());
+
+
+                                    record.add(MATERIALS, getAllMaterialsForEntity(child));
+                                    record.addProperty(INTERCHANGEABLE, lastDetailListEntity.isInterchangeableNode());
                                     if (child.isUnit()) {
-                                        record.put(CHILDREN, getAllChildrenForEntity(child));
+                                        record.add(CHILDREN, getAllChildrenForEntity(child));
                                     }
-                                    result.put(record);
+                                    result.add(record);
                                 }
                             }
                         }
@@ -215,8 +259,8 @@ public class ExportSPTUtils {
         return result;
     }
 
-    private JSONArray getAllMaterialsForEntity(DetailEntity child) {
-        JSONArray result = new JSONArray();
+    private JsonArray getAllMaterialsForEntity(DetailEntity child) {
+        JsonArray result = new JsonArray();
         MaterialListService service = new MaterialListServiceImpl(session);
         final List<MaterialListEntity> materialListByDetail = service.getMaterialListByDetail(child);
         materialListByDetail.sort((o1, o2) -> {
@@ -234,7 +278,12 @@ public class ExportSPTUtils {
         for (MaterialListEntity entity : materialListByDetail) {
             if (entity.isActive()) {
                 if (entity.getMaterialByMaterialId().isActive()) {
-                    result.put(entity.getMaterialByMaterialId());
+
+                    GsonBuilder builder = new GsonBuilder();
+                    builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+                    builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
+                    Gson gson = builder.create();
+                    result.add(gson.toJsonTree(entity.getMaterialByMaterialId()));
                 }
             }
         }
@@ -278,14 +327,14 @@ public class ExportSPTUtils {
         }
     }
 
-    public File downloadImages(File folder, JSONObject treeJSON) {
+    public File downloadImages(File folder, JsonObject treeJSON) {
         File result = new File(folder, SPTreeIOManager.IMAGES_FOLDER_FILE_NAME);
         log.debug("Starting downloading images to folder: {}", folder);
         progressManager.setCurrentProgress(0);
         progressManager.setText("Определяем список деталей");
         progressManager.setCurrentIndeterminate(true);
 
-        final String jsonType = treeJSON.getString(TYPE);
+        final String jsonType = treeJSON.getAsJsonPrimitive(TYPE).getAsString();
         if (!jsonType.equalsIgnoreCase(DEFAULT_TREE_TYPE)) {
             throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
         }
