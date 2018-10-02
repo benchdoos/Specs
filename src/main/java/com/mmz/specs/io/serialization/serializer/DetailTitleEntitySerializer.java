@@ -13,25 +13,22 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.serializer;
+package com.mmz.specs.io.serialization.serializer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.mmz.specs.model.MaterialEntity;
+import com.mmz.specs.model.DetailTitleEntity;
 
 import java.lang.reflect.Type;
 
-public class MaterialEntitySerializer implements JsonSerializer<MaterialEntity> {
+public class DetailTitleEntitySerializer implements JsonSerializer<DetailTitleEntity> {
     @Override
-    public JsonElement serialize(MaterialEntity materialEntity, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(DetailTitleEntity detailTitleEntity, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject result = new JsonObject();
-        result.addProperty("id", materialEntity.getId());
-        result.addProperty("longProfile", materialEntity.getLongProfile());
-        result.addProperty("longMark", materialEntity.getLongMark());
-        result.addProperty("shortProfile", materialEntity.getShortProfile());
-        result.addProperty("shortMark", materialEntity.getShortMark());
+        result.addProperty("id", detailTitleEntity.getId());
+        result.addProperty("title", detailTitleEntity.getTitle());
         return result;
     }
 }

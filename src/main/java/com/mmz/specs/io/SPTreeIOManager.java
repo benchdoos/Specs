@@ -15,21 +15,25 @@
 
 package com.mmz.specs.io;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SupportedExtensionsConstants;
+import com.mmz.specs.io.formats.HibernateProxyTypeAdapter;
+import com.mmz.specs.io.serialization.serializer.DetailEntitySerializer;
+import com.mmz.specs.io.serialization.serializer.DetailTitleEntitySerializer;
+import com.mmz.specs.io.serialization.serializer.MaterialEntitySerializer;
 import com.mmz.specs.io.utils.ExportSPTUtils;
 import com.mmz.specs.io.utils.ImportSPTUtils;
+import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.DetailTitleEntity;
+import com.mmz.specs.model.MaterialEntity;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -170,9 +174,22 @@ public class SPTreeIOManager implements IOManager {
         return null;
     }
 
-    public static JSONObject loadJsonFromFile(File file) throws IOException {
+    public static JsonObject loadJsonFromFile(File file) throws IOException {
         String content = FileUtils.readFileToString(file, "utf-8");
-        return new JSONObject(content);
+
+        /*GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
+        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
+        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
+        Gson gson = builder.create();
+        final JsonElement jsonElement = gson.toJsonTree(content);*/
+
+        JsonElement jelement = new JsonParser().parse(content);
+        JsonObject jobject = jelement.getAsJsonObject();
+
+
+        return jobject;
 
     }
 
@@ -184,5 +201,14 @@ public class SPTreeIOManager implements IOManager {
             }
         }
         return false;
+    }
+
+    public static Gson getDefaultGson() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+        builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
+        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
+        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
+        return builder.create();
     }
 }

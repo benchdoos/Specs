@@ -13,22 +13,26 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.serializer;
+package com.mmz.specs.io.serialization.serializer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.mmz.specs.model.DetailTitleEntity;
+import com.mmz.specs.model.DetailEntity;
 
 import java.lang.reflect.Type;
 
-public class DetailTitleEntitySerializer implements JsonSerializer<DetailTitleEntity> {
+public class DetailEntitySerializer implements JsonSerializer<DetailEntity> {
     @Override
-    public JsonElement serialize(DetailTitleEntity detailTitleEntity, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(DetailEntity detailEntity, Type type, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
-        result.addProperty("id", detailTitleEntity.getId());
-        result.addProperty("title", detailTitleEntity.getTitle());
+        result.addProperty("id", detailEntity.getId());
+        result.addProperty("code", detailEntity.getCode());
+        result.addProperty("workpieceWeight", detailEntity.getWorkpieceWeight());
+        result.addProperty("finishedWeight", detailEntity.getFinishedWeight());
+        result.addProperty("unit", detailEntity.isUnit());
+        result.add("title", context.serialize(detailEntity.getDetailTitleByDetailTitleId()));
         return result;
     }
 }

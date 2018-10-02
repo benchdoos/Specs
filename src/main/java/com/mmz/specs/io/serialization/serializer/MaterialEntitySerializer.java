@@ -13,26 +13,25 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.serializer;
+package com.mmz.specs.io.serialization.serializer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.MaterialEntity;
 
 import java.lang.reflect.Type;
 
-public class DetailEntitySerializer implements JsonSerializer<DetailEntity> {
+public class MaterialEntitySerializer implements JsonSerializer<MaterialEntity> {
     @Override
-    public JsonElement serialize(DetailEntity detailEntity, Type type, JsonSerializationContext context) {
+    public JsonElement serialize(MaterialEntity materialEntity, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject result = new JsonObject();
-        result.addProperty("id", detailEntity.getId());
-        result.addProperty("code", detailEntity.getCode());
-        result.addProperty("workpieceWeight", detailEntity.getWorkpieceWeight());
-        result.addProperty("finishedWeight", detailEntity.getFinishedWeight());
-        result.addProperty("unit", detailEntity.isUnit());
-        result.add("title", context.serialize(detailEntity.getDetailTitleByDetailTitleId()));
+        result.addProperty("id", materialEntity.getId());
+        result.addProperty("longProfile", materialEntity.getLongProfile());
+        result.addProperty("longMark", materialEntity.getLongMark());
+        result.addProperty("shortProfile", materialEntity.getShortProfile());
+        result.addProperty("shortMark", materialEntity.getShortMark());
         return result;
     }
 }

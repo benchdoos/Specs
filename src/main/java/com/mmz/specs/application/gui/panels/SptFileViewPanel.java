@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.gui.panels;
 
+import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -29,7 +30,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -54,7 +54,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private MaterialPanel materialPanel;
     private File folder;
     private File jsonFile;
-    private JSONObject rootJsonObject;
+    private JsonObject rootJsonObject;
 
     public SptFileViewPanel(File folder) {
         $$$setupUI$$$();
@@ -79,7 +79,8 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void initTree() {
-        final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJSONObject(rootJsonObject.getJSONArray(IOConstants.TREE));
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+        final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJsonObject(root, rootJsonObject.get(IOConstants.TREE).getAsJsonArray());
         DefaultTreeModel model = new DefaultTreeModel(node);
         tree.setModel(model);
     }
@@ -87,10 +88,10 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private void initBusinessLogic() throws IOException {
         jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
         log.info("Loading json tree from: {}", jsonFile);
-        JSONObject object = SPTreeIOManager.loadJsonFromFile(jsonFile);
+        JsonObject object = SPTreeIOManager.loadJsonFromFile(jsonFile);
         final String string;
         try {
-            string = object.getString(IOConstants.TYPE);
+            string = object.get(IOConstants.TYPE).getAsString();
         } catch (JSONException e) {
             throw new IOException("JSON file " + jsonFile + " is not an STP file!");
         }
@@ -100,13 +101,13 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         } else {
             throw new IOException("JSON file " + jsonFile + " is not an STP file!");
         }
-        log.info("Successfully loaded json tree from: {}, size is: {}", jsonFile, rootJsonObject.length());
+        log.info("Successfully loaded json tree from: {}, size is: {}", jsonFile, rootJsonObject.size());
     }
 
     private void printTreeInformation() {
-        final String type = rootJsonObject.getString(IOConstants.TYPE);
-        Date date = new Date(rootJsonObject.getLong(IOConstants.TIMESTAMP));
-        final String author = rootJsonObject.getString(IOConstants.AUTHOR);
+        final String type = rootJsonObject.get(IOConstants.TYPE).getAsString();
+        Date date = new Date(rootJsonObject.get(IOConstants.TIMESTAMP).getAsLong());
+        final String author = rootJsonObject.get(IOConstants.AUTHOR).getAsString();
         log.info("File {} information:", jsonFile);
         log.info("Type: {}, Author: {}, Date: {}", type, author, date);
     }

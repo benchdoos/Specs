@@ -13,7 +13,7 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.deserializer;
+package com.mmz.specs.io.serialization.deserializer;
 
 import com.google.gson.*;
 import com.mmz.specs.model.DetailTitleEntity;

@@ -13,7 +13,7 @@
  * Eugene Zrazhevsky <eugene.zrazhevsky@gmail.com>
  */
 
-package com.mmz.specs.deserializer;
+package com.mmz.specs.io.serialization.deserializer;
 
 import com.google.gson.*;
 import com.mmz.specs.model.DetailEntity;
@@ -25,7 +25,6 @@ public class DetailEntityDeserializer implements JsonDeserializer<DetailEntity> 
     @Override
     public DetailEntity deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = element.getAsJsonObject();
-        System.out.println("JSON OBJECT: > " + jsonObject);
         DetailEntity result = new DetailEntity();
         result.setId(jsonObject.get("id").getAsInt());
         result.setCode(jsonObject.get("code").getAsString());

@@ -26,17 +26,15 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.FtpUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.connection.DaoConstants;
-import com.mmz.specs.deserializer.DetailEntityDeserializer;
-import com.mmz.specs.deserializer.DetailTitleEntityDeserializer;
-import com.mmz.specs.deserializer.MaterialEntityDeserializer;
 import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.io.SPTreeIOManager;
 import com.mmz.specs.io.formats.HibernateProxyTypeAdapter;
 import com.mmz.specs.io.formats.SPTFileFormat;
+import com.mmz.specs.io.serialization.deserializer.DetailEntityDeserializer;
+import com.mmz.specs.io.serialization.deserializer.DetailTitleEntityDeserializer;
+import com.mmz.specs.io.serialization.deserializer.MaterialEntityDeserializer;
+import com.mmz.specs.io.serialization.serializer.MaterialEntitySerializer;
 import com.mmz.specs.model.*;
-import com.mmz.specs.serializer.DetailEntitySerializer;
-import com.mmz.specs.serializer.DetailTitleEntitySerializer;
-import com.mmz.specs.serializer.MaterialEntitySerializer;
 import com.mmz.specs.service.*;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -187,16 +185,13 @@ public class ExportSPTUtils {
 
                 JsonObject object = new JsonObject();
 
-                GsonBuilder builder = new GsonBuilder();
-                builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
-                builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
-                builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
-                builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
-                Gson gson = builder.create();
+                Gson gson = SPTreeIOManager.getDefaultGson();
 
                 object.add(DETAIL, gson.toJsonTree(entity));
 
                 object.addProperty(QUANTITY, 1);
+                object.addProperty(INTERCHANGEABLE, false);
+
                 final JsonArray allChildrenForEntity = getAllChildrenForEntity(entity);
                 log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.size(), allChildrenForEntity);
                 object.add(CHILDREN, allChildrenForEntity);
@@ -229,12 +224,7 @@ public class ExportSPTUtils {
                                 if (lastDetailListEntity.isActive()) {
                                     JsonObject record = new JsonObject();
 
-                                    GsonBuilder builder = new GsonBuilder();
-                                    builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
-                                    builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
-                                    builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
-                                    builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
-                                    Gson gson = builder.create();
+                                    Gson gson = SPTreeIOManager.getDefaultGson();
 
                                     record.add(DETAIL, gson.toJsonTree(child));
                                     record.addProperty(QUANTITY, lastDetailListEntity.getQuantity());
