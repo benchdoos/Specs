@@ -81,13 +81,12 @@ public class DetailSptJTree extends JTree {
                         final DetailEntity detail = treeSPTRecord.getDetail();
 
                         if (detail != null) {
+                            updateIcon(detail);
+
                             if (detail.getDetailTitleByDetailTitleId() != null) {
-                                String view;
-                                if (detail.getCode().contains(MainWindowUtils.ROOT_UNIT_CODE)) {
-                                    view = detail.getCode() + " " + detail.getDetailTitleByDetailTitleId().getTitle();
-                                } else {
-                                    view = detail.getCode() + " (" + treeSPTRecord.getQuantity() + ") " + detail.getDetailTitleByDetailTitleId().getTitle();
-                                }
+                                final boolean isManipulator = detail.getCode().contains(MainWindowUtils.ROOT_UNIT_CODE);
+                                String quantity = isManipulator ? " " : (" (" + treeSPTRecord.getQuantity() + ") ");
+                                String view = detail.getCode() + quantity + detail.getDetailTitleByDetailTitleId().getTitle();
                                 return super.getTreeCellRendererComponent(tree, view, selected, expanded, leaf, row, hasFocus);
                             }
                         }
