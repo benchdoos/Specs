@@ -15,6 +15,7 @@
 
 package com.mmz.specs.application.gui.common.utils;
 
+import com.mmz.specs.io.formats.TreeSPTRecord;
 import com.mmz.specs.model.DetailEntity;
 
 import javax.swing.*;
@@ -41,5 +42,12 @@ public class JTreeUtils {
             }
         }
         return null;
+    }
+
+    public static TreeSPTRecord getSelectedTreeSptRecord(JTree tree) {
+        final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (lastSelectedPathComponent != null) {
+            return (TreeSPTRecord) lastSelectedPathComponent.getUserObject();
+        } else return null;
     }
 }
