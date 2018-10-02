@@ -157,7 +157,7 @@
             <properties/>
             <border type="none" title="Узлы"/>
             <children>
-              <component id="66398" class="javax.swing.JTree" binding="tree">
+              <component id="66398" class="javax.swing.JTree" binding="tree" custom-create="true">
                 <constraints/>
                 <properties/>
               </component>

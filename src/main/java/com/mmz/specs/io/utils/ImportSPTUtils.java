@@ -57,6 +57,8 @@ public class ImportSPTUtils {
             final DetailEntity entity = gson.fromJson(jsonObject.get("detail"), DetailEntity.class);
 
 
+            System.out.println("Detail is:  " + entity + " for string: " + jsonObject.get("detail"));
+
             treeBuilder.setDetail(entity)
                     .setQuantity(jsonObject.get(SPTFileFormat.QUANTITY).getAsInt())
                     .setInterchangeable(jsonObject.get(SPTFileFormat.INTERCHANGEABLE).getAsBoolean());

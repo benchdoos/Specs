@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.gui.common.DetailSptJTree;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.gui.panels.service.MaterialPanel;
 import com.mmz.specs.application.utils.Logging;
@@ -83,6 +84,8 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJsonObject(root, rootJsonObject.get(IOConstants.TREE).getAsJsonArray());
         DefaultTreeModel model = new DefaultTreeModel(node);
         tree.setModel(model);
+        tree.setRootVisible(false);
+        
     }
 
     private void initBusinessLogic() throws IOException {
@@ -125,6 +128,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private void createUIComponents() {
         searchTextField = new PlaceholderTextField();
         ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
+        tree = new DetailSptJTree();
     }
 
     /**
@@ -190,7 +194,6 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         final JScrollPane scrollPane1 = new JScrollPane();
         panel1.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         scrollPane1.setBorder(BorderFactory.createTitledBorder("Узлы"));
-        tree = new JTree();
         scrollPane1.setViewportView(tree);
     }
 

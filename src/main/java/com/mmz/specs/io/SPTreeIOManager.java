@@ -21,6 +21,9 @@ import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.Logging;
 import com.mmz.specs.application.utils.SupportedExtensionsConstants;
 import com.mmz.specs.io.formats.HibernateProxyTypeAdapter;
+import com.mmz.specs.io.serialization.deserializer.DetailEntityDeserializer;
+import com.mmz.specs.io.serialization.deserializer.DetailTitleEntityDeserializer;
+import com.mmz.specs.io.serialization.deserializer.MaterialEntityDeserializer;
 import com.mmz.specs.io.serialization.serializer.DetailEntitySerializer;
 import com.mmz.specs.io.serialization.serializer.DetailTitleEntitySerializer;
 import com.mmz.specs.io.serialization.serializer.MaterialEntitySerializer;
@@ -209,6 +212,9 @@ public class SPTreeIOManager implements IOManager {
         builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
         builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
         builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
+        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
+        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
+        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
         return builder.create();
     }
 }
