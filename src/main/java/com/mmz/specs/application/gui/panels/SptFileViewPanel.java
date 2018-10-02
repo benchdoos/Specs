@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.gui.client.MaterialListWindow;
 import com.mmz.specs.application.gui.common.DetailSptJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
@@ -34,6 +35,7 @@ import com.mmz.specs.io.formats.TreeSPTRecord;
 import com.mmz.specs.io.utils.ImportSPTUtils;
 import com.mmz.specs.model.DetailEntity;
 import com.mmz.specs.model.MaterialEntity;
+import com.mmz.specs.model.MaterialListEntity;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,11 +48,13 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class SptFileViewPanel extends JPanel implements Cleanable {
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
@@ -159,6 +163,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         if (materials != null) {
             if (materials.size() > 0) {
                 materialPanel.setMaterialEntity(materials.get(0));
+                initMaterialLabelListener(materials);
             } else {
                 materialTextLabel.setText("Материал:");
                 materialPanel.setMaterialEntity(null);
@@ -240,7 +245,50 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void initMaterialLabelListener(ArrayList<MaterialEntity> entities) {
+        Component c = this;
+        for (MouseListener listener : materialPanel.getMouseListeners()) {
+            materialPanel.removeMouseListener(listener);
+        }
 
+        List entityList = getMaterialList(entities);
+
+        if (entities != null) {
+            final MouseAdapter adapter = new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    MaterialListWindow materialListWindow = new MaterialListWindow(entityList);
+                    materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), materialListWindow));
+                    materialListWindow.setVisible(true);
+                }
+            };
+
+
+            if (entities.size() > 1) {
+                materialTextLabel.setText("Материал (" + entities.size() + "):");
+            } else {
+                materialTextLabel.setText("Материал:");
+            }
+            materialPanel.addMouseListener(adapter);
+        }
+    }
+
+    private List getMaterialList(ArrayList<MaterialEntity> entities) {
+        if (entities != null) {
+            if (entities.size() > 0) {
+                List<MaterialListEntity> list = new ArrayList<>();
+                for (int i = 0; i < entities.size(); i++) {
+                    MaterialEntity entity = entities.get(i);
+                    MaterialListEntity materialListEntity = new MaterialListEntity();
+                    materialListEntity.setMaterialByMaterialId(entity);
+                    materialListEntity.setMainMaterial(i == 0);
+                    materialListEntity.setActive(true);
+                    list.add(materialListEntity);
+                }
+
+                return list;
+            }
+        }
+        return null;
     }
 
     private void initBusinessLogic() throws IOException {
