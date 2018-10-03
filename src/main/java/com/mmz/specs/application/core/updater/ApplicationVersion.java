@@ -35,6 +35,26 @@ public class ApplicationVersion {
         this.downloadUrl = downloadUrl;
     }
 
+    private long getKilobyteFromByte() {
+        return size / 1024;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getUpdateInfo() {
+        return updateInfo;
+    }
+
+    void setUpdateInfo(String updateInfo) {
+        this.updateInfo = updateInfo;
+    }
+
     public String getUpdateTitle() {
         return updateTitle;
     }
@@ -51,15 +71,6 @@ public class ApplicationVersion {
         this.version = version.replace("v", "");
     }
 
-    public long getSize() {
-        return size;
-    }
-
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -69,17 +80,5 @@ public class ApplicationVersion {
                 .append("updateTitle", updateTitle)
                 .append("updateInfo", updateInfo)
                 .toString();
-    }
-
-    private long getKilobyteFromByte() {
-        return size / 1024;
-    }
-
-    public String getUpdateInfo() {
-        return updateInfo;
-    }
-
-    void setUpdateInfo(String updateInfo) {
-        this.updateInfo = updateInfo;
     }
 }

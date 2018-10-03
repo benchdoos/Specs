@@ -43,13 +43,6 @@ public class UserTypeDaoImpl implements UserTypeDao {
 
     @Override
     @Transactional
-    public void updateUserType(UserTypeEntity userTypeEntity) {
-        session.merge(userTypeEntity);
-        log.info("UserType successfully updated: " + userTypeEntity);
-    }
-
-    @Override
-    @Transactional
     public void setSession(Session session) {
         this.session = session;
     }
@@ -75,5 +68,12 @@ public class UserTypeDaoImpl implements UserTypeDao {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void updateUserType(UserTypeEntity userTypeEntity) {
+        session.merge(userTypeEntity);
+        log.info("UserType successfully updated: " + userTypeEntity);
     }
 }

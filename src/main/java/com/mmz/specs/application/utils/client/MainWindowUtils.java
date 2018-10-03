@@ -47,9 +47,9 @@ import static javax.swing.JOptionPane.showMessageDialog;
 
 @SuppressWarnings("DeprecatedIsStillUsed")
 public class MainWindowUtils {
+    public static final String ROOT_UNIT_CODE = ".00.000";
     private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private static final long NANO_TIME = 1000000;
-    public static final String ROOT_UNIT_CODE = ".00.000";
     private final Session session;
     private ClientMainWindow clientMainWindow = null;
 
@@ -58,27 +58,90 @@ public class MainWindowUtils {
         this.session = session;
     }
 
+    public void blockMessage() {
+        if (clientMainWindow != null) {
+            clientMainWindow.blockMessage();
+        }
+    }
 
-    public DefaultMutableTreeNode getModuleDetailListFullTree() {
-        final long time = System.nanoTime();
+    public boolean containsMaterialEntityInMaterialListEntity(MaterialEntity materialEntity) {
+        MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+        ArrayList<MaterialListEntity> list = (ArrayList<MaterialListEntity>) service.listMaterialLists();
+        for (MaterialListEntity entity : list) {
+            if (entity.getMaterialByMaterialId().equals(materialEntity)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        if (!Thread.currentThread().isInterrupted()) {
-            DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-            ArrayList<DetailEntity> roots = getRootObjects(session);
+    private void expandPath(TreePath selectedPath, JTree mainTree) {
+        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (selectedEntity != null) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+            int childCount = node.getChildCount();
+            log.debug("Children for: {} count: {}", selectedEntity.toSimpleString(), childCount);
+            if (childCount == 0) {
+                new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
+                DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
+                model.reload(node);
+                mainTree.expandPath(selectedPath);
+            }
+        }
+    }
 
-
-            for (DetailEntity e : roots) {
-                if (e.getCode().contains(ROOT_UNIT_CODE)) {
-                    if (e.isActive()) {
-                        result.add(new DefaultMutableTreeNode(e));
+    public DefaultMutableTreeNode fillMainTree(DetailEntity detailEntity) {
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
+        if (session != null) {
+            if (detailEntity != null) {
+                DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
+                if (!detailEntity.isUnit()) {
+                    DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                    DefaultMutableTreeNode detail = new DefaultMutableTreeNode(detailEntity, false);
+                    root.add(detail);
+                    return root;
+                } else {
+                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListService.getDetailListByParent(detailEntity));
+                    if (detailListTreeByDetailList.children().hasMoreElements()) {
+                        return detailListTreeByDetailList;
+                    } else {
+                        DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
+                        if (detailService.getDetailById(detailEntity.getId()) == null) {
+                            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
+                        } else {
+                            detailEntity = detailService.getDetailById(detailEntity.getId());
+                        }
+                        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                        DefaultMutableTreeNode newChild = new DefaultMutableTreeNode();
+                        newChild.setUserObject(detailEntity);
+                        root.add(newChild);
+                        return root;
                     }
-                    System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
                 }
             }
-            log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
-            return result;
         }
-        return null;
+        return result;
+    }
+
+    public KeyListener getArrowKeyListener(JTree mainTree) {
+        return new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                final int keyCode = e.getKeyCode();
+                if (keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
+                    if (node != null) {
+                        final DetailEntity detail = (DetailEntity) node.getUserObject();
+                        if (detail != null) {
+                            if (node.getChildCount() == 0 && detail.isUnit()) {
+                                TreePath selPath = mainTree.getSelectionPath();
+                                expandPath(selPath, mainTree);
+                            }
+                        }
+                    }
+                }
+            }
+        };
     }
 
     public DefaultMutableTreeNode getBoostedModuleDetailListFullTree() {
@@ -108,56 +171,6 @@ public class MainWindowUtils {
             }
         }
         return null;
-    }
-
-
-    /**
-     * Gives full tree for listEntities, ignoring search (if there is so)
-     *
-     * @deprecated Use {@link #getModuleDetailListFullTree()} instead
-     */
-    @Deprecated
-    public DefaultMutableTreeNode getDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
-        final long time = System.nanoTime();
-
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
-        System.out.println(roots);
-        for (DetailEntity entity : roots) {
-            DefaultMutableTreeNode node = getChildren(entity);
-            result.add(node);
-        }
-        log.info("Counting tree by entity cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
-        return result;
-    }
-
-    public DefaultMutableTreeNode getModuleDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
-        final long time = System.nanoTime();
-
-        listEntities.sort((o1, o2) -> ComparisonChain.start()
-                .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
-                .compareTrueFirst(o1.isActive(), o2.isActive())
-                .result());
-
-
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
-        for (DetailEntity entity : roots) {
-            result.add(new DefaultMutableTreeNode(entity));
-        }
-        log.info("Counting tree by entity cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
-        return result;
-    }
-
-    private ArrayList<DetailEntity> getParentsObjects(List<DetailListEntity> listEntities) {
-        ArrayList<DetailEntity> result = new ArrayList<>();
-        for (DetailListEntity e : listEntities) {
-            final DetailEntity detailByParentDetailId = e.getDetailByParentDetailId();
-            if (!result.contains(detailByParentDetailId)) {
-                result.add(detailByParentDetailId);
-            }
-        }
-        return result;
     }
 
     /**
@@ -222,6 +235,83 @@ public class MainWindowUtils {
         return result;
     }
 
+    public ClientMainWindow getClientMainWindow(Component component) {
+        Window parentWindow = FrameUtils.findWindow(component);
+        if (parentWindow instanceof ClientMainWindow) {
+            this.clientMainWindow = (ClientMainWindow) parentWindow;
+            return (ClientMainWindow) parentWindow;
+        }
+        return null;
+    }
+
+    /**
+     * Gives full tree for listEntities, ignoring search (if there is so)
+     *
+     * @deprecated Use {@link #getModuleDetailListFullTree()} instead
+     */
+    @Deprecated
+    public DefaultMutableTreeNode getDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
+        final long time = System.nanoTime();
+
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+        ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
+        System.out.println(roots);
+        for (DetailEntity entity : roots) {
+            DefaultMutableTreeNode node = getChildren(entity);
+            result.add(node);
+        }
+        log.info("Counting tree by entity cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+        return result;
+    }
+
+    public TreeNode getDetailsTreeByDetails(List<DetailEntity> detailsBySearch) {
+        detailsBySearch.sort((o1, o2) -> ComparisonChain.start()
+                .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                .compare(o1.getCode(), o2.getCode())
+                .compare(o1.getDetailTitleByDetailTitleId().getTitle(), o2.getDetailTitleByDetailTitleId().getTitle())
+                .compareTrueFirst(o1.isActive(), o2.isActive())
+                .result());
+
+        DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+        for (DetailEntity e : detailsBySearch) {
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(e);
+            result.add(node);
+        }
+        return result;
+    }
+
+    public DetailListEntity getLatestDetailListEntity(List<DetailListEntity> result) {
+        DetailListEntity latest = null;
+        log.trace("Getting latest result from :" + result);
+        for (DetailListEntity entity : result) {
+            if (latest != null) {
+                if (latest.getNoticeByNoticeId() != null) {
+                    Date date = latest.getNoticeByNoticeId().getDate();
+                    if (date != null) {
+                        NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
+                        if (noticeEntity != null) {
+                            Date noticeDate = noticeEntity.getDate();
+                            if (noticeDate != null) {
+                                boolean before = date.before(noticeDate);
+                                boolean equals = date.equals(noticeDate);
+                                log.trace("Comparing latest " + latest + " and current" + entity);
+                                log.trace("Latest is before current: " + before + " latest date equals current: " + equals);
+                                if (before || equals) {
+                                    log.trace("Changing latest from " + latest + " to " + entity);
+                                    latest = entity;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                latest = entity;
+            }
+        }
+        log.trace("Latest entity: " + latest + " from " + result);
+        return latest;
+    }
+
     public void getModuleChildren(DefaultMutableTreeNode result, DetailEntity parent) {
         log.debug("STARTING getting children for parent: {}; {}", parent.getCode() + " " + parent.getDetailTitleByDetailTitleId().getTitle(), parent);
         final long total1 = System.nanoTime();
@@ -266,77 +356,57 @@ public class MainWindowUtils {
                 ((total2 - total1) / NANO_TIME));
     }
 
-    public DetailListEntity getLatestDetailListEntity(List<DetailListEntity> result) {
-        DetailListEntity latest = null;
-        log.trace("Getting latest result from :" + result);
-        for (DetailListEntity entity : result) {
-            if (latest != null) {
-                if (latest.getNoticeByNoticeId() != null) {
-                    Date date = latest.getNoticeByNoticeId().getDate();
-                    if (date != null) {
-                        NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
-                        if (noticeEntity != null) {
-                            Date noticeDate = noticeEntity.getDate();
-                            if (noticeDate != null) {
-                                boolean before = date.before(noticeDate);
-                                boolean equals = date.equals(noticeDate);
-                                log.trace("Comparing latest " + latest + " and current" + entity);
-                                log.trace("Latest is before current: " + before + " latest date equals current: " + equals);
-                                if (before || equals) {
-                                    log.trace("Changing latest from " + latest + " to " + entity);
-                                    latest = entity;
-                                }
-                            }
-                        }
+    public DefaultMutableTreeNode getModuleDetailListFullTree() {
+        final long time = System.nanoTime();
+
+        if (!Thread.currentThread().isInterrupted()) {
+            DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
+            ArrayList<DetailEntity> roots = getRootObjects(session);
+
+
+            for (DetailEntity e : roots) {
+                if (e.getCode().contains(ROOT_UNIT_CODE)) {
+                    if (e.isActive()) {
+                        result.add(new DefaultMutableTreeNode(e));
                     }
+                    System.out.println("root: " + e.getCode() + " " + e.getDetailTitleByDetailTitleId().getTitle());
                 }
-            } else {
-                latest = entity;
             }
-        }
-        log.trace("Latest entity: " + latest + " from " + result);
-        return latest;
-    }
-
-
-    public ClientMainWindow getClientMainWindow(Component component) {
-        Window parentWindow = FrameUtils.findWindow(component);
-        if (parentWindow instanceof ClientMainWindow) {
-            this.clientMainWindow = (ClientMainWindow) parentWindow;
-            return (ClientMainWindow) parentWindow;
+            log.info("Counting full tree cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
+            return result;
         }
         return null;
     }
 
-    public boolean containsMaterialEntityInMaterialListEntity(MaterialEntity materialEntity) {
-        MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
-        ArrayList<MaterialListEntity> list = (ArrayList<MaterialListEntity>) service.listMaterialLists();
-        for (MaterialListEntity entity : list) {
-            if (entity.getMaterialByMaterialId().equals(materialEntity)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    public DefaultMutableTreeNode getModuleDetailListTreeByEntityList(List<DetailListEntity> listEntities) {
+        final long time = System.nanoTime();
 
-    public TreeNode getDetailsTreeByDetails(List<DetailEntity> detailsBySearch) {
-        detailsBySearch.sort((o1, o2) -> ComparisonChain.start()
-                .compareTrueFirst(o1.isUnit(), o2.isUnit())
-                .compare(o1.getCode(), o2.getCode())
-                .compare(o1.getDetailTitleByDetailTitleId().getTitle(), o2.getDetailTitleByDetailTitleId().getTitle())
+        listEntities.sort((o1, o2) -> ComparisonChain.start()
+                .compare(o1.getDetailByParentDetailId().getCode(), o2.getDetailByParentDetailId().getCode())
                 .compareTrueFirst(o1.isActive(), o2.isActive())
                 .result());
 
+
         DefaultMutableTreeNode result = new DefaultMutableTreeNode("root");
-        for (DetailEntity e : detailsBySearch) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(e);
-            result.add(node);
+        ArrayList<DetailEntity> roots = getParentsObjects(listEntities);
+        for (DetailEntity entity : roots) {
+            result.add(new DefaultMutableTreeNode(entity));
         }
+        log.info("Counting tree by entity cost in total: " + ((double) ((System.nanoTime() - time) / NANO_TIME) / 1000) + " sec");
         return result;
     }
 
     public MouseListener getMouseListener(JTree mainTree) {
         return new MouseAdapter() {
+            private void addPopup(TreePath selectedPath) {
+                final JPopupMenu popup = new JPopupMenu();
+                JMenuItem reload = new JMenuItem("Обновить",
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
+                reload.addActionListener(e -> reloadPath(selectedPath));
+                popup.add(reload);
+                mainTree.setComponentPopupMenu(popup);
+            }
+
             @Override
             public void mousePressed(MouseEvent e) {
                 int selRow = mainTree.getRowForLocation(e.getX(), e.getY());
@@ -354,15 +424,6 @@ public class MainWindowUtils {
                         }
                     }
                 }
-            }
-
-            private void addPopup(TreePath selectedPath) {
-                final JPopupMenu popup = new JPopupMenu();
-                JMenuItem reload = new JMenuItem("Обновить",
-                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
-                reload.addActionListener(e -> reloadPath(selectedPath));
-                popup.add(reload);
-                mainTree.setComponentPopupMenu(popup);
             }
 
             private void reloadPath(TreePath selectedPath) {
@@ -405,76 +466,75 @@ public class MainWindowUtils {
         };
     }
 
-    public KeyListener getArrowKeyListener(JTree mainTree) {
-        return new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                final int keyCode = e.getKeyCode();
-                if (keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-                    if (node != null) {
-                        final DetailEntity detail = (DetailEntity) node.getUserObject();
-                        if (detail != null) {
-                            if (node.getChildCount() == 0 && detail.isUnit()) {
-                                TreePath selPath = mainTree.getSelectionPath();
-                                expandPath(selPath, mainTree);
-                            }
-                        }
-                    }
-                }
-            }
-        };
-    }
-
-
-    private void expandPath(TreePath selectedPath, JTree mainTree) {
-        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        if (selectedEntity != null) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
-            int childCount = node.getChildCount();
-            log.debug("Children for: {} count: {}", selectedEntity.toSimpleString(), childCount);
-            if (childCount == 0) {
-                new MainWindowUtils(session).getModuleChildren(node, selectedEntity);
-                DefaultTreeModel model = (DefaultTreeModel) mainTree.getModel();
-                model.reload(node);
-                mainTree.expandPath(selectedPath);
-            }
-        }
-    }
-
-    public DefaultMutableTreeNode fillMainTree(DetailEntity detailEntity) {
-        DefaultMutableTreeNode result = new DefaultMutableTreeNode();
-        if (session != null) {
-            if (detailEntity != null) {
-                DetailListService detailListService = new DetailListServiceImpl(new DetailListDaoImpl(session));
-                if (!detailEntity.isUnit()) {
-                    DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-                    DefaultMutableTreeNode detail = new DefaultMutableTreeNode(detailEntity, false);
-                    root.add(detail);
-                    return root;
-                } else {
-                    DefaultMutableTreeNode detailListTreeByDetailList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListService.getDetailListByParent(detailEntity));
-                    if (detailListTreeByDetailList.children().hasMoreElements()) {
-                        return detailListTreeByDetailList;
-                    } else {
-                        DetailService detailService = new DetailServiceImpl(new DetailDaoImpl(session));
-                        if (detailService.getDetailById(detailEntity.getId()) == null) {
-                            detailEntity = detailService.getDetailById(detailService.addDetail(detailEntity));
-                        } else {
-                            detailEntity = detailService.getDetailById(detailEntity.getId());
-                        }
-                        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-                        DefaultMutableTreeNode newChild = new DefaultMutableTreeNode();
-                        newChild.setUserObject(detailEntity);
-                        root.add(newChild);
-                        return root;
-                    }
-                }
+    private ArrayList<DetailEntity> getParentsObjects(List<DetailListEntity> listEntities) {
+        ArrayList<DetailEntity> result = new ArrayList<>();
+        for (DetailListEntity e : listEntities) {
+            final DetailEntity detailByParentDetailId = e.getDetailByParentDetailId();
+            if (!result.contains(detailByParentDetailId)) {
+                result.add(detailByParentDetailId);
             }
         }
         return result;
     }
 
+    private boolean notContainsEntityInChildren(DetailEntity parent, DetailEntity entity) {
+        log.debug("Checking if entity: {} contains in children of parent. For now parent is: {}", entity.toSimpleString(), parent.toSimpleString());
+        if (parent.getId() != entity.getId()) {
+            DetailListService service = new DetailListServiceImpl(session);
+            final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listChildren(parent);
+            ArrayList<Boolean> results = new ArrayList<>(detailEntities.size());
+            for (DetailEntity parent_ : detailEntities) {
+                results.add(parent_.getId() == entity.getId());
+            }
+            if (results.size() > 0) {
+                return results.contains(Boolean.FALSE);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean notContainsEntityInParentsHierarchically(DetailEntity parent, DetailEntity entity) {
+        log.debug("Checking if entity: {} is a parent of itself. For now parent is: {}", entity.toSimpleString(), parent.toSimpleString());
+        if (parent.getId() != entity.getId()) {
+            DetailListService service = new DetailListServiceImpl(session);
+            final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listParents(parent);
+            ArrayList<Boolean> results = new ArrayList<>(detailEntities.size());
+            for (DetailEntity parent_ : detailEntities) {
+                results.add(notContainsEntityInParentsHierarchically(parent_, entity));
+            }
+            if (results.size() > 0) {
+                return !results.contains(Boolean.FALSE);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean notContainsEntityOnSameLevel(DefaultMutableTreeNode node, DetailEntity parent, DetailEntity entity) {
+        log.debug("Checking if entity: {} contains on the same level of parent entity: {}", entity.toSimpleString(), parent.toSimpleString());
+        DetailListService service = new DetailListServiceImpl(session);
+        if (!parent.isUnit()) {
+            DetailEntity ultraParent = ((DetailEntity) ((DefaultMutableTreeNode) node.getParent()).getUserObject());
+            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(ultraParent);
+            for (DetailEntity child : children) {
+                if (child.getId() == entity.getId()) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
+            for (DetailEntity child : children) {
+                if (child.getId() == entity.getId()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 
     public boolean pathNotContainsEntity(Component component, TreePath selectionPath, DetailEntity entity) {
         final Object o = selectionPath.getLastPathComponent();
@@ -521,78 +581,13 @@ public class MainWindowUtils {
         return false;
     }
 
-    private boolean notContainsEntityOnSameLevel(DefaultMutableTreeNode node, DetailEntity parent, DetailEntity entity) {
-        log.debug("Checking if entity: {} contains on the same level of parent entity: {}", entity.toSimpleString(), parent.toSimpleString());
-        DetailListService service = new DetailListServiceImpl(session);
-        if (!parent.isUnit()) {
-            DetailEntity ultraParent = ((DetailEntity) ((DefaultMutableTreeNode) node.getParent()).getUserObject());
-            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(ultraParent);
-            for (DetailEntity child : children) {
-                if (child.getId() == entity.getId()) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            ArrayList<DetailEntity> children = (ArrayList<DetailEntity>) service.listChildren(parent);
-            for (DetailEntity child : children) {
-                if (child.getId() == entity.getId()) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    private boolean notContainsEntityInChildren(DetailEntity parent, DetailEntity entity) {
-        log.debug("Checking if entity: {} contains in children of parent. For now parent is: {}", entity.toSimpleString(), parent.toSimpleString());
-        if (parent.getId() != entity.getId()) {
-            DetailListService service = new DetailListServiceImpl(session);
-            final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listChildren(parent);
-            ArrayList<Boolean> results = new ArrayList<>(detailEntities.size());
-            for (DetailEntity parent_ : detailEntities) {
-                results.add(parent_.getId() == entity.getId());
-            }
-            if (results.size() > 0) {
-                return results.contains(Boolean.FALSE);
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean notContainsEntityInParentsHierarchically(DetailEntity parent, DetailEntity entity) {
-        log.debug("Checking if entity: {} is a parent of itself. For now parent is: {}", entity.toSimpleString(), parent.toSimpleString());
-        if (parent.getId() != entity.getId()) {
-            DetailListService service = new DetailListServiceImpl(session);
-            final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listParents(parent);
-            ArrayList<Boolean> results = new ArrayList<>(detailEntities.size());
-            for (DetailEntity parent_ : detailEntities) {
-                results.add(notContainsEntityInParentsHierarchically(parent_, entity));
-            }
-            if (results.size() > 0) {
-                return !results.contains(Boolean.FALSE);
-            } else {
-                return true;
-            }
-        }
-        return false;
+    public void setClientMainWindow(Component component) {
+        this.clientMainWindow = getClientMainWindow(component);
     }
 
     public void updateMessage(String pathToImage, String text) {
         if (clientMainWindow != null) {
             clientMainWindow.updateMessage(pathToImage, text);
-        }
-    }
-
-    public void setClientMainWindow(Component component) {
-        this.clientMainWindow = getClientMainWindow(component);
-    }
-
-    public void updateMessageText(String text) {
-        if (clientMainWindow != null) {
-            clientMainWindow.updateMessageText(text);
         }
     }
 
@@ -603,9 +598,9 @@ public class MainWindowUtils {
         }
     }
 
-    public void blockMessage() {
+    public void updateMessageText(String text) {
         if (clientMainWindow != null) {
-            clientMainWindow.blockMessage();
+            clientMainWindow.updateMessageText(text);
         }
     }
 }

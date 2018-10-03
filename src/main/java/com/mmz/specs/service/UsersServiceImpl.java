@@ -37,36 +37,11 @@ public class UsersServiceImpl implements UsersService {
         this.usersDao = new UsersDaoImpl(session);
     }
 
-
-    @Override
-    public void setUsersDao(UsersDao usersDao) {
-        this.usersDao = usersDao;
-    }
-
-    @Override
-    public UsersDao getUsersDao() {
-        return usersDao;
-    }
-
-
     @Override
 
     public int addUser(UsersEntity usersEntity) {
         return this.usersDao.addUser(usersEntity);
     }
-
-    @Override
-
-    public void updateUser(UsersEntity usersEntity) {
-        this.usersDao.updateUser(usersEntity);
-    }
-
-    @Override
-
-    public void removeUser(int id) {
-        this.usersDao.removeUser(id);
-    }
-
 
     @Override
 
@@ -80,10 +55,31 @@ public class UsersServiceImpl implements UsersService {
         return this.usersDao.getUserByUsername(username);
     }
 
+    @Override
+    public UsersDao getUsersDao() {
+        return usersDao;
+    }
+
+    @Override
+    public void setUsersDao(UsersDao usersDao) {
+        this.usersDao = usersDao;
+    }
 
     @Override
 
     public List<UsersEntity> listUsers() {
         return this.usersDao.listUsers();
+    }
+
+    @Override
+
+    public void removeUser(int id) {
+        this.usersDao.removeUser(id);
+    }
+
+    @Override
+
+    public void updateUser(UsersEntity usersEntity) {
+        this.usersDao.updateUser(usersEntity);
     }
 }

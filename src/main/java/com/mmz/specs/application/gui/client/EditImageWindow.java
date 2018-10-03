@@ -81,216 +81,6 @@ public class EditImageWindow extends JDialog {
         setResizable(false);
     }
 
-    private void initGui() {
-        setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
-        setModal(true);
-
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/pictureEdit64.png")));
-        setTitle("Редактирование изображения");
-    }
-
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onOK();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> onOK(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        contentPane.registerKeyboardAction(e -> onPaste(), KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void updateIcon() {
-        String imagePath = detailEntity.getImagePath();
-        if (imagePath == null || imagePath.isEmpty()) {
-            FtpUtils ftp = FtpUtils.getInstance();
-            BufferedImage image = ftp.getImage(detailEntity.getId());
-            updateIconFromBufferedImage(image);
-        } else {
-            if (!detailEntity.getImagePath().equalsIgnoreCase(ClientConstants.IMAGE_REMOVE_KEY)) {
-                File file = new File(imagePath);
-                try {
-                    BufferedImage image = ImageIO.read(file);
-                    updateIconFromBufferedImage(image);
-                } catch (IOException e) {
-                    log.warn("Could not load image for entity: {}", detailEntity, e);
-                }
-            } else {
-                updateIconFromBufferedImage(null);
-            }
-        }
-    }
-
-    private void initListeners() {
-        uploadButton.addActionListener(e -> onUpload());
-        deleteButton.addActionListener(e -> onDelete());
-        restoreImageButton.addActionListener(e -> onRestoreImage());
-        buttonOK.addActionListener(e -> onOK());
-    }
-
-    private void onRestoreImage() {
-        detailEntity.setImagePath(null);
-        updateIcon();
-    }
-
-    private void onPaste() {
-        try {
-            log.debug("Pasting image from clipboard");
-            Image image = CommonUtils.getImageFromClipboard();
-            if (image != null) {
-                final String filename = SecurityManager.generatePassword();
-                final boolean ignore = new File(TMP_IMAGE_FOLDER).mkdirs();
-
-                File file = new File(TMP_IMAGE_FOLDER + File.separator + filename + ".jpg");
-                log.debug("TMP image file location: " + file);
-                ImageIO.write(CommonUtils.getBufferedImage(image), "jpg", file);
-                detailEntity.setImagePath(file.getAbsolutePath());
-                updateIcon();
-            }
-        } catch (Exception e) {
-            log.warn("Could not paste image from clipboard", e);
-        }
-    }
-
-    private void onOK() {
-
-        dispose();
-    }
-
-    private void updateIconFromBufferedImage(BufferedImage image) {
-        if (image != null) {
-            BufferedImage scaledImage = Scalr.resize(image, 128);
-            detailIconLabel.setIcon(new ImageIcon(scaledImage));
-            detailIconLabel.setText("");
-
-            FrameUtils.removeAllComponentListeners(detailIconLabel);
-
-            detailIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(EditImageWindow.super.getRootPane()), true, image,
-                                "Изображение " + detailEntity.getCode() + detailEntity.getDetailTitleByDetailTitleId().getTitle());
-                    }
-                }
-            });
-        } else {
-            detailIconLabel.setIcon(null);
-            setDefaultImage();
-        }
-    }
-
-    private void onUpload() {
-        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
-        chooser.setDialogTitle("Выберите изображение (" + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS) + ")");
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.setMultiSelectionEnabled(false);
-
-        FileFilter fileFilter = new FileNameExtensionFilter("Изображения "
-                + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS),
-                "jpg", "jpeg", "png", "bmp", "gif");
-        chooser.setFileFilter(fileFilter);
-        int returnValue = chooser.showDialog(this, "OK");
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            if (file.exists()) {
-                if (file.isFile()) {
-                    if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
-                        log.debug("User dropped a file: {}", file);
-                        detailEntity.setImagePath(file.getAbsolutePath());
-                    } else {
-                        JOptionPane.showMessageDialog(this,
-                                "Размер файла изображения больше 5 мегабайт!",
-                                "Ошибка", JOptionPane.WARNING_MESSAGE);
-                    }
-                }
-            }
-        }
-        updateIcon();
-    }
-
-    private void setDefaultImage() {
-        Icon icon = detailIconLabel.getIcon();
-        detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
-        if (icon == null) {
-            detailIconLabel.setText(NO_IMAGE);
-            detailIconLabel.setIcon(null);
-        } else {
-            detailIconLabel.setText(null);
-            detailIconLabel.setIcon(icon);
-        }
-    }
-
-    private void initDragAndDrop() {
-        Component component = this;
-        final DropTarget dropTarget = new DropTarget() {
-            @Override
-            public synchronized void drop(DropTargetDropEvent evt) {
-                try {
-                    evt.acceptDrop(DnDConstants.ACTION_COPY);
-
-                    final Object transferData = evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-                    List<?> list = (List<?>) transferData;
-                    if (list.size() == 1) {
-                        if (list.get(0) instanceof File) {
-                            File file = (File) list.get(0);
-                            if (file.exists() && FtpUtils.getInstance().isImage(file)) {
-                                if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
-                                    detailEntity.setImagePath(file.getAbsolutePath());
-                                } else {
-                                    JOptionPane.showMessageDialog(component,
-                                            "Размер файла изображения больше 5 мегабайт!",
-                                            "Ошибка", JOptionPane.WARNING_MESSAGE);
-                                }
-                            } else {
-                                JOptionPane.showMessageDialog(component, "Возможна загрузка только изображений форматов:\n" +
-                                        Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS), "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
-                            }
-                        }
-                        updateIcon();
-                    }
-                } catch (Exception ex) {
-                    log.warn("Could not drag and drop image", ex);
-                } finally {
-                    detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
-                }
-            }
-        };
-        try {
-            dropTarget.addDropTargetListener(new DropTargetAdapter() {
-
-                @Override
-                public void drop(DropTargetDropEvent dtde) {
-                    setDefaultImage();
-                }
-
-                @Override
-                public void dragEnter(DropTargetDragEvent dtde) {
-                    detailIconLabel.setBorder(new LineBorder(Color.RED, 5));
-                    detailIconLabel.setText("Бросить сюда");
-                    detailIconLabel.setIcon(null);
-                    super.dragEnter(dtde);
-                }
-
-                @Override
-                public void dragExit(DropTargetEvent dte) {
-                    setDefaultImage();
-                    super.dragExit(dte);
-                }
-            });
-        } catch (TooManyListenersException e) {
-            log.warn("Can not init drag and drop dropTarget", e);
-        }
-        contentPane.setDropTarget(dropTarget);
-    }
-
-    private void onDelete() {
-        detailEntity.setImagePath(ClientConstants.IMAGE_REMOVE_KEY);
-        updateIcon();
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -357,5 +147,215 @@ public class EditImageWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private void initDragAndDrop() {
+        Component component = this;
+        final DropTarget dropTarget = new DropTarget() {
+            @Override
+            public synchronized void drop(DropTargetDropEvent evt) {
+                try {
+                    evt.acceptDrop(DnDConstants.ACTION_COPY);
+
+                    final Object transferData = evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    List<?> list = (List<?>) transferData;
+                    if (list.size() == 1) {
+                        if (list.get(0) instanceof File) {
+                            File file = (File) list.get(0);
+                            if (file.exists() && FtpUtils.getInstance().isImage(file)) {
+                                if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
+                                    detailEntity.setImagePath(file.getAbsolutePath());
+                                } else {
+                                    JOptionPane.showMessageDialog(component,
+                                            "Размер файла изображения больше 5 мегабайт!",
+                                            "Ошибка", JOptionPane.WARNING_MESSAGE);
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(component, "Возможна загрузка только изображений форматов:\n" +
+                                        Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS), "Ошибка загрузки", JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
+                        updateIcon();
+                    }
+                } catch (Exception ex) {
+                    log.warn("Could not drag and drop image", ex);
+                } finally {
+                    detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
+                }
+            }
+        };
+        try {
+            dropTarget.addDropTargetListener(new DropTargetAdapter() {
+
+                @Override
+                public void dragEnter(DropTargetDragEvent dtde) {
+                    detailIconLabel.setBorder(new LineBorder(Color.RED, 5));
+                    detailIconLabel.setText("Бросить сюда");
+                    detailIconLabel.setIcon(null);
+                    super.dragEnter(dtde);
+                }
+
+                @Override
+                public void dragExit(DropTargetEvent dte) {
+                    setDefaultImage();
+                    super.dragExit(dte);
+                }
+
+                @Override
+                public void drop(DropTargetDropEvent dtde) {
+                    setDefaultImage();
+                }
+            });
+        } catch (TooManyListenersException e) {
+            log.warn("Can not init drag and drop dropTarget", e);
+        }
+        contentPane.setDropTarget(dropTarget);
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        getRootPane().setDefaultButton(buttonOK);
+        setModal(true);
+
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/pictureEdit64.png")));
+        setTitle("Редактирование изображения");
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onOK();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> onOK(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onPaste(), KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        uploadButton.addActionListener(e -> onUpload());
+        deleteButton.addActionListener(e -> onDelete());
+        restoreImageButton.addActionListener(e -> onRestoreImage());
+        buttonOK.addActionListener(e -> onOK());
+    }
+
+    private void onDelete() {
+        detailEntity.setImagePath(ClientConstants.IMAGE_REMOVE_KEY);
+        updateIcon();
+    }
+
+    private void onOK() {
+
+        dispose();
+    }
+
+    private void onPaste() {
+        try {
+            log.debug("Pasting image from clipboard");
+            Image image = CommonUtils.getImageFromClipboard();
+            if (image != null) {
+                final String filename = SecurityManager.generatePassword();
+                final boolean ignore = new File(TMP_IMAGE_FOLDER).mkdirs();
+
+                File file = new File(TMP_IMAGE_FOLDER + File.separator + filename + ".jpg");
+                log.debug("TMP image file location: " + file);
+                ImageIO.write(CommonUtils.getBufferedImage(image), "jpg", file);
+                detailEntity.setImagePath(file.getAbsolutePath());
+                updateIcon();
+            }
+        } catch (Exception e) {
+            log.warn("Could not paste image from clipboard", e);
+        }
+    }
+
+    private void onRestoreImage() {
+        detailEntity.setImagePath(null);
+        updateIcon();
+    }
+
+    private void onUpload() {
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
+        chooser.setDialogTitle("Выберите изображение (" + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS) + ")");
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setMultiSelectionEnabled(false);
+
+        FileFilter fileFilter = new FileNameExtensionFilter("Изображения "
+                + Arrays.toString(SUPPORTED_IMAGE_EXTENSIONS),
+                "jpg", "jpeg", "png", "bmp", "gif");
+        chooser.setFileFilter(fileFilter);
+        int returnValue = chooser.showDialog(this, "OK");
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            if (file.exists()) {
+                if (file.isFile()) {
+                    if (file.length() <= FtpUtils.MAX_IMAGE_FILE_SIZE) {
+                        log.debug("User dropped a file: {}", file);
+                        detailEntity.setImagePath(file.getAbsolutePath());
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Размер файла изображения больше 5 мегабайт!",
+                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            }
+        }
+        updateIcon();
+    }
+
+    private void setDefaultImage() {
+        Icon icon = detailIconLabel.getIcon();
+        detailIconLabel.setBorder(BorderFactory.createEmptyBorder());
+        if (icon == null) {
+            detailIconLabel.setText(NO_IMAGE);
+            detailIconLabel.setIcon(null);
+        } else {
+            detailIconLabel.setText(null);
+            detailIconLabel.setIcon(icon);
+        }
+    }
+
+    private void updateIcon() {
+        String imagePath = detailEntity.getImagePath();
+        if (imagePath == null || imagePath.isEmpty()) {
+            FtpUtils ftp = FtpUtils.getInstance();
+            BufferedImage image = ftp.getImage(detailEntity.getId());
+            updateIconFromBufferedImage(image);
+        } else {
+            if (!detailEntity.getImagePath().equalsIgnoreCase(ClientConstants.IMAGE_REMOVE_KEY)) {
+                File file = new File(imagePath);
+                try {
+                    BufferedImage image = ImageIO.read(file);
+                    updateIconFromBufferedImage(image);
+                } catch (IOException e) {
+                    log.warn("Could not load image for entity: {}", detailEntity, e);
+                }
+            } else {
+                updateIconFromBufferedImage(null);
+            }
+        }
+    }
+
+    private void updateIconFromBufferedImage(BufferedImage image) {
+        if (image != null) {
+            BufferedImage scaledImage = Scalr.resize(image, 128);
+            detailIconLabel.setIcon(new ImageIcon(scaledImage));
+            detailIconLabel.setText("");
+
+            FrameUtils.removeAllComponentListeners(detailIconLabel);
+
+            detailIconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        FrameUtils.onShowImage(FrameUtils.findWindow(EditImageWindow.super.getRootPane()), true, image,
+                                "Изображение " + detailEntity.getCode() + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+                    }
+                }
+            });
+        } else {
+            detailIconLabel.setIcon(null);
+            setDefaultImage();
+        }
     }
 }

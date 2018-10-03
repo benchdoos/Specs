@@ -22,23 +22,20 @@ import java.util.List;
 
 public interface MaterialDao {
 
-    public Session getSession();
+    int addMaterial(MaterialEntity materialEntity);
 
-    public void setSession(Session session);
+    MaterialEntity getMaterialById(int id);
 
+    MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile);
 
-    public int addMaterial(MaterialEntity materialEntity);
+    Session getSession();
 
-    public void updateMaterial(MaterialEntity materialEntity);
+    void setSession(Session session);
 
-    public void removeMaterial(int id);
+    List<MaterialEntity> listMaterials();
 
+    void removeMaterial(int id);
 
-    public MaterialEntity getMaterialById(int id);
-
-    public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile);
-
-
-    public List<MaterialEntity> listMaterials();
+    void updateMaterial(MaterialEntity materialEntity);
 
 }

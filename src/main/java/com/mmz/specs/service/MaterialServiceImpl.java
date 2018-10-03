@@ -42,6 +42,24 @@ public class MaterialServiceImpl implements MaterialService {
     }
 
     @Override
+
+    public int addMaterial(MaterialEntity materialEntity) {
+        return this.materialDao.addMaterial(materialEntity);
+    }
+
+    @Override
+
+    public MaterialEntity getMaterialById(int id) {
+        return this.materialDao.getMaterialById(id);
+    }
+
+    @Override
+
+    public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile) {
+        return this.materialDao.getMaterialByShortMarkAndProfile(shortMark, shortProfile);
+    }
+
+    @Override
     public MaterialDao getMaterialDao() {
         return materialDao;
     }
@@ -51,23 +69,10 @@ public class MaterialServiceImpl implements MaterialService {
         this.materialDao = materialDao;
     }
 
-
     @Override
 
-    public int addMaterial(MaterialEntity materialEntity) {
-        return this.materialDao.addMaterial(materialEntity);
-    }
-
-    @Override
-
-    public void updateMaterial(MaterialEntity materialEntity) {
-        this.materialDao.updateMaterial(materialEntity);
-    }
-
-    @Override
-
-    public void removeMaterial(int id) {
-        this.materialDao.removeMaterial(id);
+    public List<MaterialEntity> listMaterials() {
+        return this.materialDao.listMaterials();
     }
 
     @Override
@@ -83,20 +88,13 @@ public class MaterialServiceImpl implements MaterialService {
 
     @Override
 
-    public MaterialEntity getMaterialById(int id) {
-        return this.materialDao.getMaterialById(id);
+    public void removeMaterial(int id) {
+        this.materialDao.removeMaterial(id);
     }
 
     @Override
 
-    public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile) {
-        return this.materialDao.getMaterialByShortMarkAndProfile(shortMark, shortProfile);
-    }
-
-
-    @Override
-
-    public List<MaterialEntity> listMaterials() {
-        return this.materialDao.listMaterials();
+    public void updateMaterial(MaterialEntity materialEntity) {
+        this.materialDao.updateMaterial(materialEntity);
     }
 }

@@ -26,6 +26,17 @@ public class UserTypeEntity {
     private String name;
     private boolean isActive;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserTypeEntity that = (UserTypeEntity) o;
+
+        if (id != that.id) return false;
+        return name != null ? name.equals(that.name) : that.name == null;
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {
@@ -46,6 +57,13 @@ public class UserTypeEntity {
         this.name = name;
     }
 
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
+    }
+
     @Basic
     @Column(name = "IS_ACTIVE")
     public boolean isActive() {
@@ -54,24 +72,6 @@ public class UserTypeEntity {
 
     public void setActive(boolean active) {
         isActive = active;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        UserTypeEntity that = (UserTypeEntity) o;
-
-        if (id != that.id) return false;
-        return name != null ? name.equals(that.name) : that.name == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        return result;
     }
 
     @Override

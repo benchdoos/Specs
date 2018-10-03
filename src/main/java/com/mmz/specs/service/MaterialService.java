@@ -22,22 +22,21 @@ import java.util.List;
 
 public interface MaterialService {
 
-    public MaterialDao getMaterialDao();
+    int addMaterial(MaterialEntity materialEntity);
 
-    public void setMaterialDao(MaterialDao materialDao);
+    MaterialEntity getMaterialById(int id);
 
-    public int addMaterial(MaterialEntity materialEntity);
+    MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile);
 
-    public void updateMaterial(MaterialEntity materialEntity);
+    MaterialDao getMaterialDao();
 
-    public void removeMaterial(int id);
+    void setMaterialDao(MaterialDao materialDao);
 
-    public MaterialEntity migrate(MaterialEntity oldMaterial, MaterialEntity newMaterial);
+    List<MaterialEntity> listMaterials();
 
-    public MaterialEntity getMaterialById(int id);
+    MaterialEntity migrate(MaterialEntity oldMaterial, MaterialEntity newMaterial);
 
-    public MaterialEntity getMaterialByShortMarkAndProfile(String shortMark, String shortProfile);
+    void removeMaterial(int id);
 
-
-    public List<MaterialEntity> listMaterials();
+    void updateMaterial(MaterialEntity materialEntity);
 }

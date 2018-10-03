@@ -22,23 +22,20 @@ import java.util.List;
 
 public interface UsersService {
 
-    public UsersDao getUsersDao();
+    int addUser(UsersEntity usersEntity);
 
-    public void setUsersDao(UsersDao usersDao);
+    UsersEntity getUserById(int id);
 
+    UsersEntity getUserByUsername(String username);
 
-    public int addUser(UsersEntity usersEntity);
+    UsersDao getUsersDao();
 
-    public void updateUser(UsersEntity usersEntity);
+    void setUsersDao(UsersDao usersDao);
 
-    public void removeUser(int id);
+    List<UsersEntity> listUsers();
 
+    void removeUser(int id);
 
-    public UsersEntity getUserById(int id);
-
-    public UsersEntity getUserByUsername(String username);
-
-
-    public List<UsersEntity> listUsers();
+    void updateUser(UsersEntity usersEntity);
 
 }

@@ -39,33 +39,8 @@ public class DetailServiceImpl implements DetailService {
     }
 
     @Override
-    public void setDetailDao(DetailDao detailDao) {
-        this.detailDao = detailDao;
-    }
-
-    @Override
-    public DetailDao getDetailDao() {
-        return detailDao;
-    }
-
-    @Override
     public int addDetail(DetailEntity detailEntity) {
         return detailDao.addDetail(detailEntity);
-    }
-
-    @Override
-    public void updateDetail(DetailEntity detailEntity) {
-        detailDao.updateDetail(detailEntity);
-    }
-
-    @Override
-    public void removeDetail(int id) {
-        detailDao.removeDetail(id);
-    }
-
-    @Override
-    public DetailEntity getDetailById(int id) {
-        return detailDao.getDetailById(id);
     }
 
     @Override
@@ -74,8 +49,18 @@ public class DetailServiceImpl implements DetailService {
     }
 
     @Override
-    public List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity) {
-        return detailDao.getDetailByTitle(titleEntity);
+    public DetailEntity getDetailById(int id) {
+        return detailDao.getDetailById(id);
+    }
+
+    @Override
+    public DetailDao getDetailDao() {
+        return detailDao;
+    }
+
+    @Override
+    public void setDetailDao(DetailDao detailDao) {
+        this.detailDao = detailDao;
     }
 
     @Override
@@ -84,12 +69,27 @@ public class DetailServiceImpl implements DetailService {
     }
 
     @Override
-    public List<DetailEntity> listDetailsByEditedImage() {
-        return detailDao.listDetailsByEditedImage();
+    public List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity) {
+        return detailDao.getDetailByTitle(titleEntity);
     }
 
     @Override
     public List<DetailEntity> listDetails() {
         return detailDao.listDetails();
+    }
+
+    @Override
+    public List<DetailEntity> listDetailsByEditedImage() {
+        return detailDao.listDetailsByEditedImage();
+    }
+
+    @Override
+    public void removeDetail(int id) {
+        detailDao.removeDetail(id);
+    }
+
+    @Override
+    public void updateDetail(DetailEntity detailEntity) {
+        detailDao.updateDetail(detailEntity);
     }
 }

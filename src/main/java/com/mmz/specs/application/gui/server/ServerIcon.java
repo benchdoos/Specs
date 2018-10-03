@@ -32,13 +32,6 @@ class ServerIcon extends TrayIcon {
         initIcon();
     }
 
-    private void initIcon() {
-        setImageAutoSize(true);
-        addMenu();
-
-        addActionListener(e -> onIconClick());
-    }
-
     private void addMenu() {
         PopupMenu menu = new PopupMenu();
 
@@ -51,6 +44,20 @@ class ServerIcon extends TrayIcon {
         menu.add(shutDown);
 
         setPopupMenu(menu);
+    }
+
+    private void initIcon() {
+        setImageAutoSize(true);
+        addMenu();
+
+        addActionListener(e -> onIconClick());
+    }
+
+    private void onIconClick() {
+        removeListeners();
+        removeIcon();
+        ServerMainWindow serverMainWindow = new ServerMainWindow();
+        serverMainWindow.setVisible(true);
     }
 
     private void onShutDownClick() {
@@ -78,21 +85,14 @@ class ServerIcon extends TrayIcon {
         }
     }
 
-    private void onIconClick() {
-        removeListeners();
-        removeIcon();
-        ServerMainWindow serverMainWindow = new ServerMainWindow();
-        serverMainWindow.setVisible(true);
+    private void removeIcon() {
+        SystemTray.getSystemTray().remove(this);
     }
 
     private void removeListeners() {
         for (ActionListener listener : getActionListeners()) {
             removeActionListener(listener);
         }
-    }
-
-    private void removeIcon() {
-        SystemTray.getSystemTray().remove(this);
     }
 
 }

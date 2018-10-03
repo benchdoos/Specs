@@ -55,6 +55,61 @@ public class ServerBackgroundService {
         return localInstance;
     }
 
+    private void createConnections() {
+        try {
+            try {
+                this.serverSocketService.createConnections();
+            } catch (IOException e) {
+                if (!this.isServerShuttingDown) {
+                    log.error("Could not create socket connections", e);
+                } else {
+                    log.info("ServerSocket is shut down");
+                }
+            }
+        } catch (Throwable e) {
+            log.warn("On server starting connections got an exception: ", e);
+        }
+    }
+
+    public List<ClientConnection> getConnectedClientsList() {
+        if (this.serverSocketService != null) {
+            return this.serverSocketService.getConnectedClientsList();
+        } else return null;
+    }
+
+    public int getOnlineUsersCount() {
+        if (this.serverSocketService != null) {
+            return this.serverSocketService.getConnectedClientsCount();
+        } else return 0;
+    }
+
+    private void startServerDBConnectionPool() {
+        try {
+            try {
+                log.info("Starting server db connection pool");
+
+                ServerLogMessage message = new ServerLogMessage("Запускается пул подключений к БД",
+                        ServerLogMessage.ServerLogMessageLevel.INFO);
+                ServerMonitoringBackgroundService.getInstance().addMessage(message);
+
+                this.serverDBConnectionPool = ServerDBConnectionPool.getInstance();
+                this.serverDBConnectionPool.startDBConnectionPool();
+            } catch (ServerStartException e) {
+                log.warn("Could not start DB connection pool in background", e);
+                ServerLogMessage message = new ServerLogMessage(
+                        "Не удалось запустить пул подключений к БД. " + e.getLocalizedMessage(),
+                        ServerLogMessage.ServerLogMessageLevel.WARN);
+                ServerMonitoringBackgroundService.getInstance().addMessage(message);
+
+                JOptionPane.showMessageDialog(null,
+                        "Не удалось установить подключение к БД\r\n" + e.getLocalizedMessage(),
+                        "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Throwable e) {
+            log.warn("On server starting DBCP got an exception: ", e);
+        }
+    }
+
     private void startServerMainBackgroundService() {
         try {
             startServerMonitoring();
@@ -85,33 +140,6 @@ public class ServerBackgroundService {
         }
     }
 
-    private void startServerDBConnectionPool() {
-        try {
-            try {
-                log.info("Starting server db connection pool");
-
-                ServerLogMessage message = new ServerLogMessage("Запускается пул подключений к БД",
-                        ServerLogMessage.ServerLogMessageLevel.INFO);
-                ServerMonitoringBackgroundService.getInstance().addMessage(message);
-
-                this.serverDBConnectionPool = ServerDBConnectionPool.getInstance();
-                this.serverDBConnectionPool.startDBConnectionPool();
-            } catch (ServerStartException e) {
-                log.warn("Could not start DB connection pool in background", e);
-                ServerLogMessage message = new ServerLogMessage(
-                        "Не удалось запустить пул подключений к БД. " + e.getLocalizedMessage(),
-                        ServerLogMessage.ServerLogMessageLevel.WARN);
-                ServerMonitoringBackgroundService.getInstance().addMessage(message);
-
-                JOptionPane.showMessageDialog(null,
-                        "Не удалось установить подключение к БД\r\n" + e.getLocalizedMessage(),
-                        "Ошибка подключения", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Throwable e) {
-            log.warn("On server starting DBCP got an exception: ", e);
-        }
-    }
-
     private void startServerSocketService() {
         try {
             this.serverSocketService = ServerSocketService.getInstance();
@@ -121,20 +149,12 @@ public class ServerBackgroundService {
         }
     }
 
-    private void createConnections() {
-        try {
-            try {
-                this.serverSocketService.createConnections();
-            } catch (IOException e) {
-                if (!this.isServerShuttingDown) {
-                    log.error("Could not create socket connections", e);
-                } else {
-                    log.info("ServerSocket is shut down");
-                }
-            }
-        } catch (Throwable e) {
-            log.warn("On server starting connections got an exception: ", e);
-        }
+    private void stopMonitoringBackgroundService() {
+        this.monitoringBackgroundService.stopMonitoring();
+    }
+
+    private void stopServerDBConnectionPool() {
+        this.serverDBConnectionPool.stopDBConnectionPool();
     }
 
     public void stopServerMainBackgroundService() {
@@ -149,25 +169,5 @@ public class ServerBackgroundService {
 
     private void stopServerSocketService() {
         this.serverSocketService.stopSocketService();
-    }
-
-    private void stopServerDBConnectionPool() {
-        this.serverDBConnectionPool.stopDBConnectionPool();
-    }
-
-    private void stopMonitoringBackgroundService() {
-        this.monitoringBackgroundService.stopMonitoring();
-    }
-
-    public int getOnlineUsersCount() {
-        if (this.serverSocketService != null) {
-            return this.serverSocketService.getConnectedClientsCount();
-        } else return 0;
-    }
-
-    public List<ClientConnection> getConnectedClientsList() {
-        if (this.serverSocketService != null) {
-            return this.serverSocketService.getConnectedClientsList();
-        } else return null;
     }
 }

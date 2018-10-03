@@ -44,18 +44,6 @@ public class UsersDaoImpl implements UsersDao {
         this.session = session;
     }
 
-
-    @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-
     @Override
     @Transactional
     public int addUser(UsersEntity usersEntity) {
@@ -66,22 +54,14 @@ public class UsersDaoImpl implements UsersDao {
     }
 
     @Override
-    @Transactional
-    public void updateUser(UsersEntity usersEntity) {
-        session.merge(usersEntity);
-        log.info("User successfully updated: " + usersEntity);
+    public Session getSession() {
+        return session;
     }
 
     @Override
-    @Transactional
-    public void removeUser(int id) {
-        UsersEntity usersEntity = session.load(UsersEntity.class, id);
-        if (usersEntity != null) {
-            session.delete(usersEntity);
-        }
-        log.info("User successfully removed: " + usersEntity);
+    public void setSession(Session session) {
+        this.session = session;
     }
-
 
     @Override
     @Transactional
@@ -105,7 +85,6 @@ public class UsersDaoImpl implements UsersDao {
         return entity;
     }
 
-
     @Override
     @Transactional
     public List<UsersEntity> listUsers() {
@@ -120,5 +99,22 @@ public class UsersDaoImpl implements UsersDao {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void removeUser(int id) {
+        UsersEntity usersEntity = session.load(UsersEntity.class, id);
+        if (usersEntity != null) {
+            session.delete(usersEntity);
+        }
+        log.info("User successfully removed: " + usersEntity);
+    }
+
+    @Override
+    @Transactional
+    public void updateUser(UsersEntity usersEntity) {
+        session.merge(usersEntity);
+        log.info("User successfully updated: " + usersEntity);
     }
 }

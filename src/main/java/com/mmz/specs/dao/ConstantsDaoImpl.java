@@ -39,14 +39,6 @@ public class ConstantsDaoImpl implements ConstantsDao {
         this.session = session;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
     @Override
     @Transactional
     public int addConstant(ConstantsEntity constantsEntity) {
@@ -54,24 +46,6 @@ public class ConstantsDaoImpl implements ConstantsDao {
         constantsEntity = getConstantById(id);
         log.debug("Constant successfully saved: " + constantsEntity);
         return id;
-    }
-
-    @Override
-    @Transactional
-    public void updateConstant(ConstantsEntity constantsEntity) {
-        session.update(constantsEntity);
-        log.debug("Constant successfully updated: " + constantsEntity);
-    }
-
-    @Override
-    @Transactional
-    public void removeConstant(int id) {
-        ConstantsEntity constantsEntity = session.load(ConstantsEntity.class, id);
-        if (constantsEntity != null) {
-            session.delete(constantsEntity);
-        }
-        log.debug("Constant successfully removed: " + constantsEntity);
-
     }
 
     @Override
@@ -93,6 +67,14 @@ public class ConstantsDaoImpl implements ConstantsDao {
 
     }
 
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
     @Override
     @Transactional
     public List<ConstantsEntity> listConstants() {
@@ -107,5 +89,23 @@ public class ConstantsDaoImpl implements ConstantsDao {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void removeConstant(int id) {
+        ConstantsEntity constantsEntity = session.load(ConstantsEntity.class, id);
+        if (constantsEntity != null) {
+            session.delete(constantsEntity);
+        }
+        log.debug("Constant successfully removed: " + constantsEntity);
+
+    }
+
+    @Override
+    @Transactional
+    public void updateConstant(ConstantsEntity constantsEntity) {
+        session.update(constantsEntity);
+        log.debug("Constant successfully updated: " + constantsEntity);
     }
 }

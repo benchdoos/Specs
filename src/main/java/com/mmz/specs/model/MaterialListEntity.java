@@ -31,6 +31,37 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
     private MaterialEntity materialByMaterialId;
     private boolean isMainMaterial;
 
+    @Override
+    public int compareTo(@Nonnull MaterialListEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getMaterialByMaterialId().getLongMark(), that.getMaterialByMaterialId().getLongMark())
+                .compare(this.getMaterialByMaterialId().getLongProfile(), that.getMaterialByMaterialId().getLongProfile())
+                .compareFalseFirst(this.isMainMaterial(), that.isMainMaterial())
+                .compareFalseFirst(this.isActive(), that.isActive())
+                .result();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MaterialListEntity)) return false;
+        MaterialListEntity that = (MaterialListEntity) o;
+
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(id, that.id);
+        return eb.isEquals();
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "DETAIL_ID", referencedColumnName = "ID", nullable = false)
+    public DetailEntity getDetailByDetailId() {
+        return detailByDetailId;
+    }
+
+    public void setDetailByDetailId(DetailEntity detailByDetailId) {
+        this.detailByDetailId = detailByDetailId;
+    }
+
     @Id
     @Column(name = "ID")
     public long getId() {
@@ -39,6 +70,21 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "MATERIAL_ID", referencedColumnName = "ID", nullable = false)
+    public MaterialEntity getMaterialByMaterialId() {
+        return materialByMaterialId;
+    }
+
+    public void setMaterialByMaterialId(MaterialEntity materialByMaterialId) {
+        this.materialByMaterialId = materialByMaterialId;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
     }
 
     @Basic
@@ -62,22 +108,6 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
     }
 
     @Override
-    public int hashCode() {
-        return (int) (id ^ (id >>> 32));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MaterialListEntity)) return false;
-        MaterialListEntity that = (MaterialListEntity) o;
-
-        EqualsBuilder eb = new EqualsBuilder();
-        eb.append(id, that.id);
-        return eb.isEquals();
-    }
-
-    @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
@@ -86,35 +116,5 @@ public class MaterialListEntity implements Comparable<MaterialListEntity> {
                 .append("detailByDetailId", detailByDetailId)
                 .append("materialByMaterialId", materialByMaterialId)
                 .toString();
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "DETAIL_ID", referencedColumnName = "ID", nullable = false)
-    public DetailEntity getDetailByDetailId() {
-        return detailByDetailId;
-    }
-
-    public void setDetailByDetailId(DetailEntity detailByDetailId) {
-        this.detailByDetailId = detailByDetailId;
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "MATERIAL_ID", referencedColumnName = "ID", nullable = false)
-    public MaterialEntity getMaterialByMaterialId() {
-        return materialByMaterialId;
-    }
-
-    public void setMaterialByMaterialId(MaterialEntity materialByMaterialId) {
-        this.materialByMaterialId = materialByMaterialId;
-    }
-
-    @Override
-    public int compareTo(@Nonnull MaterialListEntity that) {
-        return ComparisonChain.start()
-                .compare(this.getMaterialByMaterialId().getLongMark(), that.getMaterialByMaterialId().getLongMark())
-                .compare(this.getMaterialByMaterialId().getLongProfile(), that.getMaterialByMaterialId().getLongProfile())
-                .compareFalseFirst(this.isMainMaterial(), that.isMainMaterial())
-                .compareFalseFirst(this.isActive(), that.isActive())
-                .result();
     }
 }

@@ -57,163 +57,6 @@ public class EditTitleWindow extends JDialog {
         initKeyBindings();
     }
 
-    private void initTitleTextField() {
-        if (detailTitleEntity != null) {
-            titleTextField.setText(detailTitleEntity.getTitle());
-        }
-    }
-
-    private void initActiveCheckBox() {
-        if (detailTitleEntity == null) {
-            activeCheckBox.setSelected(true);
-            activeCheckBox.setEnabled(false);
-        } else {
-            activeCheckBox.setSelected(detailTitleEntity.isActive());
-        }
-    }
-
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-    }
-
-    private void onOK() {
-        addNewTitle();
-    }
-
-    private void onCancel() {
-        dispose();
-    }
-
-    private void addNewTitle() {
-        final int MAX_TITLE_LENGTH = 120;
-        String result = titleTextField.getText();
-        if (result != null) {
-            if (!result.isEmpty()) {
-                if (result.length() <= MAX_TITLE_LENGTH) {
-                    result = result.replace("\n", " ");
-                    result = fixTitle(result);
-
-                    DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
-                    DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
-
-                    if (detailTitleByTitle == null && detailTitleEntity == null) {
-                        DetailTitleEntity titleEntity = new DetailTitleEntity();
-                        titleEntity.setActive(true);
-                        titleEntity.setTitle(result);
-
-                        detailTitleEntity = createNewTitle(result, titleEntity);
-                        dispose();
-                    } else if (detailTitleEntity != null) {
-                        if (detailTitleByTitle != null) {
-                            if (detailTitleByTitle.getId() == detailTitleEntity.getId()) {
-                                updateTitleEntity(result);
-                            }
-                        } else {
-                            updateTitleEntity(result);
-                        }
-                    } else {
-                        showMessageDialog(this,
-                                "Наименование " + result +
-                                        "\nУже существует.", "Ошибка добавления", WARNING_MESSAGE);
-                    }
-                } else {
-                    showMessageDialog(this,
-                            "Длина наименования не может привышать 120 символов (сейчас: "
-                                    + result.length() + ")",
-                            "Ошибка ввода", WARNING_MESSAGE);
-                }
-            } else {
-                showMessageDialog(this,
-                        "Наименование не может быть пустым",
-                        "Ошибка ввода", WARNING_MESSAGE);
-            }
-        }
-    }
-
-    private String fixTitle(String title) {
-        if (title == null) return null;
-        if (title.length() > 0) {
-            final String[] split = title.split(" ");
-            for (int i = 0; i < split.length; i++) {
-                if (i == 0) {
-                    split[i] = WordUtils.capitalizeFully(split[i]);
-                } else {
-                    split[i] = split[i].toLowerCase();
-                }
-            }
-
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < split.length; i++) {
-                String str = split[i];
-                builder.append(str);
-                if (i != split.length - 1) {
-                    builder.append(" ");
-                }
-            }
-
-            title = builder.toString();
-        }
-        return title;
-    }
-
-    private void updateTitleEntity(String result) {
-        DetailTitleEntity titleEntity = detailTitleEntity;
-        titleEntity.setActive(activeCheckBox.isSelected());
-        titleEntity.setTitle(result);
-
-        detailTitleEntity = createNewTitle(result, titleEntity);
-        dispose();
-    }
-
-    private DetailTitleEntity createNewTitle(String result, DetailTitleEntity titleEntity) {
-        try {
-            DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
-            if (detailTitleEntity != null) {
-                service.updateDetailTitle(titleEntity);
-            } else {
-                titleEntity = service.getDetailTitleById(service.addDetailTitle(titleEntity));
-            }
-            return titleEntity;
-        } catch (Throwable throwable) {
-            showMessageDialog(this,
-                    "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
-                    "Ошибка добавления", WARNING_MESSAGE);
-            return null;
-        }
-    }
-
-    public DetailTitleEntity getDetailTitleEntity() {
-        return detailTitleEntity;
-    }
-
-    private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-        if (detailTitleEntity == null) {
-            setTitle("Новое наименование");
-            setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/titleNew16.png")));
-        } else {
-            setTitle("Изменение наименования: " + detailTitleEntity.getTitle());
-            setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/titleEdit16.png")));
-        }
-        pack();
-        setResizable(false);
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -272,5 +115,162 @@ public class EditTitleWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private void addNewTitle() {
+        final int MAX_TITLE_LENGTH = 120;
+        String result = titleTextField.getText();
+        if (result != null) {
+            if (!result.isEmpty()) {
+                if (result.length() <= MAX_TITLE_LENGTH) {
+                    result = result.replace("\n", " ");
+                    result = fixTitle(result);
+
+                    DetailTitleService titleService = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+                    DetailTitleEntity detailTitleByTitle = titleService.getDetailTitleByTitle(result);
+
+                    if (detailTitleByTitle == null && detailTitleEntity == null) {
+                        DetailTitleEntity titleEntity = new DetailTitleEntity();
+                        titleEntity.setActive(true);
+                        titleEntity.setTitle(result);
+
+                        detailTitleEntity = createNewTitle(result, titleEntity);
+                        dispose();
+                    } else if (detailTitleEntity != null) {
+                        if (detailTitleByTitle != null) {
+                            if (detailTitleByTitle.getId() == detailTitleEntity.getId()) {
+                                updateTitleEntity(result);
+                            }
+                        } else {
+                            updateTitleEntity(result);
+                        }
+                    } else {
+                        showMessageDialog(this,
+                                "Наименование " + result +
+                                        "\nУже существует.", "Ошибка добавления", WARNING_MESSAGE);
+                    }
+                } else {
+                    showMessageDialog(this,
+                            "Длина наименования не может привышать 120 символов (сейчас: "
+                                    + result.length() + ")",
+                            "Ошибка ввода", WARNING_MESSAGE);
+                }
+            } else {
+                showMessageDialog(this,
+                        "Наименование не может быть пустым",
+                        "Ошибка ввода", WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private DetailTitleEntity createNewTitle(String result, DetailTitleEntity titleEntity) {
+        try {
+            DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+            if (detailTitleEntity != null) {
+                service.updateDetailTitle(titleEntity);
+            } else {
+                titleEntity = service.getDetailTitleById(service.addDetailTitle(titleEntity));
+            }
+            return titleEntity;
+        } catch (Throwable throwable) {
+            showMessageDialog(this,
+                    "Не удалось добавить " + result + "\n" + throwable.getLocalizedMessage(),
+                    "Ошибка добавления", WARNING_MESSAGE);
+            return null;
+        }
+    }
+
+    private String fixTitle(String title) {
+        if (title == null) return null;
+        if (title.length() > 0) {
+            final String[] split = title.split(" ");
+            for (int i = 0; i < split.length; i++) {
+                if (i == 0) {
+                    split[i] = WordUtils.capitalizeFully(split[i]);
+                } else {
+                    split[i] = split[i].toLowerCase();
+                }
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < split.length; i++) {
+                String str = split[i];
+                builder.append(str);
+                if (i != split.length - 1) {
+                    builder.append(" ");
+                }
+            }
+
+            title = builder.toString();
+        }
+        return title;
+    }
+
+    public DetailTitleEntity getDetailTitleEntity() {
+        return detailTitleEntity;
+    }
+
+    private void initActiveCheckBox() {
+        if (detailTitleEntity == null) {
+            activeCheckBox.setSelected(true);
+            activeCheckBox.setEnabled(false);
+        } else {
+            activeCheckBox.setSelected(detailTitleEntity.isActive());
+        }
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+        if (detailTitleEntity == null) {
+            setTitle("Новое наименование");
+            setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/titleNew16.png")));
+        } else {
+            setTitle("Изменение наименования: " + detailTitleEntity.getTitle());
+            setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/titleEdit16.png")));
+        }
+        pack();
+        setResizable(false);
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void initTitleTextField() {
+        if (detailTitleEntity != null) {
+            titleTextField.setText(detailTitleEntity.getTitle());
+        }
+    }
+
+    private void onCancel() {
+        dispose();
+    }
+
+    private void onOK() {
+        addNewTitle();
+    }
+
+    private void updateTitleEntity(String result) {
+        DetailTitleEntity titleEntity = detailTitleEntity;
+        titleEntity.setActive(activeCheckBox.isSelected());
+        titleEntity.setTitle(result);
+
+        detailTitleEntity = createNewTitle(result, titleEntity);
+        dispose();
     }
 }

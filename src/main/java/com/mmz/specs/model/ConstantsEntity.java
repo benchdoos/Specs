@@ -26,6 +26,18 @@ public class ConstantsEntity {
     private String key;
     private String value;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ConstantsEntity that = (ConstantsEntity) o;
+
+        if (id != that.id) return false;
+        if (key != null ? !key.equals(that.key) : that.key != null) return false;
+        return value != null ? value.equals(that.value) : that.value == null;
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {
@@ -54,18 +66,6 @@ public class ConstantsEntity {
 
     public void setValue(String value) {
         this.value = value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ConstantsEntity that = (ConstantsEntity) o;
-
-        if (id != that.id) return false;
-        if (key != null ? !key.equals(that.key) : that.key != null) return false;
-        return value != null ? value.equals(that.value) : that.value == null;
     }
 
     @Override

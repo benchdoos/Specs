@@ -80,209 +80,6 @@ public class SelectMultipleDetails extends JDialog {
         setMinimumSize(getSize());
     }
 
-    private void fillList() {
-        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
-
-        DetailService service = new DetailServiceImpl(session);
-        ArrayList<DetailEntity> list = (ArrayList<DetailEntity>) service.listDetails();
-
-        Collections.sort(list);
-
-        for (DetailEntity entity : list) {
-            model.addElement(entity);
-        }
-        mainList.setModel(model);
-    }
-
-    private void initList() {
-        mainList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof DetailEntity) {
-                    DetailEntity entity = (DetailEntity) value;
-                    final String info = entity.getCode() + " " + CommonUtils.substring(20, entity.getDetailTitleByDetailTitleId().getTitle());
-                    return super.getListCellRendererComponent(list, info, index, isSelected, cellHasFocus);
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
-
-        mainList.addListSelectionListener(e -> {
-            JList list = (JList) e.getSource();
-            int selected = list.getSelectedIndex();
-
-            if (selected > 0 && selected < list.getModel().getSize()) {
-                final DetailEntity current = mainList.getModel().getElementAt(selected);
-                fillDetailInfo(current);
-            }
-
-        });
-    }
-
-    private void fillDetailInfo(DetailEntity current) {
-        if (current != null) {
-            unitLabel.setText(current.isUnit() ? "да" : "нет");
-            weightLabel.setText(
-                    (current.getWorkpieceWeight() != null ? current.getWorkpieceWeight() + "" : "0") + "; " +
-                            (current.getFinishedWeight() != null ? current.getFinishedWeight() + "" : "0"));
-            activeLabel.setText(current.isUnit() ? "да" : "нет");
-        } else {
-            unitLabel.setText(NO_DATA_STRING);
-            weightLabel.setText(NO_DATA_STRING);
-            activeLabel.setText(NO_DATA_STRING);
-        }
-    }
-
-    private void initSearchTextField() {
-        searchTextField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) mainList.getModel();
-                for (int i = 0; i < model.size(); i++) {
-                    final DetailEntity entity = model.getElementAt(i);
-                    if (entity.getCode().toUpperCase().contains(searchTextField.getText().replace(",", ".").toUpperCase())) {
-                        mainList.ensureIndexIsVisible(i);
-                        break;
-                    }
-                }
-            }
-        });
-    }
-
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void onPaste() {
-        try {
-            String data = (String) Toolkit.getDefaultToolkit()
-                    .getSystemClipboard().getData(DataFlavor.stringFlavor);
-            if (data != null && !data.isEmpty()) {
-                ArrayList<String> detailCodes = getDetailCodesFromString(data);
-                ArrayList<String> broken = new ArrayList<>();
-                ArrayList<Integer> indexes = new ArrayList<>();
-                for (String string : detailCodes) {
-                    DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) mainList.getModel();
-                    boolean isOk = addIndex(indexes, string, model);
-                    if (!broken.contains(string) && !isOk) {
-                        broken.add(string);
-                    }
-                }
-
-                selectIndexes(indexes);
-
-                if (broken.size() > 0) {
-                    showBrokenCodesWarning(broken);
-                }
-            }
-        } catch (UnsupportedFlavorException | IOException e) {
-            log.warn("Could not get details from clipboard", e);
-        }
-    }
-
-    private void selectIndexes(ArrayList<Integer> indexes) {
-        Integer[] integers = indexes.toArray(new Integer[0]);
-        int[] realIndexes = Arrays.stream(integers).mapToInt(Integer::intValue).toArray();
-
-        mainList.setSelectedIndices(realIndexes);
-        if (realIndexes.length > 1) {
-            mainList.ensureIndexIsVisible(realIndexes[realIndexes.length - 1]);
-        }
-    }
-
-    private boolean addIndex(ArrayList<Integer> indexes, String string, DefaultListModel<DetailEntity> model) {
-        boolean isOk = false;
-        for (int i = 0; i < model.size(); i++) {
-            final DetailEntity entity = model.getElementAt(i);
-
-            final String code = entity.getCode();
-
-            if (code.equalsIgnoreCase(string)) {
-                indexes.add(i);
-                isOk = true;
-            }
-        }
-        return isOk;
-    }
-
-    private void showBrokenCodesWarning(ArrayList<String> broken) {
-        StringBuilder builder = new StringBuilder();
-        for (String s : broken) {
-            builder.append(s);
-            builder.append("\n");
-        }
-        JOptionPane.showMessageDialog(this, "Не удалось найти обозначения:\n" +
-                builder.toString(), "Ошибка во время выбора нескольких деталей", JOptionPane.WARNING_MESSAGE);
-    }
-
-    private ArrayList<String> getDetailCodesFromString(String data) {
-        ArrayList<String> result = new ArrayList<>();
-        log.debug("Got data from clipboard: {}", data);
-        if (data != null) {
-            final String[] split = data.split("\n");
-            for (String code : split) {
-                code = code.replace(" ", "");
-                result.add(code);
-            }
-        }
-        return result;
-    }
-
-    private void initListeners() {
-        importButton.addActionListener(e -> onPaste());
-
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-    }
-
-    private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-        setTitle("Выбор нескольких деталей");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
-    }
-
-    private void onOK() {
-        final List<DetailEntity> selectedValuesList = mainList.getSelectedValuesList();
-        if (!selectedValuesList.isEmpty()) {
-            final ArrayList<DetailEntity> selectedValuesList1 = (ArrayList<DetailEntity>) selectedValuesList;
-            if (selectedValuesList1.size() > 1) {
-                selectedDetailEntities = selectedValuesList1;
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Выеберете как минимум 2 детали",
-                        "Внимание", JOptionPane.WARNING_MESSAGE);
-            }
-        } else {
-            selectedDetailEntities = null;
-            dispose();
-        }
-    }
-
-    private void onCancel() {
-        selectedDetailEntities = null;
-        dispose();
-    }
-
-    ArrayList<DetailEntity> getSelectedDetailEntities() {
-        return selectedDetailEntities;
-    }
-
-    private void createUIComponents() {
-        searchTextField = new PlaceholderTextField();
-        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
-    }
-
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -369,5 +166,208 @@ public class SelectMultipleDetails extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private boolean addIndex(ArrayList<Integer> indexes, String string, DefaultListModel<DetailEntity> model) {
+        boolean isOk = false;
+        for (int i = 0; i < model.size(); i++) {
+            final DetailEntity entity = model.getElementAt(i);
+
+            final String code = entity.getCode();
+
+            if (code.equalsIgnoreCase(string)) {
+                indexes.add(i);
+                isOk = true;
+            }
+        }
+        return isOk;
+    }
+
+    private void createUIComponents() {
+        searchTextField = new PlaceholderTextField();
+        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
+    }
+
+    private void fillDetailInfo(DetailEntity current) {
+        if (current != null) {
+            unitLabel.setText(current.isUnit() ? "да" : "нет");
+            weightLabel.setText(
+                    (current.getWorkpieceWeight() != null ? current.getWorkpieceWeight() + "" : "0") + "; " +
+                            (current.getFinishedWeight() != null ? current.getFinishedWeight() + "" : "0"));
+            activeLabel.setText(current.isUnit() ? "да" : "нет");
+        } else {
+            unitLabel.setText(NO_DATA_STRING);
+            weightLabel.setText(NO_DATA_STRING);
+            activeLabel.setText(NO_DATA_STRING);
+        }
+    }
+
+    private void fillList() {
+        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
+
+        DetailService service = new DetailServiceImpl(session);
+        ArrayList<DetailEntity> list = (ArrayList<DetailEntity>) service.listDetails();
+
+        Collections.sort(list);
+
+        for (DetailEntity entity : list) {
+            model.addElement(entity);
+        }
+        mainList.setModel(model);
+    }
+
+    private ArrayList<String> getDetailCodesFromString(String data) {
+        ArrayList<String> result = new ArrayList<>();
+        log.debug("Got data from clipboard: {}", data);
+        if (data != null) {
+            final String[] split = data.split("\n");
+            for (String code : split) {
+                code = code.replace(" ", "");
+                result.add(code);
+            }
+        }
+        return result;
+    }
+
+    ArrayList<DetailEntity> getSelectedDetailEntities() {
+        return selectedDetailEntities;
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+        setTitle("Выбор нескольких деталей");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initList() {
+        mainList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailEntity) {
+                    DetailEntity entity = (DetailEntity) value;
+                    final String info = entity.getCode() + " " + CommonUtils.substring(20, entity.getDetailTitleByDetailTitleId().getTitle());
+                    return super.getListCellRendererComponent(list, info, index, isSelected, cellHasFocus);
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+
+        mainList.addListSelectionListener(e -> {
+            JList list = (JList) e.getSource();
+            int selected = list.getSelectedIndex();
+
+            if (selected > 0 && selected < list.getModel().getSize()) {
+                final DetailEntity current = mainList.getModel().getElementAt(selected);
+                fillDetailInfo(current);
+            }
+
+        });
+    }
+
+    private void initListeners() {
+        importButton.addActionListener(e -> onPaste());
+
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void initSearchTextField() {
+        searchTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) mainList.getModel();
+                for (int i = 0; i < model.size(); i++) {
+                    final DetailEntity entity = model.getElementAt(i);
+                    if (entity.getCode().toUpperCase().contains(searchTextField.getText().replace(",", ".").toUpperCase())) {
+                        mainList.ensureIndexIsVisible(i);
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
+    private void onCancel() {
+        selectedDetailEntities = null;
+        dispose();
+    }
+
+    private void onOK() {
+        final List<DetailEntity> selectedValuesList = mainList.getSelectedValuesList();
+        if (!selectedValuesList.isEmpty()) {
+            final ArrayList<DetailEntity> selectedValuesList1 = (ArrayList<DetailEntity>) selectedValuesList;
+            if (selectedValuesList1.size() > 1) {
+                selectedDetailEntities = selectedValuesList1;
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Выеберете как минимум 2 детали",
+                        "Внимание", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            selectedDetailEntities = null;
+            dispose();
+        }
+    }
+
+    private void onPaste() {
+        try {
+            String data = (String) Toolkit.getDefaultToolkit()
+                    .getSystemClipboard().getData(DataFlavor.stringFlavor);
+            if (data != null && !data.isEmpty()) {
+                ArrayList<String> detailCodes = getDetailCodesFromString(data);
+                ArrayList<String> broken = new ArrayList<>();
+                ArrayList<Integer> indexes = new ArrayList<>();
+                for (String string : detailCodes) {
+                    DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) mainList.getModel();
+                    boolean isOk = addIndex(indexes, string, model);
+                    if (!broken.contains(string) && !isOk) {
+                        broken.add(string);
+                    }
+                }
+
+                selectIndexes(indexes);
+
+                if (broken.size() > 0) {
+                    showBrokenCodesWarning(broken);
+                }
+            }
+        } catch (UnsupportedFlavorException | IOException e) {
+            log.warn("Could not get details from clipboard", e);
+        }
+    }
+
+    private void selectIndexes(ArrayList<Integer> indexes) {
+        Integer[] integers = indexes.toArray(new Integer[0]);
+        int[] realIndexes = Arrays.stream(integers).mapToInt(Integer::intValue).toArray();
+
+        mainList.setSelectedIndices(realIndexes);
+        if (realIndexes.length > 1) {
+            mainList.ensureIndexIsVisible(realIndexes[realIndexes.length - 1]);
+        }
+    }
+
+    private void showBrokenCodesWarning(ArrayList<String> broken) {
+        StringBuilder builder = new StringBuilder();
+        for (String s : broken) {
+            builder.append(s);
+            builder.append("\n");
+        }
+        JOptionPane.showMessageDialog(this, "Не удалось найти обозначения:\n" +
+                builder.toString(), "Ошибка во время выбора нескольких деталей", JOptionPane.WARNING_MESSAGE);
     }
 }

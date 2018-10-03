@@ -36,115 +36,12 @@ public class UsersEntity implements Comparable<UsersEntity> {
     private boolean active;
     private UserTypeEntity userType;
 
-
-    @Id
-    @Column(name = "ID")
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Basic
-    @Column(name = "USERNAME")
-    public String getUsername() {
-        if (username != null) {
-            username = username.toLowerCase();
-        }
-        return username;
-    }
-
-    public void setUsername(String username) {
-        if (username != null) {
-            username = username.toLowerCase();
-        }
-        this.username = username;
-    }
-
-    @Basic
-    @Column(name = "PASSWORD")
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Basic
-    @Column(name = "NAME")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Basic
-    @Column(name = "PATRONYMIC")
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String lastname) {
-        this.patronymic = lastname;
-    }
-
-    @Basic
-    @Column(name = "SURNAME")
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    @Basic
-    @Column(name = "ADMIN")
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
-    }
-
-    @Basic
-    @Column(name = "EDITOR")
-    public boolean isEditor() {
-        return editor;
-    }
-
-    public void setEditor(boolean editor) {
-        this.editor = editor;
-    }
-
-    @Basic
-    @Column(name = "IS_ACTIVE")
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (username != null ? username.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (patronymic != null ? patronymic.hashCode() : 0);
-        result = 31 * result + (surname != null ? surname.hashCode() : 0);
-        result = 31 * result + (admin ? 1 : 0);
-        result = 31 * result + (editor ? 1 : 0);
-        result = 31 * result + (active ? 1 : 0);
-        return result;
+    public int compareTo(@Nonnull UsersEntity that) {
+        return ComparisonChain.start()
+                .compareTrueFirst(this.isActive(), that.active)
+                .compare(this.getUsername(), that.getUsername())
+                .result();
     }
 
     @Override
@@ -169,6 +66,126 @@ public class UsersEntity implements Comparable<UsersEntity> {
         return this.username.equals(that.getUsername());
     }
 
+    @Id
+    @Column(name = "ID")
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Basic
+    @Column(name = "NAME")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Basic
+    @Column(name = "PASSWORD")
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Basic
+    @Column(name = "PATRONYMIC")
+    public String getPatronymic() {
+        return patronymic;
+    }
+
+    public void setPatronymic(String lastname) {
+        this.patronymic = lastname;
+    }
+
+    @Basic
+    @Column(name = "SURNAME")
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "USER_TYPE_ID", referencedColumnName = "ID")
+    public UserTypeEntity getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserTypeEntity userTypeEntity) {
+        this.userType = userTypeEntity;
+    }
+
+    @Basic
+    @Column(name = "USERNAME")
+    public String getUsername() {
+        if (username != null) {
+            username = username.toLowerCase();
+        }
+        return username;
+    }
+
+    public void setUsername(String username) {
+        if (username != null) {
+            username = username.toLowerCase();
+        }
+        this.username = username;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (patronymic != null ? patronymic.hashCode() : 0);
+        result = 31 * result + (surname != null ? surname.hashCode() : 0);
+        result = 31 * result + (admin ? 1 : 0);
+        result = 31 * result + (editor ? 1 : 0);
+        result = 31 * result + (active ? 1 : 0);
+        return result;
+    }
+
+    @Basic
+    @Column(name = "IS_ACTIVE")
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    @Basic
+    @Column(name = "ADMIN")
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
+    @Basic
+    @Column(name = "EDITOR")
+    public boolean isEditor() {
+        return editor;
+    }
+
+    public void setEditor(boolean editor) {
+        this.editor = editor;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -183,23 +200,5 @@ public class UsersEntity implements Comparable<UsersEntity> {
                 .append("isActive", active)
                 .append("userType", userType)
                 .toString();
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "USER_TYPE_ID", referencedColumnName = "ID")
-    public UserTypeEntity getUserType() {
-        return userType;
-    }
-
-    public void setUserType(UserTypeEntity userTypeEntity) {
-        this.userType = userTypeEntity;
-    }
-
-    @Override
-    public int compareTo(@Nonnull UsersEntity that) {
-        return ComparisonChain.start()
-                .compareTrueFirst(this.isActive(), that.active)
-                .compare(this.getUsername(), that.getUsername())
-                .result();
     }
 }

@@ -58,154 +58,6 @@ public class CreateMaterialWindow extends JDialog {
         initKeyBindings();
     }
 
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-    }
-
-    private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        if (materialEntity == null) {
-            setTitle("Добавить новый материал");
-        } else {
-            setTitle("Редактировать материал");
-            activeCheckBox.setEnabled(true);
-        }
-
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/materialNew16.png")));
-
-        getRootPane().setDefaultButton(buttonOK);
-
-        fillFields(materialEntity);
-
-        pack();
-        setMinimumSize(getSize());
-    }
-
-    private void fillFields(MaterialEntity materialEntity) {
-        if (materialEntity != null) {
-            longMarkTextField.setText(materialEntity.getLongMark());
-            longProfileTextField.setText(materialEntity.getLongProfile());
-            shortMarkTextField.setText(materialEntity.getShortMark());
-            shortProfileTextField.setText(materialEntity.getShortProfile());
-        }
-    }
-
-    private void onOK() {
-        if (verify()) {
-            MaterialEntity materialEntity = createMaterial();
-
-            if (exist(materialEntity)) {
-                if (this.materialEntity == null) {
-                    FrameUtils.shakeFrame(this);
-                    JOptionPane.showMessageDialog(this, "Данный материал существует",
-                            "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    loginAndUpdate(materialEntity);
-                }
-            } else {
-                loginAndUpdate(materialEntity);
-            }
-        }
-    }
-
-    private void loginAndUpdate(MaterialEntity materialEntity) {
-        LoginWindow loginWindow = new LoginWindow(session);
-        loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
-        loginWindow.setVisible(true);
-        UsersEntity user = loginWindow.getAuthorizedUser();
-        if (user != null) {
-            if (user.isActive()) {
-                if (user.isAdmin() || user.isEditor()) {
-                    saveMaterial(materialEntity);
-                    dispose();
-                    return;
-                }
-            }
-        }
-        JOptionPane.showMessageDialog(this, "Необходимо быть действующим редактором " +
-                "\nили администратором, чтобы продожить.", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
-    }
-
-    private boolean exist(MaterialEntity materialEntity) {
-        MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
-        MaterialEntity materialByShortMarkAndProfile = null;
-        try {
-            materialByShortMarkAndProfile = service.getMaterialByShortMarkAndProfile(materialEntity.getShortMark(), materialEntity.getShortProfile());
-        } catch (NonUniqueResultException e) {
-            JOptionPane.showMessageDialog(this, "Существует дубликат данной записи, обратитесь к администратору.",
-                    "Ошибка изменения", JOptionPane.WARNING_MESSAGE);
-        }
-        return materialByShortMarkAndProfile != null;
-    }
-
-    private void saveMaterial(MaterialEntity materialEntity) {
-
-        MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
-        if (this.materialEntity != null) {
-            materialEntity.setId(this.materialEntity.getId());
-            service.updateMaterial(materialEntity);
-            this.materialEntity = materialEntity;
-        } else {
-            this.materialEntity = service.getMaterialById(service.addMaterial(materialEntity));
-        }
-    }
-
-    private boolean verify() {
-        if (longMarkTextField.getText().isEmpty() || longMarkTextField.getText().length() > 200) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Поле полной марки не может быть пустым или длинна поля быть более 200");
-            return false;
-        }
-        if (longProfileTextField.getText().isEmpty() || longProfileTextField.getText().length() > 200) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Поле полного профиля не может быть пустым или длинна поля быть более 200");
-            return false;
-        }
-        if (shortMarkTextField.getText().isEmpty() || shortMarkTextField.getText().length() > 40) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Поле короткой марки не может быть пустым или длинна поля быть более 40");
-            return false;
-        }
-        if (shortProfileTextField.getText().isEmpty() || shortProfileTextField.getText().length() > 50) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Поле короткого профиля не может быть пустым или длинна поля быть более 50");
-            return false;
-        }
-        return true;
-    }
-
-    private MaterialEntity createMaterial() {
-        MaterialEntity materialEntity = new MaterialEntity();
-        materialEntity.setLongMark(longMarkTextField.getText());
-        materialEntity.setLongProfile(longProfileTextField.getText());
-        materialEntity.setShortMark(shortMarkTextField.getText());
-        materialEntity.setShortProfile(shortProfileTextField.getText());
-        materialEntity.setActive(activeCheckBox.isSelected());
-        return materialEntity;
-    }
-
-    private void onCancel() {
-        dispose();
-    }
-
-    public MaterialEntity getMaterialEntity() {
-        return materialEntity;
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -287,5 +139,153 @@ public class CreateMaterialWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private MaterialEntity createMaterial() {
+        MaterialEntity materialEntity = new MaterialEntity();
+        materialEntity.setLongMark(longMarkTextField.getText());
+        materialEntity.setLongProfile(longProfileTextField.getText());
+        materialEntity.setShortMark(shortMarkTextField.getText());
+        materialEntity.setShortProfile(shortProfileTextField.getText());
+        materialEntity.setActive(activeCheckBox.isSelected());
+        return materialEntity;
+    }
+
+    private boolean exist(MaterialEntity materialEntity) {
+        MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
+        MaterialEntity materialByShortMarkAndProfile = null;
+        try {
+            materialByShortMarkAndProfile = service.getMaterialByShortMarkAndProfile(materialEntity.getShortMark(), materialEntity.getShortProfile());
+        } catch (NonUniqueResultException e) {
+            JOptionPane.showMessageDialog(this, "Существует дубликат данной записи, обратитесь к администратору.",
+                    "Ошибка изменения", JOptionPane.WARNING_MESSAGE);
+        }
+        return materialByShortMarkAndProfile != null;
+    }
+
+    private void fillFields(MaterialEntity materialEntity) {
+        if (materialEntity != null) {
+            longMarkTextField.setText(materialEntity.getLongMark());
+            longProfileTextField.setText(materialEntity.getLongProfile());
+            shortMarkTextField.setText(materialEntity.getShortMark());
+            shortProfileTextField.setText(materialEntity.getShortProfile());
+        }
+    }
+
+    public MaterialEntity getMaterialEntity() {
+        return materialEntity;
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        if (materialEntity == null) {
+            setTitle("Добавить новый материал");
+        } else {
+            setTitle("Редактировать материал");
+            activeCheckBox.setEnabled(true);
+        }
+
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/materialNew16.png")));
+
+        getRootPane().setDefaultButton(buttonOK);
+
+        fillFields(materialEntity);
+
+        pack();
+        setMinimumSize(getSize());
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void loginAndUpdate(MaterialEntity materialEntity) {
+        LoginWindow loginWindow = new LoginWindow(session);
+        loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+        loginWindow.setVisible(true);
+        UsersEntity user = loginWindow.getAuthorizedUser();
+        if (user != null) {
+            if (user.isActive()) {
+                if (user.isAdmin() || user.isEditor()) {
+                    saveMaterial(materialEntity);
+                    dispose();
+                    return;
+                }
+            }
+        }
+        JOptionPane.showMessageDialog(this, "Необходимо быть действующим редактором " +
+                "\nили администратором, чтобы продожить.", "Ошибка доступа", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void onCancel() {
+        dispose();
+    }
+
+    private void onOK() {
+        if (verify()) {
+            MaterialEntity materialEntity = createMaterial();
+
+            if (exist(materialEntity)) {
+                if (this.materialEntity == null) {
+                    FrameUtils.shakeFrame(this);
+                    JOptionPane.showMessageDialog(this, "Данный материал существует",
+                            "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    loginAndUpdate(materialEntity);
+                }
+            } else {
+                loginAndUpdate(materialEntity);
+            }
+        }
+    }
+
+    private void saveMaterial(MaterialEntity materialEntity) {
+
+        MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
+        if (this.materialEntity != null) {
+            materialEntity.setId(this.materialEntity.getId());
+            service.updateMaterial(materialEntity);
+            this.materialEntity = materialEntity;
+        } else {
+            this.materialEntity = service.getMaterialById(service.addMaterial(materialEntity));
+        }
+    }
+
+    private boolean verify() {
+        if (longMarkTextField.getText().isEmpty() || longMarkTextField.getText().length() > 200) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Поле полной марки не может быть пустым или длинна поля быть более 200");
+            return false;
+        }
+        if (longProfileTextField.getText().isEmpty() || longProfileTextField.getText().length() > 200) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Поле полного профиля не может быть пустым или длинна поля быть более 200");
+            return false;
+        }
+        if (shortMarkTextField.getText().isEmpty() || shortMarkTextField.getText().length() > 40) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Поле короткой марки не может быть пустым или длинна поля быть более 40");
+            return false;
+        }
+        if (shortProfileTextField.getText().isEmpty() || shortProfileTextField.getText().length() > 50) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Поле короткого профиля не может быть пустым или длинна поля быть более 50");
+            return false;
+        }
+        return true;
     }
 }

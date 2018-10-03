@@ -40,6 +40,56 @@ public class DetailListServiceImpl implements DetailListService {
     }
 
     @Override
+    public long addDetailList(DetailListEntity detailListEntity) {
+        return this.detailListDao.addDetailList(detailListEntity);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListByChild(DetailEntity detailEntity) {
+        return this.detailListDao.getDetailListByChild(detailEntity);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListByChild(String detailEntityIndex) {
+        return this.detailListDao.getDetailListByChild(detailEntityIndex);
+    }
+
+    @Override
+    public DetailListEntity getDetailListById(long id) {
+        return this.detailListDao.getDetailListById(id);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListByNoticeId(int id) {
+        return this.detailListDao.getDetailListByNoticeId(id);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity) {
+        return this.detailListDao.getDetailListByParent(detailEntity);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListByParent(String detailEntityIndex) {
+        return this.detailListDao.getDetailListByParent(detailEntityIndex);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child) {
+        return this.detailListDao.getDetailListByParentAndChild(parent, child);
+    }
+
+    @Override
+    public DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity latestNotice) {
+        return this.detailListDao.getDetailListByParentAndChildAndNotice(parent, child, latestNotice);
+    }
+
+    @Override
+    public List<DetailListEntity> getDetailListBySearch(String searchText) {
+        return this.detailListDao.getDetailListBySearch(searchText);
+    }
+
+    @Override
     public DetailListDao getDetailListDao() {
         return this.detailListDao;
     }
@@ -50,74 +100,8 @@ public class DetailListServiceImpl implements DetailListService {
     }
 
     @Override
-    public long addDetailList(DetailListEntity detailListEntity) {
-        return this.detailListDao.addDetailList(detailListEntity);
-    }
-
-    @Override
-    public void updateDetailList(DetailListEntity detailListEntity) {
-        this.detailListDao.updateDetailList(detailListEntity);
-    }
-
-    @Override
-    public void removeDetailList(long id) {
-        this.detailListDao.removeDetailList(id);
-    }
-
-    @Override
-    public DetailListEntity getDetailListById(long id) {
-        return this.detailListDao.getDetailListById(id);
-    }
-
-    @Override
-    public DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity latestNotice) {
-        return this.detailListDao.getDetailListByParentAndChildAndNotice(parent, child, latestNotice);
-    }
-
-    @Override
     public DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child) {
         return this.detailListDao.getLatestDetailListEntityByParentAndChild(parent, child);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity) {
-        return this.detailListDao.getDetailListByParent(detailEntity);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListByChild(DetailEntity detailEntity) {
-        return this.detailListDao.getDetailListByChild(detailEntity);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListByParent(String detailEntityIndex) {
-        return this.detailListDao.getDetailListByParent(detailEntityIndex);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListByChild(String detailEntityIndex) {
-        return this.detailListDao.getDetailListByChild(detailEntityIndex);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListByNoticeId(int id) {
-        return this.detailListDao.getDetailListByNoticeId(id);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListBySearch(String searchText) {
-        return this.detailListDao.getDetailListBySearch(searchText);
-    }
-
-    @Override
-    public List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child) {
-        return this.detailListDao.getDetailListByParentAndChild(parent, child);
-    }
-
-
-    @Override
-    public List<DetailEntity> listParents(DetailEntity child) {
-        return this.detailListDao.listParents(child);
     }
 
     public List<DetailEntity> listChildren(DetailEntity parent) {
@@ -127,5 +111,20 @@ public class DetailListServiceImpl implements DetailListService {
     @Override
     public List<DetailListEntity> listDetailLists() {
         return this.detailListDao.listDetailLists();
+    }
+
+    @Override
+    public List<DetailEntity> listParents(DetailEntity child) {
+        return this.detailListDao.listParents(child);
+    }
+
+    @Override
+    public void removeDetailList(long id) {
+        this.detailListDao.removeDetailList(id);
+    }
+
+    @Override
+    public void updateDetailList(DetailListEntity detailListEntity) {
+        this.detailListDao.updateDetailList(detailListEntity);
     }
 }

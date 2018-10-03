@@ -67,6 +67,22 @@ public class RecentItems {
         }
     }
 
+    public List<String> getItems() {
+        final int maxValue = getMaxValue();
+        ArrayList<String> list = new ArrayList<>();
+        for (int i = 0; i < maxValue; i++) {
+            try {
+                final String property = properties.getProperty(PREFIX + i);
+                if (property != null) {
+                    list.add(property);
+                }
+            } catch (Exception ignore) {
+                /*NOP*/
+            }
+        }
+        return list;
+    }
+
     public int getMaxValue() {
         loadProperties();
         final String property = properties.getProperty(MAX_VALUE_KEY);
@@ -94,18 +110,6 @@ public class RecentItems {
         }
     }
 
-    private void saveProperties() {
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(FILE)) {
-            properties.storeToXML(fileOutputStream, COMMENT);
-        } catch (Exception e) {
-            log.warn("Could not save recent items", e);
-        }
-    }
-
-    public void put(File file) {
-        put(file.getAbsolutePath());
-    }
-
     public void put(String path) {
         Properties prop = new Properties();
         prop.setProperty(MAX_VALUE_KEY, getMaxValue() + "");
@@ -129,6 +133,17 @@ public class RecentItems {
 
     }
 
+    public void put(File file) {
+        put(file.getAbsolutePath());
+    }
+
+    public void removeAll() {
+        Properties properties = new Properties();
+        properties.setProperty(MAX_VALUE_KEY, getMaxValue() + "");
+        RecentItems.properties = properties;
+        saveProperties();
+    }
+
     private void removeDuplicate(String path) {
         final Set<String> strings = properties.stringPropertyNames();
         for (String key : strings) {
@@ -139,27 +154,11 @@ public class RecentItems {
         saveProperties();
     }
 
-    public List<String> getItems() {
-        final int maxValue = getMaxValue();
-        ArrayList<String> list = new ArrayList<>();
-        for (int i = 0; i < maxValue; i++) {
-            try {
-                final String property = properties.getProperty(PREFIX + i);
-                if (property != null) {
-                    list.add(property);
-                }
-            } catch (Exception ignore) {
-                /*NOP*/
-            }
+    private void saveProperties() {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(FILE)) {
+            properties.storeToXML(fileOutputStream, COMMENT);
+        } catch (Exception e) {
+            log.warn("Could not save recent items", e);
         }
-        return list;
-    }
-
-
-    public void removeAll() {
-        Properties properties = new Properties();
-        properties.setProperty(MAX_VALUE_KEY, getMaxValue() + "");
-        RecentItems.properties = properties;
-        saveProperties();
     }
 }

@@ -21,24 +21,21 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface DetailTitleDao {
-    Session getSession();
-
-    void setSession(Session session);
-
-
     int addDetailTitle(DetailTitleEntity detailTitlesEntity);
-
-    void updateDetailTitle(DetailTitleEntity detailTitlesEntity);
-
-    void removeDetailTitle(int id);
-
 
     DetailTitleEntity getDetailTitleById(int id);
 
     DetailTitleEntity getDetailTitleByTitle(String title);
 
+    List<DetailTitleEntity> getDetailTitlesBySearch(String searchText);
+
+    Session getSession();
+
+    void setSession(Session session);
 
     List<DetailTitleEntity> listDetailTitles();
 
-    List<DetailTitleEntity> getDetailTitlesBySearch(String searchText);
+    void removeDetailTitle(int id);
+
+    void updateDetailTitle(DetailTitleEntity detailTitlesEntity);
 }

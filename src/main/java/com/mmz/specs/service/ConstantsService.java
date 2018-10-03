@@ -22,23 +22,20 @@ import java.util.List;
 
 public interface ConstantsService {
 
-    public void setConstantsDao(ConstantsDao constantsDao);
+    int addConstant(ConstantsEntity constantsEntity);
 
-    public ConstantsDao getConstantsDao();
+    ConstantsEntity getConstantById(int id);
 
+    ConstantsEntity getConstantByKey(String key);
 
-    public int addConstant(ConstantsEntity constantsEntity);
+    ConstantsDao getConstantsDao();
 
-    public void updateConstant(ConstantsEntity constantsEntity);
+    void setConstantsDao(ConstantsDao constantsDao);
 
-    public void removeConstant(int id);
+    List<ConstantsEntity> listConstants();
 
+    void removeConstant(int id);
 
-    public ConstantsEntity getConstantById(int id);
-
-    public ConstantsEntity getConstantByKey(String key);
-
-
-    public List<ConstantsEntity> listConstants();
+    void updateConstant(ConstantsEntity constantsEntity);
 
 }

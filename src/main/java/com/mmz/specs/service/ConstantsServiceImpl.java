@@ -37,36 +37,11 @@ public class ConstantsServiceImpl implements ConstantsService {
         this.constantsDao = new ConstantsDaoImpl(session);
     }
 
-
-    @Override
-    public ConstantsDao getConstantsDao() {
-        return constantsDao;
-    }
-
-    @Override
-    public void setConstantsDao(ConstantsDao constantsDao) {
-        this.constantsDao = constantsDao;
-    }
-
-
     @Override
 
     public int addConstant(ConstantsEntity constantsEntity) {
         return this.constantsDao.addConstant(constantsEntity);
     }
-
-    @Override
-
-    public void updateConstant(ConstantsEntity constantsEntity) {
-        this.constantsDao.updateConstant(constantsEntity);
-    }
-
-    @Override
-
-    public void removeConstant(int id) {
-        this.constantsDao.removeConstant(id);
-    }
-
 
     @Override
 
@@ -80,10 +55,31 @@ public class ConstantsServiceImpl implements ConstantsService {
         return this.constantsDao.getConstantByKey(key);
     }
 
+    @Override
+    public ConstantsDao getConstantsDao() {
+        return constantsDao;
+    }
+
+    @Override
+    public void setConstantsDao(ConstantsDao constantsDao) {
+        this.constantsDao = constantsDao;
+    }
 
     @Override
 
     public List<ConstantsEntity> listConstants() {
         return this.constantsDao.listConstants();
+    }
+
+    @Override
+
+    public void removeConstant(int id) {
+        this.constantsDao.removeConstant(id);
+    }
+
+    @Override
+
+    public void updateConstant(ConstantsEntity constantsEntity) {
+        this.constantsDao.updateConstant(constantsEntity);
     }
 }

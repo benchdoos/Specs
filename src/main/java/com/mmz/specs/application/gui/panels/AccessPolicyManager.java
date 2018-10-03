@@ -35,19 +35,19 @@ public class AccessPolicyManager {
         return isAvailableForEditor;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("isAvailableForConnectionOnly", isAvailableIfConnectionLost)
-                .append("isAvailableForEditor", isAvailableForEditor)
-                .toString();
-    }
-
     public boolean isAvailableOnlyForAdmin() {
         return isAvailableOnlyForAdmin;
     }
 
     public void setAvailableOnlyForAdmin(boolean availableOnlyForAdmin) {
         isAvailableOnlyForAdmin = availableOnlyForAdmin;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("isAvailableForConnectionOnly", isAvailableIfConnectionLost)
+                .append("isAvailableForEditor", isAvailableForEditor)
+                .toString();
     }
 }

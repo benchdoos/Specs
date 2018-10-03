@@ -15,12 +15,21 @@
 
 package com.mmz.specs.application.utils;
 
+import com.mmz.specs.io.formats.TreeSPTRecord;
+import com.mmz.specs.model.DetailEntity;
+import com.mmz.specs.model.DetailTitleEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class SptFileUtils {
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+
     public static TreePath findNextSearchText(JTree tree, DefaultMutableTreeNode currentSelectedNode, String search) {
        /* if (tree == null  || search == null) {
             throw new IllegalArgumentException("Params can not be null: Model(" + tree + ") Node(" + currentSelectedNode + ") Search(" + search + ")");
@@ -50,14 +59,37 @@ public class SptFileUtils {
         return null;
     }
 
-    public static TreePath find(DefaultMutableTreeNode root, String s) {
+    public static ArrayList<TreePath> find(DefaultMutableTreeNode root, String text) {
+        ArrayList<TreePath> result = new ArrayList<>();
+        log.debug("Searching text: {} in root: {}", text, root);
         @SuppressWarnings("unchecked")
         Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = e.nextElement();
-            if (node.toString().toUpperCase().contains(s.toUpperCase())) {
-                return new TreePath(node.getPath());
+            if (node.getUserObject() instanceof TreeSPTRecord) {
+                TreeSPTRecord record = (TreeSPTRecord) node.getUserObject();
+                final DetailEntity detail = record.getDetail();
+                if (detail != null) {
+                    try {
+                        if (detail.getCode().toUpperCase().contains(text.toUpperCase())) {
+                            result.add(new TreePath(node.getPath()));
+                            //return new TreePath(node.getPath());
+                        }
+                        final DetailTitleEntity title = detail.getDetailTitleByDetailTitleId();
+                        if (title != null) {
+                            if (title.getTitle().toUpperCase().contains(text.toUpperCase())) {
+                                result.add(new TreePath(node.getPath()));
+//                                return new TreePath(node.getPath());
+                            }
+                        }
+                    } catch (Exception ignore) {
+                    }
+                }
             }
+        }
+        log.debug("Total result for search text: {} is: {}", text, result.size());
+        if (result.size() > 0) {
+            return result;
         }
         return null;
     }

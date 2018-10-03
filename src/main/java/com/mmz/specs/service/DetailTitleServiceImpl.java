@@ -38,28 +38,8 @@ public class DetailTitleServiceImpl implements DetailTitleService {
     }
 
     @Override
-    public DetailTitleDao getDetailTitleDao() {
-        return detailTitleDao;
-    }
-
-    @Override
-    public void setDetailTitleDao(DetailTitleDao detailTitleDao) {
-        this.detailTitleDao = detailTitleDao;
-    }
-
-    @Override
     public int addDetailTitle(DetailTitleEntity detailTitlesEntity) {
         return detailTitleDao.addDetailTitle(detailTitlesEntity);
-    }
-
-    @Override
-    public void updateDetailTitle(DetailTitleEntity detailTitlesEntity) {
-        detailTitleDao.updateDetailTitle(detailTitlesEntity);
-    }
-
-    @Override
-    public void removeDetailTitle(int id) {
-        detailTitleDao.removeDetailTitle(id);
     }
 
     @Override
@@ -73,13 +53,33 @@ public class DetailTitleServiceImpl implements DetailTitleService {
     }
 
     @Override
-    public List<DetailTitleEntity> listDetailTitles() {
-        return detailTitleDao.listDetailTitles();
+    public DetailTitleDao getDetailTitleDao() {
+        return detailTitleDao;
+    }
+
+    @Override
+    public void setDetailTitleDao(DetailTitleDao detailTitleDao) {
+        this.detailTitleDao = detailTitleDao;
     }
 
     @Override
     public List<DetailTitleEntity> getDetailTitlesBySearch(String searchText) {
         return this.detailTitleDao.getDetailTitlesBySearch(searchText);
+    }
+
+    @Override
+    public List<DetailTitleEntity> listDetailTitles() {
+        return detailTitleDao.listDetailTitles();
+    }
+
+    @Override
+    public void removeDetailTitle(int id) {
+        detailTitleDao.removeDetailTitle(id);
+    }
+
+    @Override
+    public void updateDetailTitle(DetailTitleEntity detailTitlesEntity) {
+        detailTitleDao.updateDetailTitle(detailTitlesEntity);
     }
 
 }

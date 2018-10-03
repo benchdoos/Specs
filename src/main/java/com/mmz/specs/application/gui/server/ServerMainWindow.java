@@ -181,1399 +181,6 @@ public class ServerMainWindow extends JFrame {
         initThreads();
     }
 
-    private void initListeners() {
-
-        powerServerButton.addActionListener(e -> onPowerServerButton());
-
-        exportDataButton.addActionListener(e -> onExportDataButton());
-
-        unbindTransactionButton.addActionListener(e -> onUnbindTransactionButton());
-
-        buttonUserInfo.addActionListener(e -> onUserInfoButton());
-
-        buttonForceUserDisconnect.addActionListener(e -> onForceDisconnectUserButton());
-
-        buttonForceAllUsersDisconnect.addActionListener(e -> onForceDisconnectAllUsersButton());
-
-        buttonAdminLock.addActionListener(e -> onButtonAdminLock());
-
-        serverOnlineTimeLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                onServerOnlineCountLabel();
-            }
-        });
-
-
-        logTextPane.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    JPopupMenu menu = new JPopupMenu();
-                    JMenuItem clear = new JMenuItem("Очистить");
-                    clear.addActionListener(e1 -> ServerMonitoringBackgroundService.getInstance().clearServerLogMessages());
-                    menu.add(clear);
-                    logTextPane.add(menu);
-                }
-            }
-        });
-
-        openLogFolderButton.addActionListener(e -> onOpenLogFolder());
-
-        openClientGuideButton.addActionListener(e -> CommonUtils.openClientGuide());
-
-        openServerGuideButton.addActionListener(e -> CommonUtils.openServerGuide());
-
-
-        constantsRefreshButton.addActionListener(e -> fillAdminConstantsPanel());
-
-        updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
-
-        refreshRegisteredUsersButton.addActionListener(e -> onUpdateUserListButton());
-
-        addUserButton.addActionListener(e -> onAddNewUserButton());
-
-        removeUserButton.addActionListener(e -> onRemoveUserButton());
-        switchMonitoringButton.addActionListener(e -> onSwitchMonitoring());
-
-        initUserInfoPanelListeners();
-
-        initGraphicsPanelListeners();
-    }
-
-    private void onExportDataButton() {
-        ExportDataWindow exportDataWindow = new ExportDataWindow();
-        exportDataWindow.setLocation(FrameUtils.getFrameOnCenter(this, exportDataWindow));
-        exportDataWindow.setVisible(true);
-    }
-
-    private void onUnbindTransactionButton() {
-        final int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите освободить транзакцию?\n" +
-                        "В данный момент транзакция: " +
-                        (ServerDBConnectionPool.getInstance().transactionAlive() ? "активна" : "не активна") + "\n" +
-                        "Освобождение активной транзакции повлечет за собой \n" +
-                        "возможность редактирования данных одновременно, тем самым\n" +
-                        "даст возможность получить некорректные данные.\n" +
-                        "Данной кнопкой необходимо пользоваться при некорректной работе\n" +
-                        "менеджера транзакций.\n" +
-                        "Хотите продолжить?", "Внимание", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/warning.gif"))));
-        if (result == 0) {
-            ServerDBConnectionPool.getInstance().unbindTransaction();
-        }
-    }
-
-    private void initGraphicsPanelListeners() {
-        cpuSystemCheckBox.addActionListener(e -> serverMonitoringGraphics.setCpuSystemShow(cpuSystemCheckBox.isSelected()));
-        temperatureCpuServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setTemperatureServerShow(temperatureCpuServerCheckBox.isSelected()));
-        cpuServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setCpuServerShow(cpuServerCheckBox.isSelected()));
-        ramSystemCheckBox.addActionListener(e -> serverMonitoringGraphics.setRamSystemShow(ramSystemCheckBox.isSelected()));
-        ramServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setRamServerShow(ramServerCheckBox.isSelected()));
-        usersCheckBox.addActionListener(e -> serverMonitoringGraphics.setUsersShow(usersCheckBox.isSelected()));
-    }
-
-    private void fillAdminConstantsPanel() {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column != 0 && super.isCellEditable(row, column);
-            }
-        };
-        model.addColumn("Параметр");
-        model.addColumn("Значение");
-        SessionUtils.refreshSession(session, ConstantsEntity.class);
-        ConstantsService constantsService = new ConstantsServiceImpl(session);
-        List<ConstantsEntity> list = constantsService.listConstants();
-
-        for (ConstantsEntity entity : list) {
-            String key = entity.getKey();
-            String value = entity.getValue();
-            model.addRow(new Object[]{key, value});
-        }
-        constantsTable.setModel(model);
-    }
-
-    private void onUpdateUserListButton() {
-        clearCurrentUserPanel();
-        fillAdminRegisteredUsersPanel();
-        restoreTextFieldsColors();
-        restoreFields();
-    }
-
-    private void restoreFields() {
-        userIdLabel.setText("нет данных");
-        usernameTextField.setText("");
-        nameTextField.setText("");
-        patronymicTextField.setText("");
-        surnameTextField.setText("");
-        isEditorCheckBox.setSelected(false);
-        isAdminCheckBox.setSelected(false);
-        isActiveCheckBox.setSelected(false);
-    }
-
-    private void updateOnlineUsersCount() {
-        int onlineUsersCount = ServerBackgroundService.getInstance().getOnlineUsersCount();
-        onlineUsersCountLabel.setText(onlineUsersCount + "");
-        onlineUsersCount2.setText(onlineUsersCount + "");
-    }
-
-    private void updateTotalMemoryLabel() {
-        long runtimeTotalMemory = getSystemTotalMemory();
-        long runtimeMaxMemory = getRuntimeMaxMemory();
-        totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + runtimeTotalMemory + " МБ.");
-    }
-
-    private void updateNetworkInfoPanel() {
-        NetworkParams networkParams = OPERATING_SYSTEM.getNetworkParams();
-        networkNameInfoLabel.setText(networkParams.getHostName());
-        ipAddressInfoLabel.setText(networkParams.getIpv4DefaultGateway() + " / " + networkParams.getIpv6DefaultGateway());
-    }
-
-    private void updateProcessorInfoLabel() {
-        ArrayList<Float> cpuLoadValues = ServerMonitoringBackgroundService.getInstance().getCpuLoadValues();
-        final int index = cpuLoadValues.size() - 1;
-        double cpuLoad = cpuLoadValues.size() > index && index >= 0 ? cpuLoadValues.get(index) : 0;
-        String cpuLoadString = CommonUtils.round(cpuLoad, 1) + "%";
-
-        if (cpuLoad >= 60.0d) {
-            setWarningMode(usedCpuBySystemInfoLabel, true);
-        } else {
-            setWarningMode(usedCpuBySystemInfoLabel, false);
-        }
-        usedCpuBySystemInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ") " + cpuLoadString);
-    }
-
-    private void updateUsedProcessCpuInfoLabel() {
-        ArrayList<Float> cpuLoadByServerValues = ServerMonitoringBackgroundService.getInstance().getCpuLoadByServerValues();
-
-        final int index = cpuLoadByServerValues.size() - 1;
-        final double cpuUsageByApplication = cpuLoadByServerValues.size() > index && index >= 0 ? cpuLoadByServerValues.get(index) : 0;
-
-        String processInfo = CommonUtils.round(cpuUsageByApplication, 1) + "%";
-
-        if (cpuUsageByApplication >= 60.0d) {
-            setWarningMode(usedCpuByApplicationInfoLabel, true);
-
-        } else {
-            setWarningMode(usedCpuByApplicationInfoLabel, false);
-
-        }
-        usedCpuByApplicationInfoLabel.setText(processInfo);
-
-    }
-
-    private void setWarningMode(JLabel label, boolean value) {
-        if (value) {
-            label.setForeground(Color.RED);
-            try {
-                label.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/warningRed12.png"))));
-            } catch (NullPointerException e) {
-                /*NOP*/
-            }
-        } else {
-            label.setForeground(new JLabel().getForeground());
-            label.setIcon(null);
-        }
-    }
-
-    String getServerOnlineString(long differenceInSeconds) {
-        final String MAXIMUM_SUPPORTED_LIFE_TIME = "> 24855д.";
-        if (differenceInSeconds >= 0) {
-            long seconds = differenceInSeconds % 60;
-            long minutes = (differenceInSeconds / 60) % 60;
-            long hours = (differenceInSeconds / 60 / 60) % 24;
-            long days = (differenceInSeconds / 60 / 60 / 24);
-            return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
-        } else {
-            return MAXIMUM_SUPPORTED_LIFE_TIME;
-        }
-    }
-
-    private void updateSystemInfoLabel() {
-        String osInfo = OPERATING_SYSTEM.getManufacturer() + " " + OPERATING_SYSTEM.getFamily()
-                + " " + OPERATING_SYSTEM.getVersion() + " x" + SystemUtils.getRealSystemArch();
-        osInfoLabel.setText(osInfo);
-    }
-
-    private void initGui() {
-        setContentPane(contentPane);
-        setTitle(ApplicationConstants.APPLICATION_NAME + ApplicationConstants.APPLICATION_NAME_POSTFIX_SERVER);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/application/serverLogo.png")));
-
-        initUserTypeComboBox();
-
-        initLockTimer();
-
-        updateSystemInfoLabel();
-        updateNetworkInfoPanel();
-        updateTotalMemoryLabel();
-        updateJvmInfoLabel();
-
-        updateServerSocketPortInfoLabel();
-
-        initAdminSettingsPanel();
-
-        initAdminConstantsPanel();
-        fillAdminConstantsPanel();
-
-        initAdminRegisteredUsersPanel();
-        fillAdminRegisteredUsersPanel();
-
-        clearCurrentUserPanel();
-
-        initOnlineUsersList();
-
-        initListeners();
-
-        CommonWindowUtils.initApplicationVersionArea(applicationVersionArea);
-
-    }
-
-    private void updateServerSocketPortInfoLabel() {
-        serverSocketPortInfoLabel.setText(ServerConstants.SERVER_DEFAULT_SOCKET_PORT + "");
-    }
-
-    private int getAdminLockDelayFromConstants() {
-        ConstantsService service = new ConstantsServiceImpl(session);
-        ConstantsEntity constant = service.getConstantByKey(DaoConstants.USER_ADMIN_TIMEOUT);
-        try {
-            int result = Integer.parseInt(constant.getValue());
-            if (result < 10) {
-                result = DaoConstants.USER_ADMIN_TIMEOUT_MINIMUM;
-            } else if (result > DaoConstants.USER_ADMIN_TIMEOUT_MAXIMUM) {
-                result = DaoConstants.USER_ADMIN_TIMEOUT_MAXIMUM;
-            }
-            return result;
-        } catch (NumberFormatException e) {
-            log.warn("Constant for " + DaoConstants.USER_ADMIN_TIMEOUT + " is not set correctly: " + constant.getValue() + ", setting default");
-            constant.setValue(Integer.toString(DaoConstants.USER_ADMIN_TIMEOUT_DEFAULT));
-            service.getConstantsDao().getSession().getTransaction().begin();
-            service.updateConstant(constant);
-            service.getConstantsDao().getSession().getTransaction().commit();
-            log.info("Constant for " + DaoConstants.USER_ADMIN_TIMEOUT + " was set: " + constant.getValue());
-            return Integer.parseInt(constant.getValue());
-        }
-    }
-
-    private void updateCurrentSelectedUserInformation(UsersEntity usersEntity) {
-        if (usersEntity != null) {
-            updateCurrentUserPanel(usersEntity);
-        } else {
-            clearCurrentUserPanel();
-        }
-    }
-
-    private void clearCurrentUserPanel() {
-        FrameUtils.enableAllComponents(currentUserPanel, false);
-        FrameUtils.clearAllComponents(currentUserPanel);
-
-        userTypeComboBox.setSelectedItem(null);
-
-        restoreTextFieldsColors();
-
-    }
-
-    private void initUserTypeComboBox() {
-        DefaultComboBoxModel<UserTypeEntity> model = new DefaultComboBoxModel<>();
-
-        UserTypeService userTypeService = new UserTypeServiceImpl(session);
-        List<UserTypeEntity> userTypeEntities = userTypeService.listUserTypes();
-        for (UserTypeEntity entity : userTypeEntities) {
-            model.addElement(entity);
-        }
-
-        userTypeComboBox.setModel(model);
-        userTypeComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof UserTypeEntity) {
-                    UserTypeEntity entity = (UserTypeEntity) value;
-                    String name = entity.getName();
-                    return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        });
-    }
-
-    private void initLockTimer() {
-        int timerTimeout = getAdminLockDelayFromConstants();
-        ActionListener listener = e -> lastActionTimeAgoCounter = 0;
-
-        FrameUtils.addActionListenerToAll(contentPane, listener);
-
-        userActionsUpdateTimer = new Timer(1000, e -> {
-            if (!isWindowClosing) {
-                if (lastActionTimeAgoCounter >= timerTimeout || lastActionTimeAgoCounter < 0) {
-                    if (currentLoggedInUser != null) {
-                        setUnlocked(false);
-                        currentLoggedInUser = null;
-                    }
-                }
-                lastActionTimeAgoCounter++;
-            }
-        });
-
-        userActionsUpdateTimer.setRepeats(true);
-        if (!userActionsUpdateTimer.isRunning()) {
-            userActionsUpdateTimer.start();
-        }
-    }
-
-    private void createServerTrayIcon() {
-        SystemTray tray = SystemTray.getSystemTray();
-        try {
-            tray.add(new ServerIcon(getIconImage()));
-        } catch (AWTException e) {
-            log.warn("Could not create system icon", e);
-        }
-    }
-
-    private void onPowerServerButton() {
-        ServerBackgroundService.getInstance().stopServerMainBackgroundService();
-        if (monitorUiUpdateTimer != null) {
-            if (monitorUiUpdateTimer.isRunning()) {
-                monitorUiUpdateTimer.stop();
-            }
-        }
-
-        if (userActionsUpdateTimer != null) {
-            if (userActionsUpdateTimer.isRunning()) {
-                userActionsUpdateTimer.stop();
-            }
-        }
-
-        isWindowClosing = true;
-        dispose();
-    }
-
-    private void initThreads() {
-        int MONITORING_TIMER_DELAY = 1000;
-        Component component = this;
-
-        monitorUiUpdateTimer = new Timer(MONITORING_TIMER_DELAY, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateMonitoringByTimer();
-
-            }
-
-            private void updateMonitoringByTimer() {
-                updateOnlineUsersCount();
-                updateOnlineUsersList();
-
-                updateServerOnlineTimeLabel();
-
-                updateActiveThreadCounterLabel();
-                updateProcessorInfoLabel();
-                updateUsedProcessCpuInfoLabel();
-                updateUsedJvmMemoryInfoLabel();
-
-                updateTemperatureInfoLabel();
-                createGraphics();
-
-                updateLogTextPane();
-
-                updateTransactionStatus();
-            }
-
-            private void updateTransactionStatus() {
-                final boolean alive = ServerDBConnectionPool.getInstance().transactionAlive();
-                initTransactionLabel(alive);
-                unbindTransactionButton.setEnabled(alive);
-            }
-
-            private void initTransactionLabel(boolean alive) {
-                transactionActiveLabel.setText(alive ? "активна" : "не активна");
-                FrameUtils.removeAllComponentListeners(transactionActiveLabel);
-                if (alive) {
-                    transactionActiveLabel.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mousePressed(MouseEvent e) {
-                            if (e.getButton() == MouseEvent.BUTTON1) {
-                                try {
-                                    final Socket transactionClient = ServerDBConnectionPool.getInstance().getTransactionClient();
-                                    final ClientConnection registeredClientConnection = ServerSocketService.getInstance()
-                                            .getRegisteredClientConnection(transactionClient);
-                                    UserInfoWindow window = new UserInfoWindow(registeredClientConnection, false);
-                                    window.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), window));
-                                    window.setVisible(true);
-                                } catch (Exception e1) {
-                                    log.warn("Could not get info about reserved transaction", e1);
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            private void updateServerOnlineTimeLabel() {
-                long onlineNanoSeconds = ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds();
-                if (serverOnlineCountLabelCounterShow) {
-                    String text = getServerOnlineString(onlineNanoSeconds);
-                    serverOnlineTimeLabel.setText(text);
-                } else {
-                    serverOnlineTimeLabel.setText(serverStartDate.toString());
-                }
-            }
-
-            private void updateActiveThreadCounterLabel() {
-                threadsCount.setText(Integer.toString(getApplicationCurrentThreads()));
-            }
-
-            private void updateUsedJvmMemoryInfoLabel() {
-                final long runtimeUsedMemory = getRuntimeUsedMemory();
-                final long runtimeTotalMemory = getRuntimeTotalMemory();
-
-                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
-
-                if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
-                    setWarningMode(usedProcessMemoryInfoLabel, true);
-                } else {
-                    setWarningMode(usedProcessMemoryInfoLabel, false);
-                }
-                usedProcessMemoryInfoLabel.setText(memoryInfo);
-            }
-
-            private void updateTemperatureInfoLabel() {
-                ArrayList<Float> cpuTemperatureValue = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValues();
-
-                final int index = cpuTemperatureValue.size() - 1;
-                final double cpuTemperature = cpuTemperatureValue.size() > index && index >= 0 ? cpuTemperatureValue.get(index) : 0;
-
-                if (cpuTemperature > 90.0d) {
-
-                    setWarningMode(temperatureInfoLabel, true);
-
-                } else {
-                    setWarningMode(temperatureInfoLabel, false);
-
-                }
-
-                temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE);
-            }
-
-            private void updateLogTextPane() {
-                ArrayList<ServerLogMessage> serverLogMessages = ServerMonitoringBackgroundService.getInstance().getServerLogMessages();
-                if (serverLogMessages.size() > logMessages.size()) {
-                    int startCaretPosition = logTextPane.getCaretPosition();
-                    boolean change = false;
-
-                    if (startCaretPosition == logTextPane.getDocument().getLength()) {
-                        change = true;
-                    }
-
-                    int messagesToLoad = serverLogMessages.size() - logMessages.size();
-                    for (int i = 0; i < messagesToLoad; i++) {
-                        int j = messagesToLoad - i;
-                        ServerLogMessage message = serverLogMessages.get(serverLogMessages.size() - j);
-                        logMessages.add(message);
-                        appendTextToTextPane(message);
-                    }
-
-                    if (change) {
-                        logTextPane.setCaretPosition(logTextPane.getDocument().getLength());
-                    }
-                } else if (serverLogMessages.size() < logMessages.size()) {
-                    logMessages.clear();
-                    logTextPane.setText("");
-                }
-            }
-
-            private void appendTextToTextPane(ServerLogMessage message) {
-
-                StyledDocument doc = logTextPane.getStyledDocument();
-
-
-                SimpleAttributeSet newMessage = new SimpleAttributeSet();
-                if (message.getLevel().equals(ServerLogMessage.ServerLogMessageLevel.SUCCESS)) {
-                    StyleConstants.setForeground(newMessage, Color.GREEN.darker().darker());
-                } else if (message.getLevel().equals(ServerLogMessage.ServerLogMessageLevel.WARN)) {
-                    StyleConstants.setForeground(newMessage, Color.WHITE);
-                    StyleConstants.setBackground(newMessage, Color.RED);
-                }
-                StyleConstants.setBold(newMessage, true);
-
-
-                try {
-                    doc.insertString(doc.getLength(), message.getFormattedMessage() + "\n", newMessage);
-                } catch (Exception e) {
-                    log.warn("Could not add message", e);
-                }
-            }
-
-
-        });
-        if (!monitorUiUpdateTimer.isRunning()) {
-            monitorUiUpdateTimer.start();
-        }
-    }
-
-    private void restoreTextFieldsColors() {
-        usernameTextField.setBackground(Color.WHITE);
-    }
-
-    private void onRemoveUserButton() {
-        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
-            if (registeredUserList.getSelectedIndex() >= 0) {
-                UsersEntity entity = registeredUserList.getSelectedValue();
-                if (entity != null) {
-                    NoticeService noticeService = new NoticeServiceImpl(session);
-                    if (noticeService.listNoticesByUser(entity).size() > 0) {
-                        JOptionPane.showMessageDialog(this,
-                                "Нельзя удалять пользователей, которые вносили изменения.\n" +
-                                        "Вместо этого вы можете сделать их не активными.",
-                                "Невозможно удалить пользователя", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        if (entity.getId() >= 0) {
-                            UsersService usersService = new UsersServiceImpl(session);
-                            usersService.getUsersDao().getSession().beginTransaction();
-                            usersService.removeUser(entity.getId());
-                            usersService.getUsersDao().getSession().getTransaction().commit();
-                            JOptionPane.showMessageDialog(this, "Пользователь успешно удален!",
-                                    "Успех",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                        }
-                        clearCurrentUserPanel();
-                        restoreFields();
-
-                        DefaultListModel model = (DefaultListModel) registeredUserList.getModel();
-                        int selectedIndex = registeredUserList.getSelectedIndex();
-                        if (selectedIndex != -1) {
-                            model.remove(selectedIndex);
-                        }
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Пользователь не может быть пустым, index: " + registeredUserList.getSelectedIndex());
-                }
-            }
-        }
-    }
-
-    private void initAdminRegisteredUsersPanel() {
-        registeredUserList.setCellRenderer(getRegisteredUserListCellRenderer());
-
-        registeredUserList.addListSelectionListener(e -> {
-            final int selectedIndex = registeredUserList.getSelectedIndex();
-            if (selectedIndex >= 0) {
-                UsersEntity usersEntity = registeredUserList.getModel().getElementAt(selectedIndex);
-                updateCurrentSelectedUserInformation(usersEntity);
-            } else {
-                clearCurrentUserPanel();
-            }
-        });
-
-    }
-
-    private void fillAdminRegisteredUsersPanel() {
-        SessionUtils.refreshSession(session, UsersEntity.class);
-        DefaultListModel<UsersEntity> model = new DefaultListModel<>();
-        UsersService usersService = new UsersServiceImpl(session);
-        List<UsersEntity> usersEntityList = usersService.listUsers();
-
-        Collections.sort(usersEntityList);
-
-        for (UsersEntity user : usersEntityList) {
-            model.addElement(user);
-        }
-        registeredUserList.setModel(model);
-    }
-
-    private DefaultListCellRenderer getRegisteredUserListCellRenderer() {
-        return new DefaultListCellRenderer() {
-            private final String newUserTitle = "новый пользователь";
-
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof UsersEntity) {
-                    UsersEntity usersEntity = (UsersEntity) value;
-                    String username;
-                    if (usersEntity.getUsername() != null) {
-                        if (!usersEntity.getUsername().isEmpty()) {
-                            username = usersEntity.getUsername();
-                        } else {
-                            username = newUserTitle;
-                        }
-                    } else {
-                        username = newUserTitle;
-                    }
-                    Component listCellRendererComponent = super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
-                    try {
-                        if (usersEntity.getId() < 0) {
-                            if (isSelected) {
-                                listCellRendererComponent.setForeground(Color.GREEN.brighter().brighter());
-                            } else {
-                                listCellRendererComponent.setForeground(Color.GREEN.darker().darker());
-                            }
-                        } else {
-                            if (!usersEntity.isActive()) {
-                                if (isSelected) {
-                                    listCellRendererComponent.setBackground(Color.DARK_GRAY);
-                                } else {
-                                    listCellRendererComponent.setBackground(Color.GRAY);
-                                }
-                            }
-                        }
-                    } catch (NullPointerException e) {
-                        /*NOP*/
-                    }
-
-                    return listCellRendererComponent;
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        };
-    }
-
-    private void onSaveAdminConstantsPanel() {
-        DefaultTableModel model = (DefaultTableModel) constantsTable.getModel();
-        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
-            ConstantsService constantsService = new ConstantsServiceImpl(session);
-            session.beginTransaction();
-            for (int i = 0; i < model.getRowCount(); i++) {
-
-                final String key = model.getValueAt(i, 0).toString();
-                final String value = model.getValueAt(i, 1).toString();
-
-
-                ConstantsEntity entity = constantsService.getConstantByKey(key);
-                if (entity != null) {
-                    entity.setValue(value);
-                    constantsService.updateConstant(entity);
-                }
-            }
-            session.getTransaction().commit();
-            JOptionPane.showMessageDialog(this, "Настройки успешно изменены, все изменения \r\n" +
-                    "будут применены после перезагрузки сервера.", "Успех", JOptionPane.INFORMATION_MESSAGE);
-        } catch (HibernateException e) {
-            log.warn("Could not save constants to DB", e);
-            JOptionPane.showMessageDialog(this, "Не удалось сохранить настройки:\n" + e.getLocalizedMessage(),
-                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private void initUserInfoPanelListeners() {
-
-        DocumentListener usernameTextFieldDocumentListener = new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateData();
-            }
-
-            private void updateData() {
-                UsersEntity selectedValue = registeredUserList.getSelectedValue();
-                if (selectedValue != null) {
-                    final int VARCHAR_LENGTH = 20;
-                    if (usernameTextField.getText().length() > VARCHAR_LENGTH) {
-                        String text = usernameTextField.getText();
-                        text = text.substring(0, VARCHAR_LENGTH) + "...";
-                        selectedValue.setUsername(text);
-                    } else {
-                        selectedValue.setUsername(usernameTextField.getText());
-                    }
-                    SwingUtilities.invokeLater(() -> registeredUserList.updateUI());
-                    try {
-                        ValidationUtils.validateUserName(selectedValue.getUsername());
-                        usernameTextField.setBackground(Color.WHITE);
-                    } catch (UsernameValidationException e) {
-                        usernameTextField.setBackground(Color.RED);
-                    }
-                }
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateData();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateData();
-            }
-        };
-
-        usernameTextField.getDocument().addDocumentListener(usernameTextFieldDocumentListener);
-
-        resetPasswordButton.addActionListener(e -> {
-            UsersEntity selectedValue = registeredUserList.getSelectedValue();
-            onResetPasswordButton(selectedValue);
-        });
-
-        nameTextField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
-                }
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
-                }
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
-                }
-            }
-        });
-
-        patronymicTextField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
-                }
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
-                }
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
-                }
-            }
-        });
-
-        surnameTextField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
-                }
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
-                }
-
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                if (registeredUserList.getSelectedValue() != null) {
-                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
-                }
-            }
-        });
-
-        userTypeComboBox.addActionListener(e -> {
-            Object selectedItem = userTypeComboBox.getSelectedItem();
-            if (selectedItem != null) {
-                registeredUserList.getSelectedValue().setUserType((UserTypeEntity) selectedItem);
-            }
-        });
-
-        isEditorCheckBox.addItemListener(e -> {
-            if (registeredUserList.getSelectedValue() != null) {
-                registeredUserList.getSelectedValue().setEditor(isEditorCheckBox.isSelected());
-            }
-        });
-        isAdminCheckBox.addItemListener(e -> {
-            if (registeredUserList.getSelectedValue() != null) {
-                registeredUserList.getSelectedValue().setAdmin(isAdminCheckBox.isSelected());
-            }
-        });
-        isActiveCheckBox.addItemListener(e -> {
-            if (registeredUserList.getSelectedValue() != null) {
-                registeredUserList.getSelectedValue().setActive(isActiveCheckBox.isSelected());
-            }
-        });
-
-        saveUserButton.addActionListener(e -> {
-            UsersEntity user = registeredUserList.getSelectedValue();
-            int selectedIndex = registeredUserList.getSelectedIndex();
-            try {
-                if (ValidationUtils.validateUserEntity(user)) {
-                    restoreTextFieldsColors();
-                    try {
-                        onSaveUserButton(user);
-
-                        clearCurrentUserPanel();
-                        fillAdminRegisteredUsersPanel();
-
-                        if (selectedIndex >= 0) {
-                            registeredUserList.setSelectedIndex(selectedIndex);
-                        }
-                    } catch (OptimisticLockException e1) {
-                        JOptionPane.showMessageDialog(this,
-                                "Пользователь " + user.getUsername() + " уже существует",
-                                "Ошибка", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            } catch (UsernameValidationException e1) {
-                usernameTextField.setBackground(Color.red);
-                String message = "Имя пользователя должно:\n" +
-                        "быть больше 2 и меньше 20 символов\n" +
-                        "не должно:\n" +
-                        "начинаться с пробела";
-                JOptionPane.showMessageDialog(this, message,
-                        "Некорректное имя пользователя", JOptionPane.ERROR_MESSAGE);
-            } catch (UserTypeValidationException e1) {
-                JOptionPane.showMessageDialog(this, "Тип пользователя должен быть указан",
-                        "Некорректный тип пользователя", JOptionPane.ERROR_MESSAGE);
-            }
-
-        });
-    }
-
-    private void initAdminConstantsPanel() {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column != 0 && super.isCellEditable(row, column);
-            }
-        };
-        model.addColumn("Параметр");
-        model.addColumn("Значение");
-
-        constantsTable.getTableHeader().setReorderingAllowed(false);
-    }
-
-    private void initAdminSettingsPanel() {
-        connectionUrlTextField.setText(ServerSettingsManager.getInstance().getServerDbConnectionUrl());
-        connectionLoginTextField.setText(ServerSettingsManager.getInstance().getServerDbUsername());
-        connectionPasswordField.setText(ServerSettingsManager.getInstance().getServerDbPassword());
-        saveSettingsToButton.addActionListener(e -> onSaveSettingsToButton());
-    }
-
-    private void onForceDisconnectUserButton() {
-        DefaultListModel<ClientConnection> listModel = new DefaultListModel<>();
-        for (int i = 0; i < onlineUserList.getModel().getSize(); i++) {
-            if (onlineUserList.getModel().getElementAt(i) != null) {
-                listModel.addElement(onlineUserList.getModel().getElementAt(i));
-            }
-        }
-
-        if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
-            int selectedIndex = onlineUserList.getSelectedIndex();
-            ClientConnection connection = listModel.get(selectedIndex);
-            try {
-                ServerSocketService.getInstance().closeClientConnection(connection);
-                listModel.remove(selectedIndex);
-            } catch (IOException e) {
-                log.warn("Could not close connection from GUI: " + connection, e);
-                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
-                        "Не удалось закрыть socket-соединение с: " + connection.getSocket().getInetAddress(),
-                        ServerLogMessage.ServerLogMessageLevel.WARN));
-            }
-
-            updateOnlineUsersList();
-
-            if (listModel.getSize() > selectedIndex) {
-                onlineUserList.setSelectedIndex(selectedIndex);
-            } else {
-                if (listModel.getSize() > 0 && listModel.getSize() > selectedIndex - 1) {
-                    onlineUserList.setSelectedIndex(selectedIndex - 1);
-                }
-            }
-        }
-    }
-
-    private void updateJvmInfoLabel() {
-        jvmInfoLabel.setText(System.getProperty("java.specification.version")
-                + "(" + System.getProperty("java.version") + ")");
-    }
-
-    private void onOpenLogFolder() {
-        try {
-            Desktop.getDesktop().open(new File(ApplicationConstants.LOG_FOLDER));
-        } catch (IOException e1) {
-            log.warn("Could not open log folder:" + ApplicationConstants.LOG_FOLDER, e1);
-        }
-    }
-
-    private void onForceDisconnectAllUsersButton() {
-        if (ServerSocketService.getInstance().getConnectedClientsCount() > 0) {
-            ServerSocketService.getInstance().closeAll();
-            updateOnlineUsersList();
-        }
-    }
-
-    private void initAdminAccessArray() {
-        onlyAdminTabsList = new JPanel[]{controlPanel};
-    }
-
-    private void initKeyBindings() {
-
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-        contentPane.registerKeyboardAction(e -> dispose(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        contentPane.registerKeyboardAction(e -> onButtonAdminLock(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        contentPane.registerKeyboardAction(e -> {
-                    if (currentLoggedInUser != null) {
-                        onPowerServerButton();
-                    }
-                },
-                KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-
-        adminServerPanel.registerKeyboardAction(e -> onForceDisconnectUserButton(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        adminServerPanel.registerKeyboardAction(e -> onForceDisconnectAllUsersButton(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
-                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, true),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        adminServerPanel.registerKeyboardAction(e -> onUserInfoButton(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-
-        adminUsersPanel.registerKeyboardAction(e -> onAddNewUserButton(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0),
-                JOptionPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        adminUsersPanel.registerKeyboardAction(e -> onRemoveUserButton(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
-                JOptionPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        adminUsersPanel.registerKeyboardAction(e -> initAdminRegisteredUsersPanel(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK),
-                JOptionPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void onResetPasswordButton(UsersEntity usersEntity) {
-        try (final Session session = ServerDBConnectionPool.getInstance().getSession()) {
-            PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, session);
-            passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
-            passwordChangeWindow.setVisible(true);
-            final UsersEntity userWithNewPassword = passwordChangeWindow.getUserWithNewPassword();
-            if (userWithNewPassword != null) {
-                onUpdateUserListButton();
-                JOptionPane.showMessageDialog(this, "Пароль успешно обновлен", "Обновление пароля", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Не удалось обновить пароль\n" + e.getLocalizedMessage(),
-                    "Обновление пароля", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void onServerOnlineCountLabel() {
-        serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
-        if (serverOnlineCountLabelCounterShow) {
-            long serverOnlineTimeInSeconds = ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds();
-            serverOnlineTimeLabel.setText(getServerOnlineString(serverOnlineTimeInSeconds));
-        } else {
-            serverOnlineTimeLabel.setText(serverStartDate.toString());
-        }
-    }
-
-    private void setUnlocked(boolean isUnlocked) {
-        initAdminAccessArray();
-
-
-        if (isUnlocked) {
-            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
-            authorizedUserName.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/authorizedUser128.png"))
-                    .getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
-            authorizedUserName.setToolTipText("Авторизированный пользователь");
-            lastActionTimeAgoCounter = 0;
-        } else {
-            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
-            authorizedUserName.setText(null);
-            authorizedUserName.setIcon(null);
-            authorizedUserName.setToolTipText(null);
-            selectCommonAvailableTab();
-        }
-
-        setTabsEnabled(isUnlocked);
-
-    }
-
-    private void setTabsEnabled(boolean enabled) {
-        for (JPanel tab : onlyAdminTabsList) {
-            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(tab), enabled);
-        }
-    }
-
-    private void selectCommonAvailableTab() {
-        for (JPanel tab : onlyAdminTabsList) {
-            if (tabbedPane.getSelectedComponent().equals(tab)) {
-                if (tabbedPane.isEnabledAt(tabbedPane.getComponentZOrder(monitorPanel))) {
-                    tabbedPane.setSelectedComponent(monitorPanel);
-                } else {
-                    tabbedPane.setSelectedComponent(logPanel);
-                }
-            }
-        }
-
-    }
-
-    private void onUserInfoButton() {
-        if (onlineUserList.getSelectedIndex() >= 0) {
-            ClientConnection connection = onlineUserList.getSelectedValue();
-            UserInfoWindow userInfoWindow = new UserInfoWindow(connection, false);
-            userInfoWindow.setClientConnection(connection);
-            userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
-            userInfoWindow.setVisible(true);
-        }
-    }
-
-    private void onAddNewUserButton() {
-        DefaultListModel<UsersEntity> model = new DefaultListModel<>();
-        for (int i = 0; i < registeredUserList.getModel().getSize(); i++) {
-            model.addElement(registeredUserList.getModel().getElementAt(i));
-        }
-        UsersEntity usersEntity = new UsersEntity();
-        usersEntity.setId(-1);
-        usersEntity.setUserType(new UserTypeServiceImpl(session).getUserTypeById(1));
-        model.addElement(usersEntity);
-        registeredUserList.setModel(model);
-        int index = registeredUserList.getModel().getSize() - 1;
-        registeredUserList.setSelectedIndex(index);
-    }
-
-    private void onButtonAdminLock() {
-        if (currentLoggedInUser != null) {
-            setUnlocked(false);
-            ServerMonitoringBackgroundService.getInstance().addMessage(
-                    new ServerLogMessage("Администратор вышел из системы сервера",
-                            ServerLogMessage.ServerLogMessageLevel.SUCCESS));
-            currentLoggedInUser = null;
-        } else {
-            final Session session = ServerDBConnectionPool.getInstance().getSession();
-            LoginWindow loginWindow = new LoginWindow(session);
-            loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
-            loginWindow.setVisible(true);
-            try {
-                session.close();
-            } catch (HibernateException e) {
-                log.warn("Could not close session");
-            }
-            UsersEntity user = loginWindow.getAuthorizedUser();
-            if (user != null) {
-                log.info("User to log in as administrator: " + user);
-                if (user.isActive()) {
-                    if (user.isAdmin()) {
-                        log.info("User successfully authorized as administrator: " + user.getUsername());
-                        authorizedUserName.setText(user.getUsername());
-                        setUnlocked(user.isAdmin());
-
-                        ServerMonitoringBackgroundService.getInstance().addMessage(
-                                new ServerLogMessage("Администратор " + user.getUsername()
-                                        + " (" + user.getName() + " " + user.getSurname() + ") успешно выполнил вход на сервере",
-                                        ServerLogMessage.ServerLogMessageLevel.SUCCESS));
-
-                        currentLoggedInUser = user;
-                    } else {
-                        log.warn("User could not be authorized as administrator: " + user.getUsername() + ", he is not an admin: " + user);
-                        JOptionPane.showMessageDialog(this,
-                                "Вход разрешен только администраторам сервера",
-                                "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
-                        ServerMonitoringBackgroundService.getInstance().addMessage(
-                                new ServerLogMessage("Пользоватесь " + user.getUsername()
-                                        + " (" + user.getName() + " " + user.getSurname() + ") пытался выполнить вход в администраторскую часть, не имея права администратора.",
-                                        ServerLogMessage.ServerLogMessageLevel.WARN));
-                    }
-                } else {
-                    log.warn("User" + user.getUsername() + " can not be authorized, he is not active.");
-                    JOptionPane.showMessageDialog(this,
-                            "Вход разрешен только активным пользователям",
-                            "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
-                    ServerMonitoringBackgroundService.getInstance().addMessage(
-                            new ServerLogMessage("Не действующий пользователь " + user.getUsername()
-                                    + " (" + user.getName() + " " + user.getSurname() + ") пытался выполнить вход в администраторскую часть.",
-                                    ServerLogMessage.ServerLogMessageLevel.WARN));
-                }
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Необходимо войти в систему, чтобы продолжить",
-                        "Ошибка входа", JOptionPane.ERROR_MESSAGE);
-                ServerMonitoringBackgroundService.getInstance().addMessage(
-                        new ServerLogMessage("Кто-то пытался войти в администраторскую часть, " +
-                                "но судя по всему пароль не подошёл.",
-                                ServerLogMessage.ServerLogMessageLevel.WARN));
-            }
-        }
-    }
-
-    @Override
-    public void dispose() {
-        if (monitorUiUpdateTimer != null) {
-            if (monitorUiUpdateTimer.isRunning()) {
-                monitorUiUpdateTimer.stop();
-            }
-        }
-
-        if (userActionsUpdateTimer != null) {
-            if (userActionsUpdateTimer.isRunning()) {
-                userActionsUpdateTimer.stop();
-            }
-        }
-        try {
-            if (!isWindowClosing) {
-                createServerTrayIcon();
-            }
-            try {
-                session.close();
-            } catch (Exception e) {
-                log.warn("Could not close session", e);
-            }
-            super.dispose();
-        } catch (UnsupportedOperationException e) {
-            this.setState(Frame.ICONIFIED);
-        }
-    }
-
-    private void updateOnlineUsersList() {
-        List<ClientConnection> connections = ServerBackgroundService.getInstance().getConnectedClientsList();
-        DefaultListModel<ClientConnection> model = new DefaultListModel<>();
-        if (connections != null) {
-            for (ClientConnection connection : connections) {
-                model.addElement(connection);
-            }
-        }
-
-
-        int selectedIndex = onlineUserList.getSelectedIndex();
-        onlineUserList.setModel(model);
-
-        if (selectedIndex >= 0) {
-            onlineUserList.setSelectedIndex(selectedIndex);
-        }
-    }
-
-    private void onSwitchMonitoring() {
-        if (!isMonitoringActive) {
-            ServerMonitoringBackgroundService.getInstance().startMonitoring();
-            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), true);
-            if (tabbedPane.getSelectedIndex() == tabbedPane.getComponentZOrder(monitorPanel)) {
-                tabbedPane.setSelectedComponent(logPanel);
-            }
-            switchMonitoringButton.setText("Отключить мониторинг");
-        } else {
-            ServerMonitoringBackgroundService.getInstance().stopMonitoring();
-            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), false);
-            switchMonitoringButton.setText("Включить мониторинг");
-        }
-        isMonitoringActive = !isMonitoringActive;
-
-
-    }
-
-    private void updateCurrentUserPanel(UsersEntity entity) {
-        FrameUtils.enableAllComponents(currentUserPanel, true);
-
-
-        userIdLabel.setText(Integer.toString(entity.getId()));
-        usernameTextField.setText(entity.getUsername());
-        nameTextField.setText(entity.getName());
-        patronymicTextField.setText(entity.getPatronymic());
-        surnameTextField.setText(entity.getSurname());
-        isEditorCheckBox.setSelected(entity.isEditor());
-        isAdminCheckBox.setSelected(entity.isAdmin());
-        isActiveCheckBox.setSelected(entity.isActive());
-        userTypeComboBox.setSelectedItem(entity.getUserType());
-
-        resetPasswordButton.setEnabled(entity.getId() >= 0);
-    }
-
-    private void onSaveUserButton(UsersEntity usersEntity) {
-        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
-            UsersService service = new UsersServiceImpl(session);
-            try {
-                service.getUserById(usersEntity.getId());
-                if ((currentLoggedInUser.getId() == usersEntity.getId()) && usersEntity.isAdmin() && usersEntity.isActive()) {
-                    updateUser(usersEntity);
-                } else if (currentLoggedInUser.getId() != usersEntity.getId()) {
-                    updateUser(usersEntity);
-                } else {
-                    log.warn("User wanted to grand down his permissions (admin wanted to become user), it was blocked. User: " + usersEntity);
-                    JOptionPane.showMessageDialog(this,
-                            "Вы не можете сделать себя обычным пользователем\n" +
-                                    "либо отключить профиль.\n" +
-                                    "Это может сделать только другой администратор.",
-                            "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (ObjectNotFoundException e) {
-                final UsersEntity newUser = createNewUser(usersEntity);
-                registeredUserList.setSelectedValue(newUser, true);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this,
-                        "Не удалось обновить пользователя: " + usersEntity.getUsername()
-                                + "\n Ошибка: " + e.getLocalizedMessage(),
-                        "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
-                try {
-                    service.getUsersDao().getSession().getTransaction().rollback();
-                } catch (Exception e1) {
-                    log.warn("Could not rollback transaction", e);
-                }
-            }
-        }
-    }
-
-    private UsersEntity createNewUser(UsersEntity entity) {
-        if (entity != null) {
-            try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
-                try {
-                    UsersService service = new UsersServiceImpl(session);
-                    session.getTransaction().begin();
-
-                    final int id = service.addUser(entity);
-
-                    session.getTransaction().commit();
-
-
-                    JOptionPane.showMessageDialog(this,
-                            "Пользователь успешно сохранён: " + entity.getUsername(),
-                            "Успех", JOptionPane.INFORMATION_MESSAGE);
-                    return service.getUserById(id);
-                } catch (ConstraintViolationException e) {
-                    log.warn("Could not save user: {}", entity, e);
-                    try {
-                        session.getTransaction().rollback();
-                    } catch (HibernateException ex) {
-                        log.warn("Could not rollback transaction", ex);
-                    }
-                    JOptionPane.showMessageDialog(this, "Не удалось сохранить пользователя: " + entity.getUsername(),
-                            "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
-                }
-            } finally {
-                SessionUtils.refreshSession(this.session, UsersEntity.class);
-            }
-        }
-        return null;
-    }
-
-    private void initOnlineUsersList() {
-        DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
-
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                setOpaque(true);
-                if (value instanceof ClientConnection) {
-                    ClientConnection client = (ClientConnection) value;
-                    String username;
-                    UsersEntity userEntity = client.getUser();
-
-                    if (userEntity != null) {
-                        if (!userEntity.getUsername().isEmpty()) {
-                            username = userEntity.getUsername() + " (" + userEntity.getName() + " " + userEntity.getSurname() + ")";
-                            if (isSelected) {
-                                setBackground(Color.GREEN.brighter().brighter());
-                            } else {
-                                setBackground(Color.GREEN.darker().darker());
-                            }
-                        } else {
-                            username = "Some incorrect user, id: " + userEntity.getId();
-                            if (isSelected) {
-                                setBackground(Color.RED.brighter().brighter());
-                            } else {
-                                setBackground(Color.RED.darker().darker());
-                            }
-                        }
-                    } else {
-                        username = client.getSocket().getInetAddress().getHostName() + ":" + client.getSocket().getPort();
-                        if (isSelected) {
-                            setBackground(Color.DARK_GRAY.brighter().brighter());
-                        } else {
-                            setBackground(Color.DARK_GRAY.darker().darker());
-                        }
-                    }
-                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        };
-        onlineUserList.setCellRenderer(cellRenderer);
-    }
-
-    private void updateUser(UsersEntity entity) {
-        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
-            if (entity != null) {
-                UsersService service = new UsersServiceImpl(session);
-                service.getUsersDao().getSession().getTransaction().begin();
-
-                service.updateUser(entity);
-
-                service.getUsersDao().getSession().getTransaction().commit();
-                JOptionPane.showMessageDialog(this,
-                        "Пользователь успешно сохранён: " + entity.getUsername(),
-                        "Успех", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (Exception e) {
-            log.warn("Could not update user: {}", e);
-            JOptionPane.showMessageDialog(this, "Не удалось обновить пользователя: " + entity.getUsername() + "\n"
-                            + e.getLocalizedMessage(),
-                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
-        } finally {
-            SessionUtils.refreshSession(this.session, UsersEntity.class);
-        }
-    }
-
-    private void onSaveSettingsToButton() {
-        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
-        chooser.setDialogTitle("Сохранить файл конфигурации (.xml)");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setMultiSelectionEnabled(false);
-        chooser.setCurrentDirectory(new File(ApplicationConstants.USER_HOME_LOCATION));
-
-
-        FileFilter fileFilter = new FileNameExtensionFilter("Файл конфигурации", "xml");
-        chooser.setFileFilter(fileFilter);
-        int returnValue = chooser.showDialog(this, "OK");
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            if (chooser.getSelectedFile().isDirectory()) {
-                final String fileName = chooser.getSelectedFile() + File.separator + "server_configuration.xml";
-                try {
-                    ServerSettingsManager.getInstance().setServerSettings(fileName);
-                    ServerSettingsManager.getInstance().setServerDbConnectionUrl(connectionUrlTextField.getText());
-                    ServerSettingsManager.getInstance().setServerDbUsername(connectionLoginTextField.getText());
-                    ServerSettingsManager.getInstance().setServerDbPassword(new String(connectionPasswordField.getPassword()));
-                    CommonSettingsManager.setServerSettingsFilePath(fileName);
-
-                    JOptionPane.showMessageDialog(this,
-                            "Файл успешно сохранен:\n" + fileName,
-                            "Успех", JOptionPane.INFORMATION_MESSAGE);
-                } catch (ServerException | IOException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Невозможно сохранить файл:\n" + e.getLocalizedMessage(),
-                            "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
-                }
-
-            }
-        }
-    }
-
-    private void createGraphics() {
-        final int width = graphicsDataPanel.getWidth();
-//        final int height = 210; // must to be hardcoded or it will rise
-        final int height = graphicsDataPanel.getHeight(); // must to be hardcoded or it will rise
-
-        XYChart chart = serverMonitoringGraphics.getChart(width, height);
-        XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
-        if (graphicsDataPanel.getComponents().length > 0) {
-            graphicsDataPanel.removeAll();
-        }
-        graphicsDataPanel.add(graphXChartPanel);
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -2172,5 +779,1398 @@ public class ServerMainWindow extends JFrame {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private void clearCurrentUserPanel() {
+        FrameUtils.enableAllComponents(currentUserPanel, false);
+        FrameUtils.clearAllComponents(currentUserPanel);
+
+        userTypeComboBox.setSelectedItem(null);
+
+        restoreTextFieldsColors();
+
+    }
+
+    private void createGraphics() {
+        final int width = graphicsDataPanel.getWidth();
+//        final int height = 210; // must to be hardcoded or it will rise
+        final int height = graphicsDataPanel.getHeight(); // must to be hardcoded or it will rise
+
+        XYChart chart = serverMonitoringGraphics.getChart(width, height);
+        XChartPanel<XYChart> graphXChartPanel = new XChartPanel<>(chart);
+        if (graphicsDataPanel.getComponents().length > 0) {
+            graphicsDataPanel.removeAll();
+        }
+        graphicsDataPanel.add(graphXChartPanel);
+    }
+
+    private UsersEntity createNewUser(UsersEntity entity) {
+        if (entity != null) {
+            try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
+                try {
+                    UsersService service = new UsersServiceImpl(session);
+                    session.getTransaction().begin();
+
+                    final int id = service.addUser(entity);
+
+                    session.getTransaction().commit();
+
+
+                    JOptionPane.showMessageDialog(this,
+                            "Пользователь успешно сохранён: " + entity.getUsername(),
+                            "Успех", JOptionPane.INFORMATION_MESSAGE);
+                    return service.getUserById(id);
+                } catch (ConstraintViolationException e) {
+                    log.warn("Could not save user: {}", entity, e);
+                    try {
+                        session.getTransaction().rollback();
+                    } catch (HibernateException ex) {
+                        log.warn("Could not rollback transaction", ex);
+                    }
+                    JOptionPane.showMessageDialog(this, "Не удалось сохранить пользователя: " + entity.getUsername(),
+                            "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+                }
+            } finally {
+                SessionUtils.refreshSession(this.session, UsersEntity.class);
+            }
+        }
+        return null;
+    }
+
+    private void createServerTrayIcon() {
+        SystemTray tray = SystemTray.getSystemTray();
+        try {
+            tray.add(new ServerIcon(getIconImage()));
+        } catch (AWTException e) {
+            log.warn("Could not create system icon", e);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (monitorUiUpdateTimer != null) {
+            if (monitorUiUpdateTimer.isRunning()) {
+                monitorUiUpdateTimer.stop();
+            }
+        }
+
+        if (userActionsUpdateTimer != null) {
+            if (userActionsUpdateTimer.isRunning()) {
+                userActionsUpdateTimer.stop();
+            }
+        }
+        try {
+            if (!isWindowClosing) {
+                createServerTrayIcon();
+            }
+            try {
+                session.close();
+            } catch (Exception e) {
+                log.warn("Could not close session", e);
+            }
+            super.dispose();
+        } catch (UnsupportedOperationException e) {
+            this.setState(Frame.ICONIFIED);
+        }
+    }
+
+    private void fillAdminConstantsPanel() {
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column != 0 && super.isCellEditable(row, column);
+            }
+        };
+        model.addColumn("Параметр");
+        model.addColumn("Значение");
+        SessionUtils.refreshSession(session, ConstantsEntity.class);
+        ConstantsService constantsService = new ConstantsServiceImpl(session);
+        List<ConstantsEntity> list = constantsService.listConstants();
+
+        for (ConstantsEntity entity : list) {
+            String key = entity.getKey();
+            String value = entity.getValue();
+            model.addRow(new Object[]{key, value});
+        }
+        constantsTable.setModel(model);
+    }
+
+    private void fillAdminRegisteredUsersPanel() {
+        SessionUtils.refreshSession(session, UsersEntity.class);
+        DefaultListModel<UsersEntity> model = new DefaultListModel<>();
+        UsersService usersService = new UsersServiceImpl(session);
+        List<UsersEntity> usersEntityList = usersService.listUsers();
+
+        Collections.sort(usersEntityList);
+
+        for (UsersEntity user : usersEntityList) {
+            model.addElement(user);
+        }
+        registeredUserList.setModel(model);
+    }
+
+    private int getAdminLockDelayFromConstants() {
+        ConstantsService service = new ConstantsServiceImpl(session);
+        ConstantsEntity constant = service.getConstantByKey(DaoConstants.USER_ADMIN_TIMEOUT);
+        try {
+            int result = Integer.parseInt(constant.getValue());
+            if (result < 10) {
+                result = DaoConstants.USER_ADMIN_TIMEOUT_MINIMUM;
+            } else if (result > DaoConstants.USER_ADMIN_TIMEOUT_MAXIMUM) {
+                result = DaoConstants.USER_ADMIN_TIMEOUT_MAXIMUM;
+            }
+            return result;
+        } catch (NumberFormatException e) {
+            log.warn("Constant for " + DaoConstants.USER_ADMIN_TIMEOUT + " is not set correctly: " + constant.getValue() + ", setting default");
+            constant.setValue(Integer.toString(DaoConstants.USER_ADMIN_TIMEOUT_DEFAULT));
+            service.getConstantsDao().getSession().getTransaction().begin();
+            service.updateConstant(constant);
+            service.getConstantsDao().getSession().getTransaction().commit();
+            log.info("Constant for " + DaoConstants.USER_ADMIN_TIMEOUT + " was set: " + constant.getValue());
+            return Integer.parseInt(constant.getValue());
+        }
+    }
+
+    private DefaultListCellRenderer getRegisteredUserListCellRenderer() {
+        return new DefaultListCellRenderer() {
+            private final String newUserTitle = "новый пользователь";
+
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof UsersEntity) {
+                    UsersEntity usersEntity = (UsersEntity) value;
+                    String username;
+                    if (usersEntity.getUsername() != null) {
+                        if (!usersEntity.getUsername().isEmpty()) {
+                            username = usersEntity.getUsername();
+                        } else {
+                            username = newUserTitle;
+                        }
+                    } else {
+                        username = newUserTitle;
+                    }
+                    Component listCellRendererComponent = super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                    try {
+                        if (usersEntity.getId() < 0) {
+                            if (isSelected) {
+                                listCellRendererComponent.setForeground(Color.GREEN.brighter().brighter());
+                            } else {
+                                listCellRendererComponent.setForeground(Color.GREEN.darker().darker());
+                            }
+                        } else {
+                            if (!usersEntity.isActive()) {
+                                if (isSelected) {
+                                    listCellRendererComponent.setBackground(Color.DARK_GRAY);
+                                } else {
+                                    listCellRendererComponent.setBackground(Color.GRAY);
+                                }
+                            }
+                        }
+                    } catch (NullPointerException e) {
+                        /*NOP*/
+                    }
+
+                    return listCellRendererComponent;
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        };
+    }
+
+    String getServerOnlineString(long differenceInSeconds) {
+        final String MAXIMUM_SUPPORTED_LIFE_TIME = "> 24855д.";
+        if (differenceInSeconds >= 0) {
+            long seconds = differenceInSeconds % 60;
+            long minutes = (differenceInSeconds / 60) % 60;
+            long hours = (differenceInSeconds / 60 / 60) % 24;
+            long days = (differenceInSeconds / 60 / 60 / 24);
+            return days + "д. " + hours + "ч. " + minutes + "м. " + seconds + "с.";
+        } else {
+            return MAXIMUM_SUPPORTED_LIFE_TIME;
+        }
+    }
+
+    private void initAdminAccessArray() {
+        onlyAdminTabsList = new JPanel[]{controlPanel};
+    }
+
+    private void initAdminConstantsPanel() {
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column != 0 && super.isCellEditable(row, column);
+            }
+        };
+        model.addColumn("Параметр");
+        model.addColumn("Значение");
+
+        constantsTable.getTableHeader().setReorderingAllowed(false);
+    }
+
+    private void initAdminRegisteredUsersPanel() {
+        registeredUserList.setCellRenderer(getRegisteredUserListCellRenderer());
+
+        registeredUserList.addListSelectionListener(e -> {
+            final int selectedIndex = registeredUserList.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                UsersEntity usersEntity = registeredUserList.getModel().getElementAt(selectedIndex);
+                updateCurrentSelectedUserInformation(usersEntity);
+            } else {
+                clearCurrentUserPanel();
+            }
+        });
+
+    }
+
+    private void initAdminSettingsPanel() {
+        connectionUrlTextField.setText(ServerSettingsManager.getInstance().getServerDbConnectionUrl());
+        connectionLoginTextField.setText(ServerSettingsManager.getInstance().getServerDbUsername());
+        connectionPasswordField.setText(ServerSettingsManager.getInstance().getServerDbPassword());
+        saveSettingsToButton.addActionListener(e -> onSaveSettingsToButton());
+    }
+
+    private void initGraphicsPanelListeners() {
+        cpuSystemCheckBox.addActionListener(e -> serverMonitoringGraphics.setCpuSystemShow(cpuSystemCheckBox.isSelected()));
+        temperatureCpuServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setTemperatureServerShow(temperatureCpuServerCheckBox.isSelected()));
+        cpuServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setCpuServerShow(cpuServerCheckBox.isSelected()));
+        ramSystemCheckBox.addActionListener(e -> serverMonitoringGraphics.setRamSystemShow(ramSystemCheckBox.isSelected()));
+        ramServerCheckBox.addActionListener(e -> serverMonitoringGraphics.setRamServerShow(ramServerCheckBox.isSelected()));
+        usersCheckBox.addActionListener(e -> serverMonitoringGraphics.setUsersShow(usersCheckBox.isSelected()));
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        setTitle(ApplicationConstants.APPLICATION_NAME + ApplicationConstants.APPLICATION_NAME_POSTFIX_SERVER);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/application/serverLogo.png")));
+
+        initUserTypeComboBox();
+
+        initLockTimer();
+
+        updateSystemInfoLabel();
+        updateNetworkInfoPanel();
+        updateTotalMemoryLabel();
+        updateJvmInfoLabel();
+
+        updateServerSocketPortInfoLabel();
+
+        initAdminSettingsPanel();
+
+        initAdminConstantsPanel();
+        fillAdminConstantsPanel();
+
+        initAdminRegisteredUsersPanel();
+        fillAdminRegisteredUsersPanel();
+
+        clearCurrentUserPanel();
+
+        initOnlineUsersList();
+
+        initListeners();
+
+        CommonWindowUtils.initApplicationVersionArea(applicationVersionArea);
+
+    }
+
+    private void initKeyBindings() {
+
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        contentPane.registerKeyboardAction(e -> dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        contentPane.registerKeyboardAction(e -> onButtonAdminLock(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        contentPane.registerKeyboardAction(e -> {
+                    if (currentLoggedInUser != null) {
+                        onPowerServerButton();
+                    }
+                },
+                KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+
+        adminServerPanel.registerKeyboardAction(e -> onForceDisconnectUserButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        adminServerPanel.registerKeyboardAction(e -> onForceDisconnectAllUsersButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
+                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, true),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        adminServerPanel.registerKeyboardAction(e -> onUserInfoButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+
+        adminUsersPanel.registerKeyboardAction(e -> onAddNewUserButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0),
+                JOptionPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        adminUsersPanel.registerKeyboardAction(e -> onRemoveUserButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+                JOptionPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        adminUsersPanel.registerKeyboardAction(e -> initAdminRegisteredUsersPanel(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK),
+                JOptionPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+
+        powerServerButton.addActionListener(e -> onPowerServerButton());
+
+        exportDataButton.addActionListener(e -> onExportDataButton());
+
+        unbindTransactionButton.addActionListener(e -> onUnbindTransactionButton());
+
+        buttonUserInfo.addActionListener(e -> onUserInfoButton());
+
+        buttonForceUserDisconnect.addActionListener(e -> onForceDisconnectUserButton());
+
+        buttonForceAllUsersDisconnect.addActionListener(e -> onForceDisconnectAllUsersButton());
+
+        buttonAdminLock.addActionListener(e -> onButtonAdminLock());
+
+        serverOnlineTimeLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onServerOnlineCountLabel();
+            }
+        });
+
+
+        logTextPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    JPopupMenu menu = new JPopupMenu();
+                    JMenuItem clear = new JMenuItem("Очистить");
+                    clear.addActionListener(e1 -> ServerMonitoringBackgroundService.getInstance().clearServerLogMessages());
+                    menu.add(clear);
+                    logTextPane.add(menu);
+                }
+            }
+        });
+
+        openLogFolderButton.addActionListener(e -> onOpenLogFolder());
+
+        openClientGuideButton.addActionListener(e -> CommonUtils.openClientGuide());
+
+        openServerGuideButton.addActionListener(e -> CommonUtils.openServerGuide());
+
+
+        constantsRefreshButton.addActionListener(e -> fillAdminConstantsPanel());
+
+        updateServerConstantsButton.addActionListener(e -> onSaveAdminConstantsPanel());
+
+        refreshRegisteredUsersButton.addActionListener(e -> onUpdateUserListButton());
+
+        addUserButton.addActionListener(e -> onAddNewUserButton());
+
+        removeUserButton.addActionListener(e -> onRemoveUserButton());
+        switchMonitoringButton.addActionListener(e -> onSwitchMonitoring());
+
+        initUserInfoPanelListeners();
+
+        initGraphicsPanelListeners();
+    }
+
+    private void initLockTimer() {
+        int timerTimeout = getAdminLockDelayFromConstants();
+        ActionListener listener = e -> lastActionTimeAgoCounter = 0;
+
+        FrameUtils.addActionListenerToAll(contentPane, listener);
+
+        userActionsUpdateTimer = new Timer(1000, e -> {
+            if (!isWindowClosing) {
+                if (lastActionTimeAgoCounter >= timerTimeout || lastActionTimeAgoCounter < 0) {
+                    if (currentLoggedInUser != null) {
+                        setUnlocked(false);
+                        currentLoggedInUser = null;
+                    }
+                }
+                lastActionTimeAgoCounter++;
+            }
+        });
+
+        userActionsUpdateTimer.setRepeats(true);
+        if (!userActionsUpdateTimer.isRunning()) {
+            userActionsUpdateTimer.start();
+        }
+    }
+
+    private void initOnlineUsersList() {
+        DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                setOpaque(true);
+                if (value instanceof ClientConnection) {
+                    ClientConnection client = (ClientConnection) value;
+                    String username;
+                    UsersEntity userEntity = client.getUser();
+
+                    if (userEntity != null) {
+                        if (!userEntity.getUsername().isEmpty()) {
+                            username = userEntity.getUsername() + " (" + userEntity.getName() + " " + userEntity.getSurname() + ")";
+                            if (isSelected) {
+                                setBackground(Color.GREEN.brighter().brighter());
+                            } else {
+                                setBackground(Color.GREEN.darker().darker());
+                            }
+                        } else {
+                            username = "Some incorrect user, id: " + userEntity.getId();
+                            if (isSelected) {
+                                setBackground(Color.RED.brighter().brighter());
+                            } else {
+                                setBackground(Color.RED.darker().darker());
+                            }
+                        }
+                    } else {
+                        username = client.getSocket().getInetAddress().getHostName() + ":" + client.getSocket().getPort();
+                        if (isSelected) {
+                            setBackground(Color.DARK_GRAY.brighter().brighter());
+                        } else {
+                            setBackground(Color.DARK_GRAY.darker().darker());
+                        }
+                    }
+                    return super.getListCellRendererComponent(list, username, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        };
+        onlineUserList.setCellRenderer(cellRenderer);
+    }
+
+    private void initThreads() {
+        int MONITORING_TIMER_DELAY = 1000;
+        Component component = this;
+
+        monitorUiUpdateTimer = new Timer(MONITORING_TIMER_DELAY, new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateMonitoringByTimer();
+
+            }
+
+            private void appendTextToTextPane(ServerLogMessage message) {
+
+                StyledDocument doc = logTextPane.getStyledDocument();
+
+
+                SimpleAttributeSet newMessage = new SimpleAttributeSet();
+                if (message.getLevel().equals(ServerLogMessage.ServerLogMessageLevel.SUCCESS)) {
+                    StyleConstants.setForeground(newMessage, Color.GREEN.darker().darker());
+                } else if (message.getLevel().equals(ServerLogMessage.ServerLogMessageLevel.WARN)) {
+                    StyleConstants.setForeground(newMessage, Color.WHITE);
+                    StyleConstants.setBackground(newMessage, Color.RED);
+                }
+                StyleConstants.setBold(newMessage, true);
+
+
+                try {
+                    doc.insertString(doc.getLength(), message.getFormattedMessage() + "\n", newMessage);
+                } catch (Exception e) {
+                    log.warn("Could not add message", e);
+                }
+            }
+
+            private void initTransactionLabel(boolean alive) {
+                transactionActiveLabel.setText(alive ? "активна" : "не активна");
+                FrameUtils.removeAllComponentListeners(transactionActiveLabel);
+                if (alive) {
+                    transactionActiveLabel.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mousePressed(MouseEvent e) {
+                            if (e.getButton() == MouseEvent.BUTTON1) {
+                                try {
+                                    final Socket transactionClient = ServerDBConnectionPool.getInstance().getTransactionClient();
+                                    final ClientConnection registeredClientConnection = ServerSocketService.getInstance()
+                                            .getRegisteredClientConnection(transactionClient);
+                                    UserInfoWindow window = new UserInfoWindow(registeredClientConnection, false);
+                                    window.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), window));
+                                    window.setVisible(true);
+                                } catch (Exception e1) {
+                                    log.warn("Could not get info about reserved transaction", e1);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            private void updateActiveThreadCounterLabel() {
+                threadsCount.setText(Integer.toString(getApplicationCurrentThreads()));
+            }
+
+            private void updateLogTextPane() {
+                ArrayList<ServerLogMessage> serverLogMessages = ServerMonitoringBackgroundService.getInstance().getServerLogMessages();
+                if (serverLogMessages.size() > logMessages.size()) {
+                    int startCaretPosition = logTextPane.getCaretPosition();
+                    boolean change = false;
+
+                    if (startCaretPosition == logTextPane.getDocument().getLength()) {
+                        change = true;
+                    }
+
+                    int messagesToLoad = serverLogMessages.size() - logMessages.size();
+                    for (int i = 0; i < messagesToLoad; i++) {
+                        int j = messagesToLoad - i;
+                        ServerLogMessage message = serverLogMessages.get(serverLogMessages.size() - j);
+                        logMessages.add(message);
+                        appendTextToTextPane(message);
+                    }
+
+                    if (change) {
+                        logTextPane.setCaretPosition(logTextPane.getDocument().getLength());
+                    }
+                } else if (serverLogMessages.size() < logMessages.size()) {
+                    logMessages.clear();
+                    logTextPane.setText("");
+                }
+            }
+
+            private void updateMonitoringByTimer() {
+                updateOnlineUsersCount();
+                updateOnlineUsersList();
+
+                updateServerOnlineTimeLabel();
+
+                updateActiveThreadCounterLabel();
+                updateProcessorInfoLabel();
+                updateUsedProcessCpuInfoLabel();
+                updateUsedJvmMemoryInfoLabel();
+
+                updateTemperatureInfoLabel();
+                createGraphics();
+
+                updateLogTextPane();
+
+                updateTransactionStatus();
+            }
+
+            private void updateServerOnlineTimeLabel() {
+                long onlineNanoSeconds = ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds();
+                if (serverOnlineCountLabelCounterShow) {
+                    String text = getServerOnlineString(onlineNanoSeconds);
+                    serverOnlineTimeLabel.setText(text);
+                } else {
+                    serverOnlineTimeLabel.setText(serverStartDate.toString());
+                }
+            }
+
+            private void updateTemperatureInfoLabel() {
+                ArrayList<Float> cpuTemperatureValue = ServerMonitoringBackgroundService.getInstance().getCpuTemperatureValues();
+
+                final int index = cpuTemperatureValue.size() - 1;
+                final double cpuTemperature = cpuTemperatureValue.size() > index && index >= 0 ? cpuTemperatureValue.get(index) : 0;
+
+                if (cpuTemperature > 90.0d) {
+
+                    setWarningMode(temperatureInfoLabel, true);
+
+                } else {
+                    setWarningMode(temperatureInfoLabel, false);
+
+                }
+
+                temperatureInfoLabel.setText("ЦП: " + cpuTemperature + " C" + DEGREE);
+            }
+
+            private void updateTransactionStatus() {
+                final boolean alive = ServerDBConnectionPool.getInstance().transactionAlive();
+                initTransactionLabel(alive);
+                unbindTransactionButton.setEnabled(alive);
+            }
+
+            private void updateUsedJvmMemoryInfoLabel() {
+                final long runtimeUsedMemory = getRuntimeUsedMemory();
+                final long runtimeTotalMemory = getRuntimeTotalMemory();
+
+                String memoryInfo = "JVM: " + runtimeUsedMemory + " / " + runtimeTotalMemory + " МБ. ";
+
+                if (runtimeUsedMemory > (runtimeMaxMemory - 0.2 * runtimeMaxMemory)) {
+                    setWarningMode(usedProcessMemoryInfoLabel, true);
+                } else {
+                    setWarningMode(usedProcessMemoryInfoLabel, false);
+                }
+                usedProcessMemoryInfoLabel.setText(memoryInfo);
+            }
+
+
+        });
+        if (!monitorUiUpdateTimer.isRunning()) {
+            monitorUiUpdateTimer.start();
+        }
+    }
+
+    private void initUserInfoPanelListeners() {
+
+        DocumentListener usernameTextFieldDocumentListener = new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateData();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateData();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateData();
+            }
+
+            private void updateData() {
+                UsersEntity selectedValue = registeredUserList.getSelectedValue();
+                if (selectedValue != null) {
+                    final int VARCHAR_LENGTH = 20;
+                    if (usernameTextField.getText().length() > VARCHAR_LENGTH) {
+                        String text = usernameTextField.getText();
+                        text = text.substring(0, VARCHAR_LENGTH) + "...";
+                        selectedValue.setUsername(text);
+                    } else {
+                        selectedValue.setUsername(usernameTextField.getText());
+                    }
+                    SwingUtilities.invokeLater(() -> registeredUserList.updateUI());
+                    try {
+                        ValidationUtils.validateUserName(selectedValue.getUsername());
+                        usernameTextField.setBackground(Color.WHITE);
+                    } catch (UsernameValidationException e) {
+                        usernameTextField.setBackground(Color.RED);
+                    }
+                }
+            }
+        };
+
+        usernameTextField.getDocument().addDocumentListener(usernameTextFieldDocumentListener);
+
+        resetPasswordButton.addActionListener(e -> {
+            UsersEntity selectedValue = registeredUserList.getSelectedValue();
+            onResetPasswordButton(selectedValue);
+        });
+
+        nameTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setName(nameTextField.getText());
+                }
+            }
+        });
+
+        patronymicTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setPatronymic(patronymicTextField.getText());
+                }
+            }
+        });
+
+        surnameTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                if (registeredUserList.getSelectedValue() != null) {
+                    registeredUserList.getSelectedValue().setSurname(surnameTextField.getText());
+                }
+
+            }
+        });
+
+        userTypeComboBox.addActionListener(e -> {
+            Object selectedItem = userTypeComboBox.getSelectedItem();
+            if (selectedItem != null) {
+                registeredUserList.getSelectedValue().setUserType((UserTypeEntity) selectedItem);
+            }
+        });
+
+        isEditorCheckBox.addItemListener(e -> {
+            if (registeredUserList.getSelectedValue() != null) {
+                registeredUserList.getSelectedValue().setEditor(isEditorCheckBox.isSelected());
+            }
+        });
+        isAdminCheckBox.addItemListener(e -> {
+            if (registeredUserList.getSelectedValue() != null) {
+                registeredUserList.getSelectedValue().setAdmin(isAdminCheckBox.isSelected());
+            }
+        });
+        isActiveCheckBox.addItemListener(e -> {
+            if (registeredUserList.getSelectedValue() != null) {
+                registeredUserList.getSelectedValue().setActive(isActiveCheckBox.isSelected());
+            }
+        });
+
+        saveUserButton.addActionListener(e -> {
+            UsersEntity user = registeredUserList.getSelectedValue();
+            int selectedIndex = registeredUserList.getSelectedIndex();
+            try {
+                if (ValidationUtils.validateUserEntity(user)) {
+                    restoreTextFieldsColors();
+                    try {
+                        onSaveUserButton(user);
+
+                        clearCurrentUserPanel();
+                        fillAdminRegisteredUsersPanel();
+
+                        if (selectedIndex >= 0) {
+                            registeredUserList.setSelectedIndex(selectedIndex);
+                        }
+                    } catch (OptimisticLockException e1) {
+                        JOptionPane.showMessageDialog(this,
+                                "Пользователь " + user.getUsername() + " уже существует",
+                                "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (UsernameValidationException e1) {
+                usernameTextField.setBackground(Color.red);
+                String message = "Имя пользователя должно:\n" +
+                        "быть больше 2 и меньше 20 символов\n" +
+                        "не должно:\n" +
+                        "начинаться с пробела";
+                JOptionPane.showMessageDialog(this, message,
+                        "Некорректное имя пользователя", JOptionPane.ERROR_MESSAGE);
+            } catch (UserTypeValidationException e1) {
+                JOptionPane.showMessageDialog(this, "Тип пользователя должен быть указан",
+                        "Некорректный тип пользователя", JOptionPane.ERROR_MESSAGE);
+            }
+
+        });
+    }
+
+    private void initUserTypeComboBox() {
+        DefaultComboBoxModel<UserTypeEntity> model = new DefaultComboBoxModel<>();
+
+        UserTypeService userTypeService = new UserTypeServiceImpl(session);
+        List<UserTypeEntity> userTypeEntities = userTypeService.listUserTypes();
+        for (UserTypeEntity entity : userTypeEntities) {
+            model.addElement(entity);
+        }
+
+        userTypeComboBox.setModel(model);
+        userTypeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof UserTypeEntity) {
+                    UserTypeEntity entity = (UserTypeEntity) value;
+                    String name = entity.getName();
+                    return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        });
+    }
+
+    private void onAddNewUserButton() {
+        DefaultListModel<UsersEntity> model = new DefaultListModel<>();
+        for (int i = 0; i < registeredUserList.getModel().getSize(); i++) {
+            model.addElement(registeredUserList.getModel().getElementAt(i));
+        }
+        UsersEntity usersEntity = new UsersEntity();
+        usersEntity.setId(-1);
+        usersEntity.setUserType(new UserTypeServiceImpl(session).getUserTypeById(1));
+        model.addElement(usersEntity);
+        registeredUserList.setModel(model);
+        int index = registeredUserList.getModel().getSize() - 1;
+        registeredUserList.setSelectedIndex(index);
+    }
+
+    private void onButtonAdminLock() {
+        if (currentLoggedInUser != null) {
+            setUnlocked(false);
+            ServerMonitoringBackgroundService.getInstance().addMessage(
+                    new ServerLogMessage("Администратор вышел из системы сервера",
+                            ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+            currentLoggedInUser = null;
+        } else {
+            final Session session = ServerDBConnectionPool.getInstance().getSession();
+            LoginWindow loginWindow = new LoginWindow(session);
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+            loginWindow.setVisible(true);
+            try {
+                session.close();
+            } catch (HibernateException e) {
+                log.warn("Could not close session");
+            }
+            UsersEntity user = loginWindow.getAuthorizedUser();
+            if (user != null) {
+                log.info("User to log in as administrator: " + user);
+                if (user.isActive()) {
+                    if (user.isAdmin()) {
+                        log.info("User successfully authorized as administrator: " + user.getUsername());
+                        authorizedUserName.setText(user.getUsername());
+                        setUnlocked(user.isAdmin());
+
+                        ServerMonitoringBackgroundService.getInstance().addMessage(
+                                new ServerLogMessage("Администратор " + user.getUsername()
+                                        + " (" + user.getName() + " " + user.getSurname() + ") успешно выполнил вход на сервере",
+                                        ServerLogMessage.ServerLogMessageLevel.SUCCESS));
+
+                        currentLoggedInUser = user;
+                    } else {
+                        log.warn("User could not be authorized as administrator: " + user.getUsername() + ", he is not an admin: " + user);
+                        JOptionPane.showMessageDialog(this,
+                                "Вход разрешен только администраторам сервера",
+                                "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+                        ServerMonitoringBackgroundService.getInstance().addMessage(
+                                new ServerLogMessage("Пользоватесь " + user.getUsername()
+                                        + " (" + user.getName() + " " + user.getSurname() + ") пытался выполнить вход в администраторскую часть, не имея права администратора.",
+                                        ServerLogMessage.ServerLogMessageLevel.WARN));
+                    }
+                } else {
+                    log.warn("User" + user.getUsername() + " can not be authorized, he is not active.");
+                    JOptionPane.showMessageDialog(this,
+                            "Вход разрешен только активным пользователям",
+                            "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+                    ServerMonitoringBackgroundService.getInstance().addMessage(
+                            new ServerLogMessage("Не действующий пользователь " + user.getUsername()
+                                    + " (" + user.getName() + " " + user.getSurname() + ") пытался выполнить вход в администраторскую часть.",
+                                    ServerLogMessage.ServerLogMessageLevel.WARN));
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Необходимо войти в систему, чтобы продолжить",
+                        "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+                ServerMonitoringBackgroundService.getInstance().addMessage(
+                        new ServerLogMessage("Кто-то пытался войти в администраторскую часть, " +
+                                "но судя по всему пароль не подошёл.",
+                                ServerLogMessage.ServerLogMessageLevel.WARN));
+            }
+        }
+    }
+
+    private void onExportDataButton() {
+        ExportDataWindow exportDataWindow = new ExportDataWindow();
+        exportDataWindow.setLocation(FrameUtils.getFrameOnCenter(this, exportDataWindow));
+        exportDataWindow.setVisible(true);
+    }
+
+    private void onForceDisconnectAllUsersButton() {
+        if (ServerSocketService.getInstance().getConnectedClientsCount() > 0) {
+            ServerSocketService.getInstance().closeAll();
+            updateOnlineUsersList();
+        }
+    }
+
+    private void onForceDisconnectUserButton() {
+        DefaultListModel<ClientConnection> listModel = new DefaultListModel<>();
+        for (int i = 0; i < onlineUserList.getModel().getSize(); i++) {
+            if (onlineUserList.getModel().getElementAt(i) != null) {
+                listModel.addElement(onlineUserList.getModel().getElementAt(i));
+            }
+        }
+
+        if (onlineUserList.getSelectedIndex() >= 0 && onlineUserList.getSelectedIndex() < listModel.getSize()) {
+            int selectedIndex = onlineUserList.getSelectedIndex();
+            ClientConnection connection = listModel.get(selectedIndex);
+            try {
+                ServerSocketService.getInstance().closeClientConnection(connection);
+                listModel.remove(selectedIndex);
+            } catch (IOException e) {
+                log.warn("Could not close connection from GUI: " + connection, e);
+                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                        "Не удалось закрыть socket-соединение с: " + connection.getSocket().getInetAddress(),
+                        ServerLogMessage.ServerLogMessageLevel.WARN));
+            }
+
+            updateOnlineUsersList();
+
+            if (listModel.getSize() > selectedIndex) {
+                onlineUserList.setSelectedIndex(selectedIndex);
+            } else {
+                if (listModel.getSize() > 0 && listModel.getSize() > selectedIndex - 1) {
+                    onlineUserList.setSelectedIndex(selectedIndex - 1);
+                }
+            }
+        }
+    }
+
+    private void onOpenLogFolder() {
+        try {
+            Desktop.getDesktop().open(new File(ApplicationConstants.LOG_FOLDER));
+        } catch (IOException e1) {
+            log.warn("Could not open log folder:" + ApplicationConstants.LOG_FOLDER, e1);
+        }
+    }
+
+    private void onPowerServerButton() {
+        ServerBackgroundService.getInstance().stopServerMainBackgroundService();
+        if (monitorUiUpdateTimer != null) {
+            if (monitorUiUpdateTimer.isRunning()) {
+                monitorUiUpdateTimer.stop();
+            }
+        }
+
+        if (userActionsUpdateTimer != null) {
+            if (userActionsUpdateTimer.isRunning()) {
+                userActionsUpdateTimer.stop();
+            }
+        }
+
+        isWindowClosing = true;
+        dispose();
+    }
+
+    private void onRemoveUserButton() {
+        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
+            if (registeredUserList.getSelectedIndex() >= 0) {
+                UsersEntity entity = registeredUserList.getSelectedValue();
+                if (entity != null) {
+                    NoticeService noticeService = new NoticeServiceImpl(session);
+                    if (noticeService.listNoticesByUser(entity).size() > 0) {
+                        JOptionPane.showMessageDialog(this,
+                                "Нельзя удалять пользователей, которые вносили изменения.\n" +
+                                        "Вместо этого вы можете сделать их не активными.",
+                                "Невозможно удалить пользователя", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        if (entity.getId() >= 0) {
+                            UsersService usersService = new UsersServiceImpl(session);
+                            usersService.getUsersDao().getSession().beginTransaction();
+                            usersService.removeUser(entity.getId());
+                            usersService.getUsersDao().getSession().getTransaction().commit();
+                            JOptionPane.showMessageDialog(this, "Пользователь успешно удален!",
+                                    "Успех",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        }
+                        clearCurrentUserPanel();
+                        restoreFields();
+
+                        DefaultListModel model = (DefaultListModel) registeredUserList.getModel();
+                        int selectedIndex = registeredUserList.getSelectedIndex();
+                        if (selectedIndex != -1) {
+                            model.remove(selectedIndex);
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Пользователь не может быть пустым, index: " + registeredUserList.getSelectedIndex());
+                }
+            }
+        }
+    }
+
+    private void onResetPasswordButton(UsersEntity usersEntity) {
+        try (final Session session = ServerDBConnectionPool.getInstance().getSession()) {
+            PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, session);
+            passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
+            passwordChangeWindow.setVisible(true);
+            final UsersEntity userWithNewPassword = passwordChangeWindow.getUserWithNewPassword();
+            if (userWithNewPassword != null) {
+                onUpdateUserListButton();
+                JOptionPane.showMessageDialog(this, "Пароль успешно обновлен", "Обновление пароля", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Не удалось обновить пароль\n" + e.getLocalizedMessage(),
+                    "Обновление пароля", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void onSaveAdminConstantsPanel() {
+        DefaultTableModel model = (DefaultTableModel) constantsTable.getModel();
+        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
+            ConstantsService constantsService = new ConstantsServiceImpl(session);
+            session.beginTransaction();
+            for (int i = 0; i < model.getRowCount(); i++) {
+
+                final String key = model.getValueAt(i, 0).toString();
+                final String value = model.getValueAt(i, 1).toString();
+
+
+                ConstantsEntity entity = constantsService.getConstantByKey(key);
+                if (entity != null) {
+                    entity.setValue(value);
+                    constantsService.updateConstant(entity);
+                }
+            }
+            session.getTransaction().commit();
+            JOptionPane.showMessageDialog(this, "Настройки успешно изменены, все изменения \r\n" +
+                    "будут применены после перезагрузки сервера.", "Успех", JOptionPane.INFORMATION_MESSAGE);
+        } catch (HibernateException e) {
+            log.warn("Could not save constants to DB", e);
+            JOptionPane.showMessageDialog(this, "Не удалось сохранить настройки:\n" + e.getLocalizedMessage(),
+                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void onSaveSettingsToButton() {
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
+        chooser.setDialogTitle("Сохранить файл конфигурации (.xml)");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setMultiSelectionEnabled(false);
+        chooser.setCurrentDirectory(new File(ApplicationConstants.USER_HOME_LOCATION));
+
+
+        FileFilter fileFilter = new FileNameExtensionFilter("Файл конфигурации", "xml");
+        chooser.setFileFilter(fileFilter);
+        int returnValue = chooser.showDialog(this, "OK");
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            if (chooser.getSelectedFile().isDirectory()) {
+                final String fileName = chooser.getSelectedFile() + File.separator + "server_configuration.xml";
+                try {
+                    ServerSettingsManager.getInstance().setServerSettings(fileName);
+                    ServerSettingsManager.getInstance().setServerDbConnectionUrl(connectionUrlTextField.getText());
+                    ServerSettingsManager.getInstance().setServerDbUsername(connectionLoginTextField.getText());
+                    ServerSettingsManager.getInstance().setServerDbPassword(new String(connectionPasswordField.getPassword()));
+                    CommonSettingsManager.setServerSettingsFilePath(fileName);
+
+                    JOptionPane.showMessageDialog(this,
+                            "Файл успешно сохранен:\n" + fileName,
+                            "Успех", JOptionPane.INFORMATION_MESSAGE);
+                } catch (ServerException | IOException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Невозможно сохранить файл:\n" + e.getLocalizedMessage(),
+                            "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        }
+    }
+
+    private void onSaveUserButton(UsersEntity usersEntity) {
+        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
+            UsersService service = new UsersServiceImpl(session);
+            try {
+                service.getUserById(usersEntity.getId());
+                if ((currentLoggedInUser.getId() == usersEntity.getId()) && usersEntity.isAdmin() && usersEntity.isActive()) {
+                    updateUser(usersEntity);
+                } else if (currentLoggedInUser.getId() != usersEntity.getId()) {
+                    updateUser(usersEntity);
+                } else {
+                    log.warn("User wanted to grand down his permissions (admin wanted to become user), it was blocked. User: " + usersEntity);
+                    JOptionPane.showMessageDialog(this,
+                            "Вы не можете сделать себя обычным пользователем\n" +
+                                    "либо отключить профиль.\n" +
+                                    "Это может сделать только другой администратор.",
+                            "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (ObjectNotFoundException e) {
+                final UsersEntity newUser = createNewUser(usersEntity);
+                registeredUserList.setSelectedValue(newUser, true);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                        "Не удалось обновить пользователя: " + usersEntity.getUsername()
+                                + "\n Ошибка: " + e.getLocalizedMessage(),
+                        "Ошибка сохранения", JOptionPane.ERROR_MESSAGE);
+                try {
+                    service.getUsersDao().getSession().getTransaction().rollback();
+                } catch (Exception e1) {
+                    log.warn("Could not rollback transaction", e);
+                }
+            }
+        }
+    }
+
+    private void onServerOnlineCountLabel() {
+        serverOnlineCountLabelCounterShow = !serverOnlineCountLabelCounterShow;
+        if (serverOnlineCountLabelCounterShow) {
+            long serverOnlineTimeInSeconds = ServerMonitoringBackgroundService.getInstance().getServerOnlineTimeInSeconds();
+            serverOnlineTimeLabel.setText(getServerOnlineString(serverOnlineTimeInSeconds));
+        } else {
+            serverOnlineTimeLabel.setText(serverStartDate.toString());
+        }
+    }
+
+    private void onSwitchMonitoring() {
+        if (!isMonitoringActive) {
+            ServerMonitoringBackgroundService.getInstance().startMonitoring();
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), true);
+            if (tabbedPane.getSelectedIndex() == tabbedPane.getComponentZOrder(monitorPanel)) {
+                tabbedPane.setSelectedComponent(logPanel);
+            }
+            switchMonitoringButton.setText("Отключить мониторинг");
+        } else {
+            ServerMonitoringBackgroundService.getInstance().stopMonitoring();
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(monitorPanel), false);
+            switchMonitoringButton.setText("Включить мониторинг");
+        }
+        isMonitoringActive = !isMonitoringActive;
+
+
+    }
+
+    private void onUnbindTransactionButton() {
+        final int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите освободить транзакцию?\n" +
+                        "В данный момент транзакция: " +
+                        (ServerDBConnectionPool.getInstance().transactionAlive() ? "активна" : "не активна") + "\n" +
+                        "Освобождение активной транзакции повлечет за собой \n" +
+                        "возможность редактирования данных одновременно, тем самым\n" +
+                        "даст возможность получить некорректные данные.\n" +
+                        "Данной кнопкой необходимо пользоваться при некорректной работе\n" +
+                        "менеджера транзакций.\n" +
+                        "Хотите продолжить?", "Внимание", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/warning.gif"))));
+        if (result == 0) {
+            ServerDBConnectionPool.getInstance().unbindTransaction();
+        }
+    }
+
+    private void onUpdateUserListButton() {
+        clearCurrentUserPanel();
+        fillAdminRegisteredUsersPanel();
+        restoreTextFieldsColors();
+        restoreFields();
+    }
+
+    private void onUserInfoButton() {
+        if (onlineUserList.getSelectedIndex() >= 0) {
+            ClientConnection connection = onlineUserList.getSelectedValue();
+            UserInfoWindow userInfoWindow = new UserInfoWindow(connection, false);
+            userInfoWindow.setClientConnection(connection);
+            userInfoWindow.setLocation(FrameUtils.getFrameOnCenter(this, userInfoWindow));
+            userInfoWindow.setVisible(true);
+        }
+    }
+
+    private void restoreFields() {
+        userIdLabel.setText("нет данных");
+        usernameTextField.setText("");
+        nameTextField.setText("");
+        patronymicTextField.setText("");
+        surnameTextField.setText("");
+        isEditorCheckBox.setSelected(false);
+        isAdminCheckBox.setSelected(false);
+        isActiveCheckBox.setSelected(false);
+    }
+
+    private void restoreTextFieldsColors() {
+        usernameTextField.setBackground(Color.WHITE);
+    }
+
+    private void selectCommonAvailableTab() {
+        for (JPanel tab : onlyAdminTabsList) {
+            if (tabbedPane.getSelectedComponent().equals(tab)) {
+                if (tabbedPane.isEnabledAt(tabbedPane.getComponentZOrder(monitorPanel))) {
+                    tabbedPane.setSelectedComponent(monitorPanel);
+                } else {
+                    tabbedPane.setSelectedComponent(logPanel);
+                }
+            }
+        }
+
+    }
+
+    private void setTabsEnabled(boolean enabled) {
+        for (JPanel tab : onlyAdminTabsList) {
+            tabbedPane.setEnabledAt(tabbedPane.getComponentZOrder(tab), enabled);
+        }
+    }
+
+    private void setUnlocked(boolean isUnlocked) {
+        initAdminAccessArray();
+
+
+        if (isUnlocked) {
+            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/unlocked.png"))));
+            authorizedUserName.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/authorizedUser128.png"))
+                    .getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+            authorizedUserName.setToolTipText("Авторизированный пользователь");
+            lastActionTimeAgoCounter = 0;
+        } else {
+            buttonAdminLock.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/admin/locked.png"))));
+            authorizedUserName.setText(null);
+            authorizedUserName.setIcon(null);
+            authorizedUserName.setToolTipText(null);
+            selectCommonAvailableTab();
+        }
+
+        setTabsEnabled(isUnlocked);
+
+    }
+
+    private void setWarningMode(JLabel label, boolean value) {
+        if (value) {
+            label.setForeground(Color.RED);
+            try {
+                label.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/warningRed12.png"))));
+            } catch (NullPointerException e) {
+                /*NOP*/
+            }
+        } else {
+            label.setForeground(new JLabel().getForeground());
+            label.setIcon(null);
+        }
+    }
+
+    private void updateCurrentSelectedUserInformation(UsersEntity usersEntity) {
+        if (usersEntity != null) {
+            updateCurrentUserPanel(usersEntity);
+        } else {
+            clearCurrentUserPanel();
+        }
+    }
+
+    private void updateCurrentUserPanel(UsersEntity entity) {
+        FrameUtils.enableAllComponents(currentUserPanel, true);
+
+
+        userIdLabel.setText(Integer.toString(entity.getId()));
+        usernameTextField.setText(entity.getUsername());
+        nameTextField.setText(entity.getName());
+        patronymicTextField.setText(entity.getPatronymic());
+        surnameTextField.setText(entity.getSurname());
+        isEditorCheckBox.setSelected(entity.isEditor());
+        isAdminCheckBox.setSelected(entity.isAdmin());
+        isActiveCheckBox.setSelected(entity.isActive());
+        userTypeComboBox.setSelectedItem(entity.getUserType());
+
+        resetPasswordButton.setEnabled(entity.getId() >= 0);
+    }
+
+    private void updateJvmInfoLabel() {
+        jvmInfoLabel.setText(System.getProperty("java.specification.version")
+                + "(" + System.getProperty("java.version") + ")");
+    }
+
+    private void updateNetworkInfoPanel() {
+        NetworkParams networkParams = OPERATING_SYSTEM.getNetworkParams();
+        networkNameInfoLabel.setText(networkParams.getHostName());
+        ipAddressInfoLabel.setText(networkParams.getIpv4DefaultGateway() + " / " + networkParams.getIpv6DefaultGateway());
+    }
+
+    private void updateOnlineUsersCount() {
+        int onlineUsersCount = ServerBackgroundService.getInstance().getOnlineUsersCount();
+        onlineUsersCountLabel.setText(onlineUsersCount + "");
+        onlineUsersCount2.setText(onlineUsersCount + "");
+    }
+
+    private void updateOnlineUsersList() {
+        List<ClientConnection> connections = ServerBackgroundService.getInstance().getConnectedClientsList();
+        DefaultListModel<ClientConnection> model = new DefaultListModel<>();
+        if (connections != null) {
+            for (ClientConnection connection : connections) {
+                model.addElement(connection);
+            }
+        }
+
+
+        int selectedIndex = onlineUserList.getSelectedIndex();
+        onlineUserList.setModel(model);
+
+        if (selectedIndex >= 0) {
+            onlineUserList.setSelectedIndex(selectedIndex);
+        }
+    }
+
+    private void updateProcessorInfoLabel() {
+        ArrayList<Float> cpuLoadValues = ServerMonitoringBackgroundService.getInstance().getCpuLoadValues();
+        final int index = cpuLoadValues.size() - 1;
+        double cpuLoad = cpuLoadValues.size() > index && index >= 0 ? cpuLoadValues.get(index) : 0;
+        String cpuLoadString = CommonUtils.round(cpuLoad, 1) + "%";
+
+        if (cpuLoad >= 60.0d) {
+            setWarningMode(usedCpuBySystemInfoLabel, true);
+        } else {
+            setWarningMode(usedCpuBySystemInfoLabel, false);
+        }
+        usedCpuBySystemInfoLabel.setText(physicalProcessorCount + " (" + logicalProcessorCount + ") " + cpuLoadString);
+    }
+
+    private void updateServerSocketPortInfoLabel() {
+        serverSocketPortInfoLabel.setText(ServerConstants.SERVER_DEFAULT_SOCKET_PORT + "");
+    }
+
+    private void updateSystemInfoLabel() {
+        String osInfo = OPERATING_SYSTEM.getManufacturer() + " " + OPERATING_SYSTEM.getFamily()
+                + " " + OPERATING_SYSTEM.getVersion() + " x" + SystemUtils.getRealSystemArch();
+        osInfoLabel.setText(osInfo);
+    }
+
+    private void updateTotalMemoryLabel() {
+        long runtimeTotalMemory = getSystemTotalMemory();
+        long runtimeMaxMemory = getRuntimeMaxMemory();
+        totalMemoryInfoLabel.setText("JVM: " + runtimeMaxMemory + " МБ. ОЗУ: " + runtimeTotalMemory + " МБ.");
+    }
+
+    private void updateUsedProcessCpuInfoLabel() {
+        ArrayList<Float> cpuLoadByServerValues = ServerMonitoringBackgroundService.getInstance().getCpuLoadByServerValues();
+
+        final int index = cpuLoadByServerValues.size() - 1;
+        final double cpuUsageByApplication = cpuLoadByServerValues.size() > index && index >= 0 ? cpuLoadByServerValues.get(index) : 0;
+
+        String processInfo = CommonUtils.round(cpuUsageByApplication, 1) + "%";
+
+        if (cpuUsageByApplication >= 60.0d) {
+            setWarningMode(usedCpuByApplicationInfoLabel, true);
+
+        } else {
+            setWarningMode(usedCpuByApplicationInfoLabel, false);
+
+        }
+        usedCpuByApplicationInfoLabel.setText(processInfo);
+
+    }
+
+    private void updateUser(UsersEntity entity) {
+        try (Session session = ServerDBConnectionPool.getInstance().getSession()) {
+            if (entity != null) {
+                UsersService service = new UsersServiceImpl(session);
+                service.getUsersDao().getSession().getTransaction().begin();
+
+                service.updateUser(entity);
+
+                service.getUsersDao().getSession().getTransaction().commit();
+                JOptionPane.showMessageDialog(this,
+                        "Пользователь успешно сохранён: " + entity.getUsername(),
+                        "Успех", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception e) {
+            log.warn("Could not update user: {}", e);
+            JOptionPane.showMessageDialog(this, "Не удалось обновить пользователя: " + entity.getUsername() + "\n"
+                            + e.getLocalizedMessage(),
+                    "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+        } finally {
+            SessionUtils.refreshSession(this.session, UsersEntity.class);
+        }
     }
 }

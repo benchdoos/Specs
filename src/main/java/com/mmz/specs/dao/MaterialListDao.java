@@ -22,23 +22,21 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface MaterialListDao {
+    long addMaterialList(MaterialListEntity materialListEntity);
+
+    List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity);
+
+    MaterialListEntity getMaterialListById(long id);
+
     Session getSession();
 
     void setSession(Session session);
 
-    long addMaterialList(MaterialListEntity materialListEntity);
+    List<MaterialListEntity> getUnusedMaterialLists();
 
-    void updateMaterialList(MaterialListEntity materialListEntity);
+    List<MaterialListEntity> listMaterialLists();
 
     void removeMaterialList(long id);
 
-
-    MaterialListEntity getMaterialListById(long id);
-
-    List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity);
-
-    List<MaterialListEntity> getUnusedMaterialLists();
-
-
-    List<MaterialListEntity> listMaterialLists();
+    void updateMaterialList(MaterialListEntity materialListEntity);
 }

@@ -36,26 +36,6 @@ public class ClientConnectionImpl implements ClientConnection {
     }
 
     @Override
-    public UsersEntity getUser() {
-        return user;
-    }
-
-    @Override
-    public void setUser(UsersEntity entity) {
-        this.user = entity;
-    }
-
-    @Override
-    public Socket getSocket() {
-        return this.socket;
-    }
-
-    @Override
-    public void setSocket(Socket socket) {
-        this.socket = socket;
-    }
-
-    @Override
     public void close() throws IOException {
         try {
             if (this.socket != null) {
@@ -79,6 +59,26 @@ public class ClientConnectionImpl implements ClientConnection {
                 .append(this.socket, that.socket)
                 .append(this.user, that.user)
                 .isEquals();
+    }
+
+    @Override
+    public Socket getSocket() {
+        return this.socket;
+    }
+
+    @Override
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    @Override
+    public UsersEntity getUser() {
+        return user;
+    }
+
+    @Override
+    public void setUser(UsersEntity entity) {
+        this.user = entity;
     }
 
     @Override

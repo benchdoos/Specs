@@ -22,15 +22,13 @@ import java.util.List;
 
 public interface UserTypeDao {
 
-    public void setSession(Session session);
+    Session getSession();
 
-    public Session getSession();
+    void setSession(Session session);
 
+    UserTypeEntity getUserTypeById(int id);
 
-    public void updateUserType(UserTypeEntity userTypeEntity);
+    List<UserTypeEntity> listUserTypes();
 
-    public UserTypeEntity getUserTypeById(int id);
-
-
-    public List<UserTypeEntity> listUserTypes();
+    void updateUserType(UserTypeEntity userTypeEntity);
 }

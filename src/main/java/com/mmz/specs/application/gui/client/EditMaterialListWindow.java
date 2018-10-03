@@ -89,283 +89,6 @@ public class EditMaterialListWindow extends JDialog {
         setSize(getMinimumSize());
     }
 
-    private void initUpdateUserIsActiveListeners() {
-        materialList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
-
-        addMaterialButton.addActionListener(notifyUserIsActiveListener);
-        removeMaterial.addActionListener(notifyUserIsActiveListener);
-        createNewMaterialButton.addActionListener(notifyUserIsActiveListener);
-        editMaterialButton.addActionListener(notifyUserIsActiveListener);
-    }
-
-    private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-
-        setTitle("Редактирование материала для " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/edit/edit.png")));
-    }
-
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void onOK() {
-        int count = 0;
-        for (int i = 0; i < materialList.getModel().getSize(); i++) {
-            final MaterialListEntity materialListEntity = materialList.getModel().getElementAt(i);
-            if (materialListEntity.isMainMaterial()) {
-                count++;
-            }
-        }
-        if (count == 1) {
-            dispose();
-        } else if (count == 0) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Должен быть основной материал.",
-                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
-        } else if (count > 1) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Только один материал может быть основным",
-                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private void fillMaterialList() {
-        if (detailEntity != null) {
-            MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
-            final List<MaterialListEntity> materialListByDetail = service.getMaterialListByDetail(detailEntity);
-
-            DefaultListModel<MaterialListEntity> model = new DefaultListModel<>();
-
-            for (MaterialListEntity entity : materialListByDetail) {
-                if (entity.isActive()) {
-                    model.addElement(entity);
-                }
-            }
-
-            materialList.setModel(model);
-        }
-
-    }
-
-    private void onAddMaterial() {
-        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow(session);
-        selectionMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(this, selectionMaterialWindow));
-        selectionMaterialWindow.setVisible(true);
-        final MaterialEntity selectedValue = selectionMaterialWindow.getSelectedValue();
-
-        if (selectedValue != null) {
-            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
-            MaterialListEntity entity = new MaterialListEntity();
-            entity.setDetailByDetailId(detailEntity);
-            entity.setMaterialByMaterialId(selectedValue);
-            final boolean isSizeZero = model.size() == 0;
-            entity.setMainMaterial(isSizeZero);
-            entity.setActive(true);
-            if (!modelContainsMaterial(model, entity)) {
-                model.addElement(entity);
-                materialList.setSelectedValue(entity, true);
-            }
-        }
-    }
-
-    private boolean modelContainsMaterial(DefaultListModel<MaterialListEntity> model, MaterialListEntity entity) {
-        for (int i = 0; i < model.getSize(); i++) {
-            MaterialListEntity modelListEntity = model.getElementAt(i);
-            final MaterialEntity materialByMaterialId = modelListEntity.getMaterialByMaterialId();
-            final MaterialEntity entityMaterialByMaterialId = entity.getMaterialByMaterialId();
-            if (materialByMaterialId.getLongMark().equals(entityMaterialByMaterialId.getLongMark())
-                    && materialByMaterialId.getLongProfile().equals(entityMaterialByMaterialId.getLongProfile())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void onCancel() {
-        isCanceled = true;
-        dispose();
-    }
-
-    private void onRemoveMaterial() {
-        final MaterialListEntity selectedValue = materialList.getSelectedValue();
-        if (selectedValue != null) {
-            selectedValue.setActive(false);
-            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
-            for (int i = 0; i < model.size(); i++) {
-                final MaterialEntity materialByMaterialId = model.getElementAt(i).getMaterialByMaterialId();
-                final MaterialEntity selectedMaterialEntity = selectedValue.getMaterialByMaterialId();
-                if (materialByMaterialId.getLongMark().equals(selectedMaterialEntity.getLongMark())
-                        && materialByMaterialId.getLongProfile().equals(selectedMaterialEntity.getLongProfile())) {
-                    model.removeElementAt(i);
-                    return;
-                }
-            }
-        }
-    }
-
-    private void onEditMaterial() {
-        final MaterialListEntity selectedValue = materialList.getSelectedValue();
-        if (selectedValue != null) {
-            final MaterialEntity materialByMaterialId = selectedValue.getMaterialByMaterialId();
-            if (materialByMaterialId != null) {
-                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, materialByMaterialId);
-                createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
-                createMaterialWindow.setVisible(true);
-            }
-        }
-    }
-
-    private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-
-        addMaterialButton.addActionListener(e -> onAddMaterial());
-        removeMaterial.addActionListener(e -> onRemoveMaterial());
-        editMaterialButton.addActionListener(e -> onEditMaterial());
-        copyMaterialButton.addActionListener(e -> onCopyMaterial());
-        createNewMaterialButton.addActionListener(e -> onCreateNewMaterial());
-    }
-
-    private void onCopyMaterial() {
-        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow(session);
-        selectionMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(this, selectionMaterialWindow));
-        selectionMaterialWindow.setVisible(true);
-        final MaterialEntity selectedValue = selectionMaterialWindow.getSelectedValue();
-        if (selectedValue != null) {
-            final MaterialEntity savedMaterial = copyMaterial(selectedValue);
-
-            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, savedMaterial);
-            createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
-            createMaterialWindow.setVisible(true);
-
-            final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
-            addMaterialToDetail(materialEntity);
-        }
-    }
-
-    private MaterialEntity copyMaterial(MaterialEntity selectedValue) {
-        MaterialEntity entity = new MaterialEntity();
-        entity.setLongMark(selectedValue.getLongMark());
-        entity.setShortMark(selectedValue.getShortMark());
-        entity.setLongProfile(selectedValue.getLongProfile());
-        entity.setShortProfile(selectedValue.getShortProfile());
-        entity.setActive(true);
-        MaterialService service = new MaterialServiceImpl(session);
-        final int id = service.addMaterial(entity);
-        return service.getMaterialById(id);
-    }
-
-    private void onCreateNewMaterial() {
-        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
-        createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
-        createMaterialWindow.setVisible(true);
-
-        final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
-        addMaterialToDetail(materialEntity);
-    }
-
-    private void addMaterialToDetail(MaterialEntity materialEntity) {
-        if (materialEntity != null) {
-            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
-
-            MaterialListEntity entity = new MaterialListEntity();
-            entity.setDetailByDetailId(detailEntity);
-            entity.setMaterialByMaterialId(materialEntity);
-
-            final boolean isSizeZero = model.getSize() == 0;
-            entity.setMainMaterial(isSizeZero);
-            entity.setActive(true);
-
-            MaterialListService service = new MaterialListServiceImpl(session);
-            final MaterialListEntity materialListById = service.getMaterialListById(service.addMaterialList(entity));
-            if (materialListById != null) {
-                model.addElement(entity);
-                materialList.setSelectedValue(entity, true);
-            }
-        }
-    }
-
-    private void initCheckBoxListeners() {
-        mainCheckBox.addActionListener(e -> {
-            final MaterialListEntity selectedValue = materialList.getSelectedValue();
-
-            final DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
-
-            for (int i = 0; i < model.getSize(); i++) {
-                final MaterialListEntity elementAt = model.getElementAt(i);
-                if (elementAt.isMainMaterial() && !elementAt.equals(selectedValue)) {
-                    elementAt.setMainMaterial(false);
-                }
-            }
-            final boolean selected = mainCheckBox.isSelected();
-            selectedValue.setMainMaterial(selected);
-            materialList.updateUI();
-        });
-    }
-
-    private void initMaterialList() {
-
-        materialList.setCellRenderer(Renders.DEFAULT_LIST_MATERIAL_LIST_CELL_RENDERER);
-
-        materialList.addListSelectionListener(e -> {
-            if (materialList.getSelectedValue() != null) {
-                final MaterialListEntity selectedValue = materialList.getSelectedValue();
-                final MaterialEntity materialByMaterialId = selectedValue.getMaterialByMaterialId();
-
-                longMarkLabel.setText(materialByMaterialId.getLongMark());
-                longProfileLabel.setText(materialByMaterialId.getLongProfile());
-                shortMarkLabel.setText(materialByMaterialId.getShortMark());
-                shortProfileLabel.setText(materialByMaterialId.getShortProfile());
-
-                mainCheckBox.setSelected(selectedValue.isMainMaterial());
-                mainCheckBox.setEnabled(true);
-
-            } else {
-                fillEmptyMaterialInfo();
-            }
-        });
-
-    }
-
-    private void fillEmptyMaterialInfo() {
-        longMarkLabel.setText("Нет данных");
-        longProfileLabel.setText("Нет данных");
-        shortMarkLabel.setText("Нет данных");
-        shortProfileLabel.setText("Нет данных");
-
-        mainCheckBox.setSelected(false);
-        mainCheckBox.setEnabled(false);
-    }
-
-    public List<MaterialListEntity> getEditedMaterials() {
-        ArrayList<MaterialListEntity> result;
-        if (!isCanceled) {
-            result = new ArrayList<>();
-
-            final DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
-
-            for (int i = 0; i < model.size(); i++) {
-                final MaterialListEntity elementAt = model.getElementAt(i);
-                elementAt.setActive(true);
-                result.add(elementAt);
-            }
-        } else {
-            result = null;
-        }
-
-        return result;
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -480,5 +203,282 @@ public class EditMaterialListWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private void addMaterialToDetail(MaterialEntity materialEntity) {
+        if (materialEntity != null) {
+            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+
+            MaterialListEntity entity = new MaterialListEntity();
+            entity.setDetailByDetailId(detailEntity);
+            entity.setMaterialByMaterialId(materialEntity);
+
+            final boolean isSizeZero = model.getSize() == 0;
+            entity.setMainMaterial(isSizeZero);
+            entity.setActive(true);
+
+            MaterialListService service = new MaterialListServiceImpl(session);
+            final MaterialListEntity materialListById = service.getMaterialListById(service.addMaterialList(entity));
+            if (materialListById != null) {
+                model.addElement(entity);
+                materialList.setSelectedValue(entity, true);
+            }
+        }
+    }
+
+    private MaterialEntity copyMaterial(MaterialEntity selectedValue) {
+        MaterialEntity entity = new MaterialEntity();
+        entity.setLongMark(selectedValue.getLongMark());
+        entity.setShortMark(selectedValue.getShortMark());
+        entity.setLongProfile(selectedValue.getLongProfile());
+        entity.setShortProfile(selectedValue.getShortProfile());
+        entity.setActive(true);
+        MaterialService service = new MaterialServiceImpl(session);
+        final int id = service.addMaterial(entity);
+        return service.getMaterialById(id);
+    }
+
+    private void fillEmptyMaterialInfo() {
+        longMarkLabel.setText("Нет данных");
+        longProfileLabel.setText("Нет данных");
+        shortMarkLabel.setText("Нет данных");
+        shortProfileLabel.setText("Нет данных");
+
+        mainCheckBox.setSelected(false);
+        mainCheckBox.setEnabled(false);
+    }
+
+    private void fillMaterialList() {
+        if (detailEntity != null) {
+            MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
+            final List<MaterialListEntity> materialListByDetail = service.getMaterialListByDetail(detailEntity);
+
+            DefaultListModel<MaterialListEntity> model = new DefaultListModel<>();
+
+            for (MaterialListEntity entity : materialListByDetail) {
+                if (entity.isActive()) {
+                    model.addElement(entity);
+                }
+            }
+
+            materialList.setModel(model);
+        }
+
+    }
+
+    public List<MaterialListEntity> getEditedMaterials() {
+        ArrayList<MaterialListEntity> result;
+        if (!isCanceled) {
+            result = new ArrayList<>();
+
+            final DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+
+            for (int i = 0; i < model.size(); i++) {
+                final MaterialListEntity elementAt = model.getElementAt(i);
+                elementAt.setActive(true);
+                result.add(elementAt);
+            }
+        } else {
+            result = null;
+        }
+
+        return result;
+    }
+
+    private void initCheckBoxListeners() {
+        mainCheckBox.addActionListener(e -> {
+            final MaterialListEntity selectedValue = materialList.getSelectedValue();
+
+            final DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+
+            for (int i = 0; i < model.getSize(); i++) {
+                final MaterialListEntity elementAt = model.getElementAt(i);
+                if (elementAt.isMainMaterial() && !elementAt.equals(selectedValue)) {
+                    elementAt.setMainMaterial(false);
+                }
+            }
+            final boolean selected = mainCheckBox.isSelected();
+            selectedValue.setMainMaterial(selected);
+            materialList.updateUI();
+        });
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+
+        setTitle("Редактирование материала для " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/edit/edit.png")));
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        buttonOK.addActionListener(e -> onOK());
+
+        addMaterialButton.addActionListener(e -> onAddMaterial());
+        removeMaterial.addActionListener(e -> onRemoveMaterial());
+        editMaterialButton.addActionListener(e -> onEditMaterial());
+        copyMaterialButton.addActionListener(e -> onCopyMaterial());
+        createNewMaterialButton.addActionListener(e -> onCreateNewMaterial());
+    }
+
+    private void initMaterialList() {
+
+        materialList.setCellRenderer(Renders.DEFAULT_LIST_MATERIAL_LIST_CELL_RENDERER);
+
+        materialList.addListSelectionListener(e -> {
+            if (materialList.getSelectedValue() != null) {
+                final MaterialListEntity selectedValue = materialList.getSelectedValue();
+                final MaterialEntity materialByMaterialId = selectedValue.getMaterialByMaterialId();
+
+                longMarkLabel.setText(materialByMaterialId.getLongMark());
+                longProfileLabel.setText(materialByMaterialId.getLongProfile());
+                shortMarkLabel.setText(materialByMaterialId.getShortMark());
+                shortProfileLabel.setText(materialByMaterialId.getShortProfile());
+
+                mainCheckBox.setSelected(selectedValue.isMainMaterial());
+                mainCheckBox.setEnabled(true);
+
+            } else {
+                fillEmptyMaterialInfo();
+            }
+        });
+
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        materialList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+
+        addMaterialButton.addActionListener(notifyUserIsActiveListener);
+        removeMaterial.addActionListener(notifyUserIsActiveListener);
+        createNewMaterialButton.addActionListener(notifyUserIsActiveListener);
+        editMaterialButton.addActionListener(notifyUserIsActiveListener);
+    }
+
+    private boolean modelContainsMaterial(DefaultListModel<MaterialListEntity> model, MaterialListEntity entity) {
+        for (int i = 0; i < model.getSize(); i++) {
+            MaterialListEntity modelListEntity = model.getElementAt(i);
+            final MaterialEntity materialByMaterialId = modelListEntity.getMaterialByMaterialId();
+            final MaterialEntity entityMaterialByMaterialId = entity.getMaterialByMaterialId();
+            if (materialByMaterialId.getLongMark().equals(entityMaterialByMaterialId.getLongMark())
+                    && materialByMaterialId.getLongProfile().equals(entityMaterialByMaterialId.getLongProfile())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void onAddMaterial() {
+        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow(session);
+        selectionMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(this, selectionMaterialWindow));
+        selectionMaterialWindow.setVisible(true);
+        final MaterialEntity selectedValue = selectionMaterialWindow.getSelectedValue();
+
+        if (selectedValue != null) {
+            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+            MaterialListEntity entity = new MaterialListEntity();
+            entity.setDetailByDetailId(detailEntity);
+            entity.setMaterialByMaterialId(selectedValue);
+            final boolean isSizeZero = model.size() == 0;
+            entity.setMainMaterial(isSizeZero);
+            entity.setActive(true);
+            if (!modelContainsMaterial(model, entity)) {
+                model.addElement(entity);
+                materialList.setSelectedValue(entity, true);
+            }
+        }
+    }
+
+    private void onCancel() {
+        isCanceled = true;
+        dispose();
+    }
+
+    private void onCopyMaterial() {
+        SelectionMaterialWindow selectionMaterialWindow = new SelectionMaterialWindow(session);
+        selectionMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(this, selectionMaterialWindow));
+        selectionMaterialWindow.setVisible(true);
+        final MaterialEntity selectedValue = selectionMaterialWindow.getSelectedValue();
+        if (selectedValue != null) {
+            final MaterialEntity savedMaterial = copyMaterial(selectedValue);
+
+            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, savedMaterial);
+            createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+            createMaterialWindow.setVisible(true);
+
+            final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
+            addMaterialToDetail(materialEntity);
+        }
+    }
+
+    private void onCreateNewMaterial() {
+        CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
+        createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+        createMaterialWindow.setVisible(true);
+
+        final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
+        addMaterialToDetail(materialEntity);
+    }
+
+    private void onEditMaterial() {
+        final MaterialListEntity selectedValue = materialList.getSelectedValue();
+        if (selectedValue != null) {
+            final MaterialEntity materialByMaterialId = selectedValue.getMaterialByMaterialId();
+            if (materialByMaterialId != null) {
+                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, materialByMaterialId);
+                createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+                createMaterialWindow.setVisible(true);
+            }
+        }
+    }
+
+    private void onOK() {
+        int count = 0;
+        for (int i = 0; i < materialList.getModel().getSize(); i++) {
+            final MaterialListEntity materialListEntity = materialList.getModel().getElementAt(i);
+            if (materialListEntity.isMainMaterial()) {
+                count++;
+            }
+        }
+        if (count == 1) {
+            dispose();
+        } else if (count == 0) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Должен быть основной материал.",
+                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+        } else if (count > 1) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Только один материал может быть основным",
+                    "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void onRemoveMaterial() {
+        final MaterialListEntity selectedValue = materialList.getSelectedValue();
+        if (selectedValue != null) {
+            selectedValue.setActive(false);
+            DefaultListModel<MaterialListEntity> model = (DefaultListModel<MaterialListEntity>) materialList.getModel();
+            for (int i = 0; i < model.size(); i++) {
+                final MaterialEntity materialByMaterialId = model.getElementAt(i).getMaterialByMaterialId();
+                final MaterialEntity selectedMaterialEntity = selectedValue.getMaterialByMaterialId();
+                if (materialByMaterialId.getLongMark().equals(selectedMaterialEntity.getLongMark())
+                        && materialByMaterialId.getLongProfile().equals(selectedMaterialEntity.getLongProfile())) {
+                    model.removeElementAt(i);
+                    return;
+                }
+            }
+        }
     }
 }

@@ -58,6 +58,38 @@ public class ServerMonitoringBackgroundService {
         return localInstance;
     }
 
+    public void addMessage(ServerLogMessage message) {
+        if (serverLogMessages.size() >= 10000) {
+            serverLogMessages.clear();
+        }
+        serverLogMessages.add(message);
+
+    }
+
+    public void clearServerLogMessages() {
+        serverLogMessages.clear();
+    }
+
+    public ArrayList<Float> getCpuLoadByServerValues() {
+        return this.cpuLoadByServerValues;
+    }
+
+    public ArrayList<Float> getCpuLoadValues() {
+        return this.cpuLoadValues;
+    }
+
+    public ArrayList<Float> getCpuTemperatureValues() {
+        return this.cpuTemperatureValues;
+    }
+
+    ArrayList<Float> getGraphicXAges() {
+        ArrayList<Float> result = new ArrayList<>(MEMORY_LENGTH);
+        for (int i = 0; i < MEMORY_LENGTH; i++) {
+            result.add((float) i);
+        }
+        return result;
+    }
+
     private ActionListener getMonitorTimerActionListener() {
         return e -> {
 
@@ -71,72 +103,20 @@ public class ServerMonitoringBackgroundService {
         };
     }
 
-    private void updateCpuLoad() {
-        this.cpuLoadValues = updateGraphicValue(this.cpuLoadValues, getProcessCpuLoad());
-    }
-
-    private void updateCpuLoadByServer() {
-        final double cpuUsageByApplication = getCpuUsageByApplication();
-        this.cpuLoadByServerValues = updateGraphicValue(this.cpuLoadByServerValues, cpuUsageByApplication);
-    }
-
-    private void updateServerMemoryLoad() {
-        final long runtimeUsedMemory = getRuntimeUsedMemory();
-        final long runtimeMaxMemory = getRuntimeMaxMemory();
-
-        double usedMemory = CommonUtils.round(runtimeUsedMemory / (double) runtimeMaxMemory * 100, 2);
-
-        this.serverMemoryLoadValues = updateGraphicValue(this.serverMemoryLoadValues, usedMemory);
-    }
-
-    private void updateSystemMemoryLoad() {
-        this.systemMemoryLoadValues = updateGraphicValue(this.systemMemoryLoadValues, getSystemUsedMemory());
-    }
-
-    private void updateTemperature() {
-        this.cpuTemperatureValues = updateGraphicValue(this.cpuTemperatureValues, getCpuTemperature());
-    }
-
-    private void updateUsersCount() {
-        this.usersConnectedValues = updateGraphicValue(this.usersConnectedValues, ServerBackgroundService.getInstance().getOnlineUsersCount());
-    }
-
-    private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
-        if (oldValues.size() != MEMORY_LENGTH) {
-            for (int i = 0; i < MEMORY_LENGTH; i++) {
-                oldValues.add(0f);
-            }
-        }
-
-        ArrayList<Float> result = new ArrayList<>(MEMORY_LENGTH);
-
-        if (oldValues.size() == MEMORY_LENGTH) {
-            for (int i = 1; i < oldValues.size(); i++) {
-                result.add(oldValues.get(i));
-            }
-            result.add((float) newValue);
-        }
-        return result;
-    }
-
-    public ArrayList<Float> getSystemMemoryLoadValues() {
-        return systemMemoryLoadValues;
+    public ArrayList<ServerLogMessage> getServerLogMessages() {
+        return serverLogMessages;
     }
 
     ArrayList<Float> getServerMemoryLoadValues() {
         return this.serverMemoryLoadValues;
     }
 
-    public ArrayList<Float> getCpuLoadValues() {
-        return this.cpuLoadValues;
+    public long getServerOnlineTimeInSeconds() {
+        return Calendar.getInstance().getTime().getTime() / 1000 - this.serverStartDateSeconds;
     }
 
-    public ArrayList<Float> getCpuLoadByServerValues() {
-        return this.cpuLoadByServerValues;
-    }
-
-    public ArrayList<Float> getCpuTemperatureValues() {
-        return this.cpuTemperatureValues;
+    public ArrayList<Float> getSystemMemoryLoadValues() {
+        return systemMemoryLoadValues;
     }
 
     public ArrayList<Float> getUsersConnectedValues() {
@@ -183,31 +163,51 @@ public class ServerMonitoringBackgroundService {
                 ServerLogMessage.ServerLogMessageLevel.SUCCESS));
     }
 
-    public void addMessage(ServerLogMessage message) {
-        if (serverLogMessages.size() >= 10000) {
-            serverLogMessages.clear();
+    private void updateCpuLoad() {
+        this.cpuLoadValues = updateGraphicValue(this.cpuLoadValues, getProcessCpuLoad());
+    }
+
+    private void updateCpuLoadByServer() {
+        final double cpuUsageByApplication = getCpuUsageByApplication();
+        this.cpuLoadByServerValues = updateGraphicValue(this.cpuLoadByServerValues, cpuUsageByApplication);
+    }
+
+    private ArrayList<Float> updateGraphicValue(ArrayList<Float> oldValues, double newValue) {
+        if (oldValues.size() != MEMORY_LENGTH) {
+            for (int i = 0; i < MEMORY_LENGTH; i++) {
+                oldValues.add(0f);
+            }
         }
-        serverLogMessages.add(message);
 
-    }
-
-    public ArrayList<ServerLogMessage> getServerLogMessages() {
-        return serverLogMessages;
-    }
-
-    public long getServerOnlineTimeInSeconds() {
-        return Calendar.getInstance().getTime().getTime() / 1000 - this.serverStartDateSeconds;
-    }
-
-    ArrayList<Float> getGraphicXAges() {
         ArrayList<Float> result = new ArrayList<>(MEMORY_LENGTH);
-        for (int i = 0; i < MEMORY_LENGTH; i++) {
-            result.add((float) i);
+
+        if (oldValues.size() == MEMORY_LENGTH) {
+            for (int i = 1; i < oldValues.size(); i++) {
+                result.add(oldValues.get(i));
+            }
+            result.add((float) newValue);
         }
         return result;
     }
 
-    public void clearServerLogMessages() {
-        serverLogMessages.clear();
+    private void updateServerMemoryLoad() {
+        final long runtimeUsedMemory = getRuntimeUsedMemory();
+        final long runtimeMaxMemory = getRuntimeMaxMemory();
+
+        double usedMemory = CommonUtils.round(runtimeUsedMemory / (double) runtimeMaxMemory * 100, 2);
+
+        this.serverMemoryLoadValues = updateGraphicValue(this.serverMemoryLoadValues, usedMemory);
+    }
+
+    private void updateSystemMemoryLoad() {
+        this.systemMemoryLoadValues = updateGraphicValue(this.systemMemoryLoadValues, getSystemUsedMemory());
+    }
+
+    private void updateTemperature() {
+        this.cpuTemperatureValues = updateGraphicValue(this.cpuTemperatureValues, getCpuTemperature());
+    }
+
+    private void updateUsersCount() {
+        this.usersConnectedValues = updateGraphicValue(this.usersConnectedValues, ServerBackgroundService.getInstance().getOnlineUsersCount());
     }
 }

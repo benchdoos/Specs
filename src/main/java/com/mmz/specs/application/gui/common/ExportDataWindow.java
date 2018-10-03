@@ -79,170 +79,6 @@ public class ExportDataWindow extends JDialog {
         setMinimumSize(getSize());
     }
 
-    private void initGui() {
-        setTitle("Экспорт данных Базы Данных");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/export.png")));
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-    }
-
-    private void initPanel() {
-        exportDateLabel.setText(dateFormatter.format(Calendar.getInstance().getTime()));
-        filePathTextField.setText(ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION);
-    }
-
-    private void initKeyBindings() {
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-    }
-
-    private void initListeners() {
-        browseButton.addActionListener(e -> onBrowseFolder());
-
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-    }
-
-    private void onBrowseFolder() {
-        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
-        if (!new File(filePathTextField.getText()).exists() && new File(filePathTextField.getText()).isFile()) {
-            chooser.setCurrentDirectory(new File(ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION));
-        } else {
-            chooser.setCurrentDirectory(new File(filePathTextField.getText()));
-        }
-        chooser.setDialogTitle("Выбор папки назначения");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setAcceptAllFileFilterUsed(false);
-
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            final String absolutePath = chooser.getSelectedFile().getAbsolutePath();
-            log.debug("User changed destination folder to: {}", absolutePath);
-            filePathTextField.setText(absolutePath + File.separator);
-        }
-    }
-
-    private void initTimers() {
-        progressTimer = new Timer(250, e -> {
-            totalProgressBar.setValue(progressManager.getTotalProgress());
-            totalProgressBar.setIndeterminate(progressManager.isTotalIndeterminate());
-            totalProgressBar.setMaximum(progressManager.getTotalMaxValue());
-
-            currentProgressBar.setValue(progressManager.getCurrentProgress());
-            final boolean currentIndeterminate = progressManager.isCurrentIndeterminate();
-            currentProgressBar.setIndeterminate(currentIndeterminate);
-            currentProgressBar.setStringPainted(!currentIndeterminate);
-
-            operationInfoLabel.setText(progressManager.getText());
-        });
-        progressTimer.setRepeats(true);
-        progressTimer.restart();
-    }
-
-    private void startExport() {
-        switch (selectedMode) {
-            case SPT:
-                exportTree();
-                break;
-            default:
-                exportTree();
-                break;
-        }
-    }
-
-    private MODE getSelectedMode() {
-        if (exportSPTRadioButton.isSelected()) {
-            return MODE.SPT;
-        } else if (exportGDBRadioButton.isSelected()) {
-            return MODE.GDB;
-        } else if (exportSQLRadioButton.isSelected()) {
-            return MODE.SQL;
-        } else if (exportAllDataRadioButton.isSelected()) {
-            return MODE.SPB;
-        } else {
-            //default
-            return MODE.SPT;
-        }
-    }
-
-    private void onCancel() {
-        int result = JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите остановить экспорт данных?",
-                "Подтверждение действий", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (result == 0) {
-            log.warn("User canceled export!");
-            if (managerThread != null) {
-                if (managerThread.isAlive()) {
-                    managerThread.interrupt();
-                    enableControls(true);
-                } else {
-                    dispose();
-                }
-            } else {
-                dispose();
-            }
-        }
-    }
-
-    @Override
-    public void dispose() {
-        progressTimer.stop();
-        super.dispose();
-    }
-
-    private void onOK() {
-        enableControls(false);
-        selectedMode = getSelectedMode();
-        log.info("Starting exporting data. Export mode is: " + selectedMode);
-        startExport();
-
-    }
-
-    private void exportTree() {
-        manager = new SPTreeIOManager(ServerDBConnectionPool.getInstance().getSession(), progressManager);
-        Runnable runnable = () -> {
-            final String filePath = filePathTextField.getText() + exportDateLabel.getText() + EXPORT_TREE_EXTENSION;
-            try {
-                manager.exportData(new File(filePath));
-                if (!Thread.currentThread().isInterrupted()) {
-                    dispose();
-
-                    if (SystemUtils.isWindows()) {
-                        Runtime.getRuntime().exec("explorer.exe /select," + filePath);
-                    } else if (SystemUtils.isUnix()) {
-                        final File folder = new File(filePath).getParentFile();
-                        try {
-                            Desktop.getDesktop().open(folder);
-                        } catch (IOException e) {
-                            log.warn("Could not open folder: {}, showing message to user", e);
-                            JOptionPane.showMessageDialog(this, "Файл успешно экспортирован:\n" +
-                                    folder, "Экспорт завершен", JOptionPane.INFORMATION_MESSAGE);
-                        }
-                    }
-                }
-            } catch (IOException | ZipException e) {
-                log.warn("Could not export tree to file: {}", filePath, e);
-                JOptionPane.showMessageDialog(this, "Во время экспорта произошла ошибка:\n"
-                        + e.getLocalizedMessage(), "Ошибка при экспорте данных", JOptionPane.WARNING_MESSAGE);
-                progressManager.reset();
-                enableControls(true);
-            }
-        };
-        managerThread = new Thread(runnable);
-        managerThread.start();
-    }
-
-    private void enableControls(boolean enable) {
-        filePathTextField.setEnabled(enable);
-        browseButton.setEnabled(enable);
-        buttonOK.setEnabled(enable);
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -363,6 +199,170 @@ public class ExportDataWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    @Override
+    public void dispose() {
+        progressTimer.stop();
+        super.dispose();
+    }
+
+    private void enableControls(boolean enable) {
+        filePathTextField.setEnabled(enable);
+        browseButton.setEnabled(enable);
+        buttonOK.setEnabled(enable);
+    }
+
+    private void exportTree() {
+        manager = new SPTreeIOManager(ServerDBConnectionPool.getInstance().getSession(), progressManager);
+        Runnable runnable = () -> {
+            final String filePath = filePathTextField.getText() + exportDateLabel.getText() + EXPORT_TREE_EXTENSION;
+            try {
+                manager.exportData(new File(filePath));
+                if (!Thread.currentThread().isInterrupted()) {
+                    dispose();
+
+                    if (SystemUtils.isWindows()) {
+                        Runtime.getRuntime().exec("explorer.exe /select," + filePath);
+                    } else if (SystemUtils.isUnix()) {
+                        final File folder = new File(filePath).getParentFile();
+                        try {
+                            Desktop.getDesktop().open(folder);
+                        } catch (IOException e) {
+                            log.warn("Could not open folder: {}, showing message to user", e);
+                            JOptionPane.showMessageDialog(this, "Файл успешно экспортирован:\n" +
+                                    folder, "Экспорт завершен", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                }
+            } catch (IOException | ZipException e) {
+                log.warn("Could not export tree to file: {}", filePath, e);
+                JOptionPane.showMessageDialog(this, "Во время экспорта произошла ошибка:\n"
+                        + e.getLocalizedMessage(), "Ошибка при экспорте данных", JOptionPane.WARNING_MESSAGE);
+                progressManager.reset();
+                enableControls(true);
+            }
+        };
+        managerThread = new Thread(runnable);
+        managerThread.start();
+    }
+
+    private MODE getSelectedMode() {
+        if (exportSPTRadioButton.isSelected()) {
+            return MODE.SPT;
+        } else if (exportGDBRadioButton.isSelected()) {
+            return MODE.GDB;
+        } else if (exportSQLRadioButton.isSelected()) {
+            return MODE.SQL;
+        } else if (exportAllDataRadioButton.isSelected()) {
+            return MODE.SPB;
+        } else {
+            //default
+            return MODE.SPT;
+        }
+    }
+
+    private void initGui() {
+        setTitle("Экспорт данных Базы Данных");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/export.png")));
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+    }
+
+    private void initKeyBindings() {
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+    }
+
+    private void initListeners() {
+        browseButton.addActionListener(e -> onBrowseFolder());
+
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void initPanel() {
+        exportDateLabel.setText(dateFormatter.format(Calendar.getInstance().getTime()));
+        filePathTextField.setText(ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION);
+    }
+
+    private void initTimers() {
+        progressTimer = new Timer(250, e -> {
+            totalProgressBar.setValue(progressManager.getTotalProgress());
+            totalProgressBar.setIndeterminate(progressManager.isTotalIndeterminate());
+            totalProgressBar.setMaximum(progressManager.getTotalMaxValue());
+
+            currentProgressBar.setValue(progressManager.getCurrentProgress());
+            final boolean currentIndeterminate = progressManager.isCurrentIndeterminate();
+            currentProgressBar.setIndeterminate(currentIndeterminate);
+            currentProgressBar.setStringPainted(!currentIndeterminate);
+
+            operationInfoLabel.setText(progressManager.getText());
+        });
+        progressTimer.setRepeats(true);
+        progressTimer.restart();
+    }
+
+    private void onBrowseFolder() {
+        JFileChooser chooser = new JFileChooser(new File(ApplicationConstants.USER_HOME_LOCATION));
+        if (!new File(filePathTextField.getText()).exists() && new File(filePathTextField.getText()).isFile()) {
+            chooser.setCurrentDirectory(new File(ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION));
+        } else {
+            chooser.setCurrentDirectory(new File(filePathTextField.getText()));
+        }
+        chooser.setDialogTitle("Выбор папки назначения");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            final String absolutePath = chooser.getSelectedFile().getAbsolutePath();
+            log.debug("User changed destination folder to: {}", absolutePath);
+            filePathTextField.setText(absolutePath + File.separator);
+        }
+    }
+
+    private void onCancel() {
+        int result = JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите остановить экспорт данных?",
+                "Подтверждение действий", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (result == 0) {
+            log.warn("User canceled export!");
+            if (managerThread != null) {
+                if (managerThread.isAlive()) {
+                    managerThread.interrupt();
+                    enableControls(true);
+                } else {
+                    dispose();
+                }
+            } else {
+                dispose();
+            }
+        }
+    }
+
+    private void onOK() {
+        enableControls(false);
+        selectedMode = getSelectedMode();
+        log.info("Starting exporting data. Export mode is: " + selectedMode);
+        startExport();
+
+    }
+
+    private void startExport() {
+        switch (selectedMode) {
+            case SPT:
+                exportTree();
+                break;
+            default:
+                exportTree();
+                break;
+        }
     }
 
     private enum MODE {SPT, GDB, SQL, SPB}

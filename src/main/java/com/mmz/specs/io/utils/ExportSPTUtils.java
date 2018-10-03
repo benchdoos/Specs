@@ -146,6 +146,37 @@ public class ExportSPTUtils {
         return result;
     }
 
+    private void compressImage(File inputFile, File outputFile, float compression) throws IOException {
+        BufferedImage image = ImageIO.read(inputFile);
+
+        OutputStream os = new FileOutputStream(outputFile);
+
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        ImageWriter writer = writers.next();
+
+        ImageOutputStream ios = ImageIO.createImageOutputStream(os);
+        writer.setOutput(ios);
+
+        ImageWriteParam param = writer.getDefaultWriteParam();
+
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(compression);  // Change the quality value you prefer
+        writer.write(null, new IIOImage(image, null, null), param);
+
+        os.close();
+        ios.close();
+        writer.dispose();
+    }
+
+    public void createSPTFile(File file, File jsonFile, File imagesFolder) throws ZipException {
+        ZipFile zipFile = new ZipFile(file);
+
+        ZipParameters parameters = getDefaultZipParameters();
+
+        zipFile.addFile(jsonFile, parameters);
+        zipFile.addFolder(imagesFolder, parameters);
+    }
+
     public JsonObject createTreeJSON() {
         log.info("Creating JSON file");
         progressManager.setText("Формирование структуры базы данных");
@@ -166,45 +197,72 @@ public class ExportSPTUtils {
         return root;
     }
 
-    private JsonArray getFullTree() {
-        log.info("Creating root entities");
-        progressManager.setText("Формирование корневых каталогов");
+    public void downloadFromFTP(File result, ArrayList<DetailEntity> details) {
+        Properties constants = CommonUtils.getConstantsToProperties(session);
+        String url = constants.getProperty(DaoConstants.BLOB_CONNECTION_URL_KEY);
+        String username = constants.getProperty(DaoConstants.BLOB_ACCESS_USERNAME_KEY);
+        String password = constants.getProperty(DaoConstants.BLOB_ACCESS_PASSWORD_KEY);
+        String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
 
-        ArrayList<DetailEntity> root = CommonServiceUtils.getRootObjects(session);
+        final FtpUtils ftpUtils = FtpUtils.getInstance();
+        ftpUtils.connect(url, username, password);
+        ftpUtils.setPostfix(postfix);
 
-        log.debug("Root entities: ({}) {}", root.size(), root);
-
-        JsonArray array = new JsonArray();
-        for (int i = 0; i < root.size(); i++) {
+        for (int i = 0; i < details.size(); i++) {
             if (!Thread.currentThread().isInterrupted()) {
-                DetailEntity entity = root.get(i);
+                DetailEntity entity = details.get(i);
 
-                log.debug("Creating tree for root entity: {}", entity.toSimpleString());
-
-                progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
-
-                JsonObject object = new JsonObject();
-
-                Gson gson = SPTreeIOManager.getDefaultGson();
-
-                object.add(DETAIL, gson.toJsonTree(entity));
-
-                object.addProperty(QUANTITY, 1);
-                object.addProperty(INTERCHANGEABLE, false);
-
-                final JsonArray allChildrenForEntity = getAllChildrenForEntity(entity);
-                log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.size(), allChildrenForEntity);
-                object.add(CHILDREN, allChildrenForEntity);
-
-                array.add(object);
-
-                int progress = (int) (((double) i / (root.size() - 1)) * 100);
+                int progress = (int) (((double) i / (details.size() - 1)) * 100);
                 progressManager.setCurrentProgress(progress);
+
+
+                String fileName = entity.getId() + FTP_IMAGE_FILE_EXTENSION;
+                File localFile = new File(result + File.separator + fileName);
+                try {
+                    ftpUtils.downloadFile(entity.getId(), localFile);
+                } catch (IOException e) {
+                    log.warn("Could not write a file to {}", localFile, e);
+                }
             } else {
                 break;
             }
         }
-        return array;
+        try {
+            ftpUtils.disconnect();
+        } catch (IOException e) {
+            log.warn("Could not close ftp connection", e);
+        }
+    }
+
+    public File downloadImages(File folder, JsonObject treeJSON) {
+        File result = new File(folder, SPTreeIOManager.IMAGES_FOLDER_FILE_NAME);
+        log.debug("Starting downloading images to folder: {}", folder);
+        progressManager.setCurrentProgress(0);
+        progressManager.setText("Определяем список деталей");
+        progressManager.setCurrentIndeterminate(true);
+
+        final String jsonType = treeJSON.getAsJsonPrimitive(TYPE).getAsString();
+        if (!jsonType.equalsIgnoreCase(DEFAULT_TREE_TYPE)) {
+            throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
+        }
+        log.debug("Starting finding all details in JSON");
+        ArrayList<DetailEntity> details = ExportSPTUtils.listDetailsFromJSON(treeJSON);
+
+        progressManager.setCurrentIndeterminate(false);
+        progressManager.setText("Загружаем изображения с FTP");
+
+        if (details != null) {
+            log.debug("Got details: {}", details.size());
+            log.debug("Starting downloading {} details images to {}", details.size(), result);
+            result.mkdirs();
+
+            final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
+            exportSPTUtils.downloadFromFTP(result, details);
+
+            return result;
+        }
+        return null;
+
     }
 
     private JsonArray getAllChildrenForEntity(DetailEntity parent) {
@@ -280,83 +338,6 @@ public class ExportSPTUtils {
         return result;
     }
 
-    public void downloadFromFTP(File result, ArrayList<DetailEntity> details) {
-        Properties constants = CommonUtils.getConstantsToProperties(session);
-        String url = constants.getProperty(DaoConstants.BLOB_CONNECTION_URL_KEY);
-        String username = constants.getProperty(DaoConstants.BLOB_ACCESS_USERNAME_KEY);
-        String password = constants.getProperty(DaoConstants.BLOB_ACCESS_PASSWORD_KEY);
-        String postfix = constants.getProperty(DaoConstants.BLOB_LOCATION_POSTFIX_KEY);
-
-        final FtpUtils ftpUtils = FtpUtils.getInstance();
-        ftpUtils.connect(url, username, password);
-        ftpUtils.setPostfix(postfix);
-
-        for (int i = 0; i < details.size(); i++) {
-            if (!Thread.currentThread().isInterrupted()) {
-                DetailEntity entity = details.get(i);
-
-                int progress = (int) (((double) i / (details.size() - 1)) * 100);
-                progressManager.setCurrentProgress(progress);
-
-
-                String fileName = entity.getId() + FTP_IMAGE_FILE_EXTENSION;
-                File localFile = new File(result + File.separator + fileName);
-                try {
-                    ftpUtils.downloadFile(entity.getId(), localFile);
-                } catch (IOException e) {
-                    log.warn("Could not write a file to {}", localFile, e);
-                }
-            } else {
-                break;
-            }
-        }
-        try {
-            ftpUtils.disconnect();
-        } catch (IOException e) {
-            log.warn("Could not close ftp connection", e);
-        }
-    }
-
-    public File downloadImages(File folder, JsonObject treeJSON) {
-        File result = new File(folder, SPTreeIOManager.IMAGES_FOLDER_FILE_NAME);
-        log.debug("Starting downloading images to folder: {}", folder);
-        progressManager.setCurrentProgress(0);
-        progressManager.setText("Определяем список деталей");
-        progressManager.setCurrentIndeterminate(true);
-
-        final String jsonType = treeJSON.getAsJsonPrimitive(TYPE).getAsString();
-        if (!jsonType.equalsIgnoreCase(DEFAULT_TREE_TYPE)) {
-            throw new IllegalArgumentException("JSON File type does not much " + DEFAULT_TREE_TYPE + ", now it is: " + jsonType);
-        }
-        log.debug("Starting finding all details in JSON");
-        ArrayList<DetailEntity> details = ExportSPTUtils.listDetailsFromJSON(treeJSON);
-
-        progressManager.setCurrentIndeterminate(false);
-        progressManager.setText("Загружаем изображения с FTP");
-
-        if (details != null) {
-            log.debug("Got details: {}", details.size());
-            log.debug("Starting downloading {} details images to {}", details.size(), result);
-            result.mkdirs();
-
-            final ExportSPTUtils exportSPTUtils = new ExportSPTUtils(session, progressManager);
-            exportSPTUtils.downloadFromFTP(result, details);
-
-            return result;
-        }
-        return null;
-
-    }
-
-    public void createSPTFile(File file, File jsonFile, File imagesFolder) throws ZipException {
-        ZipFile zipFile = new ZipFile(file);
-
-        ZipParameters parameters = getDefaultZipParameters();
-
-        zipFile.addFile(jsonFile, parameters);
-        zipFile.addFolder(imagesFolder, parameters);
-    }
-
     private ZipParameters getDefaultZipParameters() {
         ZipParameters parameters = new ZipParameters();
         parameters.setEncryptFiles(true);
@@ -364,6 +345,47 @@ public class ExportSPTUtils {
         parameters.setAesKeyStrength(Zip4jConstants.AES_STRENGTH_256);
         parameters.setPassword(ApplicationConstants.INTERNAL_FULL_NAME);
         return parameters;
+    }
+
+    private JsonArray getFullTree() {
+        log.info("Creating root entities");
+        progressManager.setText("Формирование корневых каталогов");
+
+        ArrayList<DetailEntity> root = CommonServiceUtils.getRootObjects(session);
+
+        log.debug("Root entities: ({}) {}", root.size(), root);
+
+        JsonArray array = new JsonArray();
+        for (int i = 0; i < root.size(); i++) {
+            if (!Thread.currentThread().isInterrupted()) {
+                DetailEntity entity = root.get(i);
+
+                log.debug("Creating tree for root entity: {}", entity.toSimpleString());
+
+                progressManager.setText("Формирование корневого каталога: " + (i + 1) + " из " + root.size());
+
+                JsonObject object = new JsonObject();
+
+                Gson gson = SPTreeIOManager.getDefaultGson();
+
+                object.add(DETAIL, gson.toJsonTree(entity));
+
+                object.addProperty(QUANTITY, 1);
+                object.addProperty(INTERCHANGEABLE, false);
+
+                final JsonArray allChildrenForEntity = getAllChildrenForEntity(entity);
+                log.debug("Children for {} (size: {}): {}", entity.toSimpleString(), allChildrenForEntity.size(), allChildrenForEntity);
+                object.add(CHILDREN, allChildrenForEntity);
+
+                array.add(object);
+
+                int progress = (int) (((double) i / (root.size() - 1)) * 100);
+                progressManager.setCurrentProgress(progress);
+            } else {
+                break;
+            }
+        }
+        return array;
     }
 
     public void optimizeImages(File folder) {
@@ -393,27 +415,5 @@ public class ExportSPTUtils {
         }
 
         progressManager.setCurrentProgress(100);
-    }
-
-    private void compressImage(File inputFile, File outputFile, float compression) throws IOException {
-        BufferedImage image = ImageIO.read(inputFile);
-
-        OutputStream os = new FileOutputStream(outputFile);
-
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
-        ImageWriter writer = writers.next();
-
-        ImageOutputStream ios = ImageIO.createImageOutputStream(os);
-        writer.setOutput(ios);
-
-        ImageWriteParam param = writer.getDefaultWriteParam();
-
-        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(compression);  // Change the quality value you prefer
-        writer.write(null, new IIOImage(image, null, null), param);
-
-        os.close();
-        ios.close();
-        writer.dispose();
     }
 }

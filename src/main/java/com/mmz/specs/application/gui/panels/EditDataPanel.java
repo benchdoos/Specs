@@ -94,448 +94,6 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
 
     }
 
-    private void initGui() {
-        setLayout(new GridLayout());
-        add(contentPane);
-
-        initEditTitleTab();
-
-        initEditMaterialTab();
-
-        initEditDetailTab();
-
-        initUpdateUserIsActiveListeners();
-
-    }
-
-    private void initEditDetailTab() {
-        initDetailList();
-        fillDetailList();
-    }
-
-    private void initDetailList() {
-        detailsList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof DetailEntity) {
-                    DetailEntity detail = (DetailEntity) value;
-                    final String value1 = detail.getCode() + " " + detail.getDetailTitleByDetailTitleId().getTitle();
-                    return super.getListCellRendererComponent(list, value1, index, isSelected, cellHasFocus);
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
-        detailsList.addListSelectionListener(e -> updateDetailInfo());
-
-        findDetailUsageButton.addActionListener(e -> {
-            final DetailEntity selectedValue = detailsList.getSelectedValue();
-
-            final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-            ClientMainWindow mainWindow = mainWindowUtils.getClientMainWindow(this);
-            if (mainWindow != null && selectedValue != null) {
-                final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
-                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
-                Runnable runnable = () -> {
-                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListViewPanel(selectedValue.getCode()), true);
-                    mainWindowUtils.updateMessage(null, null);
-                };
-                new Thread(runnable).start();
-            }
-        });
-
-        removeDetailButton.addActionListener(e -> {
-            Component c = this;
-            DetailEntity detailEntity = detailsList.getSelectedValue();
-            try {
-                if (detailEntity != null) {
-                    DetailListService service = new DetailListServiceImpl(session);
-                    final int parentSize = service.getDetailListByParent(detailEntity).size();
-                    final int childSize = service.getDetailListByChild(detailEntity).size();
-                    if (parentSize == 0 && childSize == 0) {
-                        DetailService detailService = new DetailServiceImpl(session);
-                        detailService.removeDetail(detailEntity.getId());
-                        DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) detailsList.getModel();
-                        model.removeElement(detailEntity);
-                        updateDetailInfo();
-                    } else {
-                        JOptionPane.showMessageDialog(c,
-                                "Вы не можете удалять детали, которые\n" +
-                                        "используются в других узлах,\n" +
-                                        "либо являются предком для других деталей\n" +
-                                        "в прошлом или настоящем!", "Ошибка удаления",
-                                JOptionPane.WARNING_MESSAGE, new ImageIcon(
-                                        Toolkit.getDefaultToolkit().getImage(
-                                                getClass().getResource("/img/gui/easter/delorean.png")
-                                        ).getScaledInstance(128, 72, 1)));
-
-                    }
-                }
-            } catch (Exception ex) {
-                log.warn("Could not delete detail: {}", detailEntity, ex);
-                JOptionPane.showMessageDialog(c,
-                        "Не удалось удалить деталь:\n" + ex.getLocalizedMessage(), "Ошибка удаления",
-                        JOptionPane.WARNING_MESSAGE);
-            }
-        });
-
-    }
-
-    private void updateDetailInfo() {
-        final DetailEntity selectedValue = detailsList.getSelectedValue();
-        if (selectedValue != null) {
-            detailCodeAndTitleTextField.setText(selectedValue.getCode() + " " + selectedValue.getDetailTitleByDetailTitleId().getTitle());
-            activeDetailLabel.setForeground(selectedValue.isActive() ? Color.BLACK : Color.RED.darker());
-            activeDetailLabel.setText(selectedValue.isActive() ? "нет" : "да");
-
-            DetailListService service = new DetailListServiceImpl(session);
-            final List<DetailListEntity> detailListByChild = service.getDetailListByChild(selectedValue);
-            if (detailListByChild.size() == 0) {
-                final List<DetailListEntity> detailListByParent = service.getDetailListByParent(selectedValue);
-                usedDetailCountLabel.setText(detailListByParent.size() + "");
-            } else {
-                usedDetailCountLabel.setText(detailListByChild.size() + "");
-            }
-        } else {
-            final String noData = "нет данных";
-            detailCodeAndTitleTextField.setText(noData);
-            activeDetailLabel.setText(noData);
-            usedDetailCountLabel.setText(noData);
-        }
-    }
-
-    private void initUpdateUserIsActiveListeners() {
-        tabbedPane.addChangeListener(e -> notifyUserIsActiveListener.actionPerformed(null));
-
-        titleList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
-        materialList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
-
-        addTitleItemButton.addActionListener(notifyUserIsActiveListener);
-        removeTitleItemButton.addActionListener(notifyUserIsActiveListener);
-
-        editTitleButton.addActionListener(notifyUserIsActiveListener);
-        findTitleUsageButton.addActionListener(notifyUserIsActiveListener);
-
-        addMaterialItemButton.addActionListener(notifyUserIsActiveListener);
-        removeMaterialItemButton.addActionListener(notifyUserIsActiveListener);
-        editMaterialItemButton.addActionListener(notifyUserIsActiveListener);
-    }
-
-    private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-        buttonCancel.addActionListener(e -> onCancel());
-    }
-
-    private void initTitleList() {
-        final DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
-            //fixme color does not represent
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                setOpaque(true);
-                DetailTitleEntity entity = (DetailTitleEntity) value;
-                if (!entity.isActive()) {
-                    if (isSelected) {
-                        setBackground(Color.GREEN.brighter().brighter());
-                    } else {
-                        setBackground(Color.GREEN.darker().darker());
-                    }
-                }
-                return super.getListCellRendererComponent(list, entity.getTitle(), index, isSelected, cellHasFocus);
-            }
-        };
-
-        titleList.setCellRenderer(cellRenderer);
-        titleList.addListSelectionListener(e -> updateTitleInfo());
-    }
-
-    private void updateTitleInfo() {
-        final DetailTitleEntity selectedValue = titleList.getSelectedValue();
-        if (selectedValue != null) {
-            titleNameLabel.setText(selectedValue.getTitle());
-            titleActiveLabel.setText(selectedValue.isActive() ? "да" : "нет");
-            int count = getTitleUsage(selectedValue);
-            titleUsageCountLabel.setText(count + "");
-            findTitleUsageButton.setEnabled(count > 0);
-        } else {
-            titleNameLabel.setText(NO_DATA_STRING);
-            titleActiveLabel.setText(NO_DATA_STRING);
-            titleUsageCountLabel.setText(NO_DATA_STRING);
-            findTitleUsageButton.setEnabled(false);
-        }
-    }
-
-    private void fillTitleList() {
-        DefaultListModel<DetailTitleEntity> model = new DefaultListModel<>();
-
-        DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
-        final ArrayList<DetailTitleEntity> detailTitleEntities = (ArrayList<DetailTitleEntity>) service.listDetailTitles();
-        detailTitleEntities.sort((o1, o2) -> {
-            if (o2 != null) {
-                return ComparisonChain.start()
-                        .compareTrueFirst(o1.isActive(), o2.isActive())
-                        .compare(o1.getTitle(), o2.getTitle())
-                        .result();
-            } else {
-                return -1;
-            }
-        });
-
-        for (DetailTitleEntity entity : detailTitleEntities) {
-            model.addElement(entity);
-        }
-        titleList.setModel(model);
-    }
-
-    private int getTitleUsage(DetailTitleEntity selectedValue) {
-        if (selectedValue != null) {
-            DetailService service = new DetailServiceImpl(session);
-            final ArrayList<DetailEntity> detailsByTitle = (ArrayList<DetailEntity>) service.getDetailsByTitle(selectedValue);
-            if (detailsByTitle != null) {
-                return detailsByTitle.size();
-            }
-        }
-        return 0;
-    }
-
-    private void initEditTitleTab() {
-        initTitleList();
-        fillTitleList();
-        initEditTitleTabButtons();
-        initFindTitleUsageButton();
-    }
-
-    private void initEditTitleTabButtons() {
-        addTitleItemButton.addActionListener(e -> {
-            DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
-            if (titleEntity != null) {
-                final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
-                model.addElement(titleEntity);
-
-                fillTitleList();
-
-                titleList.setSelectedValue(titleEntity, true);
-            }
-        });
-
-        removeTitleItemButton.addActionListener(e -> {
-            final DetailTitleEntity selectedValue = titleList.getSelectedValue();
-            final int selectedIndex = titleList.getSelectedIndex();
-            if (selectedValue != null) {
-                DetailService service = new DetailServiceImpl(session);
-                final ArrayList<DetailEntity> detailsByTitle = (ArrayList<DetailEntity>) service.getDetailsByTitle(selectedValue);
-                if (detailsByTitle.isEmpty()) {
-                    new DetailTitleServiceImpl(session).removeDetailTitle(selectedValue.getId());
-
-                    final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
-                    model.removeElement(selectedValue);
-                    if (selectedIndex > 0 && selectedIndex < model.getSize() - 1) {
-                        titleList.setSelectedIndex(titleList.getModel().getSize() - 1);
-                    } else if (selectedIndex == 0 && model.getSize() > 0) {
-                        titleList.setSelectedIndex(0);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Нельзя удалить элемент, который используется в базе", "Ошибка удаления",
-                            JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        });
-
-        editTitleButton.addActionListener(e -> {
-            final DetailTitleEntity selectedValue = titleList.getSelectedValue();
-            final int selectedIndex = titleList.getSelectedIndex();
-            if (selectedValue != null) {
-                EditTitleWindow editTitleWindow = new EditTitleWindow(session, selectedValue);
-                editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), editTitleWindow));
-                editTitleWindow.setVisible(true);
-                DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
-
-                final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
-                model.setElementAt(titleEntity, selectedIndex);
-
-                fillTitleList();
-
-                titleList.setSelectedValue(titleEntity, true);
-            }
-        });
-    }
-
-    private void initEditMaterialTab() {
-        initMaterialList();
-        fillMaterialList();
-
-        initEditMaterialTabButtons();
-    }
-
-    private void fillMaterialList() {
-        DefaultListModel<MaterialEntity> model = new DefaultListModel<>();
-
-        MaterialService service = new MaterialServiceImpl(session);
-        final ArrayList<MaterialEntity> materialListEntities = (ArrayList<MaterialEntity>) service.listMaterials();
-
-        Collections.sort(materialListEntities);
-
-        for (MaterialEntity e : materialListEntities) {
-            model.addElement(e);
-        }
-        materialList.setModel(model);
-    }
-
-    private void fillMaterialInfoLabel() {
-        final MaterialEntity selectedValue = materialList.getSelectedValue();
-        if (selectedValue != null) {
-            longMarkLabel.setText(selectedValue.getLongMark());
-            longProfileLabel.setText(selectedValue.getLongProfile());
-            shortMarkLabel.setText(selectedValue.getShortMark());
-            shortProfileLabel.setText(selectedValue.getShortProfile());
-            activeMarkLabel.setText(selectedValue.isActive() ? "да" : "нет");
-        } else {
-            longMarkLabel.setText(NO_DATA_STRING);
-            longProfileLabel.setText(NO_DATA_STRING);
-            shortMarkLabel.setText(NO_DATA_STRING);
-            shortProfileLabel.setText(NO_DATA_STRING);
-            activeMarkLabel.setText(NO_DATA_STRING);
-        }
-    }
-
-    private void initEditMaterialTabButtons() {
-        addMaterialItemButton.addActionListener(e -> {
-            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
-            createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
-            createMaterialWindow.setVisible(true);
-            final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
-
-            DefaultListModel<MaterialEntity> model = (DefaultListModel<MaterialEntity>) materialList.getModel();
-            model.addElement(materialEntity);
-            materialList.setSelectedValue(materialEntity, true);
-
-        });
-
-        removeMaterialItemButton.addActionListener(e -> {
-            MaterialEntity materialEntity = materialList.getSelectedValue();
-            if (materialEntity != null) {
-                if (!new MainWindowUtils(session).containsMaterialEntityInMaterialListEntity(materialEntity)) {
-                    MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
-                    service.removeMaterial(materialEntity.getId());
-                    DefaultListModel<MaterialEntity> model = (DefaultListModel<MaterialEntity>) materialList.getModel();
-                    model.removeElement(materialEntity);
-                }
-            }
-
-        });
-
-        editMaterialItemButton.addActionListener(e -> {
-            MaterialEntity materialEntity = materialList.getSelectedValue();
-            if (materialEntity != null) {
-                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, materialEntity);
-                createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
-                createMaterialWindow.setVisible(true);
-                final MaterialEntity entity = createMaterialWindow.getMaterialEntity();
-
-                DefaultListModel<MaterialEntity> model = (DefaultListModel<MaterialEntity>) materialList.getModel();
-
-                materialList.setSelectedValue(entity, true);
-            }
-        });
-    }
-
-    @Override
-    public void setUIEnabled(boolean enable) {
-        /*NOP*/
-    }
-
-    @Override
-    public void rollbackTransaction() {
-        onCancel();
-    }
-
-    private void onCancel() {
-        int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
-                        "В случае подтверждения все изменения не сохранятся и никак\n" +
-                        "не повлияют на базу данных.\n" +
-                        "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
-        log.debug("User wanted to rollback changes, user's choice is: " + result);
-        if (result == 0) {
-            SessionUtils.closeSessionSilently(session);
-            closeTab();
-        }
-    }
-
-    private void closeTab() {
-        ClientMainWindow clientMainWindow = new MainWindowUtils(session).getClientMainWindow(this);
-        if (clientMainWindow != null) {
-            clientMainWindow.closeTab(this);
-        }
-    }
-
-    private void onOK() {
-        int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите сохранить изменения в базе данных?\n" +
-                        "Введенные вами данные будут сохранены в базе и появятся у всех пользователей.\n" +
-                        "Также все проведённые изменения будут закреплены за вами, \n" +
-                        "и в случае вопросов, будут обращаться к вам.\n" +
-                        "Провести изменения?", "Подтверждение изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/sync.gif"))));
-        log.debug("User wanted to commit changes, user's choice is: " + result);
-        if (result == 0) {
-            try {
-                session.getTransaction().commit();
-                log.debug("Closing session");
-                session.close();
-                log.info("Session successfully closed");
-                closeTab();
-            } catch (Exception e) {
-                log.warn("Could not call commit for transaction", e);
-                JOptionPane.showMessageDialog(this,
-                        "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(),
-                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE,
-                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
-            }
-        }
-    }
-
-    private void initMaterialList() {
-        materialList.setCellRenderer(Renders.DEFAULT_LIST_MATERIAL_CELL_RENDERER);
-        materialList.addListSelectionListener(e -> fillMaterialInfoLabel());
-    }
-
-    private void fillDetailList() {
-        DetailService service = new DetailServiceImpl(session);
-        ArrayList<DetailEntity> list = (ArrayList<DetailEntity>) service.listDetails();
-        list.sort((o1, o2) -> ComparisonChain.start()
-                .compareFalseFirst(o1.isActive(), o2.isActive())
-                .compare(o1.getCode(), o2.getCode())
-                .result());
-        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
-        for (DetailEntity e : list) {
-            model.addElement(e);
-        }
-        detailsList.setModel(model);
-    }
-
-    private void initFindTitleUsageButton() {
-        findTitleUsageButton.addActionListener(e -> {
-            final DetailTitleEntity selectedValue = titleList.getSelectedValue();
-            final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-            ClientMainWindow mainWindow = mainWindowUtils.getClientMainWindow(this);
-            if (mainWindow != null && selectedValue != null) {
-                final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
-                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
-                Runnable runnable = () -> {
-                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListViewPanel(selectedValue.getTitle()), true);
-                    mainWindowUtils.updateMessage(null, null);
-                };
-                new Thread(runnable).start();
-            }
-        });
-    }
-
-    @Override
-    public AccessPolicyManager getPolicyManager() {
-        AccessPolicyManager accessPolicyManager = new AccessPolicyManager(true, false);
-        accessPolicyManager.setAvailableOnlyForAdmin(true);
-        return accessPolicyManager;
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -810,5 +368,447 @@ public class EditDataPanel extends JPanel implements AccessPolicy, Transactional
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private void closeTab() {
+        ClientMainWindow clientMainWindow = new MainWindowUtils(session).getClientMainWindow(this);
+        if (clientMainWindow != null) {
+            clientMainWindow.closeTab(this);
+        }
+    }
+
+    private void fillDetailList() {
+        DetailService service = new DetailServiceImpl(session);
+        ArrayList<DetailEntity> list = (ArrayList<DetailEntity>) service.listDetails();
+        list.sort((o1, o2) -> ComparisonChain.start()
+                .compareFalseFirst(o1.isActive(), o2.isActive())
+                .compare(o1.getCode(), o2.getCode())
+                .result());
+        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
+        for (DetailEntity e : list) {
+            model.addElement(e);
+        }
+        detailsList.setModel(model);
+    }
+
+    private void fillMaterialInfoLabel() {
+        final MaterialEntity selectedValue = materialList.getSelectedValue();
+        if (selectedValue != null) {
+            longMarkLabel.setText(selectedValue.getLongMark());
+            longProfileLabel.setText(selectedValue.getLongProfile());
+            shortMarkLabel.setText(selectedValue.getShortMark());
+            shortProfileLabel.setText(selectedValue.getShortProfile());
+            activeMarkLabel.setText(selectedValue.isActive() ? "да" : "нет");
+        } else {
+            longMarkLabel.setText(NO_DATA_STRING);
+            longProfileLabel.setText(NO_DATA_STRING);
+            shortMarkLabel.setText(NO_DATA_STRING);
+            shortProfileLabel.setText(NO_DATA_STRING);
+            activeMarkLabel.setText(NO_DATA_STRING);
+        }
+    }
+
+    private void fillMaterialList() {
+        DefaultListModel<MaterialEntity> model = new DefaultListModel<>();
+
+        MaterialService service = new MaterialServiceImpl(session);
+        final ArrayList<MaterialEntity> materialListEntities = (ArrayList<MaterialEntity>) service.listMaterials();
+
+        Collections.sort(materialListEntities);
+
+        for (MaterialEntity e : materialListEntities) {
+            model.addElement(e);
+        }
+        materialList.setModel(model);
+    }
+
+    private void fillTitleList() {
+        DefaultListModel<DetailTitleEntity> model = new DefaultListModel<>();
+
+        DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
+        final ArrayList<DetailTitleEntity> detailTitleEntities = (ArrayList<DetailTitleEntity>) service.listDetailTitles();
+        detailTitleEntities.sort((o1, o2) -> {
+            if (o2 != null) {
+                return ComparisonChain.start()
+                        .compareTrueFirst(o1.isActive(), o2.isActive())
+                        .compare(o1.getTitle(), o2.getTitle())
+                        .result();
+            } else {
+                return -1;
+            }
+        });
+
+        for (DetailTitleEntity entity : detailTitleEntities) {
+            model.addElement(entity);
+        }
+        titleList.setModel(model);
+    }
+
+    @Override
+    public AccessPolicyManager getPolicyManager() {
+        AccessPolicyManager accessPolicyManager = new AccessPolicyManager(true, false);
+        accessPolicyManager.setAvailableOnlyForAdmin(true);
+        return accessPolicyManager;
+    }
+
+    private int getTitleUsage(DetailTitleEntity selectedValue) {
+        if (selectedValue != null) {
+            DetailService service = new DetailServiceImpl(session);
+            final ArrayList<DetailEntity> detailsByTitle = (ArrayList<DetailEntity>) service.getDetailsByTitle(selectedValue);
+            if (detailsByTitle != null) {
+                return detailsByTitle.size();
+            }
+        }
+        return 0;
+    }
+
+    private void initDetailList() {
+        detailsList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailEntity) {
+                    DetailEntity detail = (DetailEntity) value;
+                    final String value1 = detail.getCode() + " " + detail.getDetailTitleByDetailTitleId().getTitle();
+                    return super.getListCellRendererComponent(list, value1, index, isSelected, cellHasFocus);
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+        detailsList.addListSelectionListener(e -> updateDetailInfo());
+
+        findDetailUsageButton.addActionListener(e -> {
+            final DetailEntity selectedValue = detailsList.getSelectedValue();
+
+            final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+            ClientMainWindow mainWindow = mainWindowUtils.getClientMainWindow(this);
+            if (mainWindow != null && selectedValue != null) {
+                final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
+                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
+                Runnable runnable = () -> {
+                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListViewPanel(selectedValue.getCode()), true);
+                    mainWindowUtils.updateMessage(null, null);
+                };
+                new Thread(runnable).start();
+            }
+        });
+
+        removeDetailButton.addActionListener(e -> {
+            Component c = this;
+            DetailEntity detailEntity = detailsList.getSelectedValue();
+            try {
+                if (detailEntity != null) {
+                    DetailListService service = new DetailListServiceImpl(session);
+                    final int parentSize = service.getDetailListByParent(detailEntity).size();
+                    final int childSize = service.getDetailListByChild(detailEntity).size();
+                    if (parentSize == 0 && childSize == 0) {
+                        DetailService detailService = new DetailServiceImpl(session);
+                        detailService.removeDetail(detailEntity.getId());
+                        DefaultListModel<DetailEntity> model = (DefaultListModel<DetailEntity>) detailsList.getModel();
+                        model.removeElement(detailEntity);
+                        updateDetailInfo();
+                    } else {
+                        JOptionPane.showMessageDialog(c,
+                                "Вы не можете удалять детали, которые\n" +
+                                        "используются в других узлах,\n" +
+                                        "либо являются предком для других деталей\n" +
+                                        "в прошлом или настоящем!", "Ошибка удаления",
+                                JOptionPane.WARNING_MESSAGE, new ImageIcon(
+                                        Toolkit.getDefaultToolkit().getImage(
+                                                getClass().getResource("/img/gui/easter/delorean.png")
+                                        ).getScaledInstance(128, 72, 1)));
+
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Could not delete detail: {}", detailEntity, ex);
+                JOptionPane.showMessageDialog(c,
+                        "Не удалось удалить деталь:\n" + ex.getLocalizedMessage(), "Ошибка удаления",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+    }
+
+    private void initEditDetailTab() {
+        initDetailList();
+        fillDetailList();
+    }
+
+    private void initEditMaterialTab() {
+        initMaterialList();
+        fillMaterialList();
+
+        initEditMaterialTabButtons();
+    }
+
+    private void initEditMaterialTabButtons() {
+        addMaterialItemButton.addActionListener(e -> {
+            CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, null);
+            createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+            createMaterialWindow.setVisible(true);
+            final MaterialEntity materialEntity = createMaterialWindow.getMaterialEntity();
+
+            DefaultListModel<MaterialEntity> model = (DefaultListModel<MaterialEntity>) materialList.getModel();
+            model.addElement(materialEntity);
+            materialList.setSelectedValue(materialEntity, true);
+
+        });
+
+        removeMaterialItemButton.addActionListener(e -> {
+            MaterialEntity materialEntity = materialList.getSelectedValue();
+            if (materialEntity != null) {
+                if (!new MainWindowUtils(session).containsMaterialEntityInMaterialListEntity(materialEntity)) {
+                    MaterialService service = new MaterialServiceImpl(new MaterialDaoImpl(session));
+                    service.removeMaterial(materialEntity.getId());
+                    DefaultListModel<MaterialEntity> model = (DefaultListModel<MaterialEntity>) materialList.getModel();
+                    model.removeElement(materialEntity);
+                }
+            }
+
+        });
+
+        editMaterialItemButton.addActionListener(e -> {
+            MaterialEntity materialEntity = materialList.getSelectedValue();
+            if (materialEntity != null) {
+                CreateMaterialWindow createMaterialWindow = new CreateMaterialWindow(session, materialEntity);
+                createMaterialWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), createMaterialWindow));
+                createMaterialWindow.setVisible(true);
+                final MaterialEntity entity = createMaterialWindow.getMaterialEntity();
+
+                DefaultListModel<MaterialEntity> model = (DefaultListModel<MaterialEntity>) materialList.getModel();
+
+                materialList.setSelectedValue(entity, true);
+            }
+        });
+    }
+
+    private void initEditTitleTab() {
+        initTitleList();
+        fillTitleList();
+        initEditTitleTabButtons();
+        initFindTitleUsageButton();
+    }
+
+    private void initEditTitleTabButtons() {
+        addTitleItemButton.addActionListener(e -> {
+            DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
+            if (titleEntity != null) {
+                final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
+                model.addElement(titleEntity);
+
+                fillTitleList();
+
+                titleList.setSelectedValue(titleEntity, true);
+            }
+        });
+
+        removeTitleItemButton.addActionListener(e -> {
+            final DetailTitleEntity selectedValue = titleList.getSelectedValue();
+            final int selectedIndex = titleList.getSelectedIndex();
+            if (selectedValue != null) {
+                DetailService service = new DetailServiceImpl(session);
+                final ArrayList<DetailEntity> detailsByTitle = (ArrayList<DetailEntity>) service.getDetailsByTitle(selectedValue);
+                if (detailsByTitle.isEmpty()) {
+                    new DetailTitleServiceImpl(session).removeDetailTitle(selectedValue.getId());
+
+                    final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
+                    model.removeElement(selectedValue);
+                    if (selectedIndex > 0 && selectedIndex < model.getSize() - 1) {
+                        titleList.setSelectedIndex(titleList.getModel().getSize() - 1);
+                    } else if (selectedIndex == 0 && model.getSize() > 0) {
+                        titleList.setSelectedIndex(0);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Нельзя удалить элемент, который используется в базе", "Ошибка удаления",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        editTitleButton.addActionListener(e -> {
+            final DetailTitleEntity selectedValue = titleList.getSelectedValue();
+            final int selectedIndex = titleList.getSelectedIndex();
+            if (selectedValue != null) {
+                EditTitleWindow editTitleWindow = new EditTitleWindow(session, selectedValue);
+                editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), editTitleWindow));
+                editTitleWindow.setVisible(true);
+                DetailTitleEntity titleEntity = editTitleWindow.getDetailTitleEntity();
+
+                final DefaultListModel<DetailTitleEntity> model = (DefaultListModel<DetailTitleEntity>) titleList.getModel();
+                model.setElementAt(titleEntity, selectedIndex);
+
+                fillTitleList();
+
+                titleList.setSelectedValue(titleEntity, true);
+            }
+        });
+    }
+
+    private void initFindTitleUsageButton() {
+        findTitleUsageButton.addActionListener(e -> {
+            final DetailTitleEntity selectedValue = titleList.getSelectedValue();
+            final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+            ClientMainWindow mainWindow = mainWindowUtils.getClientMainWindow(this);
+            if (mainWindow != null && selectedValue != null) {
+                final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
+                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
+                Runnable runnable = () -> {
+                    mainWindow.addTab("Просмотр вложенности", icon, new DetailListViewPanel(selectedValue.getTitle()), true);
+                    mainWindowUtils.updateMessage(null, null);
+                };
+                new Thread(runnable).start();
+            }
+        });
+    }
+
+    private void initGui() {
+        setLayout(new GridLayout());
+        add(contentPane);
+
+        initEditTitleTab();
+
+        initEditMaterialTab();
+
+        initEditDetailTab();
+
+        initUpdateUserIsActiveListeners();
+
+    }
+
+    private void initListeners() {
+        buttonOK.addActionListener(e -> onOK());
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void initMaterialList() {
+        materialList.setCellRenderer(Renders.DEFAULT_LIST_MATERIAL_CELL_RENDERER);
+        materialList.addListSelectionListener(e -> fillMaterialInfoLabel());
+    }
+
+    private void initTitleList() {
+        final DefaultListCellRenderer cellRenderer = new DefaultListCellRenderer() {
+            //fixme color does not represent
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                setOpaque(true);
+                DetailTitleEntity entity = (DetailTitleEntity) value;
+                if (!entity.isActive()) {
+                    if (isSelected) {
+                        setBackground(Color.GREEN.brighter().brighter());
+                    } else {
+                        setBackground(Color.GREEN.darker().darker());
+                    }
+                }
+                return super.getListCellRendererComponent(list, entity.getTitle(), index, isSelected, cellHasFocus);
+            }
+        };
+
+        titleList.setCellRenderer(cellRenderer);
+        titleList.addListSelectionListener(e -> updateTitleInfo());
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        tabbedPane.addChangeListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+
+        titleList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+        materialList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+
+        addTitleItemButton.addActionListener(notifyUserIsActiveListener);
+        removeTitleItemButton.addActionListener(notifyUserIsActiveListener);
+
+        editTitleButton.addActionListener(notifyUserIsActiveListener);
+        findTitleUsageButton.addActionListener(notifyUserIsActiveListener);
+
+        addMaterialItemButton.addActionListener(notifyUserIsActiveListener);
+        removeMaterialItemButton.addActionListener(notifyUserIsActiveListener);
+        editMaterialItemButton.addActionListener(notifyUserIsActiveListener);
+    }
+
+    private void onCancel() {
+        int result = JOptionPane.showConfirmDialog(FrameUtils.findWindow(this), "Вы точно хотите отменить изменения?\n" +
+                        "В случае подтверждения все изменения не сохранятся и никак\n" +
+                        "не повлияют на базу данных.\n" +
+                        "Отменить изменения?", "Отмена изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_cancel.gif"))));
+        log.debug("User wanted to rollback changes, user's choice is: " + result);
+        if (result == 0) {
+            SessionUtils.closeSessionSilently(session);
+            closeTab();
+        }
+    }
+
+    private void onOK() {
+        int result = JOptionPane.showConfirmDialog(this, "Вы точно хотите сохранить изменения в базе данных?\n" +
+                        "Введенные вами данные будут сохранены в базе и появятся у всех пользователей.\n" +
+                        "Также все проведённые изменения будут закреплены за вами, \n" +
+                        "и в случае вопросов, будут обращаться к вам.\n" +
+                        "Провести изменения?", "Подтверждение изменений", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/sync.gif"))));
+        log.debug("User wanted to commit changes, user's choice is: " + result);
+        if (result == 0) {
+            try {
+                session.getTransaction().commit();
+                log.debug("Closing session");
+                session.close();
+                log.info("Session successfully closed");
+                closeTab();
+            } catch (Exception e) {
+                log.warn("Could not call commit for transaction", e);
+                JOptionPane.showMessageDialog(this,
+                        "Не удалось завершить транзакцию\n" + e.getLocalizedMessage(),
+                        "Ошибка сохранения", JOptionPane.WARNING_MESSAGE,
+                        new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/uploading_error.gif"))));
+            }
+        }
+    }
+
+    @Override
+    public void rollbackTransaction() {
+        onCancel();
+    }
+
+    @Override
+    public void setUIEnabled(boolean enable) {
+        /*NOP*/
+    }
+
+    private void updateDetailInfo() {
+        final DetailEntity selectedValue = detailsList.getSelectedValue();
+        if (selectedValue != null) {
+            detailCodeAndTitleTextField.setText(selectedValue.getCode() + " " + selectedValue.getDetailTitleByDetailTitleId().getTitle());
+            activeDetailLabel.setForeground(selectedValue.isActive() ? Color.BLACK : Color.RED.darker());
+            activeDetailLabel.setText(selectedValue.isActive() ? "нет" : "да");
+
+            DetailListService service = new DetailListServiceImpl(session);
+            final List<DetailListEntity> detailListByChild = service.getDetailListByChild(selectedValue);
+            if (detailListByChild.size() == 0) {
+                final List<DetailListEntity> detailListByParent = service.getDetailListByParent(selectedValue);
+                usedDetailCountLabel.setText(detailListByParent.size() + "");
+            } else {
+                usedDetailCountLabel.setText(detailListByChild.size() + "");
+            }
+        } else {
+            final String noData = "нет данных";
+            detailCodeAndTitleTextField.setText(noData);
+            activeDetailLabel.setText(noData);
+            usedDetailCountLabel.setText(noData);
+        }
+    }
+
+    private void updateTitleInfo() {
+        final DetailTitleEntity selectedValue = titleList.getSelectedValue();
+        if (selectedValue != null) {
+            titleNameLabel.setText(selectedValue.getTitle());
+            titleActiveLabel.setText(selectedValue.isActive() ? "да" : "нет");
+            int count = getTitleUsage(selectedValue);
+            titleUsageCountLabel.setText(count + "");
+            findTitleUsageButton.setEnabled(count > 0);
+        } else {
+            titleNameLabel.setText(NO_DATA_STRING);
+            titleActiveLabel.setText(NO_DATA_STRING);
+            titleUsageCountLabel.setText(NO_DATA_STRING);
+            findTitleUsageButton.setEnabled(false);
+        }
     }
 }

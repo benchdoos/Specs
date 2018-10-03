@@ -64,145 +64,6 @@ public class UserInfoWindow extends JDialog {
         pack();
     }
 
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                dispose();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void initListeners() {
-        resetPasswordButton.addActionListener(e -> onResetPassword());
-    }
-
-    private void initGui() {
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user16.png")));
-        setContentPane(contentPane);
-        setModal(true);
-
-        updateTitle();
-        updateClientConnectionAddressLabel();
-
-        setResizable(false);
-
-    }
-
-    private void initResetPasswordButton() {
-        if (clientConnection != null) {
-            if (clientConnection.getUser() != null) {
-                resetPasswordButton.setVisible(true);
-            }
-        }
-    }
-
-    private void onResetPassword() {
-
-        try (final Session session = ClientBackgroundService.getInstance().getSession()) {//only for client
-            LoginWindow loginWindow = new LoginWindow(session);
-            loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
-            loginWindow.setVisible(true);
-            UsersEntity user = loginWindow.getAuthorizedUser();
-            if (user != null) {
-                if (clientConnection != null) {
-                    final UsersEntity usersEntity = clientConnection.getUser();
-                    if (usersEntity != null) {
-                        if (user.equals(usersEntity) || (user.isAdmin() && user.isActive())) {
-                            PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, session);
-                            passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
-                            passwordChangeWindow.setVisible(true);
-                        } else {
-                            JOptionPane.showMessageDialog(this,
-                                    "Необходимо войти как пользователь " + usersEntity.getUsername() + "\n" +
-                                            "или как администратор", "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void updateUserIcon(UsersEntity entity) {
-        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user128.png")));
-        if (entity != null) {
-            updateIcon(icon);
-
-            if (entity.isAdmin()) {
-                icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/admin128.png")));
-                updateIcon(icon);
-            }
-
-            if (!entity.isActive()) {
-                icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/notActive_128.png")));
-                updateIcon(icon);
-
-            }
-        } else {
-            icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/notActive_128.png")));
-            userIconLabel.setIcon(icon);
-        }
-    }
-
-    private void updateClientConnectionAddressLabel() {
-        if (clientConnection != null) {
-            connectionAddressLabel.setText(clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
-        }
-    }
-
-    private void updateIcon(ImageIcon icon) {
-        userIconLabel.setIcon(icon);
-        setIconImage(icon.getImage());
-    }
-
-    private void updateTitle() {
-        String title = "Информация о пользователе: ";
-        if (clientConnection != null) {
-            if (isUserEntityAvailable()) {
-                setTitle(title + clientConnection.getUser().getUsername());
-            } else {
-                if (clientConnection.getSocket() != null) {
-                    setTitle(title + clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
-                }
-            }
-        }
-    }
-
-    public void setClientConnection(ClientConnection clientConnection) {
-        this.clientConnection = clientConnection;
-        initGui();
-    }
-
-    private boolean isUserEntityAvailable() {
-        return clientConnection != null && clientConnection.getUser() != null;
-    }
-
-    private void fillUserInformation(UsersEntity entity) {
-        final String NO_DATA = "нет данных";
-        if (entity != null) {
-            updateUserIcon(entity);
-            usernameLabel.setText(entity.getUsername() == null ? NO_DATA : entity.getUsername());
-            surnameLabel.setText(entity.getSurname() == null ? NO_DATA : entity.getSurname());
-            nameLabel.setText(entity.getName() == null ? NO_DATA : entity.getName());
-            patronymicLabel.setText(entity.getPatronymic() == null ? NO_DATA : entity.getPatronymic());
-            userTypeLabel.setText(entity.getUserType().getName() == null ? NO_DATA : entity.getUserType().getName());
-            isEditorCheckBox.setSelected(entity.isEditor());
-            isAdminCheckBox.setSelected(entity.isAdmin());
-            isActiveCheckBox.setSelected(entity.isActive());
-        } else {
-            usernameLabel.setText(NO_DATA);
-            surnameLabel.setText(NO_DATA);
-            nameLabel.setText(NO_DATA);
-            patronymicLabel.setText(NO_DATA);
-            userTypeLabel.setText(NO_DATA);
-            isEditorCheckBox.setSelected(false);
-            isAdminCheckBox.setSelected(false);
-            isActiveCheckBox.setSelected(false);
-        }
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -320,5 +181,144 @@ public class UserInfoWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private void fillUserInformation(UsersEntity entity) {
+        final String NO_DATA = "нет данных";
+        if (entity != null) {
+            updateUserIcon(entity);
+            usernameLabel.setText(entity.getUsername() == null ? NO_DATA : entity.getUsername());
+            surnameLabel.setText(entity.getSurname() == null ? NO_DATA : entity.getSurname());
+            nameLabel.setText(entity.getName() == null ? NO_DATA : entity.getName());
+            patronymicLabel.setText(entity.getPatronymic() == null ? NO_DATA : entity.getPatronymic());
+            userTypeLabel.setText(entity.getUserType().getName() == null ? NO_DATA : entity.getUserType().getName());
+            isEditorCheckBox.setSelected(entity.isEditor());
+            isAdminCheckBox.setSelected(entity.isAdmin());
+            isActiveCheckBox.setSelected(entity.isActive());
+        } else {
+            usernameLabel.setText(NO_DATA);
+            surnameLabel.setText(NO_DATA);
+            nameLabel.setText(NO_DATA);
+            patronymicLabel.setText(NO_DATA);
+            userTypeLabel.setText(NO_DATA);
+            isEditorCheckBox.setSelected(false);
+            isAdminCheckBox.setSelected(false);
+            isActiveCheckBox.setSelected(false);
+        }
+    }
+
+    private void initGui() {
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user16.png")));
+        setContentPane(contentPane);
+        setModal(true);
+
+        updateTitle();
+        updateClientConnectionAddressLabel();
+
+        setResizable(false);
+
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        resetPasswordButton.addActionListener(e -> onResetPassword());
+    }
+
+    private void initResetPasswordButton() {
+        if (clientConnection != null) {
+            if (clientConnection.getUser() != null) {
+                resetPasswordButton.setVisible(true);
+            }
+        }
+    }
+
+    private boolean isUserEntityAvailable() {
+        return clientConnection != null && clientConnection.getUser() != null;
+    }
+
+    private void onResetPassword() {
+
+        try (final Session session = ClientBackgroundService.getInstance().getSession()) {//only for client
+            LoginWindow loginWindow = new LoginWindow(session);
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(this, loginWindow));
+            loginWindow.setVisible(true);
+            UsersEntity user = loginWindow.getAuthorizedUser();
+            if (user != null) {
+                if (clientConnection != null) {
+                    final UsersEntity usersEntity = clientConnection.getUser();
+                    if (usersEntity != null) {
+                        if (user.equals(usersEntity) || (user.isAdmin() && user.isActive())) {
+                            PasswordChangeWindow passwordChangeWindow = new PasswordChangeWindow(usersEntity, session);
+                            passwordChangeWindow.setLocation(FrameUtils.getFrameOnCenter(this, passwordChangeWindow));
+                            passwordChangeWindow.setVisible(true);
+                        } else {
+                            JOptionPane.showMessageDialog(this,
+                                    "Необходимо войти как пользователь " + usersEntity.getUsername() + "\n" +
+                                            "или как администратор", "Ошибка доступа", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void setClientConnection(ClientConnection clientConnection) {
+        this.clientConnection = clientConnection;
+        initGui();
+    }
+
+    private void updateClientConnectionAddressLabel() {
+        if (clientConnection != null) {
+            connectionAddressLabel.setText(clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
+        }
+    }
+
+    private void updateIcon(ImageIcon icon) {
+        userIconLabel.setIcon(icon);
+        setIconImage(icon.getImage());
+    }
+
+    private void updateTitle() {
+        String title = "Информация о пользователе: ";
+        if (clientConnection != null) {
+            if (isUserEntityAvailable()) {
+                setTitle(title + clientConnection.getUser().getUsername());
+            } else {
+                if (clientConnection.getSocket() != null) {
+                    setTitle(title + clientConnection.getSocket().getInetAddress() + ":" + clientConnection.getSocket().getPort());
+                }
+            }
+        }
+    }
+
+    private void updateUserIcon(UsersEntity entity) {
+        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/user128.png")));
+        if (entity != null) {
+            updateIcon(icon);
+
+            if (entity.isAdmin()) {
+                icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/admin128.png")));
+                updateIcon(icon);
+            }
+
+            if (!entity.isActive()) {
+                icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/notActive_128.png")));
+                updateIcon(icon);
+
+            }
+        } else {
+            icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/notActive_128.png")));
+            userIconLabel.setIcon(icon);
+        }
     }
 }

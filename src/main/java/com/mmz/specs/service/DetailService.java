@@ -23,26 +23,25 @@ import java.util.List;
 
 public interface DetailService {
 
+    int addDetail(DetailEntity detailEntity);
+
+    DetailEntity getDetailByCode(String code);
+
+    DetailEntity getDetailById(int id);
+
     DetailDao getDetailDao();
 
     void setDetailDao(DetailDao detailDao);
 
-    int addDetail(DetailEntity detailEntity);
-
-    void updateDetail(DetailEntity detailEntity);
-
-    void removeDetail(int id);
-
-
-    DetailEntity getDetailById(int id);
-
-    DetailEntity getDetailByCode(String code);
+    List<DetailEntity> getDetailsBySearch(String searchText);
 
     List<DetailEntity> getDetailsByTitle(DetailTitleEntity titleEntity);
 
-    List<DetailEntity> getDetailsBySearch(String searchText);
+    List<DetailEntity> listDetails();
 
     List<DetailEntity> listDetailsByEditedImage();
 
-    List<DetailEntity> listDetails();
+    void removeDetail(int id);
+
+    void updateDetail(DetailEntity detailEntity);
 }

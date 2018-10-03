@@ -65,147 +65,6 @@ public class PasswordChangeWindow extends JDialog {
         setMinimumSize(getSize());
     }
 
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void initGui() {
-
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/securityShield16.png")));
-        setTitle("Смена пароля");
-
-        usernameLabel.setText(user.getUsername());
-
-
-    }
-
-    private FocusListener getPasswordFieldListener(JPasswordField passwordField) {
-        return new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                passwordField.selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                int position = passwordField.getPassword().length - 1;
-                if (position < 0) position = 0;
-                passwordField.setCaretPosition(position);
-            }
-        };
-    }
-
-    private void onGeneratePassword() {
-        String newPassword = SecurityManager.generatePassword();
-        passwordField1.setText(newPassword);
-        passwordField2.setText(newPassword);
-        generatedTextField.setText(newPassword);
-    }
-
-    public UsersEntity getUserWithNewPassword() {
-        return user;
-    }
-
-    private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-
-        generatePasswordButton.addActionListener(e -> onGeneratePassword());
-
-        passwordField1.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                generatedTextField.setText("");
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                generatedTextField.setText("");
-
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                generatedTextField.setText("");
-            }
-        });
-
-        passwordField1.addFocusListener(getPasswordFieldListener(passwordField1));
-
-        passwordField2.addFocusListener(getPasswordFieldListener(passwordField2));
-    }
-
-    private void onOK() {
-        if (passwordField1.getPassword().length >= SecurityManager.MINIMUM_PASSWORD_LENGTH) {
-            if (Arrays.equals(passwordField1.getPassword(), passwordField2.getPassword())) {
-                if (SecurityManager.isPasswordStrong(new String(passwordField1.getPassword()))) {
-                    user.setPassword(SecurityManager.encryptPassword(Arrays.toString(passwordField1.getPassword())));
-
-                    updateUser(user);
-
-                    dispose();
-                } else {
-                    showPasswordInstallationErrorMessage("Слишком простой пароль!\n" +
-                            "Пароль должен быть больше " + SecurityManager.MINIMUM_PASSWORD_LENGTH + " символов,\n" +
-                            "должен содержать буквы разного регистра,\n" +
-                            "спец-символы или цифры.");
-                }
-            } else {
-                showPasswordInstallationErrorMessage("Пароли должны совпадать");
-            }
-        } else {
-            showPasswordInstallationErrorMessage("Слишком простой пароль!\n" +
-                    "Пароль должен быть больше " + SecurityManager.MINIMUM_PASSWORD_LENGTH + " символов,\n" +
-                    "должен содержать буквы разного регистра,\n" +
-                    "спец-символы или цифры.");
-        }
-    }
-
-    private void showPasswordInstallationErrorMessage(String s) {
-        FrameUtils.shakeFrame(this);
-        JOptionPane.showMessageDialog(this, s, "Ошибка", JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void updateUser(UsersEntity user) {
-        if (session.getTransaction().getStatus() == TransactionStatus.NOT_ACTIVE) {
-            try {
-                session.getTransaction().begin();
-                UsersService service = new UsersServiceImpl(new UsersDaoImpl(session));
-                service.updateUser(user);
-                session.getTransaction().commit();
-                log.info("User password successfully updated ({})", user.getUsername());
-            } catch (RuntimeException e) {
-                log.warn("Could not update user {}", user, e);
-                JOptionPane.showMessageDialog(this, "Не удалось обновить пароль",
-                        "Ошибка обновления", JOptionPane.ERROR_MESSAGE);
-                try {
-                    session.getTransaction().rollback();
-                } catch (RuntimeException ex) {
-                    log.warn("Could not rollback transaction", ex);
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Нельзя сменить пароль, пока проходит другая транзакция", "Ошибка обновления",
-                    JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private void onCancel() {
-        user = null;
-        dispose();
-    }
-
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
@@ -278,5 +137,146 @@ public class PasswordChangeWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private FocusListener getPasswordFieldListener(JPasswordField passwordField) {
+        return new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                int position = passwordField.getPassword().length - 1;
+                if (position < 0) position = 0;
+                passwordField.setCaretPosition(position);
+            }
+        };
+    }
+
+    public UsersEntity getUserWithNewPassword() {
+        return user;
+    }
+
+    private void initGui() {
+
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/user/securityShield16.png")));
+        setTitle("Смена пароля");
+
+        usernameLabel.setText(user.getUsername());
+
+
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+
+        generatePasswordButton.addActionListener(e -> onGeneratePassword());
+
+        passwordField1.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                generatedTextField.setText("");
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                generatedTextField.setText("");
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                generatedTextField.setText("");
+
+            }
+        });
+
+        passwordField1.addFocusListener(getPasswordFieldListener(passwordField1));
+
+        passwordField2.addFocusListener(getPasswordFieldListener(passwordField2));
+    }
+
+    private void onCancel() {
+        user = null;
+        dispose();
+    }
+
+    private void onGeneratePassword() {
+        String newPassword = SecurityManager.generatePassword();
+        passwordField1.setText(newPassword);
+        passwordField2.setText(newPassword);
+        generatedTextField.setText(newPassword);
+    }
+
+    private void onOK() {
+        if (passwordField1.getPassword().length >= SecurityManager.MINIMUM_PASSWORD_LENGTH) {
+            if (Arrays.equals(passwordField1.getPassword(), passwordField2.getPassword())) {
+                if (SecurityManager.isPasswordStrong(new String(passwordField1.getPassword()))) {
+                    user.setPassword(SecurityManager.encryptPassword(Arrays.toString(passwordField1.getPassword())));
+
+                    updateUser(user);
+
+                    dispose();
+                } else {
+                    showPasswordInstallationErrorMessage("Слишком простой пароль!\n" +
+                            "Пароль должен быть больше " + SecurityManager.MINIMUM_PASSWORD_LENGTH + " символов,\n" +
+                            "должен содержать буквы разного регистра,\n" +
+                            "спец-символы или цифры.");
+                }
+            } else {
+                showPasswordInstallationErrorMessage("Пароли должны совпадать");
+            }
+        } else {
+            showPasswordInstallationErrorMessage("Слишком простой пароль!\n" +
+                    "Пароль должен быть больше " + SecurityManager.MINIMUM_PASSWORD_LENGTH + " символов,\n" +
+                    "должен содержать буквы разного регистра,\n" +
+                    "спец-символы или цифры.");
+        }
+    }
+
+    private void showPasswordInstallationErrorMessage(String s) {
+        FrameUtils.shakeFrame(this);
+        JOptionPane.showMessageDialog(this, s, "Ошибка", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void updateUser(UsersEntity user) {
+        if (session.getTransaction().getStatus() == TransactionStatus.NOT_ACTIVE) {
+            try {
+                session.getTransaction().begin();
+                UsersService service = new UsersServiceImpl(new UsersDaoImpl(session));
+                service.updateUser(user);
+                session.getTransaction().commit();
+                log.info("User password successfully updated ({})", user.getUsername());
+            } catch (RuntimeException e) {
+                log.warn("Could not update user {}", user, e);
+                JOptionPane.showMessageDialog(this, "Не удалось обновить пароль",
+                        "Ошибка обновления", JOptionPane.ERROR_MESSAGE);
+                try {
+                    session.getTransaction().rollback();
+                } catch (RuntimeException ex) {
+                    log.warn("Could not rollback transaction", ex);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Нельзя сменить пароль, пока проходит другая транзакция", "Ошибка обновления",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }
 }

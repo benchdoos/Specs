@@ -34,6 +34,17 @@ public class TechProcessEntity {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TechProcessEntity that = (TechProcessEntity) o;
+
+        if (id != that.id) return false;
+        return process != null ? process.equals(that.process) : that.process == null;
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {
@@ -52,17 +63,6 @@ public class TechProcessEntity {
 
     public void setProcess(String process) {
         this.process = process;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TechProcessEntity that = (TechProcessEntity) o;
-
-        if (id != that.id) return false;
-        return process != null ? process.equals(that.process) : that.process == null;
     }
 
     @Override

@@ -21,22 +21,19 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface UsersDao {
-    public Session getSession();
+    int addUser(UsersEntity usersEntity);
 
-    public void setSession(Session session);
+    Session getSession();
 
+    void setSession(Session session);
 
-    public int addUser(UsersEntity usersEntity);
+    UsersEntity getUserById(int id);
 
-    public void updateUser(UsersEntity usersEntity);
+    UsersEntity getUserByUsername(String name);
 
-    public void removeUser(int id);
+    List<UsersEntity> listUsers();
 
+    void removeUser(int id);
 
-    public UsersEntity getUserById(int id);
-
-    public UsersEntity getUserByUsername(String name);
-
-
-    public List<UsersEntity> listUsers();
+    void updateUser(UsersEntity usersEntity);
 }

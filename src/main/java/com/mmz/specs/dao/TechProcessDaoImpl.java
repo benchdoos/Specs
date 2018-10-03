@@ -38,27 +38,6 @@ public class TechProcessDaoImpl implements TechProcessDao {
         this.session = session;
     }
 
-    private List<TechProcessEntity> getTechProcessEntityList(List list, List<TechProcessEntity> result) {
-        for (Object techProcessEntity : list) {
-            if (techProcessEntity instanceof TechProcessEntity) {
-                result.add((TechProcessEntity) techProcessEntity);
-            } else {
-                log.warn("Not TechProcess from list: " + techProcessEntity);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
     @Override
     @Transactional
     public int addTechProcess(TechProcessEntity techProcessEntity) {
@@ -69,38 +48,13 @@ public class TechProcessDaoImpl implements TechProcessDao {
     }
 
     @Override
-    @Transactional
-    public void updateTechProcess(TechProcessEntity techProcessEntity) {
-        session.merge(techProcessEntity);
-        log.debug("User successfully updated: " + techProcessEntity);
+    public Session getSession() {
+        return session;
     }
 
     @Override
-    @Transactional
-    public void removeTechProcess(int id) {
-        TechProcessEntity techProcessEntity = session.load(TechProcessEntity.class, id);
-        if (techProcessEntity != null) {
-            session.delete(techProcessEntity);
-        }
-        log.debug("TechProcess successfully removed: " + techProcessEntity);
-    }
-
-    @Override
-    @Transactional
-    public TechProcessEntity getTechProcessById(int id) {
-        TechProcessEntity techProcessEntity = session.load(TechProcessEntity.class, id);
-        log.debug("TechProcess found by id:" + id + " " + techProcessEntity);
-        return techProcessEntity;
-    }
-
-    @Override
-    public TechProcessEntity getTechProcessByValue(String value) {
-        final Query query = session.createQuery(" from TechProcessEntity where process  = :value");
-        query.setParameter("value", value);
-
-        TechProcessEntity techProcessEntity = (TechProcessEntity) query.uniqueResult();
-        log.debug("TechProcess found by value:" + value + " " + techProcessEntity);
-        return techProcessEntity;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     @Override
@@ -133,12 +87,58 @@ public class TechProcessDaoImpl implements TechProcessDao {
 
     @Override
     @Transactional
+    public TechProcessEntity getTechProcessById(int id) {
+        TechProcessEntity techProcessEntity = session.load(TechProcessEntity.class, id);
+        log.debug("TechProcess found by id:" + id + " " + techProcessEntity);
+        return techProcessEntity;
+    }
+
+    @Override
+    public TechProcessEntity getTechProcessByValue(String value) {
+        final Query query = session.createQuery(" from TechProcessEntity where process  = :value");
+        query.setParameter("value", value);
+
+        TechProcessEntity techProcessEntity = (TechProcessEntity) query.uniqueResult();
+        log.debug("TechProcess found by value:" + value + " " + techProcessEntity);
+        return techProcessEntity;
+    }
+
+    private List<TechProcessEntity> getTechProcessEntityList(List list, List<TechProcessEntity> result) {
+        for (Object techProcessEntity : list) {
+            if (techProcessEntity instanceof TechProcessEntity) {
+                result.add((TechProcessEntity) techProcessEntity);
+            } else {
+                log.warn("Not TechProcess from list: " + techProcessEntity);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    @Transactional
     public List<TechProcessEntity> listTechProcesses() {
         List list = session.createQuery("from TechProcessEntity").list();
         List<TechProcessEntity> result = new ArrayList<>(list.size());
 
         result = getTechProcessEntityList(list, result);
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void removeTechProcess(int id) {
+        TechProcessEntity techProcessEntity = session.load(TechProcessEntity.class, id);
+        if (techProcessEntity != null) {
+            session.delete(techProcessEntity);
+        }
+        log.debug("TechProcess successfully removed: " + techProcessEntity);
+    }
+
+    @Override
+    @Transactional
+    public void updateTechProcess(TechProcessEntity techProcessEntity) {
+        session.merge(techProcessEntity);
+        log.debug("User successfully updated: " + techProcessEntity);
     }
 
 

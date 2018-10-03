@@ -102,20 +102,6 @@ public class DetailSptJTree extends JTree {
                 this.setBorder(null);
             }
 
-            private void updateSearch(DetailEntity detailEntity) {
-                if (searchText != null && detailEntity != null) {
-                    if (detailEntity.getCode().contains(searchText)) {
-                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.ORANGE));
-                    } else if (detailEntity.getDetailTitleByDetailTitleId().getTitle().toUpperCase().contains(searchText.toUpperCase())) {
-                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.ORANGE));
-                    } else {
-                        this.setBorder(null);
-                    }
-                } else {
-                    this.setBorder(null);
-                }
-            }
-
             private void updateBackgroundColor(boolean selected, boolean interchangeable) {
                 if (interchangeable) {
                     if (!selected) {
@@ -129,6 +115,20 @@ public class DetailSptJTree extends JTree {
             private void updateIcon(DetailEntity child) {
                 setLeafIcon(child.isUnit() ? UNIT_OPENED_ICON : DETAIL_ICON);
                 setOpenIcon(child.isUnit() ? UNIT_OPENED_ICON : DETAIL_ICON);
+            }
+
+            private void updateSearch(DetailEntity detailEntity) {
+                if (searchText != null && detailEntity != null) {
+                    if (detailEntity.getCode().contains(searchText)) {
+                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.ORANGE));
+                    } else if (detailEntity.getDetailTitleByDetailTitleId().getTitle().toUpperCase().contains(searchText.toUpperCase())) {
+                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.ORANGE));
+                    } else {
+                        this.setBorder(null);
+                    }
+                } else {
+                    this.setBorder(null);
+                }
             }
 
            /* @Override
@@ -148,14 +148,13 @@ public class DetailSptJTree extends JTree {
         };
     }
 
-
-    public void setSearchText(String text) {
-        this.searchText = text;
-    }
-
     private void initIcons(DefaultTreeCellRenderer renderer) {
         renderer.setClosedIcon(UNIT_CLOSED_ICON);
         renderer.setOpenIcon(UNIT_OPENED_ICON);
         renderer.setLeafIcon(DETAIL_ICON);
+    }
+
+    public void setSearchText(String text) {
+        this.searchText = text;
     }
 }

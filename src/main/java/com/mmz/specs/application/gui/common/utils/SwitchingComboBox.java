@@ -28,6 +28,10 @@ public abstract class SwitchingComboBox<E> extends JComboBox<E> {
         initSwitchingComboBox();
     }
 
+    protected String getTypedItem() {
+        return typedItem;
+    }
+
     private void initSwitchingComboBox() {
         KeyAdapter keyAdapter = new KeyAdapter() {
             @Override
@@ -46,10 +50,6 @@ public abstract class SwitchingComboBox<E> extends JComboBox<E> {
         addKeyListener(keyAdapter);
 
         timeoutTimer.setRepeats(false);
-    }
-
-    protected String getTypedItem() {
-        return typedItem;
     }
 
     public abstract void selectTypedItem();

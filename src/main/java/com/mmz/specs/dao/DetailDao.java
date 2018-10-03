@@ -22,27 +22,25 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface DetailDao {
-    Session getSession();
-
-    void setSession(Session session);
-
     int addDetail(DetailEntity detailEntity);
-
-    void updateDetail(DetailEntity detailEntity);
-
-    void removeDetail(int id);
-
-
-    DetailEntity getDetailById(int id);
 
     DetailEntity getDetailByCode(String index);
 
+    DetailEntity getDetailById(int id);
 
     List<DetailEntity> getDetailByTitle(DetailTitleEntity titleEntity);
 
     List<DetailEntity> getDetailsBySearch(String searchText);
 
-    List<DetailEntity> listDetailsByEditedImage();
+    Session getSession();
+
+    void setSession(Session session);
 
     List<DetailEntity> listDetails();
+
+    List<DetailEntity> listDetailsByEditedImage();
+
+    void removeDetail(int id);
+
+    void updateDetail(DetailEntity detailEntity);
 }

@@ -15,7 +15,7 @@
 
 package com.mmz.specs.application;
 
-public class ApplicationException extends Exception{
+public class ApplicationException extends Exception {
     public ApplicationException() {
         super();
     }

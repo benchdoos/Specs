@@ -42,49 +42,12 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
     public int addDetail(DetailEntity detailEntity) {
         Integer id = (Integer) session.save(detailEntity);
         detailEntity = getDetailById(id);
         log.debug("Detail successfully saved at id:{}, detail: " + detailEntity);
         return id;
 
-    }
-
-    @Override
-    public void updateDetail(DetailEntity detailEntity) {
-        session.merge(detailEntity);
-        log.debug("Detail successfully updated: " + detailEntity);
-    }
-
-    @Override
-    public void removeDetail(int id) {
-        DetailEntity detailEntity = session.load(DetailEntity.class, id);
-        if (detailEntity != null) {
-            session.delete(detailEntity);
-        }
-        log.debug("Detail successfully removed: " + detailEntity);
-    }
-
-    @Override
-    public DetailEntity getDetailById(int id) {
-        try {
-            DetailEntity detailEntity = session.load(DetailEntity.class, id);
-            log.debug("Detail found by id:" + id + " " + detailEntity);
-            return detailEntity;
-        } catch (Exception e) {
-            log.warn("Could not find detail by id: {}", id, e);
-            return null;
-        }
     }
 
     @Override
@@ -99,6 +62,18 @@ public class DetailDaoImpl implements DetailDao {
         log.debug("Detail found by code: " + code + " " + entity);
         return entity;
 
+    }
+
+    @Override
+    public DetailEntity getDetailById(int id) {
+        try {
+            DetailEntity detailEntity = session.load(DetailEntity.class, id);
+            log.debug("Detail found by id:" + id + " " + detailEntity);
+            return detailEntity;
+        } catch (Exception e) {
+            log.warn("Could not find detail by id: {}", id, e);
+            return null;
+        }
     }
 
     @Override
@@ -134,6 +109,29 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    @Override
+    public List<DetailEntity> listDetails() {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
+        Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
+        criteriaQuery.select(root);
+        Query<DetailEntity> q = session.createQuery(criteriaQuery);
+        final List<DetailEntity> result = q.list();
+        log.debug("Full list of details: ({})", result.size(), result);
+        return result;
+
+    }
+
+    @Override
     public List<DetailEntity> listDetailsByEditedImage() {
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
@@ -152,15 +150,17 @@ public class DetailDaoImpl implements DetailDao {
     }
 
     @Override
-    public List<DetailEntity> listDetails() {
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<DetailEntity> criteriaQuery = builder.createQuery(DetailEntity.class);
-        Root<DetailEntity> root = criteriaQuery.from(DetailEntity.class);
-        criteriaQuery.select(root);
-        Query<DetailEntity> q = session.createQuery(criteriaQuery);
-        final List<DetailEntity> result = q.list();
-        log.debug("Full list of details: ({})", result.size(), result);
-        return result;
+    public void removeDetail(int id) {
+        DetailEntity detailEntity = session.load(DetailEntity.class, id);
+        if (detailEntity != null) {
+            session.delete(detailEntity);
+        }
+        log.debug("Detail successfully removed: " + detailEntity);
+    }
 
+    @Override
+    public void updateDetail(DetailEntity detailEntity) {
+        session.merge(detailEntity);
+        log.debug("Detail successfully updated: " + detailEntity);
     }
 }

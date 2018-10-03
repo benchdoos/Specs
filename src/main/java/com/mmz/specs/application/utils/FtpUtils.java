@@ -105,16 +105,29 @@ public class FtpUtils {
         }
     }
 
-    public boolean isConnected() {
-        return ftpClient.isConnected() && ftpClient.isAvailable();
+    public void deleteImage(int id) throws IOException {
+        log.debug("Removing image by id: {}" + id);
+        ftpClient.deleteFile(postfix + id + FTP_IMAGE_FILE_EXTENSION);
+        log.info("Image was successfully removed: " + postfix + id + FTP_IMAGE_FILE_EXTENSION);
     }
 
     public void disconnect() throws IOException {
         ftpClient.disconnect();
     }
 
-    public void setPostfix(String postfix) {
-        this.postfix = postfix;
+    public void downloadFile(int id, File file) throws IOException {
+        String ftpFilePath = postfix + id + FTP_IMAGE_FILE_EXTENSION;
+        final boolean fileExistsOnFtpServer = ftpClient.listFiles(ftpFilePath).length > 0;
+
+        if (fileExistsOnFtpServer) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                ftpClient.retrieveFile(ftpFilePath, fileOutputStream);
+                log.info("Successfully downloaded file from: {} to {}", ftpFilePath, file);
+            }
+        } else {
+            log.debug("Could not find file: {}", ftpFilePath);
+        }
+
     }
 
     public synchronized BufferedImage getImage(int id) {
@@ -158,6 +171,52 @@ public class FtpUtils {
         return null;
     }
 
+    private String getImageInfo(BufferedImage image) {
+        if (image != null) {
+            return image.getWidth() + "x" + image.getHeight();
+        }
+        return null;
+    }
+
+    public boolean isConnected() {
+        return ftpClient.isConnected() && ftpClient.isAvailable();
+    }
+
+    private boolean isFileAnImage(File file) {
+        if (file != null && file.exists()) {
+            String mimeType = new MimetypesFileTypeMap().getContentType(file);
+            try {
+                String type = mimeType.split("/")[0];
+                log.debug("Mimetype for file {} is: {} and full is:{}", file, type, mimeType);
+                if (file.getAbsolutePath().toLowerCase().endsWith("png")) {
+                    return mimeType.contains("application/octet-stream");
+                } else {
+                    return type.equalsIgnoreCase("image");
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        } else return false;
+    }
+
+    public boolean isImage(File file) {
+        try {
+            if (file != null && file.isFile()) {
+                if (file.exists()) {
+                    for (String extension : SUPPORTED_IMAGE_EXTENSIONS) {
+                        final String filePath = file.getAbsolutePath().toLowerCase();
+                        if (filePath.contains(extension)) {
+                            return isFileAnImage(file);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not detect, if file is an image:{}", file, e);
+        }
+        return false;
+    }
+
     private void retrieveFile(int id, ByteArrayOutputStream output) throws IOException {
         try {
             if (ftpClient != null) {
@@ -174,11 +233,8 @@ public class FtpUtils {
         }
     }
 
-    private String getImageInfo(BufferedImage image) {
-        if (image != null) {
-            return image.getWidth() + "x" + image.getHeight();
-        }
-        return null;
+    public void setPostfix(String postfix) {
+        this.postfix = postfix;
     }
 
     public void uploadImage(int id, File localFile) throws IOException {
@@ -213,61 +269,5 @@ public class FtpUtils {
             }
         }
         ftpClient.completePendingCommand();
-    }
-
-    public boolean isImage(File file) {
-        try {
-            if (file != null && file.isFile()) {
-                if (file.exists()) {
-                    for (String extension : SUPPORTED_IMAGE_EXTENSIONS) {
-                        final String filePath = file.getAbsolutePath().toLowerCase();
-                        if (filePath.contains(extension)) {
-                            return isFileAnImage(file);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not detect, if file is an image:{}", file, e);
-        }
-        return false;
-    }
-
-    private boolean isFileAnImage(File file) {
-        if (file != null && file.exists()) {
-            String mimeType = new MimetypesFileTypeMap().getContentType(file);
-            try {
-                String type = mimeType.split("/")[0];
-                log.debug("Mimetype for file {} is: {} and full is:{}", file, type, mimeType);
-                if (file.getAbsolutePath().toLowerCase().endsWith("png")) {
-                    return mimeType.contains("application/octet-stream");
-                } else {
-                    return type.equalsIgnoreCase("image");
-                }
-            } catch (Exception e) {
-                return false;
-            }
-        } else return false;
-    }
-
-    public void deleteImage(int id) throws IOException {
-        log.debug("Removing image by id: {}" + id);
-        ftpClient.deleteFile(postfix + id + FTP_IMAGE_FILE_EXTENSION);
-        log.info("Image was successfully removed: " + postfix + id + FTP_IMAGE_FILE_EXTENSION);
-    }
-
-    public void downloadFile(int id, File file) throws IOException {
-        String ftpFilePath = postfix + id + FTP_IMAGE_FILE_EXTENSION;
-        final boolean fileExistsOnFtpServer = ftpClient.listFiles(ftpFilePath).length > 0;
-
-        if (fileExistsOnFtpServer) {
-            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                ftpClient.retrieveFile(ftpFilePath, fileOutputStream);
-                log.info("Successfully downloaded file from: {} to {}", ftpFilePath, file);
-            }
-        } else {
-            log.debug("Could not find file: {}", ftpFilePath);
-        }
-
     }
 }

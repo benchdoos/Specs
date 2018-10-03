@@ -76,714 +76,6 @@ public class SelectDetailEntityWindow extends JDialog {
         initWindow();
     }
 
-    private void initMode(MODE mode) {
-        switch (mode) {
-            case CREATE_SINGLE: {
-                this.singleSelectionOnly = true;
-                this.unitEnabled = true;
-                break;
-            }
-            case SELECT_SINGLE: {
-                this.singleSelectionOnly = true;
-                this.unitEnabled = false;
-                break;
-            }
-            case COPY: {
-                this.singleSelectionOnly = true;
-                this.unitEnabled = false;
-                break;
-            }
-            case EDIT: {
-                this.singleSelectionOnly = true;
-                if (incomingDetailEntity != null) {
-                    this.unitEnabled = incomingDetailEntity.isUnit();
-                }
-                break;
-            }
-            case DEFAULT: {
-                this.singleSelectionOnly = false;
-                this.unitEnabled = true;
-                break;
-            }
-        }
-    }
-
-    private void initWindow() {
-        initGui();
-
-        initListeners();
-        initKeyBindings();
-
-        initCodeComboBox();
-
-        fillCodeComboBox();
-
-        initTitleComboBox();
-
-        fillTitleComboBox();
-
-        initCreateNewTitleButton();
-
-        initUnitCheckBox();
-
-        initSeveralSelectionButton();
-
-        updateCodeComboBox();
-
-        pack();
-        setResizable(false);
-    }
-
-    private void fillTitleComboBox() {
-        DefaultComboBoxModel<DetailTitleEntity> model = new DefaultComboBoxModel<>();
-
-        DetailTitleService service = new DetailTitleServiceImpl(session);
-        ArrayList<DetailTitleEntity> list = (ArrayList<DetailTitleEntity>) service.listDetailTitles();
-
-        Collections.sort(list);
-
-        for (DetailTitleEntity entity : list) {
-            if (entity.isActive()) {
-                model.addElement(entity);
-            }
-        }
-        titleComboBox.setModel(model);
-    }
-
-    private void initListeners() {
-        buttonOK.addActionListener(e -> onOK());
-
-        createTitleButton.addActionListener(e -> onCreateTitle());
-
-        buttonCancel.addActionListener(e -> onCancel());
-    }
-
-    private void updateCodeComboBox() {
-        if (incomingDetailEntity != null) {
-            codeComboBox.setSelectedItem(incomingDetailEntity.getCode());
-        } else {
-            if (codeComboBox.getItemCount() >= 1) {
-                codeComboBox.setSelectedItem(0);
-            }
-        }
-    }
-
-    private void fillCodeComboBox() {
-        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
-
-        DetailService service = new DetailServiceImpl(session);
-        final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listDetails();
-
-        detailEntities.sort((o1, o2) -> {
-            if (o2 != null) {
-                return ComparisonChain.start()
-                        .compare(o1.getCode(), o2.getCode())
-                        .compareTrueFirst(o1.isActive(), o2.isActive())
-                        .compareTrueFirst(o1.isUnit(), o2.isUnit())
-                        .result();
-            } else {
-                return -1;
-            }
-        });
-
-        for (DetailEntity entity : detailEntities) {
-            model.addElement(entity.getCode());
-        }
-
-        codeComboBox.setModel(model);
-        AutoCompleteDecorator.decorate(this.codeComboBox);
-    }
-
-    private void initKeyBindings() {
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        contentPane.registerKeyboardAction(e -> onCancel(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private boolean checkSingleEntity() {
-        DetailEntity entity = entities.get(0);
-        if (entity == null) {
-            FrameUtils.shakeFrame(this);
-            return true;
-        }
-
-        try {
-            if (entity.getCode().isEmpty() || entity.getCode().length() > 30) {
-                throw new IllegalArgumentException("Code length can not be 0 or >30, code is: "
-                        + entity.getCode() + " " + entity.getCode().length());
-            }
-        } catch (Exception e) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this,
-                    "Длинна индекса детали должна быть в диапазоне: [0;30]", ERROR_TITLE,
-                    JOptionPane.WARNING_MESSAGE);
-            log.warn(LOG_VERIFICATION_ERROR_MESSAGE + ": {}", entity, e);
-            return true;
-        }
-
-        if (titleComboBox.getSelectedItem() == null) {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Необходимо указать наименование детали",
-                    ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean hasErrorsEntityList() {
-        for (DetailEntity entity : entities) {
-            if (entity == null) {
-                FrameUtils.shakeFrame(this);
-                JOptionPane.showMessageDialog(this,
-                        "Одна из деталей некорректна (обратитесь к разрабочику)",
-                        ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
-                log.warn(LOG_VERIFICATION_ERROR_MESSAGE + " one of entities is null, entities: {}", entities);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void onCancel() {
-        entities = null;
-        dispose();
-    }
-
-    private String fixCode(String code) {
-        if (code != null) {
-            return code.toUpperCase()
-                    .replace(",", ".")
-                    .replace("/", ".")
-                    .replace(" ", "");
-        } else return null;
-    }
-
-    public ArrayList<DetailEntity> getEntities() {
-        return entities;
-    }
-
-    private void initUnitCheckBox() {
-        unitCheckBox.addActionListener(e -> {
-            if (entities != null) {
-                if (entities.size() == 1) {
-                    final DetailEntity entity = entities.get(0);
-                    if (entity != null) {
-                        entity.setUnit(unitCheckBox.isSelected());
-                        entities.set(0, entity);
-                    }
-                }
-            }
-        });
-    }
-
-    private void initSeveralSelectionButton() {
-        multipleSelectionButton.addActionListener(e -> onMultipleSelectionButton());
-    }
-
-    private boolean verify() {
-        if (entities != null) {
-            if (entities.size() > 0) {
-                if (entities.size() > 1) {
-                    return !hasErrorsEntityList();
-                } else {
-                    return !checkSingleEntity();
-                }
-            } else {
-                FrameUtils.shakeFrame(this);
-                JOptionPane.showMessageDialog(this, "Необходимо выбрать хотя-бы одну деталь",
-                        ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
-                log.warn(LOG_VERIFICATION_ERROR_MESSAGE + "size is: {}, entities: {}", entities.size(), entities);
-                return false;
-            }
-        } else {
-            FrameUtils.shakeFrame(this);
-            JOptionPane.showMessageDialog(this, "Необходимо выбрать хотя-бы одну деталь",
-                    ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
-            log.warn(LOG_VERIFICATION_ERROR_MESSAGE + "{}", entities);
-            return false;
-        }
-    }
-
-    private boolean isLetter(char ch) {
-        return (ch >= 'a' && ch <= 'z')
-                || (ch >= 'A' && ch <= 'Z')
-                || (ch >= 'а' && ch <= 'я')
-                || (ch >= 'А' && ch <= 'Я');
-    }
-
-    private void initGui() {
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
-        if (incomingDetailEntity == null) {
-            if (mode != MODE.COPY) {
-                setTitle("Выбор детали");
-            } else {
-                setTitle("Создание детали для копии");
-            }
-        } else {
-            final String detailInfo = incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle();
-            setTitle("Редактирование детали: " + detailInfo);
-            /*multipleSelectionButton.setEnabled(false);
-            unitCheckBox.setEnabled(false);*/
-
-            final ArrayList<DetailEntity> detailEntities = new ArrayList<>();
-            detailEntities.add(incomingDetailEntity);
-            fillDetailInfo(detailEntities);
-        }
-
-        multipleSelectionButton.setEnabled(!singleSelectionOnly);
-    }
-
-    private void initTitleComboBox() {
-        titleComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof DetailTitleEntity) {
-                    DetailTitleEntity entity = (DetailTitleEntity) value;
-                    return super.getListCellRendererComponent(list, entity.getTitle(), index, isSelected, cellHasFocus);
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
-
-       /* titleComboBox.addKeyListener(new KeyAdapter() {
-            ArrayList<DetailTitleEntity> list;
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                list = getTitleEntities();
-
-                final char keyChar = e.getKeyChar();
-                if (isLetter(keyChar)) {
-                    select(list, keyChar);
-                }
-
-            }
-
-            private void select(ArrayList<DetailTitleEntity> list, char keyChar) {
-                for (DetailTitleEntity entity : list) {
-                    String title = entity.getTitle();
-                    if (title != null) {
-                        if (!title.isEmpty()) {
-
-                            title = title.toUpperCase();
-                            keyChar = Character.toUpperCase(keyChar); // toUpperCase
-                            if (title.toCharArray()[0] == keyChar) {
-                                titleComboBox.setSelectedItem(entity);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            private ArrayList<DetailTitleEntity> getTitleEntities() {
-                ArrayList<DetailTitleEntity> result = new ArrayList<>();
-                DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) titleComboBox.getModel();
-                for (int i = 0; i < model.getSize(); i++) {
-                    DetailTitleEntity entity = model.getElementAt(i);
-                    result.add(entity);
-                }
-                return result;
-            }
-        });*/
-
-        titleComboBox.addActionListener(e -> {
-            if (entities != null) {
-                if (entities.size() == 1) {
-                    final DetailEntity entity = entities.get(0);
-                    if (!entity.getDetailTitleByDetailTitleId().equals(titleComboBox.getSelectedItem())) {
-                        if (incomingDetailEntity != null) {
-                            DetailService service = new DetailServiceImpl(session);
-                            final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
-                            if (detailByIndex == null || detailByIndex.getCode().equalsIgnoreCase(incomingDetailEntity.getCode())) {
-                                entity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private void onMultipleSelectionButton() {
-        SelectMultipleDetails selectMultipleDetails = new SelectMultipleDetails(session);
-        selectMultipleDetails.setLocation(FrameUtils.getFrameOnCenter(this, selectMultipleDetails));
-        selectMultipleDetails.setVisible(true);
-        final ArrayList<DetailEntity> selectedDetailEntities = selectMultipleDetails.getSelectedDetailEntities();
-
-        if (selectedDetailEntities != null) {
-            this.entities = selectedDetailEntities;
-            if (selectedDetailEntities.size() > 1) {
-                fillCodeComboBox();
-                fillTitleComboBox();
-                fillDetailInfo(entities);
-            }
-        } else {
-            this.entities = null;
-            fillCodeComboBox();
-            fillTitleComboBox();
-            fillDetail();
-        }
-    }
-
-    private void fillDetailInfo(ArrayList<DetailEntity> detailEntities) {
-        codeComboBox.setEnabled(true);
-        unitCheckBox.setEnabled(unitEnabled);
-
-        if (detailEntities == null) {
-            codeComboBox.setEnabled(true);
-
-            titleComboBox.setEnabled(true);
-
-            unitCheckBox.setEnabled(unitEnabled);
-            unitCheckBox.setSelected(false);
-        } else {
-            if (detailEntities.size() == 0) {
-                titleComboBox.setSelectedItem(null);
-                titleComboBox.setEnabled(true);
-
-                unitCheckBox.setSelected(false);
-            } else {
-                if (detailEntities.size() == 1) {
-                    final DetailEntity detailEntity = detailEntities.get(0);
-                    titleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
-                    unitCheckBox.setSelected(detailEntity.isUnit());
-                    DetailEntity dbEntity = new DetailServiceImpl(session).getDetailByCode(detailEntity.getCode());
-                    if (dbEntity != null) {
-                        unitCheckBox.setEnabled(false);
-                    } else {
-                        if (mode != MODE.EDIT) {
-                            unitCheckBox.setEnabled(unitEnabled);
-                        }
-
-                        if (mode == MODE.COPY) {
-                            unitCheckBox.setSelected(true);
-                            unitCheckBox.setEnabled(false);
-                        }
-
-                        if (mode == MODE.DEFAULT || mode == MODE.CREATE_SINGLE) {
-                            unitCheckBox.setEnabled(true);
-                        }
-                    }
-                } else {
-                    DefaultComboBoxModel<String> codeModel = new DefaultComboBoxModel<>();
-                    final String SOME_DETAILS_SELECTED_STRING = "выбрано несколько деталей";
-                    codeModel.addElement(SOME_DETAILS_SELECTED_STRING);
-                    codeComboBox.setModel(codeModel);
-                    codeComboBox.setEnabled(false);
-
-                    DefaultComboBoxModel<DetailTitleEntity> titleModel = new DefaultComboBoxModel<>();
-                    final DetailTitleEntity title = new DetailTitleEntity();
-                    title.setTitle(SOME_DETAILS_SELECTED_STRING);
-                    titleModel.addElement(title);
-                    titleComboBox.setModel(titleModel);
-                    titleComboBox.setEnabled(false);
-
-                    unitCheckBox.setSelected(false);
-                    unitCheckBox.setEnabled(false);
-                }
-            }
-        }
-    }
-
-    private void fixLastIndex() {
-        final JTextComponent editor = (JTextComponent) codeComboBox.getEditor().getEditorComponent();
-        final Document document = editor.getDocument();
-
-        int start = editor.getSelectionStart() - 1;
-        start = (start < 0) ? 0 : start;
-        int end = editor.getSelectionStart();
-
-        String fixedString = fixCode((String) codeComboBox.getSelectedItem());
-        try {
-            if (document instanceof AbstractDocument) {
-                if (fixedString != null) {
-                    ((AbstractDocument) document).replace(start, end - start, ".",
-                            null);
-                }
-            } else {
-                final String text = document.getText(start, end - start);
-
-                if (text.length() == 1) {
-                    final char c = text.toCharArray()[0];
-                    if (c == ',' || c == ' ') {
-                        if (fixedString != null) {
-                            document.remove(start, end - start);
-                            document.insertString(start, ".", null);
-                        }
-                    }
-                } else if (text.length() > 1) {
-                    final char[] oldChars = text.toCharArray();
-                    if (containsChars(oldChars)) {
-                        if (fixedString != null) {
-                            document.remove(start, end - start);
-                            document.insertString(start, fixedString, null);
-                        }
-                    }
-                }
-            }
-        } catch (BadLocationException e) {
-            log.warn("Could not find location to fix codeComboBox", e);
-        }
-    }
-
-    private boolean containsChars(char[] oldChars) {
-        for (char c : oldChars) {
-            if (c == ',' || c == ' ') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void editExistingDetail(DetailEntity entity) {
-        DetailService service = new DetailServiceImpl(session);
-
-        if (entity.getCode().equals(incomingDetailEntity.getCode())) {
-            if (entity.getDetailTitleByDetailTitleId().equals(incomingDetailEntity.getDetailTitleByDetailTitleId())) {
-                dispose();
-            } else {
-                final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
-                        + incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
-                        "на: " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
-                if (i == 0) { // confirm
-                    entities.clear();
-                    entities.add(entity);
-                    dispose();
-                }
-            }
-        } else {
-            try {
-                DetailEntity dbDetail = service.getDetailByCode(entity.getCode());
-                if (dbDetail != null) {
-                    FrameUtils.shakeFrame(this);
-                    JOptionPane.showMessageDialog(this,
-                            "Вы указали существующий индекс другой детали: \n"
-                                    + dbDetail.getCode() + " "
-                                    + dbDetail.getDetailTitleByDetailTitleId().getTitle());
-                    log.warn("User tried to change code for entity: {}, that has another entity: {}",
-                            entity, dbDetail);
-                } else {
-                    updateReturningEntity(entity);
-                }
-            } catch (HeadlessException e) {
-                updateReturningEntity(entity);
-            }
-        }
-    }
-
-    private void updateReturningEntity(DetailEntity entity) {
-        incomingDetailEntity.setCode(entity.getCode());
-        incomingDetailEntity.setDetailTitleByDetailTitleId(entity.getDetailTitleByDetailTitleId());
-        entities.clear();
-        entities.add(incomingDetailEntity);
-        dispose();
-    }
-
-    private void fillDetail() {
-        DetailService service = new DetailServiceImpl(session);
-        final String selectedItem = (String) codeComboBox.getSelectedItem();
-        if (selectedItem != null) {
-            if (selectedItem.length() < 30) {
-                final DetailEntity detailEntity = service.getDetailByCode(selectedItem);
-                if (detailEntity != null) {
-                    entities = new ArrayList<>();
-                    entities.add(detailEntity);
-                    fillDetailInfo(entities);
-                } else {
-                    if (entities != null) {
-                        entities = null;
-                        fillDetailInfo(null);
-                    } else {
-                        entities = new ArrayList<>();
-
-                        DetailEntity entity = new DetailEntity();
-                        entity.setCode((String) codeComboBox.getSelectedItem());
-                        entity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
-                        entity.setActive(true);
-
-                        entities.add(entity);
-                        fillDetailInfo(entities);
-                    }
-                }
-            }
-        }
-    }
-
-    private void initCodeComboBox() {
-        ((JTextField) codeComboBox.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                check(e);
-            }
-
-            private void check(DocumentEvent e) {
-                try {
-                    final String text = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset());
-                    if (text.contains(",") || text.contains(" ")) {
-                        Runnable runnable = () -> fixLastIndex();
-                        SwingUtilities.invokeLater(runnable);
-                    }
-                } catch (BadLocationException e1) {
-                    e1.printStackTrace();
-                }
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                check(e);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                check(e);
-            }
-        });
-
-        codeComboBox.addItemListener(e -> {
-            if (entities != null) {
-                if (entities.size() <= 1) {
-                    fillDetail();
-                }
-            } else {
-                fillDetail();
-            }
-        });
-        codeComboBox.setSelectedIndex(-1);
-    }
-
-    private void onOK() {
-        log.debug("Got entities to save: " + entities);
-        if (verify()) {
-            if (entities != null) {
-                if (entities.size() == 1) {
-                    DetailEntity selectedDetail = entities.get(0);
-                    if (selectedDetail != null) {
-                        if (mode != MODE.COPY) {
-                            if (incomingDetailEntity == null) {
-                                createNewDetail(selectedDetail);
-                            } else {
-                                editExistingDetail(selectedDetail);
-                            }
-                        } else {
-                            DetailService service = new DetailServiceImpl(session);
-                            DetailEntity dbEntity = service.getDetailByCode(selectedDetail.getCode());
-                            if (dbEntity == null) {
-                                selectedDetail.setUnit(true);
-                                createNewDetail(selectedDetail);
-                            } else {
-                                DetailListService detailListService = new DetailListServiceImpl(session);
-                                final List<DetailEntity> detailEntities = detailListService.listChildren(dbEntity);
-                                if (detailEntities.size() == 0 && dbEntity.isUnit()) {
-                                    entities.clear();
-                                    entities.add(dbEntity);
-                                    dispose();
-                                } else {
-                                    JOptionPane.showMessageDialog(this,
-                                            "Деталь не является узлом или \n" +
-                                                    "узел включает в себя наследников",
-                                            "Ошибка копирования",
-                                            JOptionPane.WARNING_MESSAGE);
-                                }
-                            }
-                        }
-                    } else {
-                        dispose();
-                    }
-                } else {
-                    if (mode != MODE.SELECT_SINGLE && mode != MODE.CREATE_SINGLE) {
-                        dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(this,
-                                "Необходимо выбрать только 1 деталь", "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
-                    }
-                }
-            } else {
-                dispose();
-            }
-        }
-    }
-
-    private void createNewDetail(DetailEntity entity) {
-        log.debug("Creating / adding new entity: {}", entity);
-        DetailService service = new DetailServiceImpl(session);
-        try {
-            DetailEntity dbDetail = service.getDetailByCode(entity.getCode());
-            if (!dbDetail.getDetailTitleByDetailTitleId().equals(entity.getDetailTitleByDetailTitleId())) {
-                final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
-                        + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
-                        "на: " + dbDetail.getCode() + " " + dbDetail.getDetailTitleByDetailTitleId().getTitle());
-                if (i == 0) {
-                    entities.clear();
-                    entities.add(entity);
-                    dispose();
-                }
-            } else {
-                dispose();
-            }
-        } catch (Exception e) {
-            DetailTitleEntity title = (DetailTitleEntity) titleComboBox.getSelectedItem();
-            if (title != null) {
-                entity.setDetailTitleByDetailTitleId(title);
-                entities.clear();
-                entities.add(entity);
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Укажите наименование детали", "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
-            }
-        }
-    }
-
-    private void onCreateTitle() {
-        if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-            DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
-            if (titleEntity != null) {
-                titleComboBox.removeAllItems();
-                fillTitleComboBox();
-
-                titleComboBox.setSelectedItem(titleEntity);
-            }
-        }
-    }
-
-    private void initCreateNewTitleButton() {
-        final boolean b = session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
-        createTitleButton.setEnabled(b);
-    }
-
-    private void createUIComponents() {
-        titleComboBox = new SwitchingComboBox<DetailTitleEntity>() {
-            @Override
-            public void selectTypedItem() {
-                final String typedItem = getTypedItem();
-
-                DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) titleComboBox.getModel();
-                if (!typedItem.isEmpty()) {
-                    for (int i = 0; i < model.getSize(); i++) {
-                        final DetailTitleEntity elementAt = model.getElementAt(i);
-                        if (elementAt.getTitle().toLowerCase().startsWith(typedItem)) {
-                            titleComboBox.setSelectedItem(elementAt);
-                            break;
-                        }
-                    }
-                }
-            }
-        };
-    }
-
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -858,6 +150,714 @@ public class SelectDetailEntityWindow extends JDialog {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    private boolean checkSingleEntity() {
+        DetailEntity entity = entities.get(0);
+        if (entity == null) {
+            FrameUtils.shakeFrame(this);
+            return true;
+        }
+
+        try {
+            if (entity.getCode().isEmpty() || entity.getCode().length() > 30) {
+                throw new IllegalArgumentException("Code length can not be 0 or >30, code is: "
+                        + entity.getCode() + " " + entity.getCode().length());
+            }
+        } catch (Exception e) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this,
+                    "Длинна индекса детали должна быть в диапазоне: [0;30]", ERROR_TITLE,
+                    JOptionPane.WARNING_MESSAGE);
+            log.warn(LOG_VERIFICATION_ERROR_MESSAGE + ": {}", entity, e);
+            return true;
+        }
+
+        if (titleComboBox.getSelectedItem() == null) {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Необходимо указать наименование детали",
+                    ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean containsChars(char[] oldChars) {
+        for (char c : oldChars) {
+            if (c == ',' || c == ' ') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void createNewDetail(DetailEntity entity) {
+        log.debug("Creating / adding new entity: {}", entity);
+        DetailService service = new DetailServiceImpl(session);
+        try {
+            DetailEntity dbDetail = service.getDetailByCode(entity.getCode());
+            if (!dbDetail.getDetailTitleByDetailTitleId().equals(entity.getDetailTitleByDetailTitleId())) {
+                final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
+                        + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
+                        "на: " + dbDetail.getCode() + " " + dbDetail.getDetailTitleByDetailTitleId().getTitle());
+                if (i == 0) {
+                    entities.clear();
+                    entities.add(entity);
+                    dispose();
+                }
+            } else {
+                dispose();
+            }
+        } catch (Exception e) {
+            DetailTitleEntity title = (DetailTitleEntity) titleComboBox.getSelectedItem();
+            if (title != null) {
+                entity.setDetailTitleByDetailTitleId(title);
+                entities.clear();
+                entities.add(entity);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Укажите наименование детали", "Ошибка сохранения", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void createUIComponents() {
+        titleComboBox = new SwitchingComboBox<DetailTitleEntity>() {
+            @Override
+            public void selectTypedItem() {
+                final String typedItem = getTypedItem();
+
+                DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) titleComboBox.getModel();
+                if (!typedItem.isEmpty()) {
+                    for (int i = 0; i < model.getSize(); i++) {
+                        final DetailTitleEntity elementAt = model.getElementAt(i);
+                        if (elementAt.getTitle().toLowerCase().startsWith(typedItem)) {
+                            titleComboBox.setSelectedItem(elementAt);
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private void editExistingDetail(DetailEntity entity) {
+        DetailService service = new DetailServiceImpl(session);
+
+        if (entity.getCode().equals(incomingDetailEntity.getCode())) {
+            if (entity.getDetailTitleByDetailTitleId().equals(incomingDetailEntity.getDetailTitleByDetailTitleId())) {
+                dispose();
+            } else {
+                final int i = JOptionPane.showConfirmDialog(this, "Вы точно хотите изменить данные по детали:\n"
+                        + incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle() + "\n" +
+                        "на: " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
+                if (i == 0) { // confirm
+                    entities.clear();
+                    entities.add(entity);
+                    dispose();
+                }
+            }
+        } else {
+            try {
+                DetailEntity dbDetail = service.getDetailByCode(entity.getCode());
+                if (dbDetail != null) {
+                    FrameUtils.shakeFrame(this);
+                    JOptionPane.showMessageDialog(this,
+                            "Вы указали существующий индекс другой детали: \n"
+                                    + dbDetail.getCode() + " "
+                                    + dbDetail.getDetailTitleByDetailTitleId().getTitle());
+                    log.warn("User tried to change code for entity: {}, that has another entity: {}",
+                            entity, dbDetail);
+                } else {
+                    updateReturningEntity(entity);
+                }
+            } catch (HeadlessException e) {
+                updateReturningEntity(entity);
+            }
+        }
+    }
+
+    private void fillCodeComboBox() {
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+
+        DetailService service = new DetailServiceImpl(session);
+        final ArrayList<DetailEntity> detailEntities = (ArrayList<DetailEntity>) service.listDetails();
+
+        detailEntities.sort((o1, o2) -> {
+            if (o2 != null) {
+                return ComparisonChain.start()
+                        .compare(o1.getCode(), o2.getCode())
+                        .compareTrueFirst(o1.isActive(), o2.isActive())
+                        .compareTrueFirst(o1.isUnit(), o2.isUnit())
+                        .result();
+            } else {
+                return -1;
+            }
+        });
+
+        for (DetailEntity entity : detailEntities) {
+            model.addElement(entity.getCode());
+        }
+
+        codeComboBox.setModel(model);
+        AutoCompleteDecorator.decorate(this.codeComboBox);
+    }
+
+    private void fillDetail() {
+        DetailService service = new DetailServiceImpl(session);
+        final String selectedItem = (String) codeComboBox.getSelectedItem();
+        if (selectedItem != null) {
+            if (selectedItem.length() < 30) {
+                final DetailEntity detailEntity = service.getDetailByCode(selectedItem);
+                if (detailEntity != null) {
+                    entities = new ArrayList<>();
+                    entities.add(detailEntity);
+                    fillDetailInfo(entities);
+                } else {
+                    if (entities != null) {
+                        entities = null;
+                        fillDetailInfo(null);
+                    } else {
+                        entities = new ArrayList<>();
+
+                        DetailEntity entity = new DetailEntity();
+                        entity.setCode((String) codeComboBox.getSelectedItem());
+                        entity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                        entity.setActive(true);
+
+                        entities.add(entity);
+                        fillDetailInfo(entities);
+                    }
+                }
+            }
+        }
+    }
+
+    private void fillDetailInfo(ArrayList<DetailEntity> detailEntities) {
+        codeComboBox.setEnabled(true);
+        unitCheckBox.setEnabled(unitEnabled);
+
+        if (detailEntities == null) {
+            codeComboBox.setEnabled(true);
+
+            titleComboBox.setEnabled(true);
+
+            unitCheckBox.setEnabled(unitEnabled);
+            unitCheckBox.setSelected(false);
+        } else {
+            if (detailEntities.size() == 0) {
+                titleComboBox.setSelectedItem(null);
+                titleComboBox.setEnabled(true);
+
+                unitCheckBox.setSelected(false);
+            } else {
+                if (detailEntities.size() == 1) {
+                    final DetailEntity detailEntity = detailEntities.get(0);
+                    titleComboBox.setSelectedItem(detailEntity.getDetailTitleByDetailTitleId());
+                    unitCheckBox.setSelected(detailEntity.isUnit());
+                    DetailEntity dbEntity = new DetailServiceImpl(session).getDetailByCode(detailEntity.getCode());
+                    if (dbEntity != null) {
+                        unitCheckBox.setEnabled(false);
+                    } else {
+                        if (mode != MODE.EDIT) {
+                            unitCheckBox.setEnabled(unitEnabled);
+                        }
+
+                        if (mode == MODE.COPY) {
+                            unitCheckBox.setSelected(true);
+                            unitCheckBox.setEnabled(false);
+                        }
+
+                        if (mode == MODE.DEFAULT || mode == MODE.CREATE_SINGLE) {
+                            unitCheckBox.setEnabled(true);
+                        }
+                    }
+                } else {
+                    DefaultComboBoxModel<String> codeModel = new DefaultComboBoxModel<>();
+                    final String SOME_DETAILS_SELECTED_STRING = "выбрано несколько деталей";
+                    codeModel.addElement(SOME_DETAILS_SELECTED_STRING);
+                    codeComboBox.setModel(codeModel);
+                    codeComboBox.setEnabled(false);
+
+                    DefaultComboBoxModel<DetailTitleEntity> titleModel = new DefaultComboBoxModel<>();
+                    final DetailTitleEntity title = new DetailTitleEntity();
+                    title.setTitle(SOME_DETAILS_SELECTED_STRING);
+                    titleModel.addElement(title);
+                    titleComboBox.setModel(titleModel);
+                    titleComboBox.setEnabled(false);
+
+                    unitCheckBox.setSelected(false);
+                    unitCheckBox.setEnabled(false);
+                }
+            }
+        }
+    }
+
+    private void fillTitleComboBox() {
+        DefaultComboBoxModel<DetailTitleEntity> model = new DefaultComboBoxModel<>();
+
+        DetailTitleService service = new DetailTitleServiceImpl(session);
+        ArrayList<DetailTitleEntity> list = (ArrayList<DetailTitleEntity>) service.listDetailTitles();
+
+        Collections.sort(list);
+
+        for (DetailTitleEntity entity : list) {
+            if (entity.isActive()) {
+                model.addElement(entity);
+            }
+        }
+        titleComboBox.setModel(model);
+    }
+
+    private String fixCode(String code) {
+        if (code != null) {
+            return code.toUpperCase()
+                    .replace(",", ".")
+                    .replace("/", ".")
+                    .replace(" ", "");
+        } else return null;
+    }
+
+    private void fixLastIndex() {
+        final JTextComponent editor = (JTextComponent) codeComboBox.getEditor().getEditorComponent();
+        final Document document = editor.getDocument();
+
+        int start = editor.getSelectionStart() - 1;
+        start = (start < 0) ? 0 : start;
+        int end = editor.getSelectionStart();
+
+        String fixedString = fixCode((String) codeComboBox.getSelectedItem());
+        try {
+            if (document instanceof AbstractDocument) {
+                if (fixedString != null) {
+                    ((AbstractDocument) document).replace(start, end - start, ".",
+                            null);
+                }
+            } else {
+                final String text = document.getText(start, end - start);
+
+                if (text.length() == 1) {
+                    final char c = text.toCharArray()[0];
+                    if (c == ',' || c == ' ') {
+                        if (fixedString != null) {
+                            document.remove(start, end - start);
+                            document.insertString(start, ".", null);
+                        }
+                    }
+                } else if (text.length() > 1) {
+                    final char[] oldChars = text.toCharArray();
+                    if (containsChars(oldChars)) {
+                        if (fixedString != null) {
+                            document.remove(start, end - start);
+                            document.insertString(start, fixedString, null);
+                        }
+                    }
+                }
+            }
+        } catch (BadLocationException e) {
+            log.warn("Could not find location to fix codeComboBox", e);
+        }
+    }
+
+    public ArrayList<DetailEntity> getEntities() {
+        return entities;
+    }
+
+    private boolean hasErrorsEntityList() {
+        for (DetailEntity entity : entities) {
+            if (entity == null) {
+                FrameUtils.shakeFrame(this);
+                JOptionPane.showMessageDialog(this,
+                        "Одна из деталей некорректна (обратитесь к разрабочику)",
+                        ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+                log.warn(LOG_VERIFICATION_ERROR_MESSAGE + " one of entities is null, entities: {}", entities);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void initCodeComboBox() {
+        ((JTextField) codeComboBox.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                check(e);
+            }
+
+            private void check(DocumentEvent e) {
+                try {
+                    final String text = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset());
+                    if (text.contains(",") || text.contains(" ")) {
+                        Runnable runnable = () -> fixLastIndex();
+                        SwingUtilities.invokeLater(runnable);
+                    }
+                } catch (BadLocationException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                check(e);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                check(e);
+            }
+        });
+
+        codeComboBox.addItemListener(e -> {
+            if (entities != null) {
+                if (entities.size() <= 1) {
+                    fillDetail();
+                }
+            } else {
+                fillDetail();
+            }
+        });
+        codeComboBox.setSelectedIndex(-1);
+    }
+
+    private void initCreateNewTitleButton() {
+        final boolean b = session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
+        createTitleButton.setEnabled(b);
+    }
+
+    private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(buttonOK);
+
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/someDetails.png")));
+        if (incomingDetailEntity == null) {
+            if (mode != MODE.COPY) {
+                setTitle("Выбор детали");
+            } else {
+                setTitle("Создание детали для копии");
+            }
+        } else {
+            final String detailInfo = incomingDetailEntity.getCode() + " " + incomingDetailEntity.getDetailTitleByDetailTitleId().getTitle();
+            setTitle("Редактирование детали: " + detailInfo);
+            /*multipleSelectionButton.setEnabled(false);
+            unitCheckBox.setEnabled(false);*/
+
+            final ArrayList<DetailEntity> detailEntities = new ArrayList<>();
+            detailEntities.add(incomingDetailEntity);
+            fillDetailInfo(detailEntities);
+        }
+
+        multipleSelectionButton.setEnabled(!singleSelectionOnly);
+    }
+
+    private void initKeyBindings() {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        contentPane.registerKeyboardAction(e -> onCancel(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        buttonOK.addActionListener(e -> onOK());
+
+        createTitleButton.addActionListener(e -> onCreateTitle());
+
+        buttonCancel.addActionListener(e -> onCancel());
+    }
+
+    private void initMode(MODE mode) {
+        switch (mode) {
+            case CREATE_SINGLE: {
+                this.singleSelectionOnly = true;
+                this.unitEnabled = true;
+                break;
+            }
+            case SELECT_SINGLE: {
+                this.singleSelectionOnly = true;
+                this.unitEnabled = false;
+                break;
+            }
+            case COPY: {
+                this.singleSelectionOnly = true;
+                this.unitEnabled = false;
+                break;
+            }
+            case EDIT: {
+                this.singleSelectionOnly = true;
+                if (incomingDetailEntity != null) {
+                    this.unitEnabled = incomingDetailEntity.isUnit();
+                }
+                break;
+            }
+            case DEFAULT: {
+                this.singleSelectionOnly = false;
+                this.unitEnabled = true;
+                break;
+            }
+        }
+    }
+
+    private void initSeveralSelectionButton() {
+        multipleSelectionButton.addActionListener(e -> onMultipleSelectionButton());
+    }
+
+    private void initTitleComboBox() {
+        titleComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailTitleEntity) {
+                    DetailTitleEntity entity = (DetailTitleEntity) value;
+                    return super.getListCellRendererComponent(list, entity.getTitle(), index, isSelected, cellHasFocus);
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+
+       /* titleComboBox.addKeyListener(new KeyAdapter() {
+            ArrayList<DetailTitleEntity> list;
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                list = getTitleEntities();
+
+                final char keyChar = e.getKeyChar();
+                if (isLetter(keyChar)) {
+                    select(list, keyChar);
+                }
+
+            }
+
+            private void select(ArrayList<DetailTitleEntity> list, char keyChar) {
+                for (DetailTitleEntity entity : list) {
+                    String title = entity.getTitle();
+                    if (title != null) {
+                        if (!title.isEmpty()) {
+
+                            title = title.toUpperCase();
+                            keyChar = Character.toUpperCase(keyChar); // toUpperCase
+                            if (title.toCharArray()[0] == keyChar) {
+                                titleComboBox.setSelectedItem(entity);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            private ArrayList<DetailTitleEntity> getTitleEntities() {
+                ArrayList<DetailTitleEntity> result = new ArrayList<>();
+                DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) titleComboBox.getModel();
+                for (int i = 0; i < model.getSize(); i++) {
+                    DetailTitleEntity entity = model.getElementAt(i);
+                    result.add(entity);
+                }
+                return result;
+            }
+        });*/
+
+        titleComboBox.addActionListener(e -> {
+            if (entities != null) {
+                if (entities.size() == 1) {
+                    final DetailEntity entity = entities.get(0);
+                    if (!entity.getDetailTitleByDetailTitleId().equals(titleComboBox.getSelectedItem())) {
+                        if (incomingDetailEntity != null) {
+                            DetailService service = new DetailServiceImpl(session);
+                            final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
+                            if (detailByIndex == null || detailByIndex.getCode().equalsIgnoreCase(incomingDetailEntity.getCode())) {
+                                entity.setDetailTitleByDetailTitleId((DetailTitleEntity) titleComboBox.getSelectedItem());
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void initUnitCheckBox() {
+        unitCheckBox.addActionListener(e -> {
+            if (entities != null) {
+                if (entities.size() == 1) {
+                    final DetailEntity entity = entities.get(0);
+                    if (entity != null) {
+                        entity.setUnit(unitCheckBox.isSelected());
+                        entities.set(0, entity);
+                    }
+                }
+            }
+        });
+    }
+
+    private void initWindow() {
+        initGui();
+
+        initListeners();
+        initKeyBindings();
+
+        initCodeComboBox();
+
+        fillCodeComboBox();
+
+        initTitleComboBox();
+
+        fillTitleComboBox();
+
+        initCreateNewTitleButton();
+
+        initUnitCheckBox();
+
+        initSeveralSelectionButton();
+
+        updateCodeComboBox();
+
+        pack();
+        setResizable(false);
+    }
+
+    private boolean isLetter(char ch) {
+        return (ch >= 'a' && ch <= 'z')
+                || (ch >= 'A' && ch <= 'Z')
+                || (ch >= 'а' && ch <= 'я')
+                || (ch >= 'А' && ch <= 'Я');
+    }
+
+    private void onCancel() {
+        entities = null;
+        dispose();
+    }
+
+    private void onCreateTitle() {
+        if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+            DetailTitleEntity titleEntity = new CommonWindowUtils(session).onCreateNewTitle(this);
+            if (titleEntity != null) {
+                titleComboBox.removeAllItems();
+                fillTitleComboBox();
+
+                titleComboBox.setSelectedItem(titleEntity);
+            }
+        }
+    }
+
+    private void onMultipleSelectionButton() {
+        SelectMultipleDetails selectMultipleDetails = new SelectMultipleDetails(session);
+        selectMultipleDetails.setLocation(FrameUtils.getFrameOnCenter(this, selectMultipleDetails));
+        selectMultipleDetails.setVisible(true);
+        final ArrayList<DetailEntity> selectedDetailEntities = selectMultipleDetails.getSelectedDetailEntities();
+
+        if (selectedDetailEntities != null) {
+            this.entities = selectedDetailEntities;
+            if (selectedDetailEntities.size() > 1) {
+                fillCodeComboBox();
+                fillTitleComboBox();
+                fillDetailInfo(entities);
+            }
+        } else {
+            this.entities = null;
+            fillCodeComboBox();
+            fillTitleComboBox();
+            fillDetail();
+        }
+    }
+
+    private void onOK() {
+        log.debug("Got entities to save: " + entities);
+        if (verify()) {
+            if (entities != null) {
+                if (entities.size() == 1) {
+                    DetailEntity selectedDetail = entities.get(0);
+                    if (selectedDetail != null) {
+                        if (mode != MODE.COPY) {
+                            if (incomingDetailEntity == null) {
+                                createNewDetail(selectedDetail);
+                            } else {
+                                editExistingDetail(selectedDetail);
+                            }
+                        } else {
+                            DetailService service = new DetailServiceImpl(session);
+                            DetailEntity dbEntity = service.getDetailByCode(selectedDetail.getCode());
+                            if (dbEntity == null) {
+                                selectedDetail.setUnit(true);
+                                createNewDetail(selectedDetail);
+                            } else {
+                                DetailListService detailListService = new DetailListServiceImpl(session);
+                                final List<DetailEntity> detailEntities = detailListService.listChildren(dbEntity);
+                                if (detailEntities.size() == 0 && dbEntity.isUnit()) {
+                                    entities.clear();
+                                    entities.add(dbEntity);
+                                    dispose();
+                                } else {
+                                    JOptionPane.showMessageDialog(this,
+                                            "Деталь не является узлом или \n" +
+                                                    "узел включает в себя наследников",
+                                            "Ошибка копирования",
+                                            JOptionPane.WARNING_MESSAGE);
+                                }
+                            }
+                        }
+                    } else {
+                        dispose();
+                    }
+                } else {
+                    if (mode != MODE.SELECT_SINGLE && mode != MODE.CREATE_SINGLE) {
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Необходимо выбрать только 1 деталь", "Ошибка добавления", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            } else {
+                dispose();
+            }
+        }
+    }
+
+    private void updateCodeComboBox() {
+        if (incomingDetailEntity != null) {
+            codeComboBox.setSelectedItem(incomingDetailEntity.getCode());
+        } else {
+            if (codeComboBox.getItemCount() >= 1) {
+                codeComboBox.setSelectedItem(0);
+            }
+        }
+    }
+
+    private void updateReturningEntity(DetailEntity entity) {
+        incomingDetailEntity.setCode(entity.getCode());
+        incomingDetailEntity.setDetailTitleByDetailTitleId(entity.getDetailTitleByDetailTitleId());
+        entities.clear();
+        entities.add(incomingDetailEntity);
+        dispose();
+    }
+
+    private boolean verify() {
+        if (entities != null) {
+            if (entities.size() > 0) {
+                if (entities.size() > 1) {
+                    return !hasErrorsEntityList();
+                } else {
+                    return !checkSingleEntity();
+                }
+            } else {
+                FrameUtils.shakeFrame(this);
+                JOptionPane.showMessageDialog(this, "Необходимо выбрать хотя-бы одну деталь",
+                        ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+                log.warn(LOG_VERIFICATION_ERROR_MESSAGE + "size is: {}, entities: {}", entities.size(), entities);
+                return false;
+            }
+        } else {
+            FrameUtils.shakeFrame(this);
+            JOptionPane.showMessageDialog(this, "Необходимо выбрать хотя-бы одну деталь",
+                    ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+            log.warn(LOG_VERIFICATION_ERROR_MESSAGE + "{}", entities);
+            return false;
+        }
     }
 
     public enum MODE {DEFAULT, CREATE_SINGLE, SELECT_SINGLE, COPY, EDIT}

@@ -39,13 +39,13 @@ public class UserTypeServiceImpl implements UserTypeService {
     }
 
     @Override
-    public UserTypeDao getUserTypeDao() {
-        return userTypeDao;
+    public UserTypeEntity getUserTypeById(int id) {
+        return userTypeDao.getUserTypeById(id);
     }
 
     @Override
-    public void updateUserType(UserTypeEntity entity) {
-        this.userTypeDao.updateUserType(entity);
+    public UserTypeDao getUserTypeDao() {
+        return userTypeDao;
     }
 
     @Override
@@ -54,13 +54,12 @@ public class UserTypeServiceImpl implements UserTypeService {
     }
 
     @Override
-    public UserTypeEntity getUserTypeById(int id) {
-        return userTypeDao.getUserTypeById(id);
-    }
-
-
-    @Override
     public List<UserTypeEntity> listUserTypes() {
         return userTypeDao.listUserTypes();
+    }
+
+    @Override
+    public void updateUserType(UserTypeEntity entity) {
+        this.userTypeDao.updateUserType(entity);
     }
 }

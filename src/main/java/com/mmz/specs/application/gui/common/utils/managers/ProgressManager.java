@@ -25,44 +25,12 @@ public class ProgressManager {
 
     private String text = "";
 
-    public int getTotalProgress() {
-        return totalProgress;
-    }
-
-    public void setTotalProgress(int totalProgress) {
-        this.totalProgress = totalProgress;
-    }
-
     public int getCurrentProgress() {
         return currentProgress;
     }
 
     public void setCurrentProgress(int currentProgress) {
         this.currentProgress = currentProgress;
-    }
-
-    public boolean isTotalIndeterminate() {
-        return totalIndeterminate;
-    }
-
-    public void setTotalIndeterminate(boolean totalIndeterminate) {
-        this.totalIndeterminate = totalIndeterminate;
-    }
-
-    public boolean isCurrentIndeterminate() {
-        return currentIndeterminate;
-    }
-
-    public void setCurrentIndeterminate(boolean currentIndeterminate) {
-        this.currentIndeterminate = currentIndeterminate;
-    }
-
-    public int getTotalMaxValue() {
-        return totalMaxValue;
-    }
-
-    public void setTotalMaxValue(int totalMaxValue) {
-        this.totalMaxValue = totalMaxValue;
     }
 
     public String getText() {
@@ -76,6 +44,38 @@ public class ProgressManager {
         } else {
             this.text = text;
         }
+    }
+
+    public int getTotalMaxValue() {
+        return totalMaxValue;
+    }
+
+    public void setTotalMaxValue(int totalMaxValue) {
+        this.totalMaxValue = totalMaxValue;
+    }
+
+    public int getTotalProgress() {
+        return totalProgress;
+    }
+
+    public void setTotalProgress(int totalProgress) {
+        this.totalProgress = totalProgress;
+    }
+
+    public boolean isCurrentIndeterminate() {
+        return currentIndeterminate;
+    }
+
+    public void setCurrentIndeterminate(boolean currentIndeterminate) {
+        this.currentIndeterminate = currentIndeterminate;
+    }
+
+    public boolean isTotalIndeterminate() {
+        return totalIndeterminate;
+    }
+
+    public void setTotalIndeterminate(boolean totalIndeterminate) {
+        this.totalIndeterminate = totalIndeterminate;
     }
 
     public void reset() {

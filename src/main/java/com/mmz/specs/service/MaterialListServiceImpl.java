@@ -39,28 +39,13 @@ public class MaterialListServiceImpl implements MaterialListService {
     }
 
     @Override
-    public void setMaterialListDao(MaterialListDao materialListDao) {
-        this.materialListDao = materialListDao;
-    }
-
-    @Override
-    public MaterialListDao getMaterialListDao() {
-        return materialListDao;
-    }
-
-    @Override
     public long addMaterialList(MaterialListEntity materialListEntity) {
         return materialListDao.addMaterialList(materialListEntity);
     }
 
     @Override
-    public void updateMaterialList(MaterialListEntity materialListEntity) {
-        materialListDao.updateMaterialList(materialListEntity);
-    }
-
-    @Override
-    public void removeMaterialList(long id) {
-        materialListDao.removeMaterialList(id);
+    public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity) {
+        return materialListDao.getMaterialListByDetail(detailEntity);
     }
 
     @Override
@@ -69,8 +54,13 @@ public class MaterialListServiceImpl implements MaterialListService {
     }
 
     @Override
-    public List<MaterialListEntity> getMaterialListByDetail(DetailEntity detailEntity) {
-        return materialListDao.getMaterialListByDetail(detailEntity);
+    public MaterialListDao getMaterialListDao() {
+        return materialListDao;
+    }
+
+    @Override
+    public void setMaterialListDao(MaterialListDao materialListDao) {
+        this.materialListDao = materialListDao;
     }
 
     @Override
@@ -81,5 +71,15 @@ public class MaterialListServiceImpl implements MaterialListService {
     @Override
     public List<MaterialListEntity> listMaterialLists() {
         return materialListDao.listMaterialLists();
+    }
+
+    @Override
+    public void removeMaterialList(long id) {
+        materialListDao.removeMaterialList(id);
+    }
+
+    @Override
+    public void updateMaterialList(MaterialListEntity materialListEntity) {
+        materialListDao.updateMaterialList(materialListEntity);
     }
 }

@@ -38,18 +38,6 @@ public class MaterialDaoImpl implements MaterialDao {
         this.session = session;
     }
 
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
-    public Session getSession() {
-        return session;
-    }
-
-
     @Override
     @Transactional
     public int addMaterial(MaterialEntity materialEntity) {
@@ -58,24 +46,6 @@ public class MaterialDaoImpl implements MaterialDao {
         log.debug("Material successfully saved: " + materialEntity);
         return id;
     }
-
-    @Override
-    @Transactional
-    public void updateMaterial(MaterialEntity materialEntity) {
-        session.merge(materialEntity);
-        log.debug("Material successfully updated: " + materialEntity);
-    }
-
-    @Override
-    @Transactional
-    public void removeMaterial(int id) {
-        MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
-        if (materialEntity != null) {
-            session.delete(materialEntity);
-        }
-        log.debug("Material successfully removed: " + materialEntity);
-    }
-
 
     @Override
     @Transactional
@@ -104,6 +74,15 @@ public class MaterialDaoImpl implements MaterialDao {
         return entity;
     }
 
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
+    }
 
     @Override
     public List<MaterialEntity> listMaterials() {
@@ -118,5 +97,22 @@ public class MaterialDaoImpl implements MaterialDao {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void removeMaterial(int id) {
+        MaterialEntity materialEntity = session.load(MaterialEntity.class, id);
+        if (materialEntity != null) {
+            session.delete(materialEntity);
+        }
+        log.debug("Material successfully removed: " + materialEntity);
+    }
+
+    @Override
+    @Transactional
+    public void updateMaterial(MaterialEntity materialEntity) {
+        session.merge(materialEntity);
+        log.debug("Material successfully updated: " + materialEntity);
     }
 }

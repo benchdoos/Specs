@@ -36,106 +36,11 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
     private DetailTitleEntity detailTitleByDetailTitleId;
     private TechProcessEntity techProcessByTechProcessId;
 
-    @Id
-    @Column(name = "ID")
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Basic
-    @Column(name = "CODE")
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    @Basic
-    @Column(name = "UNIT")
-    public boolean isUnit() {
-        return unit;
-    }
-
-    public void setUnit(boolean unit) {
-        this.unit = unit;
-    }
-
-    @Basic
-    @Column(name = "FINISHED_WEIGHT")
-    public Double getFinishedWeight() {
-        return finishedWeight;
-    }
-
-    public void setFinishedWeight(Double finishedWeigth) {
-        this.finishedWeight = finishedWeigth;
-    }
-
-    @Basic
-    @Column(name = "WORKPIECE_WEIGHT")
-    public Double getWorkpieceWeight() {
-        return workpieceWeight;
-    }
-
-    public void setWorkpieceWeight(Double workpieceWeight) {
-        this.workpieceWeight = workpieceWeight;
-    }
-
-    @Basic
-    @Column(name = "IMAGE_PATH")
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    @Basic
-    @Column(name = "IS_ACTIVE")
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "TECH_PROCESS_ID", referencedColumnName = "ID")
-    public TechProcessEntity getTechProcessByTechProcessId() {
-        return techProcessByTechProcessId;
-    }
-
-    public void setTechProcessByTechProcessId(TechProcessEntity techProcessByTechProcessId) {
-        this.techProcessByTechProcessId = techProcessByTechProcessId;
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "TITLE_ID", referencedColumnName = "ID")
-    public DetailTitleEntity getDetailTitleByDetailTitleId() {
-        return detailTitleByDetailTitleId;
-    }
-
-    public void setDetailTitleByDetailTitleId(DetailTitleEntity detailTitleByDetailTitleId) {
-        this.detailTitleByDetailTitleId = detailTitleByDetailTitleId;
-    }
-
     @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (code != null ? code.hashCode() : 0);
-        result = 31 * result + (unit ? 1 : 0);
-        result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
-        result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
-        result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
-        result = 31 * result + Boolean.hashCode(active);
-        return result;
+    public int compareTo(@Nonnull DetailEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getCode(), that.getCode())
+                .result();
     }
 
     @Override
@@ -165,6 +70,117 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
                 .isEquals();
     }
 
+    @Basic
+    @Column(name = "CODE")
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "TITLE_ID", referencedColumnName = "ID")
+    public DetailTitleEntity getDetailTitleByDetailTitleId() {
+        return detailTitleByDetailTitleId;
+    }
+
+    public void setDetailTitleByDetailTitleId(DetailTitleEntity detailTitleByDetailTitleId) {
+        this.detailTitleByDetailTitleId = detailTitleByDetailTitleId;
+    }
+
+    @Basic
+    @Column(name = "FINISHED_WEIGHT")
+    public Double getFinishedWeight() {
+        return finishedWeight;
+    }
+
+    public void setFinishedWeight(Double finishedWeigth) {
+        this.finishedWeight = finishedWeigth;
+    }
+
+    @Id
+    @Column(name = "ID")
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Basic
+    @Column(name = "IMAGE_PATH")
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "TECH_PROCESS_ID", referencedColumnName = "ID")
+    public TechProcessEntity getTechProcessByTechProcessId() {
+        return techProcessByTechProcessId;
+    }
+
+    public void setTechProcessByTechProcessId(TechProcessEntity techProcessByTechProcessId) {
+        this.techProcessByTechProcessId = techProcessByTechProcessId;
+    }
+
+    @Basic
+    @Column(name = "WORKPIECE_WEIGHT")
+    public Double getWorkpieceWeight() {
+        return workpieceWeight;
+    }
+
+    public void setWorkpieceWeight(Double workpieceWeight) {
+        this.workpieceWeight = workpieceWeight;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (code != null ? code.hashCode() : 0);
+        result = 31 * result + (unit ? 1 : 0);
+        result = 31 * result + (finishedWeight != null ? finishedWeight.hashCode() : 0);
+        result = 31 * result + (workpieceWeight != null ? workpieceWeight.hashCode() : 0);
+        result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
+        result = 31 * result + Boolean.hashCode(active);
+        return result;
+    }
+
+    @Basic
+    @Column(name = "IS_ACTIVE")
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    @Basic
+    @Column(name = "UNIT")
+    public boolean isUnit() {
+        return unit;
+    }
+
+    public void setUnit(boolean unit) {
+        this.unit = unit;
+    }
+
+    @Override
+    public String toSimpleString() {
+        return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .append("id", id)
+                .append("code", code)
+                .append("title", detailTitleByDetailTitleId.getTitle())
+                .toString();
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -177,22 +193,6 @@ public class DetailEntity implements Comparable<DetailEntity>, SimpleOutput {
                 .append("active", active)
                 .append("techProcessByTechProcessId", techProcessByTechProcessId)
                 .append("detailTitleByDetailTitleId", detailTitleByDetailTitleId)
-                .toString();
-    }
-
-    @Override
-    public int compareTo(@Nonnull DetailEntity that) {
-        return ComparisonChain.start()
-                .compare(this.getCode(), that.getCode())
-                .result();
-    }
-
-    @Override
-    public String toSimpleString() {
-        return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
-                .append("id", id)
-                .append("code", code)
-                .append("title", detailTitleByDetailTitleId.getTitle())
                 .toString();
     }
 }

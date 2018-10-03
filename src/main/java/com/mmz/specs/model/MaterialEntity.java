@@ -32,6 +32,35 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
     private String longProfile;
     private boolean active;
 
+    @Override
+    public int compareTo(@Nonnull MaterialEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getShortMark(), that.getShortMark())
+                .compare(this.getShortProfile(), that.getShortProfile())
+                .compare(this.getLongMark(), that.getLongMark())
+                .compare(this.getLongProfile(), that.getLongProfile())
+                .compareTrueFirst(this.isActive(), that.isActive())
+                .result();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof MaterialEntity)) return false;
+
+        MaterialEntity that = (MaterialEntity) o;
+
+        return new EqualsBuilder()
+                .append(getId(), that.getId())
+                .append(isActive(), that.isActive())
+                .append(getShortMark(), that.getShortMark())
+                .append(getShortProfile(), that.getShortProfile())
+                .append(getLongMark(), that.getLongMark())
+                .append(getLongProfile(), that.getLongProfile())
+                .isEquals();
+    }
+
     @Id
     @Column(name = "ID")
     public int getId() {
@@ -40,26 +69,6 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    @Basic
-    @Column(name = "SHORT_MARK")
-    public String getShortMark() {
-        return shortMark;
-    }
-
-    public void setShortMark(String shortMark) {
-        this.shortMark = shortMark;
-    }
-
-    @Basic
-    @Column(name = "SHORT_PROFILE")
-    public String getShortProfile() {
-        return shortProfile;
-    }
-
-    public void setShortProfile(String shortProfile) {
-        this.shortProfile = shortProfile;
     }
 
     @Basic
@@ -83,13 +92,23 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
     }
 
     @Basic
-    @Column(name = "IS_ACTIVE")
-    public boolean isActive() {
-        return active;
+    @Column(name = "SHORT_MARK")
+    public String getShortMark() {
+        return shortMark;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setShortMark(String shortMark) {
+        this.shortMark = shortMark;
+    }
+
+    @Basic
+    @Column(name = "SHORT_PROFILE")
+    public String getShortProfile() {
+        return shortProfile;
+    }
+
+    public void setShortProfile(String shortProfile) {
+        this.shortProfile = shortProfile;
     }
 
     @Override
@@ -103,22 +122,14 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
         return result;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
+    @Basic
+    @Column(name = "IS_ACTIVE")
+    public boolean isActive() {
+        return active;
+    }
 
-        if (!(o instanceof MaterialEntity)) return false;
-
-        MaterialEntity that = (MaterialEntity) o;
-
-        return new EqualsBuilder()
-                .append(getId(), that.getId())
-                .append(isActive(), that.isActive())
-                .append(getShortMark(), that.getShortMark())
-                .append(getShortProfile(), that.getShortProfile())
-                .append(getLongMark(), that.getLongMark())
-                .append(getLongProfile(), that.getLongProfile())
-                .isEquals();
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override
@@ -131,16 +142,5 @@ public class MaterialEntity implements Comparable<MaterialEntity> {
                 .append("longProfile", longProfile)
                 .append("active", active)
                 .toString();
-    }
-
-    @Override
-    public int compareTo(@Nonnull MaterialEntity that) {
-        return ComparisonChain.start()
-                .compare(this.getShortMark(), that.getShortMark())
-                .compare(this.getShortProfile(), that.getShortProfile())
-                .compare(this.getLongMark(), that.getLongMark())
-                .compare(this.getLongProfile(), that.getLongProfile())
-                .compareTrueFirst(this.isActive(), that.isActive())
-                .result();
     }
 }

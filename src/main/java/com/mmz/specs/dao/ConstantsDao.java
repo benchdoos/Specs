@@ -21,40 +21,39 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface ConstantsDao {
-    public Session getSession();
-
     /**
      * Add new constant //if needed for future releases
      */
-    public int addConstant(ConstantsEntity constantsEntity);
-
-    /**
-     * Update existing constant
-     */
-    public void updateConstant(ConstantsEntity constantsEntity);
-
-
-    /**
-     * Remove constant by id
-     * @param id of the removing book
-     */
-    public void removeConstant(int id);
+    int addConstant(ConstantsEntity constantsEntity);
 
     /**
      * @param id Constant id
      * @return Constant by id
      */
-    public ConstantsEntity getConstantById(int id);
+    ConstantsEntity getConstantById(int id);
 
     /**
      * @param key for value.
      * @return ConstantsEntity by key
      */
-    public ConstantsEntity getConstantByKey(String key);
+    ConstantsEntity getConstantByKey(String key);
 
+    Session getSession();
 
     /**
      * @return constants list
-     * */
-    public List<ConstantsEntity> listConstants();
+     */
+    List<ConstantsEntity> listConstants();
+
+    /**
+     * Remove constant by id
+     *
+     * @param id of the removing book
+     */
+    void removeConstant(int id);
+
+    /**
+     * Update existing constant
+     */
+    void updateConstant(ConstantsEntity constantsEntity);
 }

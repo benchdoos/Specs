@@ -32,16 +32,19 @@ public class TreeSPTRecordBuilder {
         this.record = record;
     }
 
+    public TreeSPTRecord getTreeSPTRecord() {
+        return record;
+    }
+
     public TreeSPTRecordBuilder setDetail(DetailEntity detail) {
         record.setDetail(detail);
         return this;
     }
 
-    public TreeSPTRecordBuilder setQuantity(int quantity) {
-        record.setQuantity(quantity);
+    public TreeSPTRecordBuilder setInterchangeable(boolean interchangeable) {
+        record.setInterchangeable(interchangeable);
         return this;
     }
-
 
     public TreeSPTRecordBuilder setMaterials(List<Object> materials) {
         ArrayList<MaterialEntity> list = new ArrayList<>();
@@ -54,12 +57,8 @@ public class TreeSPTRecordBuilder {
         return this;
     }
 
-    public TreeSPTRecordBuilder setInterchangeable(boolean interchangeable) {
-        record.setInterchangeable(interchangeable);
+    public TreeSPTRecordBuilder setQuantity(int quantity) {
+        record.setQuantity(quantity);
         return this;
-    }
-
-    public TreeSPTRecord getTreeSPTRecord() {
-        return record;
     }
 }

@@ -79,29 +79,10 @@ public class ServerMonitoringGraphics {
         return chart;
     }
 
-    private void initCpuSystemGraphics(ArrayList<Float> cpuData) {
-        if (cpuSystemShow) {
-            XYSeries cpuSystem = chart.addSeries("ЦП (система)", xAges, cpuData);
-            cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
-            cpuSystem.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        }
-    }
-
-    private void initUsersGraphics(ArrayList<Float> usersCountData) {
-        if (usersShow) {
-            XYSeries users = chart.addSeries("Пользователи", xAges, usersCountData);
-            users.setMarker(SeriesMarkers.NONE).setLineColor(Color.DARK_GRAY);
-            users.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        }
-    }
-
-    private void initTemperatureCpuGraphics(ArrayList<Float> cpuTemperatureData) {
-        if (temperatureServerShow) {
-            String DEGREE = "\u00b0";
-            XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
-            temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
-            temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        }
+    private void initBackgroundColor(Color BACKGROUND_COLOR) {
+        chart.getStyler().setChartBackgroundColor(BACKGROUND_COLOR);
+        chart.getStyler().setLegendBackgroundColor(BACKGROUND_COLOR);
+        chart.getStyler().setPlotBackgroundColor(BACKGROUND_COLOR);
     }
 
     private void initCpuServerGraphics(ArrayList<Float> cpuServerData) {
@@ -112,21 +93,29 @@ public class ServerMonitoringGraphics {
         }
     }
 
+    private void initCpuSystemGraphics(ArrayList<Float> cpuData) {
+        if (cpuSystemShow) {
+            XYSeries cpuSystem = chart.addSeries("ЦП (система)", xAges, cpuData);
+            cpuSystem.setMarker(SeriesMarkers.NONE).setLineColor(Color.RED);
+            cpuSystem.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
+    }
+
+    private void initFont(Font defaultFont) {
+        chart.getStyler().setLegendFont(defaultFont);
+        chart.getStyler().setBaseFont(defaultFont);
+        chart.getStyler().setAnnotationsFont(defaultFont);
+        chart.getStyler().setAxisTitleFont(defaultFont);
+        chart.getStyler().setChartTitleFont(defaultFont);
+        chart.getStyler().setAxisTickLabelsFont(defaultFont);
+    }
+
     private void initServerRamGraphics(ArrayList<Float> serverMemoryData) {
         if (ramServerShow) {
             XYSeries serverMemory = chart.addSeries("ОЗУ (сервер)", xAges, serverMemoryData);
             serverMemory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
             serverMemory.setMarker(SeriesMarkers.NONE).setLineColor(Color.GREEN.darker());
             serverMemory.setFillColor(Color.GREEN.darker());
-        }
-    }
-
-    private void initSystemRamGraphics(ArrayList<Float> systemMemoryData) {
-        if (ramSystemShow) {
-            XYSeries systemMemory = chart.addSeries("ОЗУ (система)", xAges, systemMemoryData);
-            systemMemory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
-            systemMemory.setMarker(SeriesMarkers.NONE).setLineColor(new Color(239, 248, 255));
-            systemMemory.setFillColor(new Color(239, 248, 255));
         }
     }
 
@@ -145,39 +134,50 @@ public class ServerMonitoringGraphics {
         chart.getStyler().setPlotContentSize(1);
     }
 
-    private void initBackgroundColor(Color BACKGROUND_COLOR) {
-        chart.getStyler().setChartBackgroundColor(BACKGROUND_COLOR);
-        chart.getStyler().setLegendBackgroundColor(BACKGROUND_COLOR);
-        chart.getStyler().setPlotBackgroundColor(BACKGROUND_COLOR);
+    private void initSystemRamGraphics(ArrayList<Float> systemMemoryData) {
+        if (ramSystemShow) {
+            XYSeries systemMemory = chart.addSeries("ОЗУ (система)", xAges, systemMemoryData);
+            systemMemory.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Area);
+            systemMemory.setMarker(SeriesMarkers.NONE).setLineColor(new Color(239, 248, 255));
+            systemMemory.setFillColor(new Color(239, 248, 255));
+        }
     }
 
-    private void initFont(Font defaultFont) {
-        chart.getStyler().setLegendFont(defaultFont);
-        chart.getStyler().setBaseFont(defaultFont);
-        chart.getStyler().setAnnotationsFont(defaultFont);
-        chart.getStyler().setAxisTitleFont(defaultFont);
-        chart.getStyler().setChartTitleFont(defaultFont);
-        chart.getStyler().setAxisTickLabelsFont(defaultFont);
+    private void initTemperatureCpuGraphics(ArrayList<Float> cpuTemperatureData) {
+        if (temperatureServerShow) {
+            String DEGREE = "\u00b0";
+            XYSeries temperature = chart.addSeries(DEGREE + "C ЦП", xAges, cpuTemperatureData);
+            temperature.setMarker(SeriesMarkers.NONE).setLineColor(Color.ORANGE);
+            temperature.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
     }
 
-    public void setRamSystemShow(boolean ramSystemShow) {
-        this.ramSystemShow = ramSystemShow;
-    }
-
-    public void setCpuSystemShow(boolean cpuSystemShow) {
-        this.cpuSystemShow = cpuSystemShow;
-    }
-
-    public void setTemperatureServerShow(boolean temperatureServerShow) {
-        this.temperatureServerShow = temperatureServerShow;
+    private void initUsersGraphics(ArrayList<Float> usersCountData) {
+        if (usersShow) {
+            XYSeries users = chart.addSeries("Пользователи", xAges, usersCountData);
+            users.setMarker(SeriesMarkers.NONE).setLineColor(Color.DARK_GRAY);
+            users.setLineStyle(new BasicStroke(0.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        }
     }
 
     public void setCpuServerShow(boolean cpuServerShow) {
         this.cpuServerShow = cpuServerShow;
     }
 
+    public void setCpuSystemShow(boolean cpuSystemShow) {
+        this.cpuSystemShow = cpuSystemShow;
+    }
+
     public void setRamServerShow(boolean ramServerShow) {
         this.ramServerShow = ramServerShow;
+    }
+
+    public void setRamSystemShow(boolean ramSystemShow) {
+        this.ramSystemShow = ramSystemShow;
+    }
+
+    public void setTemperatureServerShow(boolean temperatureServerShow) {
+        this.temperatureServerShow = temperatureServerShow;
     }
 
     public void setUsersShow(boolean usersShow) {

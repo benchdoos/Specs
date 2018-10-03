@@ -22,24 +22,21 @@ import com.mmz.specs.model.UsersEntity;
 import java.util.List;
 
 public interface NoticeService {
-    public void setNoticeDao(NoticeDao noticeDao);
+    int addNotice(NoticeEntity noticeEntity);
 
-    public NoticeDao getNoticeDao();
+    NoticeEntity getNoticeById(int id);
 
+    NoticeEntity getNoticeByNumber(String number);
 
-    public int addNotice(NoticeEntity noticeEntity);
+    NoticeDao getNoticeDao();
 
-    public void updateNotice(NoticeEntity noticeEntity);
+    void setNoticeDao(NoticeDao noticeDao);
 
-    public void removeNotice(int id);
+    List<NoticeEntity> listNotices();
 
+    List<NoticeEntity> listNoticesByUser(UsersEntity entity);
 
-    public NoticeEntity getNoticeById(int id);
+    void removeNotice(int id);
 
-    public NoticeEntity getNoticeByNumber(String number);
-
-
-    public List<NoticeEntity> listNoticesByUser(UsersEntity entity);
-
-    public List<NoticeEntity> listNotices();
+    void updateNotice(NoticeEntity noticeEntity);
 }

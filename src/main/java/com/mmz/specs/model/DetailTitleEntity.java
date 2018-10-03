@@ -38,42 +38,12 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
     public DetailTitleEntity() {
     }
 
-    @Id
-    @Column(name = "ID")
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Basic
-    @Column(name = "TITLE")
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @Basic
-    @Column(name = "IS_ACTIVE")
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (active ? 1 : 0);
-        return result;
+    public int compareTo(@Nonnull DetailTitleEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getTitle(), that.getTitle())
+                .compareTrueFirst(this.isActive(), that.isActive())
+                .result();
     }
 
     @Override
@@ -98,6 +68,44 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
                 .isEquals();
     }
 
+    @Id
+    @Column(name = "ID")
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Basic
+    @Column(name = "TITLE")
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (active ? 1 : 0);
+        return result;
+    }
+
+    @Basic
+    @Column(name = "IS_ACTIVE")
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -105,13 +113,5 @@ public class DetailTitleEntity implements Comparable<DetailTitleEntity> {
                 .append("title", title)
                 .append("active", active)
                 .toString();
-    }
-
-    @Override
-    public int compareTo(@Nonnull DetailTitleEntity that) {
-        return ComparisonChain.start()
-                .compare(this.getTitle(), that.getTitle())
-                .compareTrueFirst(this.isActive(), that.isActive())
-                .result();
     }
 }

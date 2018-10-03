@@ -43,47 +43,12 @@ public class MaterialListDaoImpl implements MaterialListDao {
     }
 
     @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
     @Transactional
     public long addMaterialList(MaterialListEntity materialListEntity) {
         Long id = (Long) session.save(materialListEntity);
         materialListEntity = getMaterialListById(id);
         log.debug("MaterialList successfully saved: " + materialListEntity);
         return id;
-    }
-
-    @Override
-    @Transactional
-    public void updateMaterialList(MaterialListEntity materialListEntity) {
-        session.merge(materialListEntity);
-        log.debug("MaterialList successfully updated: " + materialListEntity);
-    }
-
-    @Override
-    @Transactional
-    public void removeMaterialList(long id) {
-        MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
-        if (materialListEntity != null) {
-            session.delete(materialListEntity);
-        }
-        log.debug("MaterialList successfully removed: " + materialListEntity);
-    }
-
-    @Override
-    @Transactional
-    public MaterialListEntity getMaterialListById(long id) {
-        MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
-        log.debug("MaterialList found by id:" + id + " " + materialListEntity);
-        return materialListEntity;
     }
 
     @Override
@@ -102,6 +67,24 @@ public class MaterialListDaoImpl implements MaterialListDao {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public MaterialListEntity getMaterialListById(long id) {
+        MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
+        log.debug("MaterialList found by id:" + id + " " + materialListEntity);
+        return materialListEntity;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     @Override
@@ -130,5 +113,22 @@ public class MaterialListDaoImpl implements MaterialListDao {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void removeMaterialList(long id) {
+        MaterialListEntity materialListEntity = session.load(MaterialListEntity.class, id);
+        if (materialListEntity != null) {
+            session.delete(materialListEntity);
+        }
+        log.debug("MaterialList successfully removed: " + materialListEntity);
+    }
+
+    @Override
+    @Transactional
+    public void updateMaterialList(MaterialListEntity materialListEntity) {
+        session.merge(materialListEntity);
+        log.debug("MaterialList successfully updated: " + materialListEntity);
     }
 }

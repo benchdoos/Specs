@@ -54,6 +54,16 @@ class ServerSocketDialogUtils {
         return "Unknown";
     }
 
+    String getUserName() {
+        try {
+            DataInputStream in = new DataInputStream(client.getInputStream());
+            return in.readUTF();
+        } catch (IOException e) {
+            log.info("Could not read client's username", e);
+        }
+        return "Unknown";
+    }
+
     void sendSessionInfo() {
         try {
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
@@ -68,16 +78,6 @@ class ServerSocketDialogUtils {
         } catch (IOException e) {
             log.warn("Could not send session info for client");
         }
-    }
-
-    String getUserName() {
-        try {
-            DataInputStream in = new DataInputStream(client.getInputStream());
-            return in.readUTF();
-        } catch (IOException e) {
-            log.info("Could not read client's username", e);
-        }
-        return "Unknown";
     }
 
     void sendTransaction() {

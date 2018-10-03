@@ -23,9 +23,7 @@ import java.net.Socket;
 public interface ClientConnection {
 
 
-    UsersEntity getUser();
-
-    void setUser(UsersEntity user);
+    void close() throws IOException;
 
     /**
      * @return Client socket
@@ -34,7 +32,9 @@ public interface ClientConnection {
 
     void setSocket(Socket socket);
 
-    void close() throws IOException;
+    UsersEntity getUser();
+
+    void setUser(UsersEntity user);
 
     String toString();
 }

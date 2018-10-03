@@ -39,39 +39,12 @@ public class NoticeDaoImpl implements NoticeDao {
     }
 
     @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
     @Transactional
     public int addNotice(NoticeEntity noticeEntity) {
         Integer id = (Integer) session.save(noticeEntity);
         noticeEntity = getNoticeById(id);
         log.debug("User successfully saved: " + noticeEntity);
         return id;
-    }
-
-    @Override
-    @Transactional
-    public void updateNotice(NoticeEntity noticeEntity) {
-        session.merge(noticeEntity);
-        log.debug("Notice successfully updated: " + noticeEntity);
-    }
-
-    @Override
-    @Transactional
-    public void removeNotice(int id) {
-        NoticeEntity noticeEntity = session.load(NoticeEntity.class, id);
-        if (noticeEntity != null) {
-            session.delete(noticeEntity);
-        }
-        log.debug("Notice successfully removed: " + noticeEntity);
     }
 
     @Override
@@ -91,6 +64,32 @@ public class NoticeDaoImpl implements NoticeDao {
         final NoticeEntity entity = (NoticeEntity) query.uniqueResult();
         log.debug("Notice successfully found by number: " + number + " " + entity);
         return entity;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    @Override
+    @Transactional
+    public List<NoticeEntity> listNotices() {
+        List list = session.createQuery("from NoticeEntity").list();
+        List<NoticeEntity> result = new ArrayList<>(list.size());
+
+        for (Object noticeEntity : list) {
+            if (noticeEntity instanceof NoticeEntity) {
+                result.add((NoticeEntity) noticeEntity);
+            } else {
+                log.warn("Not Notice from list: " + noticeEntity);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -133,17 +132,18 @@ public class NoticeDaoImpl implements NoticeDao {
 
     @Override
     @Transactional
-    public List<NoticeEntity> listNotices() {
-        List list = session.createQuery("from NoticeEntity").list();
-        List<NoticeEntity> result = new ArrayList<>(list.size());
-
-        for (Object noticeEntity : list) {
-            if (noticeEntity instanceof NoticeEntity) {
-                result.add((NoticeEntity) noticeEntity);
-            } else {
-                log.warn("Not Notice from list: " + noticeEntity);
-            }
+    public void removeNotice(int id) {
+        NoticeEntity noticeEntity = session.load(NoticeEntity.class, id);
+        if (noticeEntity != null) {
+            session.delete(noticeEntity);
         }
-        return result;
+        log.debug("Notice successfully removed: " + noticeEntity);
+    }
+
+    @Override
+    @Transactional
+    public void updateNotice(NoticeEntity noticeEntity) {
+        session.merge(noticeEntity);
+        log.debug("Notice successfully updated: " + noticeEntity);
     }
 }

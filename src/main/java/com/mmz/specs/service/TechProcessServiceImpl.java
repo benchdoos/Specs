@@ -33,28 +33,13 @@ public class TechProcessServiceImpl implements TechProcessService {
     }
 
     @Override
-    public void setTechProcessDao(TechProcessDao techProcessDao) {
-        this.techProcessDao = techProcessDao;
-    }
-
-    @Override
-    public TechProcessDao getTechProcessDao() {
-        return techProcessDao;
-    }
-
-    @Override
     public int addTechProcess(TechProcessEntity techProcessEntity) {
         return techProcessDao.addTechProcess(techProcessEntity);
     }
 
     @Override
-    public void updateTechProcess(TechProcessEntity techProcessEntity) {
-        techProcessDao.updateTechProcess(techProcessEntity);
-    }
-
-    @Override
-    public void removeTechProcess(int id) {
-        techProcessDao.removeTechProcess(id);
+    public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString) {
+        return techProcessDao.getTechProcessByAlikeValue(searchingString);
     }
 
     @Override
@@ -68,12 +53,27 @@ public class TechProcessServiceImpl implements TechProcessService {
     }
 
     @Override
-    public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString) {
-        return techProcessDao.getTechProcessByAlikeValue(searchingString);
+    public TechProcessDao getTechProcessDao() {
+        return techProcessDao;
+    }
+
+    @Override
+    public void setTechProcessDao(TechProcessDao techProcessDao) {
+        this.techProcessDao = techProcessDao;
     }
 
     @Override
     public List<TechProcessEntity> listTechProcesses() {
         return techProcessDao.listTechProcesses();
+    }
+
+    @Override
+    public void removeTechProcess(int id) {
+        techProcessDao.removeTechProcess(id);
+    }
+
+    @Override
+    public void updateTechProcess(TechProcessEntity techProcessEntity) {
+        techProcessDao.updateTechProcess(techProcessEntity);
     }
 }

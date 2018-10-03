@@ -21,24 +21,21 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface TechProcessDao {
-    public void setSession(Session session);
+    int addTechProcess(TechProcessEntity techProcessEntity);
 
-    public Session getSession();
+    Session getSession();
 
+    void setSession(Session session);
 
-    public int addTechProcess(TechProcessEntity techProcessEntity);
+    List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString);
 
-    public void updateTechProcess(TechProcessEntity techProcessEntity);
+    TechProcessEntity getTechProcessById(int id);
 
-    public void removeTechProcess(int id);
+    TechProcessEntity getTechProcessByValue(String value);
 
+    List<TechProcessEntity> listTechProcesses();
 
-    public TechProcessEntity getTechProcessById(int id);
+    void removeTechProcess(int id);
 
-    public TechProcessEntity getTechProcessByValue(String value);
-
-    public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString);
-
-
-    public List<TechProcessEntity> listTechProcesses();
+    void updateTechProcess(TechProcessEntity techProcessEntity);
 }

@@ -32,20 +32,6 @@ public class ServerLogMessage {
         this.level = level;
     }
 
-    public String getFormattedMessage() {
-        Date date = new Date(time);
-        String dateString = new SimpleDateFormat("HH:mm:ss").format(date);
-        return "[" + dateString + "]\t" + message.replace("\n", " ");
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (int) (time ^ (time >>> 32));
-        result = 31 * result + message.hashCode();
-        result = 31 * result + level.hashCode();
-        return result;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -58,21 +44,10 @@ public class ServerLogMessage {
         return level == that.level;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("time", time)
-                .append("message", message)
-                .append("level", level)
-                .toString();
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public String getFormattedMessage() {
+        Date date = new Date(time);
+        String dateString = new SimpleDateFormat("HH:mm:ss").format(date);
+        return "[" + dateString + "]\t" + message.replace("\n", " ");
     }
 
     public ServerLogMessageLevel getLevel() {
@@ -83,8 +58,33 @@ public class ServerLogMessage {
         this.level = level;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public long getTime() {
         return time;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (time ^ (time >>> 32));
+        result = 31 * result + message.hashCode();
+        result = 31 * result + level.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("time", time)
+                .append("message", message)
+                .append("level", level)
+                .toString();
     }
 
     public enum ServerLogMessageLevel {

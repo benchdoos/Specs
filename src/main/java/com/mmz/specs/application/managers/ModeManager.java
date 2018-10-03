@@ -16,8 +16,8 @@
 package com.mmz.specs.application.managers;
 
 public class ModeManager {
-    private static MODE currentMode;
     public static final MODE DEFAULT_MODE = MODE.CLIENT;
+    private static MODE currentMode;
 
     public static MODE getCurrentMode() {
         return currentMode;

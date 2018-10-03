@@ -47,11 +47,9 @@ import java.util.Calendar;
 import static com.mmz.specs.application.core.ApplicationConstants.APPLICATION_EXPORT_FOLDER_LOCATION;
 
 public class SPTreeIOManager implements IOManager {
-    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     public static final String JSON_FILE_NAME = "tree.json";
     public static final String IMAGES_FOLDER_FILE_NAME = "images";
-
-
+    private static final Logger log = LogManager.getLogger(Logging.getCurrentClassName());
     private Session session = null;
     private String datePattern = "dd.MM.yyyy HH.mm";
     private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
@@ -67,6 +65,58 @@ public class SPTreeIOManager implements IOManager {
     public SPTreeIOManager(ProgressManager progressManager) {
         this.progressManager = progressManager;
         this.session = null;
+    }
+
+    public static JsonObject loadJsonFromFile(File file) throws IOException {
+        String content = FileUtils.readFileToString(file, "utf-8");
+
+        /*GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
+        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
+        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
+        Gson gson = builder.create();
+        final JsonElement jsonElement = gson.toJsonTree(content);*/
+
+        JsonElement jelement = new JsonParser().parse(content);
+        JsonObject jobject = jelement.getAsJsonObject();
+
+
+        return jobject;
+
+    }
+
+    public static Gson getDefaultGson() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+        builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
+        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
+        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
+        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
+        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
+        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
+        return builder.create();
+    }
+
+    private void checkCreate(File file) throws IOException {
+        log.debug("Checking ability to create file: {}", file);
+        progressManager.setText("Проверка доступности файла");
+
+        new File(APPLICATION_EXPORT_FOLDER_LOCATION).mkdirs();
+
+        if (!file.createNewFile()) {
+            log.warn("Can not create file: {}", file);
+            log.warn("File exists: {}", file.exists());
+            throw new IOException("Can not write data to file: " + file + ". File exists: " + file.exists());
+        } else {
+            log.debug("Testing file deleted: " + file.delete());
+        }
+    }
+
+    private File createFolder(File file) {
+        final File folder = new File(file.getParentFile() + File.separator + dateFormatter.format(Calendar.getInstance().getTime()).replace(" ", "_"));
+        folder.mkdirs();
+        return folder;
     }
 
     @Override
@@ -114,18 +164,6 @@ public class SPTreeIOManager implements IOManager {
         }
     }
 
-    private void removeTrash(File folder) {
-        log.debug("Deleting temp folder: {}", folder);
-        progressManager.setText("Удаляем временные файлы");
-        progressManager.setCurrentProgress(0);
-        try {
-            FileUtils.deleteDirectory(folder);
-            progressManager.setCurrentProgress(100);
-        } catch (IOException e) {
-            log.warn("Could not delete folder: {}", folder, e);
-        }
-    }
-
     private File exportTree(File folder, JsonObject treeJSON) throws IOException {
         progressManager.setText("Экспорт дерева");
         final File jsonFile = new File(folder + File.separator + JSON_FILE_NAME);
@@ -135,28 +173,6 @@ public class SPTreeIOManager implements IOManager {
         }
         return jsonFile;
     }
-
-    private File createFolder(File file) {
-        final File folder = new File(file.getParentFile() + File.separator + dateFormatter.format(Calendar.getInstance().getTime()).replace(" ", "_"));
-        folder.mkdirs();
-        return folder;
-    }
-
-    private void checkCreate(File file) throws IOException {
-        log.debug("Checking ability to create file: {}", file);
-        progressManager.setText("Проверка доступности файла");
-
-        new File(APPLICATION_EXPORT_FOLDER_LOCATION).mkdirs();
-
-        if (!file.createNewFile()) {
-            log.warn("Can not create file: {}", file);
-            log.warn("File exists: {}", file.exists());
-            throw new IOException("Can not write data to file: " + file + ". File exists: " + file.exists());
-        } else {
-            log.debug("Testing file deleted: " + file.delete());
-        }
-    }
-
 
     @Override
     public Object importData(File sptFile) throws IOException {
@@ -177,25 +193,6 @@ public class SPTreeIOManager implements IOManager {
         return null;
     }
 
-    public static JsonObject loadJsonFromFile(File file) throws IOException {
-        String content = FileUtils.readFileToString(file, "utf-8");
-
-        /*GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
-        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
-        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
-        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
-        Gson gson = builder.create();
-        final JsonElement jsonElement = gson.toJsonTree(content);*/
-
-        JsonElement jelement = new JsonParser().parse(content);
-        JsonObject jobject = jelement.getAsJsonObject();
-
-
-        return jobject;
-
-    }
-
     private boolean isFileSPT(File file) {
         if (file != null) {
             if (file.exists()) {
@@ -206,15 +203,15 @@ public class SPTreeIOManager implements IOManager {
         return false;
     }
 
-    public static Gson getDefaultGson() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
-        builder.registerTypeAdapter(DetailEntity.class, new DetailEntitySerializer());
-        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntitySerializer());
-        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntitySerializer());
-        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
-        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
-        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
-        return builder.create();
+    private void removeTrash(File folder) {
+        log.debug("Deleting temp folder: {}", folder);
+        progressManager.setText("Удаляем временные файлы");
+        progressManager.setCurrentProgress(0);
+        try {
+            FileUtils.deleteDirectory(folder);
+            progressManager.setCurrentProgress(100);
+        } catch (IOException e) {
+            log.warn("Could not delete folder: {}", folder, e);
+        }
     }
 }

@@ -23,41 +23,39 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface DetailListDao {
+    long addDetailList(DetailListEntity detailListEntity);
+
+    List<DetailListEntity> getDetailListByChild(DetailEntity detailEntity);
+
+    List<DetailListEntity> getDetailListByChild(String detailEntityIndex);
+
+    DetailListEntity getDetailListById(long id);
+
+    List<DetailListEntity> getDetailListByNoticeId(int id);
+
+    List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity);
+
+    List<DetailListEntity> getDetailListByParent(String detailEntityIndex);
+
+    List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child);
+
+    DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity latestNotice);
+
+    List<DetailListEntity> getDetailListBySearch(String searchText);
+
+    DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child);
+
     Session getSession();
 
     void setSession(Session session);
 
-    long addDetailList(DetailListEntity detailListEntity);
-
-    void updateDetailList(DetailListEntity detailListEntity);
-
-    void removeDetailList(long id);
-
-
-    DetailListEntity getDetailListById(long id);
-
-    DetailListEntity getDetailListByParentAndChildAndNotice(DetailEntity parent, DetailEntity child, NoticeEntity latestNotice);
-
-    DetailListEntity getLatestDetailListEntityByParentAndChild(DetailEntity parent, DetailEntity child);
-
-    List<DetailListEntity> getDetailListByParent(DetailEntity detailEntity);
-
-    List<DetailListEntity> getDetailListByChild(DetailEntity detailEntity);
-
-    List<DetailListEntity> getDetailListByParent(String detailEntityIndex);
-
-    List<DetailListEntity> getDetailListByChild(String detailEntityIndex);
-
-    List<DetailListEntity> getDetailListByNoticeId(int id);
-
-    List<DetailListEntity> getDetailListBySearch(String searchText);
-
-    List<DetailListEntity> getDetailListByParentAndChild(DetailEntity parent, DetailEntity child);
-
-
-    List<DetailEntity> listParents(DetailEntity detailEntity);
-
     List<DetailEntity> listChildren(DetailEntity detailEntity);
 
     List<DetailListEntity> listDetailLists();
+
+    List<DetailEntity> listParents(DetailEntity detailEntity);
+
+    void removeDetailList(long id);
+
+    void updateDetailList(DetailListEntity detailListEntity);
 }

@@ -53,19 +53,19 @@ public class ButtonTabComponent extends JPanel {
         //make JLabel read titles from JTabbedPane
         JLabel label = new JLabel() {
             @Override
-            public String getText() {
+            public Icon getIcon() {
                 int i = pane.indexOfTabComponent(ButtonTabComponent.this);
                 if (i != -1) {
-                    return pane.getTitleAt(i);
+                    return pane.getIconAt(i);
                 }
                 return null;
             }
 
             @Override
-            public Icon getIcon() {
+            public String getText() {
                 int i = pane.indexOfTabComponent(ButtonTabComponent.this);
                 if (i != -1) {
-                    return pane.getIconAt(i);
+                    return pane.getTitleAt(i);
                 }
                 return null;
             }
@@ -81,14 +81,14 @@ public class ButtonTabComponent extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
     }
 
-    private void manageTransactions(int i) {
-        Transactional transactional = (Transactional) pane.getComponentAt(i);
-        transactional.rollbackTransaction();
-    }
-
     private void manageCleanable(int i) {
         Cleanable cleanable = (Cleanable) pane.getComponentAt(i);
         cleanable.clean();
+    }
+
+    private void manageTransactions(int i) {
+        Transactional transactional = (Transactional) pane.getComponentAt(i);
+        transactional.rollbackTransaction();
     }
 
     private class TabButton extends JButton implements ActionListener {
@@ -132,10 +132,6 @@ public class ButtonTabComponent extends JPanel {
             }
         }
 
-        //we don't want to update UI for this button
-        public void updateUI() {
-        }
-
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
@@ -152,6 +148,10 @@ public class ButtonTabComponent extends JPanel {
                 g2.drawImage(grayCircle, 0, 0, null);
             }
             g2.dispose();
+        }
+
+        //we don't want to update UI for this button
+        public void updateUI() {
         }
     }
 }

@@ -34,54 +34,14 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
     private DetailEntity detailByChildDetailId;
     private NoticeEntity noticeByNoticeId;
 
-    @Id
-    @Column(name = "ID")
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    @Basic
-    @Column(name = "QUANTITY")
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    @Basic
-    @Column(name = "IS_INTERCHANGEABLE_NODE")
-    public boolean isInterchangeableNode() {
-        return isInterchangeableNode;
-    }
-
-    public void setInterchangeableNode(boolean interchangeableNode) {
-        isInterchangeableNode = interchangeableNode;
-    }
-
-    @Basic
-    @Column(name = "IS_ACTIVE")
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(id)
-                .append(quantity)
-                .append(isInterchangeableNode)
-                .append(isActive)
-                .toHashCode();
+    public int compareTo(@Nonnull DetailListEntity that) {
+        return ComparisonChain.start()
+                .compare(this.getDetailByParentDetailId(), that.getDetailByParentDetailId())
+                .compare(this.getDetailByChildDetailId(), that.getDetailByChildDetailId())
+                .compareTrueFirst(this.isActive(), that.isActive())
+                .compareTrueFirst(this.isInterchangeableNode(), that.isInterchangeableNode())
+                .result();
     }
 
     @Override
@@ -98,6 +58,46 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
                 .append(isInterchangeableNode, that.isInterchangeableNode)
                 .append(isActive, that.isActive)
                 .isEquals();
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "CHILD_DETAIL_ID", referencedColumnName = "ID", nullable = false)
+    public DetailEntity getDetailByChildDetailId() {
+        return detailByChildDetailId;
+    }
+
+    public void setDetailByChildDetailId(DetailEntity detailByChildDetailId) {
+        this.detailByChildDetailId = detailByChildDetailId;
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "PARENT_DETAIL_ID", referencedColumnName = "ID", nullable = false)
+    public DetailEntity getDetailByParentDetailId() {
+        return detailByParentDetailId;
+    }
+
+    public void setDetailByParentDetailId(DetailEntity detailByParentDetailId) {
+        this.detailByParentDetailId = detailByParentDetailId;
+    }
+
+    @Id
+    @Column(name = "ID")
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "NOTICE_ID", referencedColumnName = "ID", nullable = false)
+    public NoticeEntity getNoticeByNoticeId() {
+        return noticeByNoticeId;
+    }
+
+    public void setNoticeByNoticeId(NoticeEntity noticeByNoticeId) {
+        this.noticeByNoticeId = noticeByNoticeId;
     }
 
 
@@ -120,6 +120,46 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
         return true;
     }*/
 
+    @Basic
+    @Column(name = "QUANTITY")
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(quantity)
+                .append(isInterchangeableNode)
+                .append(isActive)
+                .toHashCode();
+    }
+
+    @Basic
+    @Column(name = "IS_ACTIVE")
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    @Basic
+    @Column(name = "IS_INTERCHANGEABLE_NODE")
+    public boolean isInterchangeableNode() {
+        return isInterchangeableNode;
+    }
+
+    public void setInterchangeableNode(boolean interchangeableNode) {
+        isInterchangeableNode = interchangeableNode;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -131,45 +171,5 @@ public class DetailListEntity implements Comparable<DetailListEntity> {
                 .append("detailByChildDetailId", detailByChildDetailId)
                 .append("noticeByNoticeId", noticeByNoticeId)
                 .toString();
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "PARENT_DETAIL_ID", referencedColumnName = "ID", nullable = false)
-    public DetailEntity getDetailByParentDetailId() {
-        return detailByParentDetailId;
-    }
-
-    public void setDetailByParentDetailId(DetailEntity detailByParentDetailId) {
-        this.detailByParentDetailId = detailByParentDetailId;
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "CHILD_DETAIL_ID", referencedColumnName = "ID", nullable = false)
-    public DetailEntity getDetailByChildDetailId() {
-        return detailByChildDetailId;
-    }
-
-    public void setDetailByChildDetailId(DetailEntity detailByChildDetailId) {
-        this.detailByChildDetailId = detailByChildDetailId;
-    }
-
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "NOTICE_ID", referencedColumnName = "ID", nullable = false)
-    public NoticeEntity getNoticeByNoticeId() {
-        return noticeByNoticeId;
-    }
-
-    public void setNoticeByNoticeId(NoticeEntity noticeByNoticeId) {
-        this.noticeByNoticeId = noticeByNoticeId;
-    }
-
-    @Override
-    public int compareTo(@Nonnull DetailListEntity that) {
-        return ComparisonChain.start()
-                .compare(this.getDetailByParentDetailId(), that.getDetailByParentDetailId())
-                .compare(this.getDetailByChildDetailId(), that.getDetailByChildDetailId())
-                .compareTrueFirst(this.isActive(), that.isActive())
-                .compareTrueFirst(this.isInterchangeableNode(), that.isInterchangeableNode())
-                .result();
     }
 }

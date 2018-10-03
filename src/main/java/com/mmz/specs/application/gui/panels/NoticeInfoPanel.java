@@ -49,7 +49,6 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
     private DetailEntity detailEntity;
     private ActionListener notifyUserIsActiveListener = FrameUtils.getNotifyUserIsActiveActionListener(this);
 
-
     public NoticeInfoPanel(Session session, List<NoticeEntity> noticeEntities) {
 
         this.session = session;
@@ -57,177 +56,6 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
 
         initGui();
 
-    }
-
-    public void setDetailEntity(DetailEntity detailEntity) {
-        this.detailEntity = detailEntity;
-    }
-
-    private void initGui() {
-        setLayout(new GridLayout());
-        add(contentPane);
-
-        initNoticeList();
-        updateNoticeList();
-        initDetailEffectedList();
-
-        initListeners();
-
-        initUpdateUserIsActiveListeners();
-
-    }
-
-    private void initUpdateUserIsActiveListeners() {
-        noticeList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
-        detailEffectedList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
-    }
-
-    private void initDetailInfoLabel() {
-        if (detailEntity != null) {
-            detailInfoLabel.setText("Извещения, которые затрагивают " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
-        } else detailInfoLabel.setVisible(false);
-    }
-
-    private void updateNoticeList() {
-        DefaultListModel<NoticeEntity> model = new DefaultListModel<>();
-        for (NoticeEntity entity : noticeEntities) {
-            model.addElement(entity);
-        }
-        noticeList.setModel(model);
-
-
-        if (noticeList.getModel().getSize() >= 0) {
-            noticeList.setSelectedIndex(0);
-        }
-
-    }
-
-    private void initNoticeList() {
-        noticeList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof NoticeEntity) {
-                    NoticeEntity entity = (NoticeEntity) value;
-                    return super.getListCellRendererComponent(list, entity.getNumber(), index, isSelected, cellHasFocus);
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
-
-
-        noticeList.addListSelectionListener(e -> {
-            final int selectedIndex = noticeList.getSelectedIndex();
-            if (selectedIndex >= 0) {
-                updateNoticeInfo(noticeList.getModel().getElementAt(selectedIndex));
-            } else {
-                updateNoticeInfo(null);
-            }
-        });
-    }
-
-    private void initDetailEffectedList() {
-        detailEffectedList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof DetailEntity) {
-                    DetailEntity entity = (DetailEntity) value;
-                    return super.getListCellRendererComponent(list, entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle(), index, isSelected, cellHasFocus);
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
-    }
-
-    private void initListeners() {
-        detailEffectedList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (e.getClickCount() == 2) {
-                        openDetailInfo(true);
-                    }
-                } else if (e.getButton() == MouseEvent.BUTTON2) {
-                    openDetailInfo(false);
-                }
-            }
-        });
-
-        detailEffectedList.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    openDetailInfo(true);
-                }
-            }
-        });
-    }
-
-    private void openDetailInfo(boolean select) {
-        final DetailEntity selectedDetail = detailEffectedList.getSelectedValue();
-        if (selectedDetail != null) {
-            DetailInfoPanel detailInfoPanel = new DetailInfoPanel(selectedDetail);
-            String iconPath = selectedDetail.isUnit() ? "/img/gui/tree/unitOpened.png" : "/img/gui/tree/detail.png";
-
-            new MainWindowUtils(session).getClientMainWindow(this).addTab("Информация о детали",
-                    new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource(iconPath))),
-                    detailInfoPanel, select);
-        }
-    }
-
-    private void updateNoticeInfo(NoticeEntity selectedValue) {
-        if (selectedValue != null) {
-            numberLabel.setText(selectedValue.getNumber());
-
-            dateLabel.setText(selectedValue.getDate() != null ?
-                    ApplicationConstants.DEFAULT_DATE_FORMAT.format(selectedValue.getDate()) : NO_DATA_STRING);
-
-            userLabel.setText(selectedValue.getUsersByProvidedByUserId().getName()
-                    + " " + selectedValue.getUsersByProvidedByUserId().getSurname());
-
-            descriptionTextArea.setText(selectedValue.getDescription());
-            descriptionTextArea.setCaretPosition(0);
-
-            noticeCreatedByUserLabel.setText(
-                    selectedValue.getAuthorByUserId() == null ? NO_DATA_STRING :
-                            selectedValue.getAuthorByUserId().getName() + " " + selectedValue.getAuthorByUserId().getSurname());
-
-            noticeCreationDateLabel.setText(selectedValue.getCreationDate() != null ?
-                    ApplicationConstants.DEFAULT_DATE_FORMAT.format(selectedValue.getCreationDate()) : NO_DATA_STRING);
-
-
-            ListModel<DetailEntity> effectList = new CommonWindowUtils(session).getEffectList(selectedValue.getId());
-
-            if (effectList != null) {
-                detailEffectedList.setModel(effectList);
-            } else {
-                detailEffectedList.setModel(new DefaultListModel<>());
-            }
-        } else {
-            numberLabel.setText(NO_DATA_STRING);
-            dateLabel.setText(NO_DATA_STRING);
-            userLabel.setText(NO_DATA_STRING);
-            descriptionTextArea.setText(NO_DATA_STRING);
-            noticeCreatedByUserLabel.setText(NO_DATA_STRING);
-            noticeCreationDateLabel.setText(NO_DATA_STRING);
-
-            detailEffectedList.setModel(new DefaultListModel<>());
-        }
-    }
-
-    @Override
-    public void setVisible(boolean aFlag) {
-        initDetailInfoLabel();
-        super.setVisible(aFlag);
-    }
-
-    @Override
-    public AccessPolicyManager getPolicyManager() {
-        return new AccessPolicyManager(false, false);
-    }
-
-    @Override
-    public void setUIEnabled(boolean enable) {
-        /*NOP*/
     }
 
     {
@@ -335,5 +163,176 @@ public class NoticeInfoPanel extends JPanel implements AccessPolicy {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    @Override
+    public AccessPolicyManager getPolicyManager() {
+        return new AccessPolicyManager(false, false);
+    }
+
+    private void initDetailEffectedList() {
+        detailEffectedList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailEntity) {
+                    DetailEntity entity = (DetailEntity) value;
+                    return super.getListCellRendererComponent(list, entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle(), index, isSelected, cellHasFocus);
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+    }
+
+    private void initDetailInfoLabel() {
+        if (detailEntity != null) {
+            detailInfoLabel.setText("Извещения, которые затрагивают " + detailEntity.getCode() + " " + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+        } else detailInfoLabel.setVisible(false);
+    }
+
+    private void initGui() {
+        setLayout(new GridLayout());
+        add(contentPane);
+
+        initNoticeList();
+        updateNoticeList();
+        initDetailEffectedList();
+
+        initListeners();
+
+        initUpdateUserIsActiveListeners();
+
+    }
+
+    private void initListeners() {
+        detailEffectedList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (e.getClickCount() == 2) {
+                        openDetailInfo(true);
+                    }
+                } else if (e.getButton() == MouseEvent.BUTTON2) {
+                    openDetailInfo(false);
+                }
+            }
+        });
+
+        detailEffectedList.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    openDetailInfo(true);
+                }
+            }
+        });
+    }
+
+    private void initNoticeList() {
+        noticeList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof NoticeEntity) {
+                    NoticeEntity entity = (NoticeEntity) value;
+                    return super.getListCellRendererComponent(list, entity.getNumber(), index, isSelected, cellHasFocus);
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+
+
+        noticeList.addListSelectionListener(e -> {
+            final int selectedIndex = noticeList.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                updateNoticeInfo(noticeList.getModel().getElementAt(selectedIndex));
+            } else {
+                updateNoticeInfo(null);
+            }
+        });
+    }
+
+    private void initUpdateUserIsActiveListeners() {
+        noticeList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+        detailEffectedList.addListSelectionListener(e -> notifyUserIsActiveListener.actionPerformed(null));
+    }
+
+    private void openDetailInfo(boolean select) {
+        final DetailEntity selectedDetail = detailEffectedList.getSelectedValue();
+        if (selectedDetail != null) {
+            DetailInfoPanel detailInfoPanel = new DetailInfoPanel(selectedDetail);
+            String iconPath = selectedDetail.isUnit() ? "/img/gui/tree/unitOpened.png" : "/img/gui/tree/detail.png";
+
+            new MainWindowUtils(session).getClientMainWindow(this).addTab("Информация о детали",
+                    new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource(iconPath))),
+                    detailInfoPanel, select);
+        }
+    }
+
+    public void setDetailEntity(DetailEntity detailEntity) {
+        this.detailEntity = detailEntity;
+    }
+
+    @Override
+    public void setUIEnabled(boolean enable) {
+        /*NOP*/
+    }
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        initDetailInfoLabel();
+        super.setVisible(aFlag);
+    }
+
+    private void updateNoticeInfo(NoticeEntity selectedValue) {
+        if (selectedValue != null) {
+            numberLabel.setText(selectedValue.getNumber());
+
+            dateLabel.setText(selectedValue.getDate() != null ?
+                    ApplicationConstants.DEFAULT_DATE_FORMAT.format(selectedValue.getDate()) : NO_DATA_STRING);
+
+            userLabel.setText(selectedValue.getUsersByProvidedByUserId().getName()
+                    + " " + selectedValue.getUsersByProvidedByUserId().getSurname());
+
+            descriptionTextArea.setText(selectedValue.getDescription());
+            descriptionTextArea.setCaretPosition(0);
+
+            noticeCreatedByUserLabel.setText(
+                    selectedValue.getAuthorByUserId() == null ? NO_DATA_STRING :
+                            selectedValue.getAuthorByUserId().getName() + " " + selectedValue.getAuthorByUserId().getSurname());
+
+            noticeCreationDateLabel.setText(selectedValue.getCreationDate() != null ?
+                    ApplicationConstants.DEFAULT_DATE_FORMAT.format(selectedValue.getCreationDate()) : NO_DATA_STRING);
+
+
+            ListModel<DetailEntity> effectList = new CommonWindowUtils(session).getEffectList(selectedValue.getId());
+
+            if (effectList != null) {
+                detailEffectedList.setModel(effectList);
+            } else {
+                detailEffectedList.setModel(new DefaultListModel<>());
+            }
+        } else {
+            numberLabel.setText(NO_DATA_STRING);
+            dateLabel.setText(NO_DATA_STRING);
+            userLabel.setText(NO_DATA_STRING);
+            descriptionTextArea.setText(NO_DATA_STRING);
+            noticeCreatedByUserLabel.setText(NO_DATA_STRING);
+            noticeCreationDateLabel.setText(NO_DATA_STRING);
+
+            detailEffectedList.setModel(new DefaultListModel<>());
+        }
+    }
+
+    private void updateNoticeList() {
+        DefaultListModel<NoticeEntity> model = new DefaultListModel<>();
+        for (NoticeEntity entity : noticeEntities) {
+            model.addElement(entity);
+        }
+        noticeList.setModel(model);
+
+
+        if (noticeList.getModel().getSize() >= 0) {
+            noticeList.setSelectedIndex(0);
+        }
+
     }
 }

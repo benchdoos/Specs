@@ -39,28 +39,8 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public void setNoticeDao(NoticeDao noticeDao) {
-        this.noticeDao = noticeDao;
-    }
-
-    @Override
-    public NoticeDao getNoticeDao() {
-        return noticeDao;
-    }
-
-    @Override
     public int addNotice(NoticeEntity noticeEntity) {
         return noticeDao.addNotice(noticeEntity);
-    }
-
-    @Override
-    public void updateNotice(NoticeEntity noticeEntity) {
-        noticeDao.updateNotice(noticeEntity);
-    }
-
-    @Override
-    public void removeNotice(int id) {
-        noticeDao.removeNotice(id);
     }
 
     @Override
@@ -74,12 +54,32 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public List<NoticeEntity> listNoticesByUser(UsersEntity entity) {
-        return noticeDao.listNoticesByUser(entity);
+    public NoticeDao getNoticeDao() {
+        return noticeDao;
+    }
+
+    @Override
+    public void setNoticeDao(NoticeDao noticeDao) {
+        this.noticeDao = noticeDao;
     }
 
     @Override
     public List<NoticeEntity> listNotices() {
         return noticeDao.listNotices();
+    }
+
+    @Override
+    public List<NoticeEntity> listNoticesByUser(UsersEntity entity) {
+        return noticeDao.listNoticesByUser(entity);
+    }
+
+    @Override
+    public void removeNotice(int id) {
+        noticeDao.removeNotice(id);
+    }
+
+    @Override
+    public void updateNotice(NoticeEntity noticeEntity) {
+        noticeDao.updateNotice(noticeEntity);
     }
 }

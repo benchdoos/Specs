@@ -39,39 +39,12 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     }
 
     @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
     @Transactional
     public int addDetailTitle(DetailTitleEntity detailTitlesEntity) {
         Integer id = (Integer) session.save(detailTitlesEntity);
         detailTitlesEntity = getDetailTitleById(id);
         log.debug("DetailTitle successfully saved: " + detailTitlesEntity);
         return id;
-    }
-
-    @Override
-    @Transactional
-    public void updateDetailTitle(DetailTitleEntity detailTitlesEntity) {
-        session.merge(detailTitlesEntity);
-        log.debug("DetailTitle successfully updated: " + detailTitlesEntity);
-    }
-
-    @Override
-    @Transactional
-    public void removeDetailTitle(int id) {
-        DetailTitleEntity detailTitleEntity = session.load(DetailTitleEntity.class, id);
-        if (detailTitleEntity != null) {
-            session.delete(detailTitleEntity);
-        }
-        log.debug("DetailTitle successfully removed: " + detailTitleEntity);
     }
 
     @Override
@@ -94,6 +67,29 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     }
 
     @Override
+    public List<DetailTitleEntity> getDetailTitlesBySearch(String searchText) {
+        Query query = session.createQuery("from DetailTitleEntity where UPPER(title) like UPPER( '%" + searchText + "%')");
+        ArrayList<DetailTitleEntity> titles = new ArrayList<>();
+
+        List list = query.list();
+        for (Object o : list) {
+            titles.add((DetailTitleEntity) o);
+        }
+        System.out.println("for search: " + searchText + " found: " + titles);
+        return titles;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    @Override
     @Transactional
     public List<DetailTitleEntity> listDetailTitles() {
         List list = session.createQuery("from DetailTitleEntity").list();
@@ -110,15 +106,19 @@ public class DetailTitleDaoImpl implements DetailTitleDao {
     }
 
     @Override
-    public List<DetailTitleEntity> getDetailTitlesBySearch(String searchText) {
-        Query query = session.createQuery("from DetailTitleEntity where UPPER(title) like UPPER( '%" + searchText + "%')");
-        ArrayList<DetailTitleEntity> titles = new ArrayList<>();
-
-        List list = query.list();
-        for (Object o : list) {
-            titles.add((DetailTitleEntity) o);
+    @Transactional
+    public void removeDetailTitle(int id) {
+        DetailTitleEntity detailTitleEntity = session.load(DetailTitleEntity.class, id);
+        if (detailTitleEntity != null) {
+            session.delete(detailTitleEntity);
         }
-        System.out.println("for search: " + searchText + " found: " + titles);
-        return titles;
+        log.debug("DetailTitle successfully removed: " + detailTitleEntity);
+    }
+
+    @Override
+    @Transactional
+    public void updateDetailTitle(DetailTitleEntity detailTitlesEntity) {
+        session.merge(detailTitlesEntity);
+        log.debug("DetailTitle successfully updated: " + detailTitlesEntity);
     }
 }

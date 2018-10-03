@@ -46,9 +46,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +74,8 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private File jsonFile;
     private JsonObject rootJsonObject;
     private Thread searchThread = null;
+    private ArrayList<TreePath> searchResult = null;
+    private int searchPosition = -1;
 
 
     public SptFileViewPanel(File folder) {
@@ -299,32 +299,56 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void findInTreeBySearchDown(String text) {
-        final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        TreePath treePath;
-        if (lastSelectedPathComponent == null) {
-            treePath = SptFileUtils.find((DefaultMutableTreeNode) tree.getModel().getRoot(), text);
+        text = text.replaceAll(",", "");
+        if (searchResult == null) {
+            searchResult = SptFileUtils.find((DefaultMutableTreeNode) tree.getModel().getRoot(), text);
+            if (searchResult != null) {
+                if (searchResult.size() > 0) {
+                    searchPosition = searchResult.size() - 1;
+                    TreePath treePath = searchResult.get(searchPosition);
+                    tree.expandPath(treePath);
+                    tree.setSelectionPath(treePath);
+                }
+            }
         } else {
-            treePath = SptFileUtils.find(lastSelectedPathComponent, text);
-        }
-        if (treePath != null) {
-            tree.expandPath(treePath);
-            tree.setSelectionPath(treePath);
-        } else {
-            treePath = SptFileUtils.find((DefaultMutableTreeNode) tree.getModel().getRoot(), text);
+            if (searchPosition - 1 >= 0) {
+                searchPosition--;
+            } else {
+                searchPosition = searchResult.size() - 1;
+            }
+            TreePath treePath = searchResult.get(searchPosition);
             tree.expandPath(treePath);
             tree.setSelectionPath(treePath);
         }
 
-
-        /*final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-        final TreePath nextSearchText = SptFileUtils.findNextSearchText(tree, lastSelectedPathComponent, text);
-        if (nextSearchText != null) {
-            tree.expandPath(nextSearchText);
-        }*/
     }
 
-    private List getMaterialList(ArrayList<MaterialEntity> entities) {
+    private void findInTreeBySearchUp(String text) {
+        log.debug("Search field got shift + enter for text: {}", text);
+        text = text.replaceAll(",", "");
+        if (searchResult == null) {
+            searchResult = SptFileUtils.find((DefaultMutableTreeNode) tree.getModel().getRoot(), text);
+            if (searchResult != null) {
+                if (searchResult.size() > 0) {
+                    searchPosition = 0;
+                    TreePath treePath = searchResult.get(searchPosition);
+                    tree.expandPath(treePath);
+                    tree.setSelectionPath(treePath);
+                }
+            }
+        } else {
+            if (searchPosition + 1 < searchResult.size()) {
+                searchPosition++;
+            } else {
+                searchPosition = 0;
+            }
+            TreePath treePath = searchResult.get(searchPosition);
+            tree.expandPath(treePath);
+            tree.setSelectionPath(treePath);
+        }
+    }
+
+    private List<MaterialListEntity> getMaterialList(ArrayList<MaterialEntity> entities) {
         if (entities != null) {
             if (entities.size() > 0) {
                 List<MaterialListEntity> list = new ArrayList<>();
@@ -368,7 +392,14 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
 
         initTree();
         initTreeListeners();
-        initSearchTextFieldDocumentListeners();
+        initSearchTextFieldListeners();
+        initKeyBindings();
+    }
+
+    private void initKeyBindings() {
+        registerKeyboardAction(e -> searchTextField.requestFocus(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void initMaterialLabelListener(ArrayList<MaterialEntity> entities) {
@@ -377,7 +408,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
             materialPanel.removeMouseListener(listener);
         }
 
-        List entityList = getMaterialList(entities);
+        List<MaterialListEntity> entityList = getMaterialList(entities);
 
         if (entities != null) {
             final MouseAdapter adapter = new MouseAdapter() {
@@ -399,6 +430,32 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         }
     }
 
+    private void initSearchKeyListeners() {
+        searchTextField.registerKeyboardAction(e -> {
+                    final String text = searchTextField.getText();
+                    if (text != null) {
+                        findInTreeBySearchDown(text);
+                    }
+                }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        searchTextField.registerKeyboardAction(e -> {
+                    final String text = searchTextField.getText();
+                    if (text != null) {
+                        findInTreeBySearchUp(text);
+                    }
+                }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+
+        searchTextField.registerKeyboardAction(e -> {
+                    searchTextField.setText("");
+                    resetSearchResult();
+                },
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
     private void initSearchTextFieldDocumentListeners() {
         searchTextField.getDocument().addDocumentListener(new DocumentListener() {
             String searchText = "";
@@ -407,7 +464,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
                     searchText = searchText.replace(",", ".");
                     searchText = searchText.toUpperCase();
                     log.debug("User is searching for: " + searchText);
-
+                    resetSearchResult();
 
                     if (searchThread == null) {
                         searchThread = new Thread(() -> {
@@ -481,6 +538,11 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         });
     }
 
+    private void initSearchTextFieldListeners() {
+        initSearchKeyListeners();
+        initSearchTextFieldDocumentListeners();
+    }
+
     private void initTree() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
         final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJsonObject(root, rootJsonObject.get(IOConstants.TREE).getAsJsonArray());
@@ -502,6 +564,11 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         final String author = rootJsonObject.get(IOConstants.AUTHOR).getAsString();
         log.info("File {} information:", jsonFile);
         log.info("Type: {}, Author: {}, Date: {}", type, author, date);
+    }
+
+    private void resetSearchResult() {
+        searchResult = null;
+        searchPosition = -1;
     }
 
     private void restoreImageLabel() {

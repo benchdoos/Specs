@@ -110,8 +110,33 @@ public class ServerDBConnectionPool {
         }
     }
 
-    public void startDBConnectionPool() throws ServerStartException {
-        prepareServer();
+    public boolean bindTransaction(Socket client) {
+        if (transactionClient == null) {
+            transactionClient = client;
+            return true;
+        }
+        return false;
+    }
+
+    private void checkConnectionSettings() throws ServerStartException {
+        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbConnectionUrl(), "Could not find DB Connection URL. Set correct value at settings file: ");
+
+        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbUsername(), "Could not find DB Username. Set correct value at settings file: ");
+
+        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbPassword(), "Could not find DB Password. Set correct value at settings file: ");
+    }
+
+    private void createDaoSession() {
+        try (Session session = getSession()) {
+            testConnection(session);
+        }
+    }
+
+    public boolean equalsTransaction(Socket client) {
+        if (transactionClient != null) {
+            return transactionClient.equals(client);
+        }
+        return false;
     }
 
     public Session getSession() throws HibernateException {
@@ -134,16 +159,8 @@ public class ServerDBConnectionPool {
         }
     }
 
-    private void createDaoSession() {
-        try (Session session = getSession()) {
-            testConnection(session);
-        }
-    }
-
-    private void prepareServerSettings() {
-        dbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
-        connectionUsername = ServerSettingsManager.getInstance().getServerDbUsername();
-        connectionPassword = ServerSettingsManager.getInstance().getServerDbPassword();
+    public Socket getTransactionClient() {
+        return transactionClient;
     }
 
     private void prepareServer() throws ServerStartException {
@@ -161,12 +178,14 @@ public class ServerDBConnectionPool {
         } else throw new ServerStartException("DB connection already started");
     }
 
-    private void checkConnectionSettings() throws ServerStartException {
-        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbConnectionUrl(), "Could not find DB Connection URL. Set correct value at settings file: ");
+    private void prepareServerSettings() {
+        dbConnectionUrl = ServerSettingsManager.getInstance().getServerDbConnectionUrl();
+        connectionUsername = ServerSettingsManager.getInstance().getServerDbUsername();
+        connectionPassword = ServerSettingsManager.getInstance().getServerDbPassword();
+    }
 
-        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbUsername(), "Could not find DB Username. Set correct value at settings file: ");
-
-        checkConnectionProperty(ServerSettingsManager.getInstance().getServerDbPassword(), "Could not find DB Password. Set correct value at settings file: ");
+    public void startDBConnectionPool() throws ServerStartException {
+        prepareServer();
     }
 
     public void stopDBConnectionPool() {
@@ -174,31 +193,12 @@ public class ServerDBConnectionPool {
         ourSessionFactory = null;
     }
 
-    public boolean bindTransaction(Socket client) {
-        if (transactionClient == null) {
-            transactionClient = client;
-            return true;
-        }
-        return false;
-    }
-
-    public Socket getTransactionClient() {
-        return transactionClient;
+    public boolean transactionAlive() {
+        return transactionClient != null;
     }
 
     public void unbindTransaction() {
         transactionClient = null;
         log.info("Transaction successfully unbinded");
-    }
-
-    public boolean equalsTransaction(Socket client) {
-        if (transactionClient != null) {
-            return transactionClient.equals(client);
-        }
-        return false;
-    }
-
-    public boolean transactionAlive() {
-        return transactionClient != null;
     }
 }

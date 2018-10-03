@@ -46,83 +46,12 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
 
     }
 
-    @Id
-    @Column(name = "ID")
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Basic
-    @Column(name = "NUMBER")
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    @Basic
-    @Column(name = "DATE")
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    @Basic
-    @Column(name = "DESCRIPTION")
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "PROVIDED_BY_USER_ID", referencedColumnName = "ID")
-    public UsersEntity getUsersByProvidedByUserId() {
-        return usersByProvidedByUserId;
-    }
-
-    public void setUsersByProvidedByUserId(UsersEntity usersByProvidedByUserId) {
-        this.usersByProvidedByUserId = usersByProvidedByUserId;
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "AUTHOR_USER_ID", referencedColumnName = "ID")
-    public UsersEntity getAuthorByUserId() {
-        return authorByUserId;
-    }
-
-    public void setAuthorByUserId(UsersEntity usersByCreatedByUserId) {
-        this.authorByUserId = usersByCreatedByUserId;
-    }
-
-    @Basic
-    @Column(name = "CREATION_DATE")
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
     @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (number != null ? number.hashCode() : 0);
-        result = 31 * result + (date != null ? date.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        return result;
+    public int compareTo(@Nonnull NoticeEntity that) {
+        return ComparisonChain.start()
+                .compare(that.getDate(), this.getDate())
+                .compare(that.getNumber(), this.getNumber())
+                .result();
     }
 
     @Override
@@ -161,6 +90,85 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
 
     }
 
+    @ManyToOne
+    @JoinColumn(name = "AUTHOR_USER_ID", referencedColumnName = "ID")
+    public UsersEntity getAuthorByUserId() {
+        return authorByUserId;
+    }
+
+    public void setAuthorByUserId(UsersEntity usersByCreatedByUserId) {
+        this.authorByUserId = usersByCreatedByUserId;
+    }
+
+    @Basic
+    @Column(name = "CREATION_DATE")
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    @Basic
+    @Column(name = "DATE")
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    @Basic
+    @Column(name = "DESCRIPTION")
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Id
+    @Column(name = "ID")
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Basic
+    @Column(name = "NUMBER")
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "PROVIDED_BY_USER_ID", referencedColumnName = "ID")
+    public UsersEntity getUsersByProvidedByUserId() {
+        return usersByProvidedByUserId;
+    }
+
+    public void setUsersByProvidedByUserId(UsersEntity usersByProvidedByUserId) {
+        this.usersByProvidedByUserId = usersByProvidedByUserId;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (number != null ? number.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        return result;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -170,13 +178,5 @@ public class NoticeEntity implements Comparable<NoticeEntity> {
                 .append("description", description.replaceAll("\n", " "))
                 .append("usersByProvidedByUserId", usersByProvidedByUserId)
                 .toString();
-    }
-
-    @Override
-    public int compareTo(@Nonnull NoticeEntity that) {
-        return ComparisonChain.start()
-                .compare(that.getDate(), this.getDate())
-                .compare(that.getNumber(), this.getNumber())
-                .result();
     }
 }

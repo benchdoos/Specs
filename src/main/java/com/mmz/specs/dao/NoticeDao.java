@@ -22,23 +22,21 @@ import org.hibernate.Session;
 import java.util.List;
 
 public interface NoticeDao {
-    public void setSession(Session session);
+    int addNotice(NoticeEntity noticeEntity);
 
-    public Session getSession();
+    NoticeEntity getNoticeById(int id);
 
+    NoticeEntity getNoticeByNumber(String number);
 
-    public int addNotice(NoticeEntity noticeEntity);
+    Session getSession();
 
-    public void updateNotice(NoticeEntity noticeEntity);
+    void setSession(Session session);
 
-    public void removeNotice(int id);
+    List<NoticeEntity> listNotices();
 
+    List<NoticeEntity> listNoticesByUser(UsersEntity entity);
 
-    public NoticeEntity getNoticeById(int id);
+    void removeNotice(int id);
 
-    public NoticeEntity getNoticeByNumber(String number);
-
-    public List<NoticeEntity> listNoticesByUser(UsersEntity entity);
-
-    public List<NoticeEntity> listNotices();
+    void updateNotice(NoticeEntity noticeEntity);
 }

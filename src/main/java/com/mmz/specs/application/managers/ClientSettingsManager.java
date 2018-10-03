@@ -57,43 +57,6 @@ public class ClientSettingsManager {
         return localInstance;
     }
 
-    void loadSettingsFile() throws IOException {
-        log.info("Trying to load settings file: " + connectionFileLocation);
-        CLIENT_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));
-        log.info("Settings file successfully loaded: " + connectionFileLocation);
-    }
-
-    boolean isSettingsFileCorrect() {
-        String serverAddress = CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY);
-        if (serverAddress == null) {
-            return false;
-        } else return !serverAddress.isEmpty();
-    }
-
-    public String getServerAddress() {
-        return CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY);
-    }
-
-    public void setServerAddress(String address) throws IOException {
-        CLIENT_SETTINGS.setProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY, address);
-        updateSettingsFile();
-    }
-
-    private synchronized void updateSettingsFile() throws IOException {
-        log.info("Updating / saving settings file: " + connectionFileLocation);
-        CLIENT_SETTINGS.storeToXML(new FileOutputStream(connectionFileLocation),
-                ApplicationConstants.INTERNAL_FULL_NAME + " client settings file", ApplicationConstants.DEFAULT_FILE_ENCODING);
-        log.info("Settings file successfully updated: " + connectionFileLocation);
-    }
-
-    public int getServerPort() {
-        return ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
-    }
-
-    public Properties getProperties() {
-        return CLIENT_SETTINGS;
-    }
-
     public Dimension getClientMainWindowDimension() {
         return getDimension(ClientConstants.MAIN_WINDOW_DIMENSION, ClientConstants.MAIN_WINDOW_DEFAULT_DIMENSION);
     }
@@ -104,13 +67,13 @@ public class ClientSettingsManager {
         updateSettingsFile();
     }
 
-    public Dimension getImagePreviewWindowDimension() {
-        return getDimension(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, ClientConstants.IMAGE_PREVIEW_WINDOW_DEFAULT_DIMENSION);
+    Point getClientMainWindowLocation() {
+        return getPoint(ClientConstants.MAIN_WINDOW_POSITION);
     }
 
-    public void setImagePreviewWindowDimension(Dimension dimension) throws IOException {
-        String value = dimension.width + "," + dimension.height;
-        CLIENT_SETTINGS.setProperty(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, value);
+    public void setClientMainWindowLocation(Point point) throws IOException {
+        String value = point.x + "," + point.y;
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_POSITION, value);
         updateSettingsFile();
     }
 
@@ -133,28 +96,13 @@ public class ClientSettingsManager {
         return defaultDimension;
     }
 
-    public boolean isClientMainWindowExtended() {
-        try {
-            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_EXTENDED);
-            return Boolean.valueOf(property);
-        } catch (Exception ignore) {
-            /*NOP*/
-        }
-        return ClientConstants.MAIN_WINDOW_DEFAULT_EXTENDED;
+    public Dimension getImagePreviewWindowDimension() {
+        return getDimension(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, ClientConstants.IMAGE_PREVIEW_WINDOW_DEFAULT_DIMENSION);
     }
 
-    public void setClientMainWindowExtended(boolean extended) throws IOException {
-        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_EXTENDED, Boolean.toString(extended));
-        updateSettingsFile();
-    }
-
-    Point getClientMainWindowLocation() {
-        return getPoint(ClientConstants.MAIN_WINDOW_POSITION);
-    }
-
-    public void setClientMainWindowLocation(Point point) throws IOException {
-        String value = point.x + "," + point.y;
-        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_POSITION, value);
+    public void setImagePreviewWindowDimension(Dimension dimension) throws IOException {
+        String value = dimension.width + "," + dimension.height;
+        CLIENT_SETTINGS.setProperty(ClientConstants.IMAGE_PREVIEW_WINDOW_DIMENSION, value);
         updateSettingsFile();
     }
 
@@ -194,21 +142,21 @@ public class ClientSettingsManager {
         return new Point(-1, -1);
     }
 
-    public boolean isBoostRootUnitsLoading() {
-        try {
-            String property = CLIENT_SETTINGS.getProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING);
-            if (property != null) {
-                return Boolean.valueOf(property);
-            }
-        } catch (Exception ignore) {
-            /*NOP*/
-        }
-        return ClientConstants.BOOST_ROOT_UNITS_DEFAULT_LOADING;
+    public Properties getProperties() {
+        return CLIENT_SETTINGS;
     }
 
-    public void setBoostRootUnitsLoading(boolean boost) throws IOException {
-        CLIENT_SETTINGS.setProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING, Boolean.toString(boost));
+    public String getServerAddress() {
+        return CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY);
+    }
+
+    public void setServerAddress(String address) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY, address);
         updateSettingsFile();
+    }
+
+    public int getServerPort() {
+        return ServerConstants.SERVER_DEFAULT_SOCKET_PORT;
     }
 
     public boolean isAutoUpdateEnabled() {
@@ -228,5 +176,57 @@ public class ClientSettingsManager {
     public void setAutoUpdateEnabled(boolean enabled) throws IOException {
         CLIENT_SETTINGS.setProperty(ClientConstants.AUTO_UPDATE_ENABLED, Boolean.toString(enabled));
         updateSettingsFile();
+    }
+
+    public boolean isBoostRootUnitsLoading() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING);
+            if (property != null) {
+                return Boolean.valueOf(property);
+            }
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.BOOST_ROOT_UNITS_DEFAULT_LOADING;
+    }
+
+    public void setBoostRootUnitsLoading(boolean boost) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.BOOST_ROOT_UNITS_LOADING, Boolean.toString(boost));
+        updateSettingsFile();
+    }
+
+    public boolean isClientMainWindowExtended() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.MAIN_WINDOW_EXTENDED);
+            return Boolean.valueOf(property);
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.MAIN_WINDOW_DEFAULT_EXTENDED;
+    }
+
+    public void setClientMainWindowExtended(boolean extended) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.MAIN_WINDOW_EXTENDED, Boolean.toString(extended));
+        updateSettingsFile();
+    }
+
+    boolean isSettingsFileCorrect() {
+        String serverAddress = CLIENT_SETTINGS.getProperty(ClientConstants.CLIENT_SERVER_ADDRESS_KEY);
+        if (serverAddress == null) {
+            return false;
+        } else return !serverAddress.isEmpty();
+    }
+
+    void loadSettingsFile() throws IOException {
+        log.info("Trying to load settings file: " + connectionFileLocation);
+        CLIENT_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));
+        log.info("Settings file successfully loaded: " + connectionFileLocation);
+    }
+
+    private synchronized void updateSettingsFile() throws IOException {
+        log.info("Updating / saving settings file: " + connectionFileLocation);
+        CLIENT_SETTINGS.storeToXML(new FileOutputStream(connectionFileLocation),
+                ApplicationConstants.INTERNAL_FULL_NAME + " client settings file", ApplicationConstants.DEFAULT_FILE_ENCODING);
+        log.info("Settings file successfully updated: " + connectionFileLocation);
     }
 }

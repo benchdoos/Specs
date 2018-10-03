@@ -21,24 +21,21 @@ import com.mmz.specs.model.TechProcessEntity;
 import java.util.List;
 
 public interface TechProcessService {
-    public void setTechProcessDao(TechProcessDao techProcessDao);
+    int addTechProcess(TechProcessEntity techProcessEntity);
 
-    public TechProcessDao getTechProcessDao();
+    List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString);
 
+    TechProcessEntity getTechProcessById(int id);
 
-    public int addTechProcess(TechProcessEntity techProcessEntity);
+    TechProcessEntity getTechProcessByValue(String value);
 
-    public void updateTechProcess(TechProcessEntity techProcessEntity);
+    TechProcessDao getTechProcessDao();
 
-    public void removeTechProcess(int id);
+    void setTechProcessDao(TechProcessDao techProcessDao);
 
+    List<TechProcessEntity> listTechProcesses();
 
-    public TechProcessEntity getTechProcessById(int id);
+    void removeTechProcess(int id);
 
-    public TechProcessEntity getTechProcessByValue(String value);
-
-    public List<TechProcessEntity> getTechProcessByAlikeValue(String searchingString);
-
-
-    public List<TechProcessEntity> listTechProcesses();
+    void updateTechProcess(TechProcessEntity techProcessEntity);
 }

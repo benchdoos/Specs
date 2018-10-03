@@ -35,6 +35,14 @@ public class TreeSPTRecord {
         this.detail = detail;
     }
 
+    public ArrayList<MaterialEntity> getMaterials() {
+        return materials;
+    }
+
+    public void setMaterials(ArrayList<MaterialEntity> materials) {
+        this.materials = materials;
+    }
+
     public int getQuantity() {
         return quantity;
     }
@@ -49,14 +57,6 @@ public class TreeSPTRecord {
 
     public void setInterchangeable(boolean interchangeable) {
         this.interchangeable = interchangeable;
-    }
-
-    public ArrayList<MaterialEntity> getMaterials() {
-        return materials;
-    }
-
-    public void setMaterials(ArrayList<MaterialEntity> materials) {
-        this.materials = materials;
     }
 
     @Override

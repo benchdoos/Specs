@@ -183,66 +183,6 @@ public class CommonWindowUtils {
         return text;
     }
 
-    public DefaultListModel<DetailEntity> getEffectList(int id) {
-        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
-
-        List<DetailListEntity> list = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByNoticeId(id);
-        ArrayList<String> unique = new ArrayList<>();
-
-        for (DetailListEntity entity : list) {
-            if (!unique.contains(entity.getDetailByParentDetailId().getCode())) {
-                unique.add(entity.getDetailByParentDetailId().getCode());
-                model.addElement(entity.getDetailByParentDetailId());
-            }
-
-            if (!unique.contains(entity.getDetailByChildDetailId().getCode())) {
-                unique.add(entity.getDetailByChildDetailId().getCode());
-                model.addElement(entity.getDetailByChildDetailId());
-            }
-        }
-
-        Collections.sort(unique);
-        model = sortModel(unique, model);
-
-        return model;
-    }
-
-    private DefaultListModel<DetailEntity> sortModel(ArrayList<String> unique, DefaultListModel<DetailEntity> model) {
-        DefaultListModel<DetailEntity> result = new DefaultListModel<>();
-        for (String name : unique) {
-            for (int i = 0; i < model.getSize(); i++) {
-                DetailEntity entity = model.getElementAt(i);
-                if (name.equalsIgnoreCase(entity.getCode())) {
-                    result.addElement(entity);
-                }
-            }
-        }
-        return result;
-    }
-
-    public DetailTitleEntity onCreateNewTitle(Component component) {
-        Window window = FrameUtils.findWindow(component);
-        if (window instanceof ClientMainWindow) {
-            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
-            UsersEntity currentUser = clientMainWindow.getCurrentUser();
-
-
-            if (addTitle(component, currentUser)) {
-                return getDetailTitleEntity(component);
-            }
-        } else {
-            LoginWindow loginWindow = new LoginWindow(session);
-            loginWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), loginWindow));
-            loginWindow.setVisible(true);
-            UsersEntity user = loginWindow.getAuthorizedUser();
-
-            if (addTitle(component, user)) {
-                return getDetailTitleEntity(component);
-            }
-        }
-        return null;
-    }
-
     private boolean addTitle(Component component, UsersEntity user) {
         if (user != null) {
             if (user.isActive()) {
@@ -273,5 +213,65 @@ public class CommonWindowUtils {
         editTitleWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), editTitleWindow));
         editTitleWindow.setVisible(true);
         return editTitleWindow.getDetailTitleEntity();
+    }
+
+    public DefaultListModel<DetailEntity> getEffectList(int id) {
+        DefaultListModel<DetailEntity> model = new DefaultListModel<>();
+
+        List<DetailListEntity> list = new DetailListServiceImpl(new DetailListDaoImpl(session)).getDetailListByNoticeId(id);
+        ArrayList<String> unique = new ArrayList<>();
+
+        for (DetailListEntity entity : list) {
+            if (!unique.contains(entity.getDetailByParentDetailId().getCode())) {
+                unique.add(entity.getDetailByParentDetailId().getCode());
+                model.addElement(entity.getDetailByParentDetailId());
+            }
+
+            if (!unique.contains(entity.getDetailByChildDetailId().getCode())) {
+                unique.add(entity.getDetailByChildDetailId().getCode());
+                model.addElement(entity.getDetailByChildDetailId());
+            }
+        }
+
+        Collections.sort(unique);
+        model = sortModel(unique, model);
+
+        return model;
+    }
+
+    public DetailTitleEntity onCreateNewTitle(Component component) {
+        Window window = FrameUtils.findWindow(component);
+        if (window instanceof ClientMainWindow) {
+            ClientMainWindow clientMainWindow = (ClientMainWindow) window;
+            UsersEntity currentUser = clientMainWindow.getCurrentUser();
+
+
+            if (addTitle(component, currentUser)) {
+                return getDetailTitleEntity(component);
+            }
+        } else {
+            LoginWindow loginWindow = new LoginWindow(session);
+            loginWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(component), loginWindow));
+            loginWindow.setVisible(true);
+            UsersEntity user = loginWindow.getAuthorizedUser();
+
+            if (addTitle(component, user)) {
+                return getDetailTitleEntity(component);
+            }
+        }
+        return null;
+    }
+
+    private DefaultListModel<DetailEntity> sortModel(ArrayList<String> unique, DefaultListModel<DetailEntity> model) {
+        DefaultListModel<DetailEntity> result = new DefaultListModel<>();
+        for (String name : unique) {
+            for (int i = 0; i < model.getSize(); i++) {
+                DetailEntity entity = model.getElementAt(i);
+                if (name.equalsIgnoreCase(entity.getCode())) {
+                    result.addElement(entity);
+                }
+            }
+        }
+        return result;
     }
 }

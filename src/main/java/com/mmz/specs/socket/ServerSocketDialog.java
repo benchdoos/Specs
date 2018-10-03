@@ -45,40 +45,6 @@ public class ServerSocketDialog implements Runnable {
 
     }
 
-    @Override
-    public void run() {
-        log.info("Thread started for client: " + connection);
-        Thread currentThread = Thread.currentThread();
-
-        try (DataInputStream in = new DataInputStream(client.getInputStream())) {
-            while (!client.isClosed()) {
-                final boolean interrupted = currentThread.isInterrupted();
-
-                if (!interrupted) {
-                    manageCommand(in.readUTF());
-                }
-            }
-        } catch (IOException e) {
-            log.warn("Got IOException from: " + connection, e);
-            try {
-                ServerSocketService.getInstance().closeClientConnection(connection);
-            } catch (IOException e1) {
-                log.warn("Could not close connection", e1);
-                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
-                        "Не удалось закрыть socket-соединение с: " + connection.getSocket().getInetAddress() + " " + e1.getLocalizedMessage(),
-                        ServerLogMessage.ServerLogMessageLevel.WARN));
-            }
-        } finally {
-            try {
-                log.info("Trying to close ClientConnection " + connection);
-                connection.close();
-                log.info("ClientConnection closed successfully.");
-            } catch (IOException e) {
-                log.warn("Could not close ClientConnection properly");
-            }
-        }
-    }
-
     private void manageCommand(final String command) throws IOException {
         switch (command) {
             case TESTING_CONNECTION_COMMAND:
@@ -152,6 +118,40 @@ public class ServerSocketDialog implements Runnable {
             connection.close();
         } catch (IOException e) {
             log.warn("Could not close connection at ServerSocketDialog: " + connection);
+        }
+    }
+
+    @Override
+    public void run() {
+        log.info("Thread started for client: " + connection);
+        Thread currentThread = Thread.currentThread();
+
+        try (DataInputStream in = new DataInputStream(client.getInputStream())) {
+            while (!client.isClosed()) {
+                final boolean interrupted = currentThread.isInterrupted();
+
+                if (!interrupted) {
+                    manageCommand(in.readUTF());
+                }
+            }
+        } catch (IOException e) {
+            log.warn("Got IOException from: " + connection, e);
+            try {
+                ServerSocketService.getInstance().closeClientConnection(connection);
+            } catch (IOException e1) {
+                log.warn("Could not close connection", e1);
+                ServerMonitoringBackgroundService.getInstance().addMessage(new ServerLogMessage(
+                        "Не удалось закрыть socket-соединение с: " + connection.getSocket().getInetAddress() + " " + e1.getLocalizedMessage(),
+                        ServerLogMessage.ServerLogMessageLevel.WARN));
+            }
+        } finally {
+            try {
+                log.info("Trying to close ClientConnection " + connection);
+                connection.close();
+                log.info("ClientConnection closed successfully.");
+            } catch (IOException e) {
+                log.warn("Could not close ClientConnection properly");
+            }
         }
     }
 }

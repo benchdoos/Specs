@@ -34,21 +34,6 @@ public class CommonComboBoxUtils {
         this.session = session;
     }
 
-    public DefaultListCellRenderer getTitleComboBoxRenderer() {
-        return new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof DetailTitleEntity) {
-                    DetailTitleEntity detailTitleEntity = (DetailTitleEntity) value;
-                    String title = detailTitleEntity.getTitle();
-                    return super.getListCellRendererComponent(list, CommonUtils.substring(35, title), index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        };
-    }
-
     public ComboBoxModel<DetailTitleEntity> getTitleComboBoxModel(JComboBox<DetailTitleEntity> detailTitleComboBox) {
         DefaultComboBoxModel<DetailTitleEntity> model = (DefaultComboBoxModel<DetailTitleEntity>) detailTitleComboBox.getModel();
         DetailTitleService service = new DetailTitleServiceImpl(new DetailTitleDaoImpl(session));
@@ -65,5 +50,20 @@ public class CommonComboBoxUtils {
             }
         }
         return model;
+    }
+
+    public DefaultListCellRenderer getTitleComboBoxRenderer() {
+        return new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof DetailTitleEntity) {
+                    DetailTitleEntity detailTitleEntity = (DetailTitleEntity) value;
+                    String title = detailTitleEntity.getTitle();
+                    return super.getListCellRendererComponent(list, CommonUtils.substring(35, title), index, isSelected, cellHasFocus);
+                } else {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            }
+        };
     }
 }

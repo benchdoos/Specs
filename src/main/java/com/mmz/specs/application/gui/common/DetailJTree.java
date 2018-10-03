@@ -68,6 +68,21 @@ public class DetailJTree extends JTree {
 
 
             @Override
+            public Dimension getPreferredSize() {
+                Dimension dim = super.getPreferredSize();
+                FontMetrics fm = getFontMetrics(getFont());
+                char[] chars = getText().toCharArray();
+
+                int w = getIconTextGap() + 32;
+                for (char ch : chars) {
+                    w += fm.charWidth(ch);
+                }
+                w += getText().length();
+                dim.width = w;
+                return dim;
+            }
+
+            @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //todo optimize this!!!
 
                 if (session != null) {
@@ -125,18 +140,6 @@ public class DetailJTree extends JTree {
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             }
 
-            private void updateSearch(DetailEntity detailEntity) {
-                if (searchText != null && detailEntity != null) {
-                    if (detailEntity.getCode().contains(searchText)) {
-                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 5, Color.ORANGE));
-                    } else {
-                        this.setBorder(null);
-                    }
-                } else {
-                    this.setBorder(null);
-                }
-            }
-
             private void updateBackgroundColor(boolean selected, DetailListEntity detailListEntity) {
                 if (detailListEntity != null) {
                     if (detailListEntity.isInterchangeableNode()) {
@@ -162,32 +165,28 @@ public class DetailJTree extends JTree {
                 setOpenIcon(child.isUnit() ? UNIT_OPENED_ICON : DETAIL_ICON);
             }
 
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension dim = super.getPreferredSize();
-                FontMetrics fm = getFontMetrics(getFont());
-                char[] chars = getText().toCharArray();
-
-                int w = getIconTextGap() + 32;
-                for (char ch : chars) {
-                    w += fm.charWidth(ch);
+            private void updateSearch(DetailEntity detailEntity) {
+                if (searchText != null && detailEntity != null) {
+                    if (detailEntity.getCode().contains(searchText)) {
+                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 5, Color.ORANGE));
+                    } else {
+                        this.setBorder(null);
+                    }
+                } else {
+                    this.setBorder(null);
                 }
-                w += getText().length();
-                dim.width = w;
-                return dim;
             }
         };
-    }
-
-
-    public void setSearchText(String text) {
-        this.searchText = text;
     }
 
     private void initIcons(DefaultTreeCellRenderer renderer) {
         renderer.setClosedIcon(UNIT_CLOSED_ICON);
         renderer.setOpenIcon(UNIT_OPENED_ICON);
         renderer.setLeafIcon(DETAIL_ICON);
+    }
+
+    public void setSearchText(String text) {
+        this.searchText = text;
     }
 
     public void setSession(Session session) {

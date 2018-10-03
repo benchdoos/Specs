@@ -55,13 +55,13 @@ public class ServerSettingsManager {
         return localInstance;
     }
 
-    public void setServerSettings(String serverSettingsFileLocation) throws ServerException {
-        if (serverSettingsFileLocation == null) {
-            throw new ServerException(new IllegalArgumentException("ServerDBConnectionPool settings path can not be null"));
-        } else if (serverSettingsFileLocation.isEmpty()) {
-            throw new ServerException(new IllegalArgumentException("ServerDBConnectionPool settings path can not be empty"));
-        }
-        instance.connectionFileLocation = serverSettingsFileLocation;
+    private void createEmptySettingsFile() throws IOException {
+        log.debug("Creating empty settings file at: " + connectionFileLocation);
+        SERVER_SETTINGS.clear();
+        SERVER_SETTINGS.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, "");
+        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, "");
+        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, "");
+        updateSettingsFile();
     }
 
     public String getServerDbConnectionUrl() {
@@ -70,6 +70,15 @@ public class ServerSettingsManager {
 
     public void setServerDbConnectionUrl(String url) throws IOException {
         SERVER_SETTINGS.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, url);
+        updateSettingsFile();
+    }
+
+    public String getServerDbPassword() {
+        return SERVER_SETTINGS.getProperty(HibernateConstants.CONNECTION_PASSWORD_KEY);
+    }
+
+    public void setServerDbPassword(String password) throws IOException {
+        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, password);
         updateSettingsFile();
     }
 
@@ -82,13 +91,11 @@ public class ServerSettingsManager {
         updateSettingsFile();
     }
 
-    public String getServerDbPassword() {
-        return SERVER_SETTINGS.getProperty(HibernateConstants.CONNECTION_PASSWORD_KEY);
-    }
+    private void loadSettings() throws IOException {
+        log.info("Trying to load settings file: " + connectionFileLocation);
+        SERVER_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));
+        log.info("Settings file successfully loaded: " + connectionFileLocation);
 
-    public void setServerDbPassword(String password) throws IOException {
-        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, password);
-        updateSettingsFile();
     }
 
     public void loadSettingsFile() {
@@ -107,13 +114,13 @@ public class ServerSettingsManager {
         }
     }
 
-    private void createEmptySettingsFile() throws IOException {
-        log.debug("Creating empty settings file at: " + connectionFileLocation);
-        SERVER_SETTINGS.clear();
-        SERVER_SETTINGS.setProperty(HibernateConstants.DB_CONNECTION_URL_KEY, "");
-        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_USERNAME_KEY, "");
-        SERVER_SETTINGS.setProperty(HibernateConstants.CONNECTION_PASSWORD_KEY, "");
-        updateSettingsFile();
+    public void setServerSettings(String serverSettingsFileLocation) throws ServerException {
+        if (serverSettingsFileLocation == null) {
+            throw new ServerException(new IllegalArgumentException("ServerDBConnectionPool settings path can not be null"));
+        } else if (serverSettingsFileLocation.isEmpty()) {
+            throw new ServerException(new IllegalArgumentException("ServerDBConnectionPool settings path can not be empty"));
+        }
+        instance.connectionFileLocation = serverSettingsFileLocation;
     }
 
     private void updateSettingsFile() throws IOException {
@@ -121,12 +128,5 @@ public class ServerSettingsManager {
         SERVER_SETTINGS.storeToXML(new FileOutputStream(connectionFileLocation),
                 ApplicationConstants.INTERNAL_FULL_NAME + " settings file", ApplicationConstants.DEFAULT_FILE_ENCODING);
         log.info("Settings file successfully updated: " + connectionFileLocation);
-    }
-
-    private void loadSettings() throws IOException {
-        log.info("Trying to load settings file: " + connectionFileLocation);
-        SERVER_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));
-        log.info("Settings file successfully loaded: " + connectionFileLocation);
-
     }
 }

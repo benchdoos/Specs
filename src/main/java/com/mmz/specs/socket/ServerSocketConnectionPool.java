@@ -50,6 +50,24 @@ public class ServerSocketConnectionPool {
         return localInstance;
     }
 
+    public Socket getClient() throws IOException {
+        return server.accept();
+    }
+
+    public String getServerInfo() {
+        if (server != null) {
+            return server.toString();
+        } else return "";
+    }
+
+    public int getServerPort() {
+        return serverSocketPort;
+    }
+
+    public boolean isServerStarted() {
+        return server != null && !server.isClosed();
+    }
+
     /**
      * Overloads serverSocketPort
      */
@@ -60,7 +78,6 @@ public class ServerSocketConnectionPool {
             throw new ApplicationException("Could not set server port " + serverSocketPort + ", server is already running: " + server);
         }
     }
-
 
     public void startServer() throws IOException {
         log.info("Starting server if not started. Is started: " + isServerStarted());
@@ -73,29 +90,11 @@ public class ServerSocketConnectionPool {
         }
     }
 
-    public Socket getClient() throws IOException {
-        return server.accept();
-    }
-
-    public boolean isServerStarted() {
-        return server != null && !server.isClosed();
-    }
-
-    public String getServerInfo() {
-        if (server != null) {
-            return server.toString();
-        } else return "";
-    }
-
     public void stopServerSocketConnectionPool() throws IOException {
         if (server != null) {
             if (!server.isClosed()) {
                 server.close();
             }
         }
-    }
-
-    public int getServerPort() {
-        return serverSocketPort;
     }
 }

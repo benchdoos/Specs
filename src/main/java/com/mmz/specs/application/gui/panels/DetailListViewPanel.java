@@ -113,826 +113,6 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
         searchTextField.setText(searchText);
     }
 
-    private void fillMainTree(DetailEntity rootEntity) {
-        mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).fillMainTree(rootEntity)));
-    }
-
-    private void initGui() {
-        setLayout(new GridLayout());
-        add(detailListPanel);
-
-        initListeners();
-
-        initUpdateUserIsActive();
-
-        initMainTree();
-
-        updateDetailInfoPanelWithEmptyEntity();
-
-    }
-
-    private void initUpdateUserIsActive() {
-        noticeInfoButton.addActionListener(notifyUserIsActiveListener);
-
-        refreshSessionButton.addActionListener(notifyUserIsActiveListener);
-
-        addButton.addActionListener(notifyUserIsActiveListener);
-
-        copyButton.addActionListener(notifyUserIsActiveListener);
-
-        editButton.addActionListener(notifyUserIsActiveListener);
-    }
-
-    private void hideControls() {
-        controlsBar.setVisible(false);
-        searchTextField.setVisible(false);
-    }
-
-    private void initListeners() {
-        DetailListViewPanel panel = this;
-        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-        noticeInfoButton.addActionListener(e -> {
-            mainWindowUtils.setClientMainWindow(panel);
-            mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
-            new Thread(() -> onNoticeInfo(true)).start();
-        });
-
-        noticeInfoButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    mainWindowUtils.setClientMainWindow(panel);
-                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
-                    new Thread(() -> onNoticeInfo(false)).start();
-                }
-            }
-        });
-
-        initSearchTextFieldDocumentListeners();
-
-        refreshSessionButton.addActionListener(e -> onRefreshSession());
-
-        initSearchTextFieldKeysBindings();
-
-        initKeyBindings();
-
-        updateDetailIconLabelListener();
-
-
-        addButton.addActionListener(e -> onAddNewItem());
-
-        copyButton.addActionListener(e -> onCopyButton());
-
-        editButton.addActionListener(e -> onEditDetail(true));
-        editButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    onEditDetail(false);
-                }
-            }
-        });
-
-        addCopyPopupMenu(numberLabel);
-
-        addCopyPopupMenu(titleLabel);
-
-        addCopyPopupMenu(workpieceWeightLabel);
-
-        addCopyPopupMenu(finishedWeightLabel);
-    }
-
-    private void addCopyPopupMenu(JLabel titleLabel) {
-        titleLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    if (mainTree.getLastSelectedPathComponent() != null) {
-                        JPopupMenu menu = CommonWindowUtils.getCopyPopupMenu(titleLabel.getText());
-                        titleLabel.setComponentPopupMenu(menu);
-                    }
-                }
-            }
-        });
-    }
-
-
-    private void updateDetailIconLabelListener() {
-        detailIconLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    final DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                    if (detailEntity != null) {
-                        JPopupMenu popupMenu = new JPopupMenu();
-                        JMenuItem refresh = new JMenuItem("Обновить",
-                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
-                        refresh.addActionListener(e1 -> {
-                            detailIconLabel.setIcon(null);
-                            updateDetailImage(detailEntity);
-                        });
-                        popupMenu.add(refresh);
-
-                        detailIconLabel.setComponentPopupMenu(popupMenu);
-                    }
-                }
-            }
-        });
-    }
-
-    private void initKeyBindings() {
-        registerKeyboardAction(e -> onAddNewItem(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        registerKeyboardAction(e -> onCopyButton(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK, false),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        registerKeyboardAction(e -> onEditDetail(true),
-                KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        registerKeyboardAction(e -> onNoticeInfo(true),
-                KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK, false),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
-    private void onAddNewItem() {
-        if (hasPermissionsToEditDB()) {
-            if (ClientBackgroundService.getInstance().bindTransaction()) {
-                Session newSession = ClientBackgroundService.getInstance().getSession();
-                newSession.beginTransaction();
-
-                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, CREATE_SINGLE);
-                selectionDetailWindow.setLocation(FrameUtils
-                        .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-                selectionDetailWindow.setVisible(true);
-                ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
-                if (list != null) {
-                    if (list.size() == 1) {
-                        DetailEntity entity = list.get(0);
-                        if (entity != null) {
-                            DetailService service = new DetailServiceImpl(newSession);
-                            final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
-                            if (detailByIndex == null) {
-                                entity.setActive(true);
-                                entity.setCode(entity.getCode().toUpperCase());
-
-                                ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
-                                if (mainWindow != null) {
-                                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                                    try {
-                                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
-                                    } catch (Exception e) {
-                                        ClientBackgroundService.getInstance().unbindTransaction();
-                                        SessionUtils.closeSessionSilently(newSession);
-                                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                        JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
-                                                e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
-                                    }
-                                } else {
-                                    SessionUtils.closeSessionSilently(newSession);
-                                    ClientBackgroundService.getInstance().unbindTransaction();
-                                }
-                            } else {
-                                SessionUtils.closeSessionSilently(newSession);
-                                ClientBackgroundService.getInstance().unbindTransaction();
-                            }
-                        } else {
-                            SessionUtils.closeSessionSilently(newSession);
-                            ClientBackgroundService.getInstance().unbindTransaction();
-                        }
-                    } else {
-                        SessionUtils.closeSessionSilently(newSession);
-                        ClientBackgroundService.getInstance().unbindTransaction();
-                    }
-                } else {
-                    SessionUtils.closeSessionSilently(newSession);
-                    ClientBackgroundService.getInstance().unbindTransaction();
-                }
-            } else {
-                showTransactionCreatingFailMessage();
-            }
-        }
-    }
-
-    private void onCopyButton() {
-        if (hasPermissionsToEditDB()) {
-            if (ClientBackgroundService.getInstance().bindTransaction()) {
-                Session newSession = ClientBackgroundService.getInstance().getSession();
-                newSession.beginTransaction();
-
-                DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                if (selectedEntity != null) {
-                    if (selectedEntity.isUnit()) {
-                        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, COPY);
-                        selectionDetailWindow.setLocation(FrameUtils
-                                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
-                        selectionDetailWindow.setVisible(true);
-                        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
-
-                        if (list != null) {
-                            if (list.size() == 1) {
-                                DetailEntity entity = list.get(0);
-                                if (entity != null) {
-                                    entity.setUnit(true);
-                                    entity.setActive(true);
-
-                                    ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
-
-                                    if (mainWindow != null) {
-                                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                                        try {
-                                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
-                                        } catch (Exception e) {
-                                            ClientBackgroundService.getInstance().unbindTransaction();
-                                            SessionUtils.closeSessionSilently(newSession);
-                                            log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                                            JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
-                                                    e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
-                                        }
-                                    } else {
-                                        SessionUtils.closeSessionSilently(newSession);
-                                        ClientBackgroundService.getInstance().unbindTransaction();
-                                    }
-                                } else {
-                                    SessionUtils.closeSessionSilently(newSession);
-                                    ClientBackgroundService.getInstance().unbindTransaction();
-                                }
-                            } else {
-                                SessionUtils.closeSessionSilently(newSession);
-                                ClientBackgroundService.getInstance().unbindTransaction();
-                            }
-                        } else {
-                            SessionUtils.closeSessionSilently(newSession);
-                            ClientBackgroundService.getInstance().unbindTransaction();
-                        }
-                    } else {
-                        SessionUtils.closeSessionSilently(newSession);
-                        ClientBackgroundService.getInstance().unbindTransaction();
-                    }
-                } else {
-                    SessionUtils.closeSessionSilently(newSession);
-                    ClientBackgroundService.getInstance().unbindTransaction();
-                }
-            } else {
-                showTransactionCreatingFailMessage();
-            }
-        }
-    }
-
-    private void showTransactionCreatingFailMessage() {
-        JOptionPane.showMessageDialog(this, "Не удалось отредактировать данные, \n" +
-                        "кто-то уже проводит изменения", "Ошибка доступа", JOptionPane.WARNING_MESSAGE,
-                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/warning.gif"))));
-    }
-
-    private void initSearchTextFieldKeysBindings() {
-        registerKeyboardAction(e -> searchTextField.requestFocus(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK, false),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        searchTextField.registerKeyboardAction(e -> searchTextField.setText(""),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
-                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-    }
-
-    private void updateDetailInfoPanel(DetailEntity selectedComponent) {
-        updateDetailInfoPanelWithEmptyEntity();
-        if (selectedComponent != null) {
-            updateDetailInfoPanelWithEntity(selectedComponent);
-        }
-    }
-
-    private void updateDetailInfoPanelWithEmptyEntity() {
-        numberLabel.setText("нет данных");
-        titleLabel.setText("нет данных");
-
-        detailIconLabel.setIcon(null);
-        FrameUtils.removeAllComponentListeners(detailIconLabel);
-        updateDetailIconLabelListener();
-
-        unitLabel.setText("нет данных");
-        finishedWeightLabel.setText("нет данных");
-        workpieceWeightLabel.setText("нет данных");
-
-        materialPanel.setMaterialEntity(null);
-
-        techProcessLabel.setToolTipText("");
-        techProcessLabel.setText("нет данных");
-
-        isActiveLabel.setText("нет данных");
-    }
-
-    private void initSearchTextFieldDocumentListeners() {
-        searchTextField.getDocument().addDocumentListener(new DocumentListener() {
-            String searchText = "";
-            final Timer searchTimer = new Timer(1000, e -> {
-                if (!searchText.isEmpty()) {
-                    searchText = searchText.replace(",", ".");
-                    searchText = searchText.toUpperCase();
-                    log.debug("User is searching for: " + searchText);
-
-
-                    if (searchThread == null) {
-                        searchThread = new Thread(() -> {
-                            fillMainTreeBySearch(searchText);
-                            updateMainTreeSelectors(searchText);
-                        });
-                        searchThread.start();
-                    } else {
-                        if (searchThread.isAlive()) {
-                            log.debug("Interrupting search thread");
-                            searchThread.interrupt();
-                        }
-                        searchThread = new Thread(() -> {
-                            fillMainTreeBySearch(searchText);
-                            updateMainTreeSelectors(searchText);
-                        });
-                        searchThread.start();
-                    }
-                } else {
-                    if (searchThread == null) {
-                        searchThread = new Thread(() -> {
-                            fillMainTreeFully();
-                            updateMainTreeSelectors(null);
-                            updateDetailInfoPanelWithEmptyEntity();
-                        });
-                        searchThread.start();
-                    } else {
-                        if (searchThread.isAlive()) {
-                            log.debug("Interrupting search thread");
-                            searchThread.interrupt();
-                        }
-                        searchThread = new Thread(() -> {
-                            fillMainTreeFully();
-                            updateMainTreeSelectors(null);
-                            updateDetailInfoPanelWithEmptyEntity();
-                        });
-                        searchThread.start();
-                    }
-                }
-            });
-
-            private void updateMainTreeSelectors(String searchText) {
-                DetailJTree jTree = (DetailJTree) mainTree;
-                jTree.setSearchText(searchText);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                searchText = searchTextField.getText();
-                searchTimer.setRepeats(false);
-                if (searchTimer.isRunning()) {
-                    searchTimer.restart();
-                } else searchTimer.start();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                searchText = searchTextField.getText();
-                searchTimer.setRepeats(false);
-                if (searchTimer.isRunning()) {
-                    searchTimer.restart();
-                } else searchTimer.start();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                searchText = searchTextField.getText();
-                searchTimer.setRepeats(false);
-                if (searchTimer.isRunning()) {
-                    searchTimer.restart();
-                } else searchTimer.start();
-            }
-        });
-    }
-
-    private void fillMainTreeFully() {
-        Thread thread = Thread.currentThread();
-        if (session != null && !thread.isInterrupted()) {
-            final boolean boostRootUnitsLoading = ClientSettingsManager.getInstance().isBoostRootUnitsLoading();
-            log.info("Loading full main tree in boots mode: {}", boostRootUnitsLoading);
-            if (boostRootUnitsLoading) {
-                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getBoostedModuleDetailListFullTree();
-                if (!Thread.currentThread().isInterrupted()) {
-                    mainTree.setModel(new DefaultTreeModel(detailListFullTree));
-                }
-            } else {
-                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree();
-                if (!Thread.currentThread().isInterrupted()) {
-                    mainTree.setModel(new DefaultTreeModel(detailListFullTree));
-                }
-            }
-
-        }
-
-        if (thread.isInterrupted()) {
-            mainTree.setModel(new DefaultTreeModel(null));
-        }
-    }
-
-    private void onNoticeInfo(boolean select) {
-        MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-        mainWindowUtils.setClientMainWindow(this);
-
-        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        if (selectedEntity != null) {
-            DetailListService detailListService = new DetailListServiceImpl(session);
-            List<DetailListEntity> list;
-
-            if (detailListService.getDetailListByParent(selectedEntity).size() > 0) {
-                list = detailListService.getDetailListByParent(selectedEntity);
-            } else {
-                list = detailListService.getDetailListByChild(selectedEntity);
-
-            }
-            if (list != null) {
-                if (list.size() > 0) {
-                    List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
-                    NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
-                    noticeInfoPanel.setDetailEntity(selectedEntity);
-
-                    ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
-                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
-                    clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);
-                }
-            }
-        }
-        mainWindowUtils.updateMessage(null, null);
-    }
-
-    private void onRefreshSession() {
-        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-        mainWindowUtils.setClientMainWindow(this);
-        if (ClientBackgroundService.getInstance().isConnected()) {
-            new Thread(() -> {
-                refreshSessionButton.setEnabled(false);
-                searchTextField.setEnabled(false);
-
-                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем список деталей...");
-
-                updateDetailInfoPanelWithEmptyEntity();
-
-                final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
-                mainTree.setModel(model);
-
-                SessionUtils.closeSessionSilently(session);
-                session = ClientBackgroundService.getInstance().getSession();
-
-                refreshMainTreeListeners();
-                DetailJTree tree = (DetailJTree) mainTree;
-                tree.setSession(session);
-
-                fillMainTreeFully();
-
-                mainWindowUtils.updateMessage(null, null);
-                searchTextField.setEnabled(true);
-                refreshSessionButton.setEnabled(true);
-                searchTextField.setText("");
-
-            }).start();
-        }
-    }
-
-    private List<NoticeEntity> getUniqueNoticeList(List<DetailListEntity> list) {
-        List<NoticeEntity> result = new ArrayList<>();
-        List<NoticeEntity> noticeList = new ArrayList<>();
-        for (DetailListEntity entity : list) {
-            NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
-
-            if (noticeEntity != null) {
-                if (!noticeList.contains(noticeEntity)) {
-                    noticeList.add(noticeEntity);
-                    result.add(noticeEntity);
-                }
-            }
-        }
-        Collections.sort(result);
-        return result;
-    }
-
-    private void fillMainTreeBySearch(final String searchText) {
-        final Thread thread = Thread.currentThread();
-        if (session != null && !thread.isInterrupted()) {
-            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
-            final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
-
-            if (!thread.isInterrupted()) {
-                if (detailListBySearch != null && detailListBySearch.size() > 0) {
-                    final DefaultMutableTreeNode moduleDetailListTreeByEntityList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch);
-                    if (!thread.isInterrupted()) {
-                        mainTree.setModel(new DefaultTreeModel(moduleDetailListTreeByEntityList));
-                    }
-                } else {
-                    DetailService detailService = new DetailServiceImpl(session);
-                    final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
-                    if (!thread.isInterrupted()) {
-                        if (detailsBySearch != null && detailsBySearch.size() > 0) {
-                            final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch);
-                            if (!thread.isInterrupted()) {
-                                mainTree.setModel(new DefaultTreeModel(detailsTreeByDetails));
-                            }
-                        } else {
-                            DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
-                            final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
-                            if (!thread.isInterrupted()) {
-                                if (detailTitlesBySearch != null) {
-                                    List<DetailEntity> resultDetails = new ArrayList<>();
-                                    if (!thread.isInterrupted()) {
-                                        for (DetailTitleEntity e : detailTitlesBySearch) {
-                                            if (e != null && !thread.isInterrupted()) {
-                                                final List<DetailEntity> detailsByTitle = detailService.getDetailsByTitle(e);
-
-                                                resultDetails.addAll(detailsByTitle);
-                                            }
-                                        }
-                                        final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(resultDetails);
-                                        if (!thread.isInterrupted()) {
-                                            mainTree.setModel(new DefaultTreeModel(detailsTreeByDetails));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (thread.isInterrupted()) {
-            mainTree.setModel(new DefaultTreeModel(null));
-        }
-    }
-
-    private void updateDetailInfoPanelWithEntity(DetailEntity selectedComponent) {
-        numberLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, selectedComponent.getCode()));
-
-        if (selectedComponent.getDetailTitleByDetailTitleId() != null) {
-            String title = selectedComponent.getDetailTitleByDetailTitleId().getTitle();
-            titleLabel.setToolTipText(title);
-            titleLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, title));
-        }
-
-        unitLabel.setText(Boolean.toString(selectedComponent.isUnit())
-                .replace("false", "нет").replace("true", "да"));
-
-        if (selectedComponent.getFinishedWeight() != null) {
-            finishedWeightLabel.setText((Double.toString(selectedComponent.getFinishedWeight())));
-        }
-
-        if (selectedComponent.getWorkpieceWeight() != null) {
-            workpieceWeightLabel.setText(Double.toString(selectedComponent.getWorkpieceWeight()));
-        }
-
-        fillDetailMaterialInfo(selectedComponent);
-
-
-        updateDetailImage(selectedComponent);
-
-        if (selectedComponent.getTechProcessByTechProcessId() != null) {
-            String process = selectedComponent.getTechProcessByTechProcessId().getProcess();
-            techProcessLabel.setToolTipText(process);
-            techProcessLabel.setText(CommonUtils.substring(25, process));
-        }
-
-        isActiveLabel.setText(Boolean.toString(!selectedComponent.isActive())
-                .replace("false", "нет").replace("true", "да"));
-    }
-
-    private void updateDetailImage(final DetailEntity detailEntity) {
-        Runnable runnable = () -> {
-            detailIconLabel.setText("Загрузка...");
-            FrameUtils.removeAllComponentListeners(detailIconLabel);
-            updateDetailIconLabelListener();
-
-            if (detailEntity != null) {
-                if (detailEntity.getImagePath() == null) {
-                    loadImageFromFtp(detailEntity);
-                } else {
-                    if (detailEntity.getImagePath().equalsIgnoreCase(IMAGE_REMOVE_KEY)) {
-                        setEmptyImageIcon();
-                    } else {
-                        loadImageFromLocalStorage(detailEntity);
-                    }
-                }
-            } else {
-                setEmptyImageIcon();
-            }
-        };
-
-        Thread thread = new Thread(runnable);
-        thread.start();
-    }
-
-    private void loadImageFromLocalStorage(DetailEntity selectedComponent) {
-        final String imagePath = selectedComponent.getImagePath();
-        File file = new File(imagePath);
-        if (file.exists()) {
-            final boolean extension = FtpUtils.getInstance().isImage(file);
-            if (extension) {
-                final BufferedImage bufferedImage = CommonUtils.getBufferedImage(file);
-                if (bufferedImage != null) {
-                    updateDetailIconByImage(selectedComponent, bufferedImage);
-                } else {
-                    setEmptyImageIcon();
-                }
-            }
-        }
-    }
-
-    private void loadImageFromFtp(DetailEntity selectedComponent) {
-        FtpUtils ftp = FtpUtils.getInstance();
-        BufferedImage image = ftp.getImage(selectedComponent.getId());
-
-        if (image != null) {
-            updateDetailIconByImage(selectedComponent, image);
-        } else {
-            setEmptyImageIcon();
-        }
-    }
-
-    private void updateDetailIconByImage(DetailEntity detailEntity, BufferedImage image) {
-        BufferedImage scaledImage = Scalr.resize(image, 128);
-
-        DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        if (detailEntity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
-            detailIconLabel.setIcon(new ImageIcon(scaledImage));
-            detailIconLabel.setText("");
-            detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            detailIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListViewPanel.super.getRootPane()), false,
-                                image, "Изображение " + detailEntity.getCode() + " "
-                                        + detailEntity.getDetailTitleByDetailTitleId().getTitle());
-                    }
-                }
-            });
-        }
-    }
-
-    private void setEmptyImageIcon() {
-        detailIconLabel.setIcon(null);
-        detailIconLabel.setText("Нет изображения");
-        detailIconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-    }
-
-    private void fillDetailMaterialInfo(DetailEntity selectedComponent) {
-        clearDetailMaterialInfo();
-
-        MaterialListService service = new MaterialListServiceImpl(session);
-        List<MaterialListEntity> materialList = service.getMaterialListByDetail(selectedComponent);
-        if (!materialList.isEmpty()) {
-            for (MaterialListEntity entity : materialList) {
-                if (entity.isMainMaterial() && entity.isActive()) {
-                    final MaterialEntity materialByMaterialId = entity.getMaterialByMaterialId();
-
-                    materialPanel.setMaxStringSize(MAXIMUM_STRING_LENGTH);
-                    materialPanel.setMaterialEntity(materialByMaterialId);
-
-                    /*String longProfile = materialByMaterialId.getLongProfile();
-                    String longMark = materialByMaterialId.getLongMark();
-                    String delimiter = CommonWindowUtils.createDelimiter(longProfile, longMark);
-                    String tooltipText = "<html> <p style=\"line-height: 0.2em;\">" + longProfile + "<br>" + delimiter + "<br>" + longMark + "</p></html>";
-                    materialMarkLabel.setToolTipText(tooltipText);
-                    materialProfileLabel.setToolTipText(tooltipText);*/
-                }
-            }
-            initMaterialLabelListener(materialList);
-        }
-    }
-
-
-    private void clearDetailMaterialInfo() {
-        materialTextLabel.setText("Материал:");
-        materialPanel.setMaterialEntity(null);
-        initMaterialLabelListener(null);
-    }
-
-    private void initMaterialLabelListener(List<MaterialListEntity> materialList) {
-        Component c = this;
-        for (MouseListener listener : materialPanel.getMouseListeners()) {
-            materialPanel.removeMouseListener(listener);
-        }
-
-        if (materialList != null) {
-            final MouseAdapter adapter = new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    MaterialListWindow materialListWindow = new MaterialListWindow(materialList);
-                    materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), materialListWindow));
-                    materialListWindow.setVisible(true);
-                }
-            };
-
-            int counter = 0;
-            for (MaterialListEntity e : materialList) {
-                if (e.isActive()) {
-                    counter++;
-                }
-            }
-            if (counter > 1) {
-                materialTextLabel.setText("Материал (" + counter + "):");
-            } else materialTextLabel.setText("Материал:");
-            materialPanel.addMouseListener(adapter);
-        }
-    }
-
-    private void initMainTree() {
-        DetailJTree jTree = (DetailJTree) mainTree;
-        jTree.setSession(session);
-
-        mainTree.addTreeSelectionListener(e -> {
-            DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-            if (selectedEntity != null) {
-                DetailServiceImpl detailService = new DetailServiceImpl(session);
-                DetailEntity loadedEntity = detailService.getDetailById(selectedEntity.getId());
-
-                updateDetailInfoPanel(loadedEntity);
-            }
-        });
-
-
-        refreshMainTreeListeners();
-
-    }
-
-    private void refreshMainTreeListeners() {
-        mainTree.removeMouseListener(ml);
-        mainTree.removeKeyListener(kl);
-
-        ml = new MainWindowUtils(session).getMouseListener(mainTree);
-        kl = new MainWindowUtils(session).getArrowKeyListener(mainTree);
-
-
-        mainTree.addMouseListener(ml);
-        mainTree.addKeyListener(kl);
-    }
-
-    private void onEditDetail(boolean select) {
-        ClientMainWindow mainWindow = new MainWindowUtils(session).getClientMainWindow(this);
-        if (hasPermissionsToEditDB()) {
-            if (ClientBackgroundService.getInstance().bindTransaction()) {
-                Session newSession = ClientBackgroundService.getInstance().getSession();
-                newSession.beginTransaction();
-
-                final DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                if (entityFromTree != null) {
-
-                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
-                    try {
-                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
-                    } catch (Exception e) {
-                        ClientBackgroundService.getInstance().unbindTransaction();
-                        SessionUtils.closeSessionSilently(newSession);
-                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
-                        JOptionPane.showMessageDialog(this, "Не удалось открыть транзакционную вкладку\n" +
-                                e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
-                    }
-
-                } else {
-                    SessionUtils.closeSessionSilently(newSession);
-                    ClientBackgroundService.getInstance().unbindTransaction();
-                }
-            } else {
-                showTransactionCreatingFailMessage();
-            }
-        }
-    }
-
-    private boolean hasPermissionsToEditDB() {
-        ClientMainWindow mainWindow = new MainWindowUtils(session).getClientMainWindow(this);
-        if (mainWindow != null) {
-            final UsersEntity currentUser = mainWindow.getCurrentUser();
-            if (currentUser != null) {
-                return (currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive();
-            }
-        }
-        return false;
-    }
-
-    private void createUIComponents() {
-        mainTree = new DetailJTree();
-        searchTextField = new PlaceholderTextField();
-        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
-    }
-
-    @Override
-    public AccessPolicyManager getPolicyManager() {
-        return new AccessPolicyManager(false, false);
-    }
-
-    @Override
-    public void setUIEnabled(boolean enable) {
-        addButton.setEnabled(enable);
-        editButton.setEnabled(enable);
-        final DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-        copyButton.setEnabled(selectedEntity != null ? enable && selectedEntity.isUnit() : enable);
-    }
-
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -1065,5 +245,823 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
         editButton.setText("");
         editButton.setToolTipText("Редактировать (CTRL+E)");
         toolBar1.add(editButton);
+    }
+
+    private void addCopyPopupMenu(JLabel titleLabel) {
+        titleLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    if (mainTree.getLastSelectedPathComponent() != null) {
+                        JPopupMenu menu = CommonWindowUtils.getCopyPopupMenu(titleLabel.getText());
+                        titleLabel.setComponentPopupMenu(menu);
+                    }
+                }
+            }
+        });
+    }
+
+    private void clearDetailMaterialInfo() {
+        materialTextLabel.setText("Материал:");
+        materialPanel.setMaterialEntity(null);
+        initMaterialLabelListener(null);
+    }
+
+    private void createUIComponents() {
+        mainTree = new DetailJTree();
+        searchTextField = new PlaceholderTextField();
+        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
+    }
+
+    private void fillDetailMaterialInfo(DetailEntity selectedComponent) {
+        clearDetailMaterialInfo();
+
+        MaterialListService service = new MaterialListServiceImpl(session);
+        List<MaterialListEntity> materialList = service.getMaterialListByDetail(selectedComponent);
+        if (!materialList.isEmpty()) {
+            for (MaterialListEntity entity : materialList) {
+                if (entity.isMainMaterial() && entity.isActive()) {
+                    final MaterialEntity materialByMaterialId = entity.getMaterialByMaterialId();
+
+                    materialPanel.setMaxStringSize(MAXIMUM_STRING_LENGTH);
+                    materialPanel.setMaterialEntity(materialByMaterialId);
+
+                    /*String longProfile = materialByMaterialId.getLongProfile();
+                    String longMark = materialByMaterialId.getLongMark();
+                    String delimiter = CommonWindowUtils.createDelimiter(longProfile, longMark);
+                    String tooltipText = "<html> <p style=\"line-height: 0.2em;\">" + longProfile + "<br>" + delimiter + "<br>" + longMark + "</p></html>";
+                    materialMarkLabel.setToolTipText(tooltipText);
+                    materialProfileLabel.setToolTipText(tooltipText);*/
+                }
+            }
+            initMaterialLabelListener(materialList);
+        }
+    }
+
+    private void fillMainTree(DetailEntity rootEntity) {
+        mainTree.setModel(new DefaultTreeModel(new MainWindowUtils(session).fillMainTree(rootEntity)));
+    }
+
+    private void fillMainTreeBySearch(final String searchText) {
+        final Thread thread = Thread.currentThread();
+        if (session != null && !thread.isInterrupted()) {
+            DetailListService service = new DetailListServiceImpl(new DetailListDaoImpl(session));
+            final List<DetailListEntity> detailListBySearch = service.getDetailListBySearch(searchText);
+
+            if (!thread.isInterrupted()) {
+                if (detailListBySearch != null && detailListBySearch.size() > 0) {
+                    final DefaultMutableTreeNode moduleDetailListTreeByEntityList = new MainWindowUtils(session).getModuleDetailListTreeByEntityList(detailListBySearch);
+                    if (!thread.isInterrupted()) {
+                        mainTree.setModel(new DefaultTreeModel(moduleDetailListTreeByEntityList));
+                    }
+                } else {
+                    DetailService detailService = new DetailServiceImpl(session);
+                    final List<DetailEntity> detailsBySearch = detailService.getDetailsBySearch(searchText);
+                    if (!thread.isInterrupted()) {
+                        if (detailsBySearch != null && detailsBySearch.size() > 0) {
+                            final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(detailsBySearch);
+                            if (!thread.isInterrupted()) {
+                                mainTree.setModel(new DefaultTreeModel(detailsTreeByDetails));
+                            }
+                        } else {
+                            DetailTitleService detailTitleService = new DetailTitleServiceImpl(session);
+                            final List<DetailTitleEntity> detailTitlesBySearch = detailTitleService.getDetailTitlesBySearch(searchText);
+                            if (!thread.isInterrupted()) {
+                                if (detailTitlesBySearch != null) {
+                                    List<DetailEntity> resultDetails = new ArrayList<>();
+                                    if (!thread.isInterrupted()) {
+                                        for (DetailTitleEntity e : detailTitlesBySearch) {
+                                            if (e != null && !thread.isInterrupted()) {
+                                                final List<DetailEntity> detailsByTitle = detailService.getDetailsByTitle(e);
+
+                                                resultDetails.addAll(detailsByTitle);
+                                            }
+                                        }
+                                        final TreeNode detailsTreeByDetails = new MainWindowUtils(session).getDetailsTreeByDetails(resultDetails);
+                                        if (!thread.isInterrupted()) {
+                                            mainTree.setModel(new DefaultTreeModel(detailsTreeByDetails));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (thread.isInterrupted()) {
+            mainTree.setModel(new DefaultTreeModel(null));
+        }
+    }
+
+    private void fillMainTreeFully() {
+        Thread thread = Thread.currentThread();
+        if (session != null && !thread.isInterrupted()) {
+            final boolean boostRootUnitsLoading = ClientSettingsManager.getInstance().isBoostRootUnitsLoading();
+            log.info("Loading full main tree in boots mode: {}", boostRootUnitsLoading);
+            if (boostRootUnitsLoading) {
+                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getBoostedModuleDetailListFullTree();
+                if (!Thread.currentThread().isInterrupted()) {
+                    mainTree.setModel(new DefaultTreeModel(detailListFullTree));
+                }
+            } else {
+                final DefaultMutableTreeNode detailListFullTree = new MainWindowUtils(session).getModuleDetailListFullTree();
+                if (!Thread.currentThread().isInterrupted()) {
+                    mainTree.setModel(new DefaultTreeModel(detailListFullTree));
+                }
+            }
+
+        }
+
+        if (thread.isInterrupted()) {
+            mainTree.setModel(new DefaultTreeModel(null));
+        }
+    }
+
+    @Override
+    public AccessPolicyManager getPolicyManager() {
+        return new AccessPolicyManager(false, false);
+    }
+
+    private List<NoticeEntity> getUniqueNoticeList(List<DetailListEntity> list) {
+        List<NoticeEntity> result = new ArrayList<>();
+        List<NoticeEntity> noticeList = new ArrayList<>();
+        for (DetailListEntity entity : list) {
+            NoticeEntity noticeEntity = entity.getNoticeByNoticeId();
+
+            if (noticeEntity != null) {
+                if (!noticeList.contains(noticeEntity)) {
+                    noticeList.add(noticeEntity);
+                    result.add(noticeEntity);
+                }
+            }
+        }
+        Collections.sort(result);
+        return result;
+    }
+
+    private boolean hasPermissionsToEditDB() {
+        ClientMainWindow mainWindow = new MainWindowUtils(session).getClientMainWindow(this);
+        if (mainWindow != null) {
+            final UsersEntity currentUser = mainWindow.getCurrentUser();
+            if (currentUser != null) {
+                return (currentUser.isEditor() || currentUser.isAdmin()) && currentUser.isActive();
+            }
+        }
+        return false;
+    }
+
+    private void hideControls() {
+        controlsBar.setVisible(false);
+        searchTextField.setVisible(false);
+    }
+
+    private void initGui() {
+        setLayout(new GridLayout());
+        add(detailListPanel);
+
+        initListeners();
+
+        initUpdateUserIsActive();
+
+        initMainTree();
+
+        updateDetailInfoPanelWithEmptyEntity();
+
+    }
+
+    private void initKeyBindings() {
+        registerKeyboardAction(e -> onAddNewItem(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        registerKeyboardAction(e -> onCopyButton(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        registerKeyboardAction(e -> onEditDetail(true),
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        registerKeyboardAction(e -> onNoticeInfo(true),
+                KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private void initListeners() {
+        DetailListViewPanel panel = this;
+        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        noticeInfoButton.addActionListener(e -> {
+            mainWindowUtils.setClientMainWindow(panel);
+            mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
+            new Thread(() -> onNoticeInfo(true)).start();
+        });
+
+        noticeInfoButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    mainWindowUtils.setClientMainWindow(panel);
+                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
+                    new Thread(() -> onNoticeInfo(false)).start();
+                }
+            }
+        });
+
+        initSearchTextFieldDocumentListeners();
+
+        refreshSessionButton.addActionListener(e -> onRefreshSession());
+
+        initSearchTextFieldKeysBindings();
+
+        initKeyBindings();
+
+        updateDetailIconLabelListener();
+
+
+        addButton.addActionListener(e -> onAddNewItem());
+
+        copyButton.addActionListener(e -> onCopyButton());
+
+        editButton.addActionListener(e -> onEditDetail(true));
+        editButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    onEditDetail(false);
+                }
+            }
+        });
+
+        addCopyPopupMenu(numberLabel);
+
+        addCopyPopupMenu(titleLabel);
+
+        addCopyPopupMenu(workpieceWeightLabel);
+
+        addCopyPopupMenu(finishedWeightLabel);
+    }
+
+    private void initMainTree() {
+        DetailJTree jTree = (DetailJTree) mainTree;
+        jTree.setSession(session);
+
+        mainTree.addTreeSelectionListener(e -> {
+            DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+            if (selectedEntity != null) {
+                DetailServiceImpl detailService = new DetailServiceImpl(session);
+                DetailEntity loadedEntity = detailService.getDetailById(selectedEntity.getId());
+
+                updateDetailInfoPanel(loadedEntity);
+            }
+        });
+
+
+        refreshMainTreeListeners();
+
+    }
+
+    private void initMaterialLabelListener(List<MaterialListEntity> materialList) {
+        Component c = this;
+        for (MouseListener listener : materialPanel.getMouseListeners()) {
+            materialPanel.removeMouseListener(listener);
+        }
+
+        if (materialList != null) {
+            final MouseAdapter adapter = new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    MaterialListWindow materialListWindow = new MaterialListWindow(materialList);
+                    materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), materialListWindow));
+                    materialListWindow.setVisible(true);
+                }
+            };
+
+            int counter = 0;
+            for (MaterialListEntity e : materialList) {
+                if (e.isActive()) {
+                    counter++;
+                }
+            }
+            if (counter > 1) {
+                materialTextLabel.setText("Материал (" + counter + "):");
+            } else materialTextLabel.setText("Материал:");
+            materialPanel.addMouseListener(adapter);
+        }
+    }
+
+    private void initSearchTextFieldDocumentListeners() {
+        searchTextField.getDocument().addDocumentListener(new DocumentListener() {
+            String searchText = "";
+            final Timer searchTimer = new Timer(1000, e -> {
+                if (!searchText.isEmpty()) {
+                    searchText = searchText.replace(",", ".");
+                    searchText = searchText.toUpperCase();
+                    log.debug("User is searching for: " + searchText);
+
+
+                    if (searchThread == null) {
+                        searchThread = new Thread(() -> {
+                            fillMainTreeBySearch(searchText);
+                            updateMainTreeSelectors(searchText);
+                        });
+                        searchThread.start();
+                    } else {
+                        if (searchThread.isAlive()) {
+                            log.debug("Interrupting search thread");
+                            searchThread.interrupt();
+                        }
+                        searchThread = new Thread(() -> {
+                            fillMainTreeBySearch(searchText);
+                            updateMainTreeSelectors(searchText);
+                        });
+                        searchThread.start();
+                    }
+                } else {
+                    if (searchThread == null) {
+                        searchThread = new Thread(() -> {
+                            fillMainTreeFully();
+                            updateMainTreeSelectors(null);
+                            updateDetailInfoPanelWithEmptyEntity();
+                        });
+                        searchThread.start();
+                    } else {
+                        if (searchThread.isAlive()) {
+                            log.debug("Interrupting search thread");
+                            searchThread.interrupt();
+                        }
+                        searchThread = new Thread(() -> {
+                            fillMainTreeFully();
+                            updateMainTreeSelectors(null);
+                            updateDetailInfoPanelWithEmptyEntity();
+                        });
+                        searchThread.start();
+                    }
+                }
+            });
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            private void updateMainTreeSelectors(String searchText) {
+                DetailJTree jTree = (DetailJTree) mainTree;
+                jTree.setSearchText(searchText);
+            }
+        });
+    }
+
+    private void initSearchTextFieldKeysBindings() {
+        registerKeyboardAction(e -> searchTextField.requestFocus(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        searchTextField.registerKeyboardAction(e -> searchTextField.setText(""),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false),
+                WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+    }
+
+    private void initUpdateUserIsActive() {
+        noticeInfoButton.addActionListener(notifyUserIsActiveListener);
+
+        refreshSessionButton.addActionListener(notifyUserIsActiveListener);
+
+        addButton.addActionListener(notifyUserIsActiveListener);
+
+        copyButton.addActionListener(notifyUserIsActiveListener);
+
+        editButton.addActionListener(notifyUserIsActiveListener);
+    }
+
+    private void loadImageFromFtp(DetailEntity selectedComponent) {
+        FtpUtils ftp = FtpUtils.getInstance();
+        BufferedImage image = ftp.getImage(selectedComponent.getId());
+
+        if (image != null) {
+            updateDetailIconByImage(selectedComponent, image);
+        } else {
+            setEmptyImageIcon();
+        }
+    }
+
+    private void loadImageFromLocalStorage(DetailEntity selectedComponent) {
+        final String imagePath = selectedComponent.getImagePath();
+        File file = new File(imagePath);
+        if (file.exists()) {
+            final boolean extension = FtpUtils.getInstance().isImage(file);
+            if (extension) {
+                final BufferedImage bufferedImage = CommonUtils.getBufferedImage(file);
+                if (bufferedImage != null) {
+                    updateDetailIconByImage(selectedComponent, bufferedImage);
+                } else {
+                    setEmptyImageIcon();
+                }
+            }
+        }
+    }
+
+    private void onAddNewItem() {
+        if (hasPermissionsToEditDB()) {
+            if (ClientBackgroundService.getInstance().bindTransaction()) {
+                Session newSession = ClientBackgroundService.getInstance().getSession();
+                newSession.beginTransaction();
+
+                SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, CREATE_SINGLE);
+                selectionDetailWindow.setLocation(FrameUtils
+                        .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                selectionDetailWindow.setVisible(true);
+                ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+                if (list != null) {
+                    if (list.size() == 1) {
+                        DetailEntity entity = list.get(0);
+                        if (entity != null) {
+                            DetailService service = new DetailServiceImpl(newSession);
+                            final DetailEntity detailByIndex = service.getDetailByCode(entity.getCode());
+                            if (detailByIndex == null) {
+                                entity.setActive(true);
+                                entity.setCode(entity.getCode().toUpperCase());
+
+                                ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
+                                if (mainWindow != null) {
+                                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                                    try {
+                                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, true), true);
+                                    } catch (Exception e) {
+                                        ClientBackgroundService.getInstance().unbindTransaction();
+                                        SessionUtils.closeSessionSilently(newSession);
+                                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                                        JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
+                                                e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                    }
+                                } else {
+                                    SessionUtils.closeSessionSilently(newSession);
+                                    ClientBackgroundService.getInstance().unbindTransaction();
+                                }
+                            } else {
+                                SessionUtils.closeSessionSilently(newSession);
+                                ClientBackgroundService.getInstance().unbindTransaction();
+                            }
+                        } else {
+                            SessionUtils.closeSessionSilently(newSession);
+                            ClientBackgroundService.getInstance().unbindTransaction();
+                        }
+                    } else {
+                        SessionUtils.closeSessionSilently(newSession);
+                        ClientBackgroundService.getInstance().unbindTransaction();
+                    }
+                } else {
+                    SessionUtils.closeSessionSilently(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
+                }
+            } else {
+                showTransactionCreatingFailMessage();
+            }
+        }
+    }
+
+    private void onCopyButton() {
+        if (hasPermissionsToEditDB()) {
+            if (ClientBackgroundService.getInstance().bindTransaction()) {
+                Session newSession = ClientBackgroundService.getInstance().getSession();
+                newSession.beginTransaction();
+
+                DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                if (selectedEntity != null) {
+                    if (selectedEntity.isUnit()) {
+                        SelectDetailEntityWindow selectionDetailWindow = new SelectDetailEntityWindow(newSession, null, COPY);
+                        selectionDetailWindow.setLocation(FrameUtils
+                                .getFrameOnCenter(FrameUtils.findWindow(this), selectionDetailWindow));
+                        selectionDetailWindow.setVisible(true);
+                        ArrayList<DetailEntity> list = selectionDetailWindow.getEntities();
+
+                        if (list != null) {
+                            if (list.size() == 1) {
+                                DetailEntity entity = list.get(0);
+                                if (entity != null) {
+                                    entity.setUnit(true);
+                                    entity.setActive(true);
+
+                                    ClientMainWindow mainWindow = new MainWindowUtils(newSession).getClientMainWindow(this);
+
+                                    if (mainWindow != null) {
+                                        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                                        try {
+                                            mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entity, selectedEntity), true);
+                                        } catch (Exception e) {
+                                            ClientBackgroundService.getInstance().unbindTransaction();
+                                            SessionUtils.closeSessionSilently(newSession);
+                                            log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                                            JOptionPane.showMessageDialog(this, "Не удалось добавить транзакционную вкладку\n" +
+                                                    e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                                        }
+                                    } else {
+                                        SessionUtils.closeSessionSilently(newSession);
+                                        ClientBackgroundService.getInstance().unbindTransaction();
+                                    }
+                                } else {
+                                    SessionUtils.closeSessionSilently(newSession);
+                                    ClientBackgroundService.getInstance().unbindTransaction();
+                                }
+                            } else {
+                                SessionUtils.closeSessionSilently(newSession);
+                                ClientBackgroundService.getInstance().unbindTransaction();
+                            }
+                        } else {
+                            SessionUtils.closeSessionSilently(newSession);
+                            ClientBackgroundService.getInstance().unbindTransaction();
+                        }
+                    } else {
+                        SessionUtils.closeSessionSilently(newSession);
+                        ClientBackgroundService.getInstance().unbindTransaction();
+                    }
+                } else {
+                    SessionUtils.closeSessionSilently(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
+                }
+            } else {
+                showTransactionCreatingFailMessage();
+            }
+        }
+    }
+
+    private void onEditDetail(boolean select) {
+        ClientMainWindow mainWindow = new MainWindowUtils(session).getClientMainWindow(this);
+        if (hasPermissionsToEditDB()) {
+            if (ClientBackgroundService.getInstance().bindTransaction()) {
+                Session newSession = ClientBackgroundService.getInstance().getSession();
+                newSession.beginTransaction();
+
+                final DetailEntity entityFromTree = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                if (entityFromTree != null) {
+
+                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/noticeEdit16.png")));
+                    try {
+                        mainWindow.addTab("Редактирование извещения", icon, new EditNoticePanel(newSession, entityFromTree), select);
+                    } catch (Exception e) {
+                        ClientBackgroundService.getInstance().unbindTransaction();
+                        SessionUtils.closeSessionSilently(newSession);
+                        log.warn("User tried to add transactional tab ({}), but transaction is already active", EditNoticePanel.class.getName(), e);
+                        JOptionPane.showMessageDialog(this, "Не удалось открыть транзакционную вкладку\n" +
+                                e.getLocalizedMessage(), "Ошибка добавления вкладки", JOptionPane.WARNING_MESSAGE);
+                    }
+
+                } else {
+                    SessionUtils.closeSessionSilently(newSession);
+                    ClientBackgroundService.getInstance().unbindTransaction();
+                }
+            } else {
+                showTransactionCreatingFailMessage();
+            }
+        }
+    }
+
+    private void onNoticeInfo(boolean select) {
+        MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        mainWindowUtils.setClientMainWindow(this);
+
+        DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (selectedEntity != null) {
+            DetailListService detailListService = new DetailListServiceImpl(session);
+            List<DetailListEntity> list;
+
+            if (detailListService.getDetailListByParent(selectedEntity).size() > 0) {
+                list = detailListService.getDetailListByParent(selectedEntity);
+            } else {
+                list = detailListService.getDetailListByChild(selectedEntity);
+
+            }
+            if (list != null) {
+                if (list.size() > 0) {
+                    List<NoticeEntity> noticeEntities = getUniqueNoticeList(list);
+                    NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
+                    noticeInfoPanel.setDetailEntity(selectedEntity);
+
+                    ClientMainWindow clientMainWindow = (ClientMainWindow) FrameUtils.findWindow(this);
+                    ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
+                    clientMainWindow.addTab("Информация о извещениях", icon, noticeInfoPanel, select);
+                }
+            }
+        }
+        mainWindowUtils.updateMessage(null, null);
+    }
+
+    private void onRefreshSession() {
+        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        mainWindowUtils.setClientMainWindow(this);
+        if (ClientBackgroundService.getInstance().isConnected()) {
+            new Thread(() -> {
+                refreshSessionButton.setEnabled(false);
+                searchTextField.setEnabled(false);
+
+                mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Обновляем список деталей...");
+
+                updateDetailInfoPanelWithEmptyEntity();
+
+                final DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode());
+                mainTree.setModel(model);
+
+                SessionUtils.closeSessionSilently(session);
+                session = ClientBackgroundService.getInstance().getSession();
+
+                refreshMainTreeListeners();
+                DetailJTree tree = (DetailJTree) mainTree;
+                tree.setSession(session);
+
+                fillMainTreeFully();
+
+                mainWindowUtils.updateMessage(null, null);
+                searchTextField.setEnabled(true);
+                refreshSessionButton.setEnabled(true);
+                searchTextField.setText("");
+
+            }).start();
+        }
+    }
+
+    private void refreshMainTreeListeners() {
+        mainTree.removeMouseListener(ml);
+        mainTree.removeKeyListener(kl);
+
+        ml = new MainWindowUtils(session).getMouseListener(mainTree);
+        kl = new MainWindowUtils(session).getArrowKeyListener(mainTree);
+
+
+        mainTree.addMouseListener(ml);
+        mainTree.addKeyListener(kl);
+    }
+
+    private void setEmptyImageIcon() {
+        detailIconLabel.setIcon(null);
+        detailIconLabel.setText("Нет изображения");
+        detailIconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+
+    @Override
+    public void setUIEnabled(boolean enable) {
+        addButton.setEnabled(enable);
+        editButton.setEnabled(enable);
+        final DetailEntity selectedEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        copyButton.setEnabled(selectedEntity != null ? enable && selectedEntity.isUnit() : enable);
+    }
+
+    private void showTransactionCreatingFailMessage() {
+        JOptionPane.showMessageDialog(this, "Не удалось отредактировать данные, \n" +
+                        "кто-то уже проводит изменения", "Ошибка доступа", JOptionPane.WARNING_MESSAGE,
+                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/warning.gif"))));
+    }
+
+    private void updateDetailIconByImage(DetailEntity detailEntity, BufferedImage image) {
+        BufferedImage scaledImage = Scalr.resize(image, 128);
+
+        DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+        if (detailEntity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
+            detailIconLabel.setIcon(new ImageIcon(scaledImage));
+            detailIconLabel.setText("");
+            detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            detailIconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListViewPanel.super.getRootPane()), false,
+                                image, "Изображение " + detailEntity.getCode() + " "
+                                        + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateDetailIconLabelListener() {
+        detailIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    final DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                    if (detailEntity != null) {
+                        JPopupMenu popupMenu = new JPopupMenu();
+                        JMenuItem refresh = new JMenuItem("Обновить",
+                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
+                        refresh.addActionListener(e1 -> {
+                            detailIconLabel.setIcon(null);
+                            updateDetailImage(detailEntity);
+                        });
+                        popupMenu.add(refresh);
+
+                        detailIconLabel.setComponentPopupMenu(popupMenu);
+                    }
+                }
+            }
+        });
+    }
+
+    private void updateDetailImage(final DetailEntity detailEntity) {
+        Runnable runnable = () -> {
+            detailIconLabel.setText("Загрузка...");
+            FrameUtils.removeAllComponentListeners(detailIconLabel);
+            updateDetailIconLabelListener();
+
+            if (detailEntity != null) {
+                if (detailEntity.getImagePath() == null) {
+                    loadImageFromFtp(detailEntity);
+                } else {
+                    if (detailEntity.getImagePath().equalsIgnoreCase(IMAGE_REMOVE_KEY)) {
+                        setEmptyImageIcon();
+                    } else {
+                        loadImageFromLocalStorage(detailEntity);
+                    }
+                }
+            } else {
+                setEmptyImageIcon();
+            }
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+
+    private void updateDetailInfoPanel(DetailEntity selectedComponent) {
+        updateDetailInfoPanelWithEmptyEntity();
+        if (selectedComponent != null) {
+            updateDetailInfoPanelWithEntity(selectedComponent);
+        }
+    }
+
+    private void updateDetailInfoPanelWithEmptyEntity() {
+        numberLabel.setText("нет данных");
+        titleLabel.setText("нет данных");
+
+        detailIconLabel.setIcon(null);
+        FrameUtils.removeAllComponentListeners(detailIconLabel);
+        updateDetailIconLabelListener();
+
+        unitLabel.setText("нет данных");
+        finishedWeightLabel.setText("нет данных");
+        workpieceWeightLabel.setText("нет данных");
+
+        materialPanel.setMaterialEntity(null);
+
+        techProcessLabel.setToolTipText("");
+        techProcessLabel.setText("нет данных");
+
+        isActiveLabel.setText("нет данных");
+    }
+
+    private void updateDetailInfoPanelWithEntity(DetailEntity selectedComponent) {
+        numberLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, selectedComponent.getCode()));
+
+        if (selectedComponent.getDetailTitleByDetailTitleId() != null) {
+            String title = selectedComponent.getDetailTitleByDetailTitleId().getTitle();
+            titleLabel.setToolTipText(title);
+            titleLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, title));
+        }
+
+        unitLabel.setText(Boolean.toString(selectedComponent.isUnit())
+                .replace("false", "нет").replace("true", "да"));
+
+        if (selectedComponent.getFinishedWeight() != null) {
+            finishedWeightLabel.setText((Double.toString(selectedComponent.getFinishedWeight())));
+        }
+
+        if (selectedComponent.getWorkpieceWeight() != null) {
+            workpieceWeightLabel.setText(Double.toString(selectedComponent.getWorkpieceWeight()));
+        }
+
+        fillDetailMaterialInfo(selectedComponent);
+
+
+        updateDetailImage(selectedComponent);
+
+        if (selectedComponent.getTechProcessByTechProcessId() != null) {
+            String process = selectedComponent.getTechProcessByTechProcessId().getProcess();
+            techProcessLabel.setToolTipText(process);
+            techProcessLabel.setText(CommonUtils.substring(25, process));
+        }
+
+        isActiveLabel.setText(Boolean.toString(!selectedComponent.isActive())
+                .replace("false", "нет").replace("true", "да"));
     }
 }

@@ -39,94 +39,8 @@ public class MaterialPanel extends JPanel {
     private MaterialEntity materialEntity;
     private int maxStringSize = 35; //initial
 
-
     public MaterialPanel() {
         initGui();
-    }
-
-    @Override
-    public synchronized void addMouseListener(MouseListener l) {
-        contentPane.addMouseListener(l);
-    }
-
-    private void updateInfo() {
-        updateText();
-        updateToolTip();
-    }
-
-    private void updateText() {
-        if (materialEntity != null) {
-            String firstWord = CommonUtils.getFirstWordText(materialEntity);
-            String substringLongProfile = CommonUtils.substring(maxStringSize, CommonUtils.getLongProfile(materialEntity));
-            String substringLongMark = CommonUtils.substring(maxStringSize, materialEntity.getLongMark());
-
-            if (!firstWord.isEmpty()) {
-                if (!substringLongProfile.isEmpty()) {
-                    materialFirstWordLabel.setText(firstWord);
-                    materialProfileLabel.setText(substringLongProfile);
-                    materialMarkLabel.setText(substringLongMark);
-                    materialSeparator.setVisible(true);
-                } else {
-                    String fixedFirstWord = firstWord.replaceAll(" ", "");
-                    if (!fixedFirstWord.isEmpty()) {
-                        fixedFirstWord = fixedFirstWord + " ";
-                    }
-                    materialFirstWordLabel.setText(CommonUtils.substring(maxStringSize, fixedFirstWord + substringLongMark));
-                    materialProfileLabel.setText(" ");
-                    materialMarkLabel.setText(" ");
-                    materialSeparator.setVisible(false);
-                }
-            } else {
-                materialFirstWordLabel.setText(firstWord + substringLongProfile + substringLongMark);
-                materialSeparator.setVisible(false);
-            }
-        } else {
-            materialFirstWordLabel.setText("нет данных");
-            materialMarkLabel.setText("");
-            materialProfileLabel.setText("");
-            materialSeparator.setVisible(false);
-        }
-    }
-
-    private void initGui() {
-        setLayout(new GridLayout());
-        add(contentPane);
-    }
-
-    public MaterialEntity getMaterialEntity() {
-        return materialEntity;
-    }
-
-    public void setMaterialEntity(MaterialEntity materialEntity) {
-        this.materialEntity = materialEntity;
-        updateInfo();
-    }
-
-    @Override
-    public synchronized MouseListener[] getMouseListeners() {
-        return contentPane.getMouseListeners();
-    }
-
-    @Override
-    public synchronized void removeMouseListener(MouseListener l) {
-        contentPane.removeMouseListener(l);
-    }
-
-    public int getMaxStringSize() {
-        return maxStringSize;
-    }
-
-    private void updateToolTip() {
-        if (materialEntity != null) {
-            contentPane.setToolTipText(CommonUtils.getHtmlToolTip(materialEntity));
-        } else {
-            contentPane.setToolTipText(null);
-        }
-    }
-
-    public void setMaxStringSize(int maxStringSize) {
-        this.maxStringSize = maxStringSize;
-        updateInfo();
     }
 
     {
@@ -171,5 +85,90 @@ public class MaterialPanel extends JPanel {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
+    }
+
+    @Override
+    public synchronized void addMouseListener(MouseListener l) {
+        contentPane.addMouseListener(l);
+    }
+
+    public MaterialEntity getMaterialEntity() {
+        return materialEntity;
+    }
+
+    public void setMaterialEntity(MaterialEntity materialEntity) {
+        this.materialEntity = materialEntity;
+        updateInfo();
+    }
+
+    public int getMaxStringSize() {
+        return maxStringSize;
+    }
+
+    public void setMaxStringSize(int maxStringSize) {
+        this.maxStringSize = maxStringSize;
+        updateInfo();
+    }
+
+    @Override
+    public synchronized MouseListener[] getMouseListeners() {
+        return contentPane.getMouseListeners();
+    }
+
+    private void initGui() {
+        setLayout(new GridLayout());
+        add(contentPane);
+    }
+
+    @Override
+    public synchronized void removeMouseListener(MouseListener l) {
+        contentPane.removeMouseListener(l);
+    }
+
+    private void updateInfo() {
+        updateText();
+        updateToolTip();
+    }
+
+    private void updateText() {
+        if (materialEntity != null) {
+            String firstWord = CommonUtils.getFirstWordText(materialEntity);
+            String substringLongProfile = CommonUtils.substring(maxStringSize, CommonUtils.getLongProfile(materialEntity));
+            String substringLongMark = CommonUtils.substring(maxStringSize, materialEntity.getLongMark());
+
+            if (!firstWord.isEmpty()) {
+                if (!substringLongProfile.isEmpty()) {
+                    materialFirstWordLabel.setText(firstWord);
+                    materialProfileLabel.setText(substringLongProfile);
+                    materialMarkLabel.setText(substringLongMark);
+                    materialSeparator.setVisible(true);
+                } else {
+                    String fixedFirstWord = firstWord.replaceAll(" ", "");
+                    if (!fixedFirstWord.isEmpty()) {
+                        fixedFirstWord = fixedFirstWord + " ";
+                    }
+                    materialFirstWordLabel.setText(CommonUtils.substring(maxStringSize, fixedFirstWord + substringLongMark));
+                    materialProfileLabel.setText(" ");
+                    materialMarkLabel.setText(" ");
+                    materialSeparator.setVisible(false);
+                }
+            } else {
+                materialFirstWordLabel.setText(firstWord + substringLongProfile + substringLongMark);
+                materialSeparator.setVisible(false);
+            }
+        } else {
+            materialFirstWordLabel.setText("нет данных");
+            materialMarkLabel.setText("");
+            materialProfileLabel.setText("");
+            materialSeparator.setVisible(false);
+        }
+    }
+
+    private void updateToolTip() {
+        if (materialEntity != null) {
+            contentPane.setToolTipText(CommonUtils.getHtmlToolTip(materialEntity));
+        } else {
+            contentPane.setToolTipText(null);
+        }
     }
 }

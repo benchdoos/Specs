@@ -58,30 +58,53 @@ public class ClientBackgroundService {
         return localInstance;
     }
 
+    public boolean bindTransaction() {
+        try {
+            log.info("Asking server for transaction");
+            outputStream.writeUTF(SocketConstants.TRANSACTION_BIND);
+            final String s = dataInputStream.readUTF();
+            return s.equalsIgnoreCase(TRANSACTION_ACCESS_GRANTED);
+        } catch (Throwable e) {
+            log.warn("Could not ask server for transaction", e);
+            return false;
+        }
+    }
+
+    public void closeConnection() throws IOException {
+        log.info("Trying to close connection to server");
+        if (isConnected()) {
+            log.info("Writing to server that we're unbinding all transactions");
+            outputStream.writeUTF(SocketConstants.TRANSACTION_UNBIND);
+            log.info("Writing to server that we're quiting");
+            outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
+            socket.close();
+        }
+        log.info("Connection to server successfully closed");
+    }
+
     public void createConnection() throws IOException {
         if (!isConnected()) {
             createNewServerConnection();
         }
     }
 
-    public boolean isConnected() {
-        try {
-            if (socket != null && !socket.isClosed()) {
-                outputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
-                return true;
-            }
-        } catch (Throwable ignored) {
-        }
-        return false;
-    }
+    private SessionFactory createFactory(String dbAddress, String dbUsername, String dbPassword) {
+        log.info("Creating configuration");
+        Configuration configuration = new Configuration();
+        log.info("Loading hibernate configuration file");
+        configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
+        log.info("Configuration file successfully loaded");
+        log.info("Setting hibernate connection configuration from server");
 
-    public boolean isDBAvailable() { //fixme LIER!
-        try (Session session = getSession()) {
-            if (session == null) return false;
-            return session.isConnected() && session.isOpen();
-        } catch (Throwable ignore) {
-            return false;
-        }
+        configuration.setProperty(CP_DB_CONNECTION_URL_KEY, dbAddress);
+        configuration.setProperty(CP_CONNECTION_USERNAME_KEY, dbUsername);
+        configuration.setProperty(CP_CONNECTION_PASSWORD_KEY, dbPassword);
+
+        configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "25");
+
+        log.info("Creating Hibernate connection at: " + dbAddress
+                + " username: " + dbUsername + " password length: " + dbPassword.length());
+        return configuration.buildSessionFactory();
     }
 
     private void createNewServerConnection() throws IOException {
@@ -129,70 +152,23 @@ public class ClientBackgroundService {
         return null;
     }
 
-    public boolean bindTransaction() {
+    public boolean isConnected() {
         try {
-            log.info("Asking server for transaction");
-            outputStream.writeUTF(SocketConstants.TRANSACTION_BIND);
-            final String s = dataInputStream.readUTF();
-            return s.equalsIgnoreCase(TRANSACTION_ACCESS_GRANTED);
-        } catch (Throwable e) {
-            log.warn("Could not ask server for transaction", e);
+            if (socket != null && !socket.isClosed()) {
+                outputStream.writeUTF(SocketConstants.TESTING_CONNECTION_COMMAND);
+                return true;
+            }
+        } catch (Throwable ignored) {
+        }
+        return false;
+    }
+
+    public boolean isDBAvailable() { //fixme LIER!
+        try (Session session = getSession()) {
+            if (session == null) return false;
+            return session.isConnected() && session.isOpen();
+        } catch (Throwable ignore) {
             return false;
-        }
-    }
-
-    public void unbindTransaction() {
-        try {
-            log.info("Asking server to unbind transaction");
-            outputStream.writeUTF(SocketConstants.TRANSACTION_UNBIND);
-        } catch (Throwable e) {
-            log.warn("Could not unbind transaction", e);
-        }
-    }
-
-    private SessionFactory createFactory(String dbAddress, String dbUsername, String dbPassword) {
-        log.info("Creating configuration");
-        Configuration configuration = new Configuration();
-        log.info("Loading hibernate configuration file");
-        configuration.configure(ServerDBConnectionPool.class.getResource("/hibernate/hibernate.cfg.xml"));
-        log.info("Configuration file successfully loaded");
-        log.info("Setting hibernate connection configuration from server");
-
-        configuration.setProperty(CP_DB_CONNECTION_URL_KEY, dbAddress);
-        configuration.setProperty(CP_CONNECTION_USERNAME_KEY, dbUsername);
-        configuration.setProperty(CP_CONNECTION_PASSWORD_KEY, dbPassword);
-
-        configuration.setProperty(HibernateConstants.CP_CONNECTION_POOL_SIZE, "25");
-
-        log.info("Creating Hibernate connection at: " + dbAddress
-                + " username: " + dbUsername + " password length: " + dbPassword.length());
-        return configuration.buildSessionFactory();
-    }
-
-    public void closeConnection() throws IOException {
-        log.info("Trying to close connection to server");
-        if (isConnected()) {
-            log.info("Writing to server that we're unbinding all transactions");
-            outputStream.writeUTF(SocketConstants.TRANSACTION_UNBIND);
-            log.info("Writing to server that we're quiting");
-            outputStream.writeUTF(SocketConstants.QUIT_COMMAND);
-            socket.close();
-        }
-        log.info("Connection to server successfully closed");
-    }
-
-    public void userLogin(UsersEntity usersEntity) throws IOException {
-        if (isConnected()) {
-            log.info("Writing to server that user {} is connected.", usersEntity.getUsername());
-            outputStream.writeUTF(SocketConstants.USER_LOGIN);
-            outputStream.writeUTF(usersEntity.getUsername());
-        }
-    }
-
-    public void userLogout(UsersEntity usersEntity) throws IOException {
-        if (isConnected()) {
-            log.info("Writing to server that user {} is disconnected.", usersEntity.getUsername());
-            outputStream.writeUTF(SocketConstants.USER_LOGOUT);
         }
     }
 
@@ -211,5 +187,29 @@ public class ClientBackgroundService {
             /*NOP*/
         }
         return result;
+    }
+
+    public void unbindTransaction() {
+        try {
+            log.info("Asking server to unbind transaction");
+            outputStream.writeUTF(SocketConstants.TRANSACTION_UNBIND);
+        } catch (Throwable e) {
+            log.warn("Could not unbind transaction", e);
+        }
+    }
+
+    public void userLogin(UsersEntity usersEntity) throws IOException {
+        if (isConnected()) {
+            log.info("Writing to server that user {} is connected.", usersEntity.getUsername());
+            outputStream.writeUTF(SocketConstants.USER_LOGIN);
+            outputStream.writeUTF(usersEntity.getUsername());
+        }
+    }
+
+    public void userLogout(UsersEntity usersEntity) throws IOException {
+        if (isConnected()) {
+            log.info("Writing to server that user {} is disconnected.", usersEntity.getUsername());
+            outputStream.writeUTF(SocketConstants.USER_LOGOUT);
+        }
     }
 }
