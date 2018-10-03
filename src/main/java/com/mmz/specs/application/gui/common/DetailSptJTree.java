@@ -66,11 +66,8 @@ public class DetailSptJTree extends JTree {
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                if (selected) {
-                    this.setBackgroundSelectionColor(BACKGROUND_SELECTION_COLOR);
-                } else {
-                    this.setBackgroundNonSelectionColor(BACKGROUND_NON_SELECTION_COLOR);
-                }
+                restore(selected);
+
 
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
                 if (node.getUserObject() instanceof TreeSPTRecord) {
@@ -82,6 +79,7 @@ public class DetailSptJTree extends JTree {
 
                         if (detail != null) {
                             updateIcon(detail);
+                            updateSearch(detail);
 
                             if (detail.getDetailTitleByDetailTitleId() != null) {
                                 final boolean isManipulator = detail.getCode().contains(MainWindowUtils.ROOT_UNIT_CODE);
@@ -95,17 +93,28 @@ public class DetailSptJTree extends JTree {
                 return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             }
 
-            /*private void updateSearch(DetailEntity detailEntity) {
+            private void restore(boolean selected) {
+                if (selected) {
+                    this.setBackgroundSelectionColor(BACKGROUND_SELECTION_COLOR);
+                } else {
+                    this.setBackgroundNonSelectionColor(BACKGROUND_NON_SELECTION_COLOR);
+                }
+                this.setBorder(null);
+            }
+
+            private void updateSearch(DetailEntity detailEntity) {
                 if (searchText != null && detailEntity != null) {
                     if (detailEntity.getCode().contains(searchText)) {
-                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 5, Color.ORANGE));
+                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.ORANGE));
+                    } else if (detailEntity.getDetailTitleByDetailTitleId().getTitle().toUpperCase().contains(searchText.toUpperCase())) {
+                        this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.ORANGE));
                     } else {
                         this.setBorder(null);
                     }
                 } else {
                     this.setBorder(null);
                 }
-            }*/
+            }
 
             private void updateBackgroundColor(boolean selected, boolean interchangeable) {
                 if (interchangeable) {

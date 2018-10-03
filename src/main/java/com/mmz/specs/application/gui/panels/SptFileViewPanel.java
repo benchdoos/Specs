@@ -24,10 +24,7 @@ import com.mmz.specs.application.gui.common.DetailSptJTree;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.gui.panels.service.MaterialPanel;
-import com.mmz.specs.application.utils.CommonUtils;
-import com.mmz.specs.application.utils.FrameUtils;
-import com.mmz.specs.application.utils.Logging;
-import com.mmz.specs.application.utils.SupportedExtensionsConstants;
+import com.mmz.specs.application.utils.*;
 import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.io.SPTreeIOManager;
 import com.mmz.specs.io.formats.SPTFileFormat;
@@ -43,8 +40,11 @@ import org.imgscalr.Scalr;
 import org.json.JSONException;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -75,6 +75,8 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private File folder;
     private File jsonFile;
     private JsonObject rootJsonObject;
+    private Thread searchThread = null;
+
 
     public SptFileViewPanel(File folder) {
         $$$setupUI$$$();
@@ -92,246 +94,11 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         }
     }
 
-    private void initGui() {
-        setLayout(new GridLayout());
-        add(contentPane);
-
-        initTree();
-        initTreeListeners();
-    }
-
-    private void initTree() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
-        final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJsonObject(root, rootJsonObject.get(IOConstants.TREE).getAsJsonArray());
-        DefaultTreeModel model = new DefaultTreeModel(node);
-        tree.setModel(model);
-        tree.setRootVisible(false);
-    }
-
-    private void initTreeListeners() {
-        tree.addTreeSelectionListener(e -> {
-            TreeSPTRecord treeSPTRecord = JTreeUtils.getSelectedTreeSptRecord(tree);
-            updateInfoAboutSelectedRecord(treeSPTRecord);
-        });
-    }
-
-    private void updateInfoAboutSelectedRecord(TreeSPTRecord treeSPTRecord) {
-        if (treeSPTRecord == null) {
-            clearInfo();
-        } else {
-            fillInfo(treeSPTRecord);
-        }
-    }
-
-    private void fillInfo(TreeSPTRecord treeSPTRecord) {
-
-        DetailEntity detailEntity = treeSPTRecord.getDetail();
-
-        codeLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, detailEntity.getCode()));
-
-        if (detailEntity.getDetailTitleByDetailTitleId() != null) {
-            String title = detailEntity.getDetailTitleByDetailTitleId().getTitle();
-            titleLabel.setToolTipText(title);
-            titleLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, title));
-        }
-
-        unitLabel.setText(Boolean.toString(detailEntity.isUnit())
-                .replace("false", "нет").replace("true", "да"));
-
-        fillDetailWeight(detailEntity);
-        fillMaterialInfoLabel(treeSPTRecord.getMaterials());
-        new Thread(() -> fillDetailImage(detailEntity)).start();
-    }
-
-    private void fillDetailWeight(DetailEntity detailEntity) {
-        if (detailEntity.getWorkpieceWeight() != null && !detailEntity.isUnit()) {
-            workpieceWeightLabel.setText((Double.toString(detailEntity.getWorkpieceWeight())));
-        } else {
-            workpieceWeightLabel.setText("");
-        }
-
-        if (detailEntity.getFinishedWeight() != null && !detailEntity.isUnit()) {
-            finishedWeightLabel.setText((Double.toString(detailEntity.getFinishedWeight())));
-        } else {
-            finishedWeightLabel.setText("");
-        }
-    }
-
-    private void fillMaterialInfoLabel(ArrayList<MaterialEntity> materials) {
-        clearDetailMaterialInfo();
-        materialPanel.setMaxStringSize(MAXIMUM_STRING_LENGTH);
-        if (materials != null) {
-            if (materials.size() > 0) {
-                materialPanel.setMaterialEntity(materials.get(0));
-                initMaterialLabelListener(materials);
-            } else {
-                materialTextLabel.setText("Материал:");
-                materialPanel.setMaterialEntity(null);
-            }
-        }
-    }
-
-    private void clearInfo() {
-        final String NO_DATA_STRING = "нет данных";
-        codeLabel.setText(NO_DATA_STRING);
-        titleLabel.setText(NO_DATA_STRING);
-        unitLabel.setText(NO_DATA_STRING);
-        workpieceWeightLabel.setText(NO_DATA_STRING);
-        finishedWeightLabel.setText(NO_DATA_STRING);
-        fillDetailImage(null);
-        clearDetailMaterialInfo();
-    }
-
-    private void fillDetailImage(DetailEntity entity) {
-        Component component = this;
-        if (entity == null) {
-            imageLabel.setIcon(null);
-            imageLabel.setText("нет изображения");
-        } else {
-            final String filePath = folder + File.separator + "images" + File.separator + entity.getId() + SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
-            try {
-                log.debug("Loading image for id: {} at: {}", entity.getId(), filePath);
-                final File img = new File(filePath);
-                if (img.exists()) {
-                    final BufferedImage bufferedImage = CommonUtils.getBufferedImage(img);
-                    if (bufferedImage != null) {
-                        final TreeSPTRecord selectedTreeSptRecord = JTreeUtils.getSelectedTreeSptRecord(tree);
-                        if (selectedTreeSptRecord != null) {
-
-                            DetailEntity current = selectedTreeSptRecord.getDetail();
-                            BufferedImage scaledImage = Scalr.resize(bufferedImage, 128);
-
-                            if (entity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
-                                imageLabel.setIcon(new ImageIcon(scaledImage));
-                                imageLabel.setText("");
-                                imageLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-                                FrameUtils.removeAllComponentListeners(imageLabel);
-                                imageLabel.addMouseListener(new MouseAdapter() {
-                                    @Override
-                                    public void mouseClicked(MouseEvent e) {
-                                        if (e.getButton() == MouseEvent.BUTTON1) {
-                                            FrameUtils.onShowImage(FrameUtils.findWindow(component), false,
-                                                    bufferedImage, "Изображение " + entity.getCode() + " "
-                                                            + entity.getDetailTitleByDetailTitleId().getTitle());
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    } else {
-                        restoreImageLabel();
-                    }
-                } else {
-                    restoreImageLabel();
-                }
-            } catch (Exception e) {
-                log.debug("Can not load image: {}", filePath, e.getLocalizedMessage());
-                restoreImageLabel();
-            }
-        }
-    }
-
-    private void restoreImageLabel() {
-        imageLabel.setIcon(null);
-        imageLabel.setText("нет изображения");
-        imageLabel.setCursor(null);
-    }
-
-    private void clearDetailMaterialInfo() {
-        materialTextLabel.setText("Материал:");
-        materialPanel.setMaterialEntity(null);
-        initMaterialLabelListener(null);
-    }
-
-    private void initMaterialLabelListener(ArrayList<MaterialEntity> entities) {
-        Component c = this;
-        for (MouseListener listener : materialPanel.getMouseListeners()) {
-            materialPanel.removeMouseListener(listener);
-        }
-
-        List entityList = getMaterialList(entities);
-
-        if (entities != null) {
-            final MouseAdapter adapter = new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    MaterialListWindow materialListWindow = new MaterialListWindow(entityList);
-                    materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), materialListWindow));
-                    materialListWindow.setVisible(true);
-                }
-            };
-
-
-            if (entities.size() > 1) {
-                materialTextLabel.setText("Материал (" + entities.size() + "):");
-            } else {
-                materialTextLabel.setText("Материал:");
-            }
-            materialPanel.addMouseListener(adapter);
-        }
-    }
-
-    private List getMaterialList(ArrayList<MaterialEntity> entities) {
-        if (entities != null) {
-            if (entities.size() > 0) {
-                List<MaterialListEntity> list = new ArrayList<>();
-                for (int i = 0; i < entities.size(); i++) {
-                    MaterialEntity entity = entities.get(i);
-                    MaterialListEntity materialListEntity = new MaterialListEntity();
-                    materialListEntity.setMaterialByMaterialId(entity);
-                    materialListEntity.setMainMaterial(i == 0);
-                    materialListEntity.setActive(true);
-                    list.add(materialListEntity);
-                }
-
-                return list;
-            }
-        }
-        return null;
-    }
-
-    private void initBusinessLogic() throws IOException {
-        jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
-        log.info("Loading json tree from: {}", jsonFile);
-        JsonObject object = SPTreeIOManager.loadJsonFromFile(jsonFile);
-        final String string;
-        try {
-            string = object.get(IOConstants.TYPE).getAsString();
-        } catch (JSONException e) {
-            throw new IOException("JSON file " + jsonFile + " is not an STP file!");
-        }
-
-        if (string.equalsIgnoreCase(SPTFileFormat.DEFAULT_TREE_TYPE)) {
-            rootJsonObject = object;
-        } else {
-            throw new IOException("JSON file " + jsonFile + " is not an STP file!");
-        }
-        log.info("Successfully loaded json tree from: {}, size is: {}", jsonFile, rootJsonObject.size());
-    }
-
-    private void printTreeInformation() {
-        final String type = rootJsonObject.get(IOConstants.TYPE).getAsString();
-        Date date = new Date(rootJsonObject.get(IOConstants.TIMESTAMP).getAsLong());
-        final String author = rootJsonObject.get(IOConstants.AUTHOR).getAsString();
-        log.info("File {} information:", jsonFile);
-        log.info("Type: {}, Author: {}, Date: {}", type, author, date);
-    }
-
-    @Override
-    public void clean() {
-        try {
-            log.info("Deleting directory: {}", folder);
-            FileUtils.deleteDirectory(folder);
-        } catch (IOException e) {
-            log.warn("Could not delete tmp folder: {}", folder, e);
-        }
-    }
-
-    private void createUIComponents() {
-        searchTextField = new PlaceholderTextField();
-        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
-        tree = new DetailSptJTree();
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return contentPane;
     }
 
     /**
@@ -400,10 +167,354 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         scrollPane1.setViewportView(tree);
     }
 
-    /**
-     * @noinspection ALL
-     */
-    public JComponent $$$getRootComponent$$$() {
-        return contentPane;
+    @Override
+    public void clean() {
+        try {
+            log.info("Deleting directory: {}", folder);
+            FileUtils.deleteDirectory(folder);
+        } catch (IOException e) {
+            log.warn("Could not delete tmp folder: {}", folder, e);
+        }
+    }
+
+    private void clearDetailMaterialInfo() {
+        materialTextLabel.setText("Материал:");
+        materialPanel.setMaterialEntity(null);
+        initMaterialLabelListener(null);
+    }
+
+    private void clearInfo() {
+        final String NO_DATA_STRING = "нет данных";
+        codeLabel.setText(NO_DATA_STRING);
+        titleLabel.setText(NO_DATA_STRING);
+        unitLabel.setText(NO_DATA_STRING);
+        workpieceWeightLabel.setText(NO_DATA_STRING);
+        finishedWeightLabel.setText(NO_DATA_STRING);
+        fillDetailImage(null);
+        clearDetailMaterialInfo();
+    }
+
+    private void createUIComponents() {
+        searchTextField = new PlaceholderTextField();
+        ((PlaceholderTextField) searchTextField).setPlaceholder("Поиск");
+        tree = new DetailSptJTree();
+    }
+
+    private void fillDetailImage(DetailEntity entity) {
+        Component component = this;
+        if (entity == null) {
+            imageLabel.setIcon(null);
+            imageLabel.setText("нет изображения");
+        } else {
+            final String filePath = folder + File.separator + "images" + File.separator + entity.getId() + SupportedExtensionsConstants.FTP_IMAGE_FILE_EXTENSION;
+            try {
+                log.debug("Loading image for id: {} at: {}", entity.getId(), filePath);
+                final File img = new File(filePath);
+                if (img.exists()) {
+                    final BufferedImage bufferedImage = CommonUtils.getBufferedImage(img);
+                    if (bufferedImage != null) {
+                        final TreeSPTRecord selectedTreeSptRecord = JTreeUtils.getSelectedTreeSptRecord(tree);
+                        if (selectedTreeSptRecord != null) {
+
+                            DetailEntity current = selectedTreeSptRecord.getDetail();
+                            BufferedImage scaledImage = Scalr.resize(bufferedImage, 128);
+
+                            if (entity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
+                                imageLabel.setIcon(new ImageIcon(scaledImage));
+                                imageLabel.setText("");
+                                imageLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+                                FrameUtils.removeAllComponentListeners(imageLabel);
+                                imageLabel.addMouseListener(new MouseAdapter() {
+                                    @Override
+                                    public void mouseClicked(MouseEvent e) {
+                                        if (e.getButton() == MouseEvent.BUTTON1) {
+                                            FrameUtils.onShowImage(FrameUtils.findWindow(component), false,
+                                                    bufferedImage, "Изображение " + entity.getCode() + " "
+                                                            + entity.getDetailTitleByDetailTitleId().getTitle());
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    } else {
+                        restoreImageLabel();
+                    }
+                } else {
+                    restoreImageLabel();
+                }
+            } catch (Exception e) {
+                log.debug("Can not load image: {}", filePath, e.getLocalizedMessage());
+                restoreImageLabel();
+            }
+        }
+    }
+
+    private void fillDetailWeight(DetailEntity detailEntity) {
+        if (detailEntity.getWorkpieceWeight() != null && !detailEntity.isUnit()) {
+            workpieceWeightLabel.setText((Double.toString(detailEntity.getWorkpieceWeight())));
+        } else {
+            workpieceWeightLabel.setText("");
+        }
+
+        if (detailEntity.getFinishedWeight() != null && !detailEntity.isUnit()) {
+            finishedWeightLabel.setText((Double.toString(detailEntity.getFinishedWeight())));
+        } else {
+            finishedWeightLabel.setText("");
+        }
+    }
+
+    private void fillInfo(TreeSPTRecord treeSPTRecord) {
+
+        DetailEntity detailEntity = treeSPTRecord.getDetail();
+
+        codeLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, detailEntity.getCode()));
+
+        if (detailEntity.getDetailTitleByDetailTitleId() != null) {
+            String title = detailEntity.getDetailTitleByDetailTitleId().getTitle();
+            titleLabel.setToolTipText(title);
+            titleLabel.setText(CommonUtils.substring(MAXIMUM_STRING_LENGTH, title));
+        }
+
+        unitLabel.setText(Boolean.toString(detailEntity.isUnit())
+                .replace("false", "нет").replace("true", "да"));
+
+        fillDetailWeight(detailEntity);
+        fillMaterialInfoLabel(treeSPTRecord.getMaterials());
+        new Thread(() -> fillDetailImage(detailEntity)).start();
+    }
+
+    private void fillMaterialInfoLabel(ArrayList<MaterialEntity> materials) {
+        clearDetailMaterialInfo();
+        materialPanel.setMaxStringSize(MAXIMUM_STRING_LENGTH);
+        if (materials != null) {
+            if (materials.size() > 0) {
+                materialPanel.setMaterialEntity(materials.get(0));
+                initMaterialLabelListener(materials);
+            } else {
+                materialTextLabel.setText("Материал:");
+                materialPanel.setMaterialEntity(null);
+            }
+        }
+    }
+
+    private void findInTreeBySearchDown(String text) {
+        final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        TreePath treePath;
+        if (lastSelectedPathComponent == null) {
+            treePath = SptFileUtils.find((DefaultMutableTreeNode) tree.getModel().getRoot(), text);
+        } else {
+            treePath = SptFileUtils.find(lastSelectedPathComponent, text);
+        }
+        if (treePath != null) {
+            tree.expandPath(treePath);
+            tree.setSelectionPath(treePath);
+        } else {
+            treePath = SptFileUtils.find((DefaultMutableTreeNode) tree.getModel().getRoot(), text);
+            tree.expandPath(treePath);
+            tree.setSelectionPath(treePath);
+        }
+
+
+        /*final DefaultMutableTreeNode lastSelectedPathComponent = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+        final TreePath nextSearchText = SptFileUtils.findNextSearchText(tree, lastSelectedPathComponent, text);
+        if (nextSearchText != null) {
+            tree.expandPath(nextSearchText);
+        }*/
+    }
+
+    private List getMaterialList(ArrayList<MaterialEntity> entities) {
+        if (entities != null) {
+            if (entities.size() > 0) {
+                List<MaterialListEntity> list = new ArrayList<>();
+                for (int i = 0; i < entities.size(); i++) {
+                    MaterialEntity entity = entities.get(i);
+                    MaterialListEntity materialListEntity = new MaterialListEntity();
+                    materialListEntity.setMaterialByMaterialId(entity);
+                    materialListEntity.setMainMaterial(i == 0);
+                    materialListEntity.setActive(true);
+                    list.add(materialListEntity);
+                }
+
+                return list;
+            }
+        }
+        return null;
+    }
+
+    private void initBusinessLogic() throws IOException {
+        jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
+        log.info("Loading json tree from: {}", jsonFile);
+        JsonObject object = SPTreeIOManager.loadJsonFromFile(jsonFile);
+        final String string;
+        try {
+            string = object.get(IOConstants.TYPE).getAsString();
+        } catch (JSONException e) {
+            throw new IOException("JSON file " + jsonFile + " is not an STP file!");
+        }
+
+        if (string.equalsIgnoreCase(SPTFileFormat.DEFAULT_TREE_TYPE)) {
+            rootJsonObject = object;
+        } else {
+            throw new IOException("JSON file " + jsonFile + " is not an STP file!");
+        }
+        log.info("Successfully loaded json tree from: {}, size is: {}", jsonFile, rootJsonObject.size());
+    }
+
+    private void initGui() {
+        setLayout(new GridLayout());
+        add(contentPane);
+
+        initTree();
+        initTreeListeners();
+        initSearchTextFieldDocumentListeners();
+    }
+
+    private void initMaterialLabelListener(ArrayList<MaterialEntity> entities) {
+        Component c = this;
+        for (MouseListener listener : materialPanel.getMouseListeners()) {
+            materialPanel.removeMouseListener(listener);
+        }
+
+        List entityList = getMaterialList(entities);
+
+        if (entities != null) {
+            final MouseAdapter adapter = new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    MaterialListWindow materialListWindow = new MaterialListWindow(entityList);
+                    materialListWindow.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(c), materialListWindow));
+                    materialListWindow.setVisible(true);
+                }
+            };
+
+
+            if (entities.size() > 1) {
+                materialTextLabel.setText("Материал (" + entities.size() + "):");
+            } else {
+                materialTextLabel.setText("Материал:");
+            }
+            materialPanel.addMouseListener(adapter);
+        }
+    }
+
+    private void initSearchTextFieldDocumentListeners() {
+        searchTextField.getDocument().addDocumentListener(new DocumentListener() {
+            String searchText = "";
+            final Timer searchTimer = new Timer(1000, e -> {
+                if (!searchText.isEmpty()) {
+                    searchText = searchText.replace(",", ".");
+                    searchText = searchText.toUpperCase();
+                    log.debug("User is searching for: " + searchText);
+
+
+                    if (searchThread == null) {
+                        searchThread = new Thread(() -> {
+                            findInTreeBySearchDown(searchText);
+                            updateMainTreeSelectors(searchText);
+                        });
+                        searchThread.start();
+                    } else {
+                        if (searchThread.isAlive()) {
+                            log.debug("Interrupting search thread");
+                            searchThread.interrupt();
+                        }
+                        searchThread = new Thread(() -> {
+                            findInTreeBySearchDown(searchText);
+                            updateMainTreeSelectors(searchText);
+                        });
+                        searchThread.start();
+                    }
+                } else {
+                    if (searchThread == null) {
+                        searchThread = new Thread(() -> {
+                            updateMainTreeSelectors(null);
+                            clearInfo();
+                        });
+                        searchThread.start();
+                    } else {
+                        if (searchThread.isAlive()) {
+                            log.debug("Interrupting search thread");
+                            searchThread.interrupt();
+                        }
+                        searchThread = new Thread(() -> {
+                            updateMainTreeSelectors(null);
+                            clearInfo();
+                        });
+                        searchThread.start();
+                    }
+                }
+            });
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                searchText = searchTextField.getText();
+                searchTimer.setRepeats(false);
+                if (searchTimer.isRunning()) {
+                    searchTimer.restart();
+                } else searchTimer.start();
+            }
+
+            private void updateMainTreeSelectors(String searchText) {
+                DetailSptJTree jTree = (DetailSptJTree) tree;
+                jTree.setSearchText(searchText);
+            }
+        });
+    }
+
+    private void initTree() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+        final DefaultMutableTreeNode node = ImportSPTUtils.getDefaultTreeModelFromJsonObject(root, rootJsonObject.get(IOConstants.TREE).getAsJsonArray());
+        DefaultTreeModel model = new DefaultTreeModel(node);
+        tree.setModel(model);
+        tree.setRootVisible(false);
+    }
+
+    private void initTreeListeners() {
+        tree.addTreeSelectionListener(e -> {
+            TreeSPTRecord treeSPTRecord = JTreeUtils.getSelectedTreeSptRecord(tree);
+            updateInfoAboutSelectedRecord(treeSPTRecord);
+        });
+    }
+
+    private void printTreeInformation() {
+        final String type = rootJsonObject.get(IOConstants.TYPE).getAsString();
+        Date date = new Date(rootJsonObject.get(IOConstants.TIMESTAMP).getAsLong());
+        final String author = rootJsonObject.get(IOConstants.AUTHOR).getAsString();
+        log.info("File {} information:", jsonFile);
+        log.info("Type: {}, Author: {}, Date: {}", type, author, date);
+    }
+
+    private void restoreImageLabel() {
+        imageLabel.setIcon(null);
+        imageLabel.setText("нет изображения");
+        imageLabel.setCursor(null);
+    }
+
+    private void updateInfoAboutSelectedRecord(TreeSPTRecord treeSPTRecord) {
+        if (treeSPTRecord == null) {
+            clearInfo();
+        } else {
+            fillInfo(treeSPTRecord);
+        }
     }
 }
