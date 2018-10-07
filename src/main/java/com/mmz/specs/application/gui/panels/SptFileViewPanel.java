@@ -316,9 +316,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
             } else {
                 searchPosition = searchResult.size() - 1;
             }
-            TreePath treePath = searchResult.get(searchPosition);
-            tree.expandPath(treePath);
-            tree.setSelectionPath(treePath);
+            updateTreeHighlight();
         }
 
     }
@@ -342,9 +340,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
             } else {
                 searchPosition = 0;
             }
-            TreePath treePath = searchResult.get(searchPosition);
-            tree.expandPath(treePath);
-            tree.setSelectionPath(treePath);
+            updateTreeHighlight();
         }
     }
 
@@ -451,6 +447,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         searchTextField.registerKeyboardAction(e -> {
                     searchTextField.setText("");
                     resetSearchResult();
+                    updateTreeHighlight();
                 },
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -502,6 +499,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
                         searchThread.start();
                     }
                 }
+                updateTreeHighlight();
             });
 
             @Override
@@ -583,5 +581,16 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         } else {
             fillInfo(treeSPTRecord);
         }
+    }
+
+    private void updateTreeHighlight() {
+        if (searchResult != null) {
+            TreePath treePath = searchResult.get(searchPosition);
+            tree.expandPath(treePath);
+            tree.setSelectionPath(treePath);
+            tree.scrollPathToVisible(treePath);
+        }
+        tree.invalidate();
+        tree.repaint();
     }
 }
