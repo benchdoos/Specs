@@ -23,10 +23,7 @@ import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.core.server.service.ClientConnection;
 import com.mmz.specs.application.core.server.service.ClientConnectionImpl;
-import com.mmz.specs.application.gui.common.AboutApplicationWindow;
-import com.mmz.specs.application.gui.common.ButtonTabComponent;
-import com.mmz.specs.application.gui.common.LoginWindow;
-import com.mmz.specs.application.gui.common.UserInfoWindow;
+import com.mmz.specs.application.gui.common.*;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.gui.panels.*;
 import com.mmz.specs.application.managers.ClientSettingsManager;
@@ -35,6 +32,7 @@ import com.mmz.specs.application.utils.*;
 import com.mmz.specs.application.utils.client.CommonWindowUtils;
 import com.mmz.specs.application.utils.client.MainWindowUtils;
 import com.mmz.specs.connection.DaoConstants;
+import com.mmz.specs.io.FileInfo;
 import com.mmz.specs.io.SPTreeIOManager;
 import com.mmz.specs.model.ConstantsEntity;
 import com.mmz.specs.model.NoticeEntity;
@@ -474,12 +472,33 @@ public class ClientMainWindow extends JFrame {
                 .getImage(getClass().getResource("/img/gui/menu/recent.png"))));
         menu.add(recentItemsMenu);
 
+        JMenuItem fileInfoMenu = new JMenuItem("Информация о файле");
+        fileInfoMenu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
+                .getImage(getClass().getResource("/img/gui/menu/fileInfo.png"))));
+        fileInfoMenu.addActionListener(e -> onFileInfo());
+        fileInfoMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
+        menu.add(fileInfoMenu);
+
         /*JMenuItem saveFileMenu = new JMenuItem("Сохранить");
         saveFileMenu.addActionListener(e -> onSaveFileMenu());
         saveFileMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         menu.add(saveFileMenu);*/
 
         return menu;
+    }
+
+    private void onFileInfo() {
+        final Component selectedComponent = clientMainTabbedPane.getSelectedComponent();
+        if (selectedComponent instanceof FileViewPanel) {
+            final Component component = ((JPanel) ((FileViewPanel) selectedComponent).getComponent(0)).getComponent(0);
+            if (component instanceof SptFileViewPanel) {
+                SptFileViewPanel panel = (SptFileViewPanel) component;
+                final FileInfo fileInfo = panel.getFileInfo();
+                FileInfoWindow window = new FileInfoWindow(fileInfo);
+                window.setLocation(FrameUtils.getFrameOnCenter(FrameUtils.findWindow(this), window));
+                window.setVisible(true);
+            }
+        }
     }
 
     private JMenu getHelpMenu() {
@@ -1135,7 +1154,7 @@ public class ClientMainWindow extends JFrame {
                     progressManager.setTotalProgress(3);
                     log.debug("Opening SPT file at  {}", folder);
 
-                    SptFileViewPanel sptFileViewPanel = new SptFileViewPanel(folder);
+                    SptFileViewPanel sptFileViewPanel = new SptFileViewPanel(file, folder);
                     progressManager.setTotalProgress(4);
 
                     RecentItems.getInstance().put(file);

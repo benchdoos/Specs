@@ -25,6 +25,7 @@ import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.gui.common.utils.PlaceholderTextField;
 import com.mmz.specs.application.gui.panels.service.MaterialPanel;
 import com.mmz.specs.application.utils.*;
+import com.mmz.specs.io.FileInfo;
 import com.mmz.specs.io.IOConstants;
 import com.mmz.specs.io.SPTreeIOManager;
 import com.mmz.specs.io.formats.SPTFileFormat;
@@ -76,11 +77,15 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private Thread searchThread = null;
     private ArrayList<TreePath> searchResult = null;
     private int searchPosition = -1;
+    private File original;
 
 
-    public SptFileViewPanel(File folder) {
+    public SptFileViewPanel(File original, File folder) {
         $$$setupUI$$$();
+        this.original = original;
         this.folder = folder;
+
+        jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
 
         try {
             initBusinessLogic();
@@ -344,6 +349,24 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
         }
     }
 
+    public FileInfo getFileInfo() {
+        final String type = rootJsonObject.get(IOConstants.TYPE).getAsString();
+        Date date = new Date(rootJsonObject.get(IOConstants.TIMESTAMP).getAsLong());
+        final String author = rootJsonObject.get(IOConstants.AUTHOR).getAsString();
+
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(original.getName());
+        fileInfo.setDescription(type);
+        fileInfo.setCreated(date);
+        fileInfo.setAuthor(author);
+        fileInfo.setSize(original.length());
+
+        final ImageIcon imageIcon = new ImageIcon(Toolkit.getDefaultToolkit()
+                .getImage(getClass().getResource("/img/gui/extensions/sptFileFormat256.png")));
+        fileInfo.setImage(imageIcon);
+        return fileInfo;
+    }
+
     private List<MaterialListEntity> getMaterialList(ArrayList<MaterialEntity> entities) {
         if (entities != null) {
             if (entities.size() > 0) {
@@ -364,7 +387,6 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void initBusinessLogic() throws IOException {
-        jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
         log.info("Loading json tree from: {}", jsonFile);
         JsonObject object = SPTreeIOManager.loadJsonFromFile(jsonFile);
         final String string;

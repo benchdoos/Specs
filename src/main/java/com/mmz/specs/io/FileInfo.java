@@ -20,7 +20,7 @@ import java.util.Date;
 
 public class FileInfo {
     private ImageIcon image;
-    private String extension;
+    private String fileName;
     private String description;
     private Date created;
     private String author;
@@ -50,12 +50,12 @@ public class FileInfo {
         this.description = description;
     }
 
-    public String getExtension() {
-        return extension;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setExtension(String extension) {
-        this.extension = extension;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public ImageIcon getImage() {
