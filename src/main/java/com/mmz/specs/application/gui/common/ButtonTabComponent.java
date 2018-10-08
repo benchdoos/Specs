@@ -78,7 +78,7 @@ public class ButtonTabComponent extends JPanel {
         JButton button = new TabButton();
         add(button);
         //add more space to the top of the component
-        setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
+//        setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
     }
 
     private void manageCleanable(int i) {
