@@ -256,8 +256,8 @@ public class DetailInfoPanel extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(c), false, image,
-                                "Изображение " + entity.getCode() + " " + entity.getDetailTitleByDetailTitleId().getTitle());
+                        FrameUtils.onShowImage(image, "Изображение " + entity.getCode() + " "
+                                + entity.getDetailTitleByDetailTitleId().getTitle());
                     }
                 }
             });

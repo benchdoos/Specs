@@ -462,9 +462,8 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
                     FtpUtils ftp = FtpUtils.getInstance();
                     BufferedImage image = ftp.getImage(entity.getId());
                     if (image != null) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListViewPanel.super.getRootPane()), false,
-                                image, "Изображение " + entity.getCode() + " "
-                                        + entity.getDetailTitleByDetailTitleId().getTitle());
+                        FrameUtils.onShowImage(image, "Изображение " + entity.getCode() + " "
+                                + entity.getDetailTitleByDetailTitleId().getTitle());
                     }
                 }
             }
@@ -979,9 +978,8 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
                 final boolean isImage = FtpUtils.getInstance().isImage(file);
                 if (isImage) {
                     final BufferedImage bufferedImage = CommonUtils.getBufferedImage(file);
-                    FrameUtils.onShowImage(FrameUtils.findWindow(c), false,
-                            bufferedImage, "Изображение " + entity.getCode() + " "
-                                    + entity.getDetailTitleByDetailTitleId().getTitle());
+                    FrameUtils.onShowImage(bufferedImage, "Изображение " + entity.getCode() + " "
+                            + entity.getDetailTitleByDetailTitleId().getTitle());
                 }
             }
         }

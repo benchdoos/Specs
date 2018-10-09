@@ -16,8 +16,8 @@
 package com.mmz.specs.application.utils;
 
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.panels.service.SimpleImageViewer;
 import com.mmz.specs.application.managers.ClientSettingsManager;
-import hu.kazocsaba.imageviewer.ImageViewer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -187,23 +187,17 @@ public class FrameUtils {
     }
 
 
-    public static void onShowImage(Window parent, boolean modal, BufferedImage image, String title) {
-        final ImageViewer imageViewer = new ImageViewer(image);
-        imageViewer.setPixelatedZoom(true);
+    public static void onShowImage(BufferedImage image, String title) {
 
-        JDialog imageFrame;
-        if (modal) {
-            imageFrame = new JDialog(parent);
-        } else {
-            imageFrame = new JDialog();
-        }
-        imageFrame.setModal(modal);
+        SimpleImageViewer imageViewer = new SimpleImageViewer(image);
+
+        JFrame imageFrame;
+        imageFrame = new JFrame();
         imageFrame.setTitle(title);
 
         imageFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(FrameUtils.class.getResource("/img/gui/picture64.png")));
         imageFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-        imageFrame.add(imageViewer.getComponent());
+        imageFrame.add(imageViewer);
 
         imageFrame.setMinimumSize(new Dimension(256, 256));
         imageFrame.setSize(ClientSettingsManager.getInstance().getImagePreviewWindowDimension());

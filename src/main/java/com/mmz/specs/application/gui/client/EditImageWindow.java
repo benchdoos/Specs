@@ -348,8 +348,9 @@ public class EditImageWindow extends JDialog {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(EditImageWindow.super.getRootPane()), true, image,
-                                "Изображение " + detailEntity.getCode() + detailEntity.getDetailTitleByDetailTitleId().getTitle());
+                        FrameUtils.onShowImage(image,
+                                "Изображение " + detailEntity.getCode() + " "
+                                        + detailEntity.getDetailTitleByDetailTitleId().getTitle());
                     }
                 }
             });
