@@ -124,14 +124,13 @@ public class SimpleImageViewer extends JPanel {
             height = image.getHeight(null);
             width = image.getWidth(null);
         }
-        BufferedImage resizedimage;
-        resizedimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2 = resizedimage.createGraphics();
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = bufferedImage.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2.drawImage(image, 0, 0, width, height, null);
         g2.dispose();
-        return resizedimage;
+        return bufferedImage;
 
     }
 
