@@ -189,14 +189,16 @@ public class FrameUtils {
 
     public static void onShowImage(BufferedImage image, String title) {
 
-        SimpleImageViewer imageViewer = new SimpleImageViewer(image);
 
-        JFrame imageFrame;
-        imageFrame = new JFrame();
+        JFrame imageFrame = new JFrame();
         imageFrame.setTitle(title);
 
         imageFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(FrameUtils.class.getResource("/img/gui/picture64.png")));
         imageFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        SimpleImageViewer imageViewer = new SimpleImageViewer(image);
+        imageViewer.registerKeyboardAction(e -> imageFrame.dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
         imageFrame.add(imageViewer);
 
         imageFrame.setMinimumSize(new Dimension(256, 256));
