@@ -55,7 +55,7 @@
                   <text value="нет данных"/>
                 </properties>
               </component>
-              <component id="ede49" class="javax.swing.JLabel" binding="imageLabel">
+              <component id="3794f" class="javax.swing.JButton" binding="imageButton">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="128" height="128"/>
@@ -64,8 +64,11 @@
                   </grid>
                 </constraints>
                 <properties>
+                  <borderPainted value="false"/>
+                  <contentAreaFilled value="false"/>
                   <foreground color="-10395295"/>
                   <horizontalAlignment value="0"/>
+                  <opaque value="false"/>
                   <text value="нет изображения"/>
                 </properties>
               </component>
