@@ -220,6 +220,7 @@ public class ClientMainWindow extends JFrame {
         applicationVersionTextField.setBackground(new Color(-855310));
         applicationVersionTextField.setEditable(false);
         applicationVersionTextField.setForeground(new Color(-7697782));
+        applicationVersionTextField.setVisible(false);
         panel4.add(applicationVersionTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(160, -1), null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
