@@ -69,7 +69,7 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
     private JLabel workpieceWeightLabel;
     private JLabel techProcessLabel;
     private JLabel isActiveLabel;
-    private JLabel detailIconLabel;
+    private JButton imageButton;
     private JButton noticeInfoButton;
     private JTree mainTree;
     private JButton refreshSessionButton;
@@ -163,12 +163,6 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
         workpieceWeightLabel = new JLabel();
         workpieceWeightLabel.setText("нет данных");
         detailInfoPanel.add(workpieceWeightLabel, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        detailIconLabel = new JLabel();
-        detailIconLabel.setForeground(new Color(-10395295));
-        detailIconLabel.setHorizontalAlignment(0);
-        detailIconLabel.setHorizontalTextPosition(0);
-        detailIconLabel.setText("Нет изображения");
-        detailInfoPanel.add(detailIconLabel, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(128, 128), new Dimension(128, 128), new Dimension(128, 128), 0, false));
         final JLabel label8 = new JLabel();
         label8.setText("Последнее извещение:");
         detailInfoPanel.add(label8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -205,6 +199,14 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
         detailInfoPanel.add(noticeInfoButton, new GridConstraints(10, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         materialPanel = new MaterialPanel();
         detailInfoPanel.add(materialPanel.$$$getRootComponent$$$(), new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 40), null, null, 0, false));
+        imageButton = new JButton();
+        imageButton.setBorderPainted(false);
+        imageButton.setContentAreaFilled(false);
+        imageButton.setForeground(new Color(-10395295));
+        imageButton.setHorizontalAlignment(0);
+        imageButton.setOpaque(false);
+        imageButton.setText("нет изображения");
+        detailInfoPanel.add(imageButton, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(128, 128), new Dimension(128, 128), new Dimension(128, 128), 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         detailListPanel.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         scrollPane1.setBorder(BorderFactory.createTitledBorder("Узлы"));
@@ -449,58 +451,45 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
                 WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
-    private void initListeners() {
-        DetailListViewPanel panel = this;
-        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
-        noticeInfoButton.addActionListener(e -> {
-            mainWindowUtils.setClientMainWindow(panel);
-            mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
-            new Thread(() -> onNoticeInfo(true)).start();
-        });
-
-        noticeInfoButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    mainWindowUtils.setClientMainWindow(panel);
-                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
-                    new Thread(() -> onNoticeInfo(false)).start();
+    private void initDetailImageButtonListener() {
+        Component c = this;
+        imageButton.addActionListener(e -> {
+            final DetailEntity entity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+            if (entity != null) {
+                if (entity.getImagePath() != null) {
+                    openLocalImage(c, entity);
+                } else {
+                    FtpUtils ftp = FtpUtils.getInstance();
+                    BufferedImage image = ftp.getImage(entity.getId());
+                    if (image != null) {
+                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListViewPanel.super.getRootPane()), false,
+                                image, "Изображение " + entity.getCode() + " "
+                                        + entity.getDetailTitleByDetailTitleId().getTitle());
+                    }
                 }
             }
         });
 
-        initSearchTextFieldDocumentListeners();
-
-        refreshSessionButton.addActionListener(e -> onRefreshSession());
-
-        initSearchTextFieldKeysBindings();
-
-        initKeyBindings();
-
-        updateDetailIconLabelListener();
-
-
-        addButton.addActionListener(e -> onAddNewItem());
-
-        copyButton.addActionListener(e -> onCopyButton());
-
-        editButton.addActionListener(e -> onEditDetail(true));
-        editButton.addMouseListener(new MouseAdapter() {
+        imageButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    onEditDetail(false);
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    final DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
+                    if (detailEntity != null) {
+                        JPopupMenu popupMenu = new JPopupMenu();
+                        JMenuItem refresh = new JMenuItem("Обновить",
+                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
+                        refresh.addActionListener(e1 -> {
+                            imageButton.setIcon(null);
+                            updateDetailImage(detailEntity);
+                        });
+                        popupMenu.add(refresh);
+
+                        imageButton.setComponentPopupMenu(popupMenu);
+                    }
                 }
             }
         });
-
-        addCopyPopupMenu(numberLabel);
-
-        addCopyPopupMenu(titleLabel);
-
-        addCopyPopupMenu(workpieceWeightLabel);
-
-        addCopyPopupMenu(finishedWeightLabel);
     }
 
     private void initMainTree() {
@@ -914,10 +903,58 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
         mainTree.addKeyListener(kl);
     }
 
-    private void setEmptyImageIcon() {
-        detailIconLabel.setIcon(null);
-        detailIconLabel.setText("Нет изображения");
-        detailIconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    private void initListeners() {
+        DetailListViewPanel panel = this;
+        final MainWindowUtils mainWindowUtils = new MainWindowUtils(session);
+        noticeInfoButton.addActionListener(e -> {
+            mainWindowUtils.setClientMainWindow(panel);
+            mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
+            new Thread(() -> onNoticeInfo(true)).start();
+        });
+
+        noticeInfoButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    mainWindowUtils.setClientMainWindow(panel);
+                    mainWindowUtils.updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях...");
+                    new Thread(() -> onNoticeInfo(false)).start();
+                }
+            }
+        });
+
+        initSearchTextFieldDocumentListeners();
+
+        refreshSessionButton.addActionListener(e -> onRefreshSession());
+
+        initSearchTextFieldKeysBindings();
+
+        initKeyBindings();
+
+        initDetailImageButtonListener();
+
+
+        addButton.addActionListener(e -> onAddNewItem());
+
+        copyButton.addActionListener(e -> onCopyButton());
+
+        editButton.addActionListener(e -> onEditDetail(true));
+        editButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    onEditDetail(false);
+                }
+            }
+        });
+
+        addCopyPopupMenu(numberLabel);
+
+        addCopyPopupMenu(titleLabel);
+
+        addCopyPopupMenu(workpieceWeightLabel);
+
+        addCopyPopupMenu(finishedWeightLabel);
     }
 
     @Override
@@ -934,56 +971,42 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
                 new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/animated/warning.gif"))));
     }
 
+    private void openLocalImage(Component c, DetailEntity entity) {
+        if (!entity.getImagePath().equalsIgnoreCase(IMAGE_REMOVE_KEY)) {
+            final String imagePath = entity.getImagePath();
+            File file = new File(imagePath);
+            if (file.exists()) {
+                final boolean isImage = FtpUtils.getInstance().isImage(file);
+                if (isImage) {
+                    final BufferedImage bufferedImage = CommonUtils.getBufferedImage(file);
+                    FrameUtils.onShowImage(FrameUtils.findWindow(c), false,
+                            bufferedImage, "Изображение " + entity.getCode() + " "
+                                    + entity.getDetailTitleByDetailTitleId().getTitle());
+                }
+            }
+        }
+    }
+
+    private void setEmptyImageIcon() {
+        imageButton.setIcon(null);
+        imageButton.setText("Нет изображения");
+        imageButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+
     private void updateDetailIconByImage(DetailEntity detailEntity, BufferedImage image) {
         BufferedImage scaledImage = Scalr.resize(image, 128);
 
         DetailEntity current = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
         if (detailEntity.equals(current)) {// prevents setting image for not current selected DetailEntity (fixes time delay)
-            detailIconLabel.setIcon(new ImageIcon(scaledImage));
-            detailIconLabel.setText("");
-            detailIconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            detailIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                        FrameUtils.onShowImage(FrameUtils.findWindow(DetailListViewPanel.super.getRootPane()), false,
-                                image, "Изображение " + detailEntity.getCode() + " "
-                                        + detailEntity.getDetailTitleByDetailTitleId().getTitle());
-                    }
-                }
-            });
+            imageButton.setIcon(new ImageIcon(scaledImage));
+            imageButton.setText("");
+            imageButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
-    }
-
-    private void updateDetailIconLabelListener() {
-        detailIconLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    final DetailEntity detailEntity = JTreeUtils.getSelectedDetailEntityFromTree(mainTree);
-                    if (detailEntity != null) {
-                        JPopupMenu popupMenu = new JPopupMenu();
-                        JMenuItem refresh = new JMenuItem("Обновить",
-                                new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/refresh.png"))));
-                        refresh.addActionListener(e1 -> {
-                            detailIconLabel.setIcon(null);
-                            updateDetailImage(detailEntity);
-                        });
-                        popupMenu.add(refresh);
-
-                        detailIconLabel.setComponentPopupMenu(popupMenu);
-                    }
-                }
-            }
-        });
     }
 
     private void updateDetailImage(final DetailEntity detailEntity) {
         Runnable runnable = () -> {
-            detailIconLabel.setText("Загрузка...");
-            FrameUtils.removeAllComponentListeners(detailIconLabel);
-            updateDetailIconLabelListener();
-
+            imageButton.setText("Загрузка...");
             if (detailEntity != null) {
                 if (detailEntity.getImagePath() == null) {
                     loadImageFromFtp(detailEntity);
@@ -1014,9 +1037,7 @@ public class DetailListViewPanel extends JPanel implements AccessPolicy {
         numberLabel.setText("нет данных");
         titleLabel.setText("нет данных");
 
-        detailIconLabel.setIcon(null);
-        FrameUtils.removeAllComponentListeners(detailIconLabel);
-        updateDetailIconLabelListener();
+        imageButton.setIcon(null);
 
         unitLabel.setText("нет данных");
         finishedWeightLabel.setText("нет данных");
