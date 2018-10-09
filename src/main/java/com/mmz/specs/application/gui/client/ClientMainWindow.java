@@ -151,19 +151,6 @@ public class ClientMainWindow extends JFrame {
         panel1.setLayout(new GridLayoutManager(3, 4, new Insets(0, 0, 0, 0), -1, -1));
         mainPanel.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel1.setBorder(BorderFactory.createTitledBorder("Функционал"));
-        adminButton = new JButton();
-        adminButton.setAutoscrolls(false);
-        adminButton.setBorderPainted(false);
-        adminButton.setContentAreaFilled(true);
-        adminButton.setEnabled(false);
-        adminButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/adminTools.png")));
-        adminButton.setRequestFocusEnabled(true);
-        adminButton.setRolloverEnabled(true);
-        adminButton.setText("Администрирование");
-        adminButton.setMnemonic('А');
-        adminButton.setDisplayedMnemonicIndex(0);
-        adminButton.setToolTipText("Администрирование сервера");
-        panel1.add(adminButton, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         panel1.add(spacer1, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
@@ -202,34 +189,50 @@ public class ClientMainWindow extends JFrame {
         panel2.add(label1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         panel1.add(spacer2, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final JPanel panel3 = new JPanel();
+        panel3.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.add(panel3, new GridConstraints(2, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        adminButton = new JButton();
+        adminButton.setAutoscrolls(false);
+        adminButton.setBorderPainted(false);
+        adminButton.setContentAreaFilled(true);
+        adminButton.setEnabled(false);
+        adminButton.setIcon(new ImageIcon(getClass().getResource("/img/gui/adminTools.png")));
+        adminButton.setRequestFocusEnabled(true);
+        adminButton.setRolloverEnabled(true);
+        adminButton.setText("Администрирование");
+        adminButton.setMnemonic('А');
+        adminButton.setDisplayedMnemonicIndex(0);
+        adminButton.setToolTipText("Администрирование сервера");
+        panel3.add(adminButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setIcon(new ImageIcon(getClass().getResource("/img/gui/user/securityShield16.png")));
         label2.setText("");
         label2.setToolTipText("Доступно только администраторам");
-        panel1.add(label2, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
-        contentPane.add(panel3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel3.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 4, 0, 0), -1, -1));
-        panel3.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel4.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+        contentPane.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JPanel panel5 = new JPanel();
+        panel5.setLayout(new GridLayoutManager(1, 2, new Insets(0, 4, 0, 0), -1, -1));
+        panel4.add(panel5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         statusLabel = new JLabel();
         statusLabel.setIcon(new ImageIcon(getClass().getResource("/img/gui/status/red16.png")));
-        panel4.add(statusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel5.add(statusLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         applicationVersionTextField = new JTextField();
         applicationVersionTextField.setBackground(new Color(-855310));
         applicationVersionTextField.setEditable(false);
         applicationVersionTextField.setForeground(new Color(-7697782));
         applicationVersionTextField.setVisible(false);
-        panel4.add(applicationVersionTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(160, -1), null, 0, false));
-        final JPanel panel5 = new JPanel();
-        panel5.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel3.add(panel5, new GridConstraints(1, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel5.add(applicationVersionTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(160, -1), null, 0, false));
+        final JPanel panel6 = new JPanel();
+        panel6.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.add(panel6, new GridConstraints(1, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         usernameLabel = new JLabel();
         Font usernameLabelFont = this.$$$getFont$$$(null, Font.BOLD, 11, usernameLabel.getFont());
         if (usernameLabelFont != null) usernameLabel.setFont(usernameLabelFont);
         usernameLabel.setText(" ");
-        panel5.add(usernameLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(20, -1), null, null, 0, false));
+        panel6.add(usernameLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(20, -1), null, null, 0, false));
         loginButton = new JButton();
         loginButton.setBorderPainted(false);
         loginButton.setContentAreaFilled(false);
@@ -238,15 +241,15 @@ public class ClientMainWindow extends JFrame {
         loginButton.setOpaque(false);
         loginButton.setText("");
         loginButton.setToolTipText("Блокировка / разблокировка элементов управления (CTRL + L)");
-        panel5.add(loginButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JPanel panel6 = new JPanel();
-        panel6.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        panel3.add(panel6, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel6.add(loginButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel7 = new JPanel();
+        panel7.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.add(panel7, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         messageLabel = new JLabel();
         messageLabel.setText("сообщение");
-        panel6.add(messageLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel7.add(messageLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
-        panel3.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel4.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
         contentPane.add(spacer4, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }
@@ -385,16 +388,19 @@ public class ClientMainWindow extends JFrame {
 
     private JMenu getConnectionMenu() {
         JMenu menu = new JMenu("Подключение");
+        menu.setMnemonic('п');
         menu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/connectionSettings.png"))));
         menu.setIconTextGap(0);
 
         JMenuItem connectionSettings = new JMenuItem("Настройки подключения");
+        connectionSettings.setMnemonic('н');
         connectionSettings.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/connectionSettings.png"))));
         connectionSettings.setIconTextGap(0);
         connectionSettings.addActionListener(e -> onConnectionSettings());
         menu.add(connectionSettings);
 
         JMenuItem connectServer = new JMenuItem("Подключение к серверу");
+        connectServer.setMnemonic('п');
         connectServer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
                 InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         connectServer.addActionListener(e -> {
@@ -406,6 +412,7 @@ public class ClientMainWindow extends JFrame {
         menu.add(connectServer);
 
         JMenuItem disconnectServer = new JMenuItem("Отключение от сервера");
+        disconnectServer.setMnemonic('о');
         disconnectServer.addActionListener(e -> {
             manualDisconnect = true;
             onDisconnectFromServer();
@@ -450,14 +457,17 @@ public class ClientMainWindow extends JFrame {
 
     private JMenu getEditMenu() {
         final JMenu edit = new JMenu("Правка");
+        edit.setMnemonic('р');
         edit.setEnabled(false);
         return edit;
     }
 
     private JMenu getFileMenu() {
         JMenu menu = new JMenu("Файл");
+        menu.setMnemonic('ф');
 
         JMenuItem openFileMenu = new JMenuItem("Открыть");
+        openFileMenu.setMnemonic('о');
         openFileMenu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
                 .getImage(getClass().getResource("/img/gui/menu/open.png"))));
         openFileMenu.addActionListener(e -> onOpenFileMenu());
@@ -470,6 +480,7 @@ public class ClientMainWindow extends JFrame {
         menu.add(recentItemsMenu);
 
         JMenuItem fileInfoMenu = new JMenuItem("Информация");
+        fileInfoMenu.setMnemonic('и');
         fileInfoMenu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit()
                 .getImage(getClass().getResource("/img/gui/menu/fileInfo.png"))));
         fileInfoMenu.addActionListener(e -> onFileInfo());
@@ -487,14 +498,17 @@ public class ClientMainWindow extends JFrame {
 
     private JMenu getHelpMenu() {
         JMenu help = new JMenu("Справка");
+        help.setMnemonic('с');
 
         JMenuItem userGuide = new JMenuItem("Руководство пользователя");
+        userGuide.setMnemonic('р');
         userGuide.addActionListener(e -> CommonUtils.openClientGuide());
         userGuide.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/guide.png"))));
 
         help.add(userGuide);
 
         JMenuItem about = new JMenuItem("О приложении");
+        about.setMnemonic('о');
         about.addActionListener(e -> {
             AboutApplicationWindow window = new AboutApplicationWindow();
             window.setLocation(FrameUtils.getFrameOnCenter(this, window));
@@ -508,6 +522,7 @@ public class ClientMainWindow extends JFrame {
 
     private JMenu getRecentItemsMenu() {
         JMenu menu = new JMenu("Недавние файлы");
+        menu.setMnemonic('н');
         menu.addMenuListener(new MenuListener() {
             @Override
             public void menuCanceled(MenuEvent e) {
@@ -570,6 +585,7 @@ public class ClientMainWindow extends JFrame {
 
     private JMenu getSettingsMenu() {
         JMenu menu = new JMenu("Параметры");
+        menu.setMnemonic('п');
 
         JMenuItem settings = getSettingsMenuItem();
         menu.add(settings);
@@ -582,6 +598,7 @@ public class ClientMainWindow extends JFrame {
 
     private JMenuItem getSettingsMenuItem() {
         JMenuItem settings = new JMenuItem("Настройки");
+        settings.setMnemonic('н');
         settings.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/menu/settings.png"))));
         settings.setIconTextGap(0);
         settings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, InputEvent.CTRL_DOWN_MASK));
