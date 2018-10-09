@@ -17,6 +17,7 @@ package com.mmz.specs.application.utils.client;
 
 import com.google.common.collect.ComparisonChain;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
+import com.mmz.specs.application.gui.common.MessageBuilder;
 import com.mmz.specs.application.gui.common.utils.JTreeUtils;
 import com.mmz.specs.application.utils.FrameUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -58,11 +59,6 @@ public class MainWindowUtils {
         this.session = session;
     }
 
-    public void blockMessage() {
-        if (clientMainWindow != null) {
-            clientMainWindow.blockMessage();
-        }
-    }
 
     public boolean containsMaterialEntityInMaterialListEntity(MaterialEntity materialEntity) {
         MaterialListService service = new MaterialListServiceImpl(new MaterialListDaoImpl(session));
@@ -427,7 +423,10 @@ public class MainWindowUtils {
             }
 
             private void reloadPath(TreePath selectedPath) {
-                new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage("/img/gui/animated/sync.gif", "Обновляем данные");
+                new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(
+                        new MessageBuilder()
+                                .setIcon("/img/gui/animated/sync.gif").setText("Обновляем данные")
+                                .getMessage());
 
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) mainTree.getLastSelectedPathComponent();
                 node.removeAllChildren();
@@ -461,7 +460,7 @@ public class MainWindowUtils {
 
                 expandPath(selectedPath, mainTree);
 
-                new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(null, null);
+                new MainWindowUtils(session).getClientMainWindow(mainTree).updateMessage(null);
             }
         };
     }
@@ -587,20 +586,8 @@ public class MainWindowUtils {
 
     public void updateMessage(String pathToImage, String text) {
         if (clientMainWindow != null) {
-            clientMainWindow.updateMessage(pathToImage, text);
-        }
-    }
-
-    public void updateMessageIcon(String path) {
-        if (clientMainWindow != null) {
-
-            clientMainWindow.updateMessageIcon(path);
-        }
-    }
-
-    public void updateMessageText(String text) {
-        if (clientMainWindow != null) {
-            clientMainWindow.updateMessageText(text);
+            final MessageBuilder messageBuilder = new MessageBuilder().setIcon(pathToImage).setText(text);
+            clientMainWindow.updateMessage(messageBuilder.getMessage());
         }
     }
 }

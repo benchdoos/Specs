@@ -39,4 +39,5 @@ public class ClientConstants {
 
 
     public static final String IMAGE_REMOVE_KEY = "remove";
+    public static final String OFFLINE_MODE = "--offline";
 }

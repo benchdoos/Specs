@@ -18,6 +18,7 @@ package com.mmz.specs.application.gui.client;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.mmz.specs.application.core.client.ClientConstants;
 import com.mmz.specs.application.core.client.service.ClientBackgroundService;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import com.mmz.specs.application.utils.FrameUtils;
@@ -41,6 +42,7 @@ public class ClientConfigurationWindow extends JDialog {
     private JTextField serverAddressTextField;
     private JTextField serverPortTextField;
     private JButton testConnectionButton;
+    private JButton offlineModeButton;
 
     public ClientConfigurationWindow() {
         setContentPane(contentPane);
@@ -86,13 +88,13 @@ public class ClientConfigurationWindow extends JDialog {
         contentPane = new JPanel();
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel1.add(spacer1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
-        panel1.add(panel2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel1.add(panel2, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         okButton = new JButton();
         okButton.setText("OK");
         okButton.setMnemonic('O');
@@ -108,6 +110,9 @@ public class ClientConfigurationWindow extends JDialog {
         testConnectionButton.setMnemonic('П');
         testConnectionButton.setDisplayedMnemonicIndex(0);
         panel1.add(testConnectionButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        offlineModeButton = new JButton();
+        offlineModeButton.setText("Автономный режим");
+        panel1.add(offlineModeButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -149,16 +154,31 @@ public class ClientConfigurationWindow extends JDialog {
     }
 
     private void initListeners() {
+        testConnectionButton.addActionListener(e -> onTestConnection());
+
+        offlineModeButton.addActionListener(e -> onOfflineMode());
+
         okButton.addActionListener(e -> onOK());
 
         cancelButton.addActionListener(e -> onCancel());
 
-        testConnectionButton.addActionListener(e -> onTestConnection());
     }
 
     private void initTextFields() {
-        serverAddressTextField.setText(ClientSettingsManager.getInstance().getServerAddress());
+        final String serverAddress = ClientSettingsManager.getInstance().getServerAddress();
+        if (!ClientConstants.OFFLINE_MODE.equalsIgnoreCase(serverAddress)) {
+            serverAddressTextField.setText(serverAddress);
+        }
         serverPortTextField.setText(ClientSettingsManager.getInstance().getServerPort() + "");
+    }
+
+    private void onOfflineMode() {
+        try {
+            ClientSettingsManager.getInstance().setServerAddress(ClientConstants.OFFLINE_MODE);
+            dispose();
+        } catch (IOException e) {
+            log.warn("Could not save offline mode", e);
+        }
     }
 
     private void onCancel() {

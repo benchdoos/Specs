@@ -79,22 +79,19 @@ public class ClientMainWindow extends JFrame {
     private JButton adminButton;
     private JTextField applicationVersionTextField;
     private JLabel messageLabel;
+    private final Timer messageTimer = new Timer(5 * 1000, e -> updateMessage(null));
     private Timer uiUpdateTimer;
     private Timer unlockUiTimer;
     private Timer connectionManagerTimer;
     private int unlockedSeconds;
     private int maxUnlockedSeconds;
-    private boolean blockingMessage = false;
-    private final Timer blockingMessageTimer = new Timer(5 * 1000, e -> {
-        blockingMessage = false;
-        updateMessage(null, null);
-    });
     private boolean manualDisconnect;
 
     public ClientMainWindow() {
         try {
             initGui();
             initTimers();
+            initConnectionMode();
         } catch (Throwable e) {
             log.warn("Could not init Client main window", e);
         }
@@ -264,12 +261,6 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    public void blockMessage() {
-        this.blockingMessage = true;
-        blockingMessageTimer.setRepeats(false);
-        blockingMessageTimer.restart();
-    }
-
     private void clearCleanableTabs() {
         for (Component c : clientMainTabbedPane.getComponents()) {
             try {
@@ -348,7 +339,10 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void createConnection() {
-        updateMessage("/img/gui/animated/connection.gif", "Устанавливаем соединение с сервером");
+        updateMessage(new MessageBuilder()
+                .setIcon("/img/gui/animated/connection.gif")
+                .setText("Устанавливаем соединение с сервером")
+                .getMessage());
         new Thread(() -> {
             try {
                 if (!ClientBackgroundService.getInstance().isConnected()) {
@@ -359,8 +353,10 @@ public class ClientMainWindow extends JFrame {
             if (ClientBackgroundService.getInstance().isConnected()) {
                 session = ClientBackgroundService.getInstance().getSession();
 //                initFtp();
-                updateMessage("/img/gui/animated/connection_completed.gif", "Соединение установлено");
-                blockMessage();
+                updateMessage(new MessageBuilder()
+                        .setIcon("/img/gui/animated/connection_completed.gif")
+                        .setText("Соединение установлено")
+                        .getMessage());
             }
 
 
@@ -376,7 +372,7 @@ public class ClientMainWindow extends JFrame {
             uiUpdateTimer.stop();
             unlockUiTimer.stop();
             connectionManagerTimer.stop();
-            blockingMessageTimer.stop();
+            messageTimer.stop();
         } catch (Exception e) {
             log.warn("Could not stop something", e);
             log.warn("Exiting system permanently, (if some of timers is alive)");
@@ -611,6 +607,13 @@ public class ClientMainWindow extends JFrame {
         statusLabel.setToolTipText("Соединение с сервером и БД не установлено");
     }
 
+    private void initConnectionMode() {
+        manualDisconnect = ClientSettingsManager.getInstance().getServerAddress().equalsIgnoreCase(ClientConstants.OFFLINE_MODE);
+        if (manualDisconnect) {
+            onDisconnectFromServer();
+        }
+    }
+
     private void initDropTarget() {
         final DropTarget dropTarget = new DropTarget() {
             @Override
@@ -709,7 +712,7 @@ public class ClientMainWindow extends JFrame {
 
         CommonWindowUtils.initApplicationVersionArea(applicationVersionTextField);
 
-        updateMessage(null, null);
+        updateMessage(null);
 
         initStatusEaster();
 
@@ -777,14 +780,20 @@ public class ClientMainWindow extends JFrame {
         });
 
         noticeListViewButton.addActionListener(e -> {
-            updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях");
+            updateMessage(new MessageBuilder()
+                    .setIcon("/img/gui/animated/sync.gif")
+                    .setText("Открываем информацию о извещениях")
+                    .getMessage());
             new Thread(() -> onListNoticeInfo(true)).start();
         });
         noticeListViewButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON2) {
-                    updateMessage("/img/gui/animated/sync.gif", "Открываем информацию о извещениях");
+                    updateMessage(new MessageBuilder()
+                            .setIcon("/img/gui/animated/sync.gif")
+                            .setText("Открываем информацию о извещениях")
+                            .getMessage());
                     new Thread(() -> onListNoticeInfo(false)).start();
                 }
             }
@@ -916,10 +925,10 @@ public class ClientMainWindow extends JFrame {
     }
 
     private void manageConnections() {
-        boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
-        boolean isSessionOnline = session != null && session.isConnected();
-        boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
         if (!manualDisconnect) {
+            boolean isServerOnline = ClientBackgroundService.getInstance().isConnected();
+            boolean isSessionOnline = session != null && session.isConnected();
+            boolean isFtpOnline = ftpUtils != null && ftpUtils.isConnected();
             if (isServerOnline) {
                 if (isSessionOnline) {
                     if (!isFtpOnline) {
@@ -933,7 +942,9 @@ public class ClientMainWindow extends JFrame {
             } else {
                 session = null;
                 ftpUtils = null;
-                createConnection();
+                if (!manualDisconnect) {
+                    createConnection();
+                }
             }
         }
     }
@@ -965,6 +976,10 @@ public class ClientMainWindow extends JFrame {
         ClientConfigurationWindow configurationWindow = new ClientConfigurationWindow();
         configurationWindow.setLocation(FrameUtils.getFrameOnCenter(this, configurationWindow));
         configurationWindow.setVisible(true);
+        if (ClientSettingsManager.getInstance().getServerAddress().equalsIgnoreCase(ClientConstants.OFFLINE_MODE)) {
+            manualDisconnect = true;
+            onDisconnectFromServer();
+        }
     }
 
     private void onDisconnectFromFtp() {
@@ -1032,7 +1047,7 @@ public class ClientMainWindow extends JFrame {
         NoticeInfoPanel noticeInfoPanel = new NoticeInfoPanel(session, noticeEntities);
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/notice16.png")));
         addTab("Информация о извещениях", icon, noticeInfoPanel, select);
-        updateMessage(null, null);
+        updateMessage(null);
     }
 
     private void onLogin() {
@@ -1121,10 +1136,13 @@ public class ClientMainWindow extends JFrame {
         final ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/gui/tree/unitOpened.png")));
         log.debug("Adding ViewDetailList tab");
         try {
-            updateMessage("/img/gui/animated/sync.gif", "Открываем просмотр вложенности");
+            updateMessage(new MessageBuilder()
+                    .setIcon("/img/gui/animated/sync.gif")
+                    .setText("Открываем просмотр вложенности")
+                    .getMessage());
             Runnable runnable = () -> {
                 addTab("Просмотр вложенности", icon, new DetailListViewPanel(), select);
-                updateMessage(null, null);
+                updateMessage(null);
             };
             new Thread(runnable).start();
 
@@ -1328,32 +1346,14 @@ public class ClientMainWindow extends JFrame {
         }
     }
 
-    public void updateMessage(final String imagePath, final String message) {
-        if (!blockingMessage) {
-            updateMessageIcon(imagePath);
-            updateMessageText(message);
-        }
-    }
-
-    public void updateMessageIcon(String imagePath) {
-        if (!blockingMessage) {
-            if (imagePath != null) {
-                try {
-                    messageLabel.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource(imagePath))
-                            .getScaledInstance(16, 16, 1)));
-                } catch (Exception e) {
-                    log.warn("Could not set image for message label", e);
-                    messageLabel.setIcon(null);
-                }
-            } else {
-                messageLabel.setIcon(null);
-            }
-        }
-    }
-
-    public void updateMessageText(String message) {
-        if (!blockingMessage) {
-            messageLabel.setText(message);
+    public void updateMessage(Message message) {
+        messageTimer.restart();
+        if (message != null) {
+            messageLabel.setIcon(message.getIcon());
+            messageLabel.setText(message.getText());
+        } else {
+            messageLabel.setIcon(null);
+            messageLabel.setText(null);
         }
     }
 
