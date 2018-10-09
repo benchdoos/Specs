@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -39,11 +40,6 @@ public class AboutApplicationWindow extends JDialog {
     private JScrollPane scrollBar;
 
     public AboutApplicationWindow() {
-        setContentPane(contentPane);
-        setModal(true);
-        setTitle("О приложении");
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
         initGui();
 
 
@@ -133,13 +129,24 @@ public class AboutApplicationWindow extends JDialog {
     }
 
     private void initGui() {
+        setContentPane(contentPane);
+        setModal(true);
+        setTitle("О приложении");
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+
         scrollBar.setBorder(BorderFactory.createEmptyBorder());
 
         textArea.setBackground(new JPanel().getBackground());
 
-        openLogFolderButton.addActionListener(e -> onOpenLogFolder());
+        initKeyBindings();
 
         CommonWindowUtils.initApplicationVersionArea(versionTextField);
+    }
+
+    private void initKeyBindings() {
+        contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        openLogFolderButton.addActionListener(e -> onOpenLogFolder());
     }
 
     private void onOpenLogFolder() {
