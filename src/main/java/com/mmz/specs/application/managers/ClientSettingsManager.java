@@ -217,6 +217,24 @@ public class ClientSettingsManager {
         } else return !serverAddress.isEmpty();
     }
 
+    public boolean isNewImageViewerUsing() {
+        try {
+            String property = CLIENT_SETTINGS.getProperty(ClientConstants.NEW_IMAGE_VIEWER);
+            if (property != null) {
+                return Boolean.valueOf(property);
+            }
+        } catch (Exception ignore) {
+            /*NOP*/
+        }
+        return ClientConstants.NEW_IMAGE_VIEWER_DEFAULT_VALUE;
+    }
+
+    public void setNewImageViewerUsing(boolean using) throws IOException {
+        CLIENT_SETTINGS.setProperty(ClientConstants.NEW_IMAGE_VIEWER, Boolean.toString(using));
+        updateSettingsFile();
+    }
+
+
     void loadSettingsFile() throws IOException {
         log.info("Trying to load settings file: " + connectionFileLocation);
         CLIENT_SETTINGS.loadFromXML(new FileInputStream(connectionFileLocation));

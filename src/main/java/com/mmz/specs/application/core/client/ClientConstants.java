@@ -40,4 +40,6 @@ public class ClientConstants {
 
     public static final String IMAGE_REMOVE_KEY = "remove";
     public static final String OFFLINE_MODE = "--offline";
+    public static final String NEW_IMAGE_VIEWER = "preview.image.viewer.new";
+    public static final boolean NEW_IMAGE_VIEWER_DEFAULT_VALUE = false;
 }

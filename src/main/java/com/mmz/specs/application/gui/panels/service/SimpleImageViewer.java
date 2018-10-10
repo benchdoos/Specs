@@ -24,16 +24,15 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 public class SimpleImageViewer extends JPanel {
-    private Color BACKGROUND_COLOR = new JPanel().getBackground();
     private static final RESIZE_POLICY DEFAULT_RESIZE_POLICY = RESIZE_POLICY.FIT_TO_SCREEN;
     final private BufferedImage bufferedImage;
     private final int DEFAULT_UNIT_INCREMENT_SPEED = 16;
+    private Color BACKGROUND_COLOR = new JPanel().getBackground();
     private RESIZE_POLICY currentResizePolicy = DEFAULT_RESIZE_POLICY;
     private JPanel contentPane;
     private JLabel imageLabel;
     private JScrollPane scrollPane;
     private float currentSize = 1.0f;
-    private Thread resizeThread = null;
 
     public SimpleImageViewer(BufferedImage image) {
         this.bufferedImage = image;
@@ -47,6 +46,20 @@ public class SimpleImageViewer extends JPanel {
         initMouseListeners();
 
         centerImage();
+
+        Timer imageTimer = new Timer(1000, new ActionListener() {
+            private float localSize = currentSize;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (localSize != currentSize) {
+                    localSize = currentSize;
+                    scaleImage(currentSize);
+                }
+            }
+        });
+        imageTimer.setRepeats(true);
+        imageTimer.restart();
     }
 
     {
@@ -81,6 +94,21 @@ public class SimpleImageViewer extends JPanel {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
+    /*public BufferedImage getBufferedImage(BufferedImage image, int height, int width) {
+        if (height <= 0 && width <= 0) {
+            height = image.getHeight(null);
+            width = image.getWidth(null);
+        }
+        Image tmp = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        BufferedImage dimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = dimg.createGraphics();
+        g2d.drawImage(tmp, 0, 0, null);
+        g2d.dispose();
+
+        return dimg;
+    }*/
 
     private void centerImage() {
         Dimension size = scrollPane.getViewport().getViewSize();
@@ -140,6 +168,32 @@ public class SimpleImageViewer extends JPanel {
         }
         return bufferedImage;
 
+    }
+
+    private float getCorrectSize(float v) {
+        float result;
+        final float MIN_SCALE = 0.02f;
+        final float MAX_SCALE = getMaxScaleValue();
+        if (v >= MIN_SCALE && v <= MAX_SCALE) {
+            result = v;
+        } else {
+            if (v <= MIN_SCALE) {
+                currentSize = MIN_SCALE;
+                result = currentSize;
+            } else {
+                currentSize = MAX_SCALE;
+                result = currentSize;
+            }
+        }
+        return result;
+    }
+
+    private float getMaxScaleValue() {
+        if (bufferedImage.getWidth() > 1500) {
+            return 2.0f;
+        } else {
+            return 5.0f;
+        }
     }
 
     private void initComponentListeners(BufferedImage image) {
@@ -237,7 +291,7 @@ public class SimpleImageViewer extends JPanel {
                 if (controlDown) {
                     scrollPane.getVerticalScrollBar().setUnitIncrement(0);
                     scrollPane.getHorizontalScrollBar().setUnitIncrement(0);
-                    scaleImage(e.getWheelRotation());
+                    currentSize = getCorrectSize(currentSize + ((float) e.getWheelRotation() * .05f));
                 } else {
                     scrollPane.getVerticalScrollBar().setUnitIncrement(DEFAULT_UNIT_INCREMENT_SPEED);
                     scrollPane.getHorizontalScrollBar().setUnitIncrement(DEFAULT_UNIT_INCREMENT_SPEED);
@@ -257,17 +311,17 @@ public class SimpleImageViewer extends JPanel {
             }
             case FIT_TO_WIDTH: {
                 image = fitToWidth(image);
-                currentSize = (float) image.getWidth(null) / bufferedImage.getWidth();
+                currentSize = getCorrectSize((float) image.getWidth(null) / bufferedImage.getWidth());
                 break;
             }
             case FIT_TO_HEIGHT: {
                 image = fitToHeight(image);
-                currentSize = (float) image.getWidth(null) / bufferedImage.getWidth();
+                currentSize = getCorrectSize((float) image.getWidth(null) / bufferedImage.getWidth());
                 break;
             }
             default: {
                 image = fitToWindow(image);
-                currentSize = (float) image.getWidth(null) / bufferedImage.getWidth();
+                currentSize = getCorrectSize((float) image.getWidth(null) / bufferedImage.getWidth());
                 break;
             }
         }
@@ -275,35 +329,7 @@ public class SimpleImageViewer extends JPanel {
     }
 
     private void scaleImage(float size) {
-        final float MIN_SCALE = 0.2f;
-        final float MAX_SCALE = 2.0f;
-        if (size > MIN_SCALE && size < MAX_SCALE) {
-            updateImage(bufferedImage, size);
-        } else {
-            if (size < MIN_SCALE) {
-                this.currentSize = MIN_SCALE;
-            } else {
-                this.currentSize = MAX_SCALE;
-            }
-        }
-    }
-
-    private void scaleImage(int rotation) {
-        final float size = currentSize + ((float) rotation * .05f);
-        currentSize = size;
-        if (resizeThread == null) {
-            resizeThread = new Thread(() -> scaleImage(size));
-            resizeThread.start();
-        } else {
-            if (resizeThread.isAlive()) {
-                resizeThread.interrupt();
-                resizeThread = new Thread(() -> scaleImage(size));
-                resizeThread.start();
-            } else {
-                resizeThread = new Thread(() -> scaleImage(size));
-                resizeThread.start();
-            }
-        }
+        updateImage(bufferedImage, size);
     }
 
     private void updateImage(BufferedImage bufferedImage) {
@@ -314,12 +340,10 @@ public class SimpleImageViewer extends JPanel {
         int resizedHeight = (int) (bufferedImage.getHeight() * size);
         int resizedWidth = (int) (bufferedImage.getWidth() * size);
 
-        BufferedImage resized = bufferedImage;
-        if (!Thread.currentThread().isInterrupted()) {
-            resized = getBufferedImage(bufferedImage, resizedHeight, resizedWidth);
-        }
-
+        BufferedImage resized;
+        resized = getBufferedImage(bufferedImage, resizedHeight, resizedWidth);
         if (resized != null) {
+            imageLabel.setIcon(null);
             imageLabel.setIcon(new ImageIcon(resized));
         }
     }

@@ -18,6 +18,8 @@ package com.mmz.specs.application.utils;
 import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.panels.service.SimpleImageViewer;
 import com.mmz.specs.application.managers.ClientSettingsManager;
+import hu.kazocsaba.imageviewer.ImageViewer;
+import hu.kazocsaba.imageviewer.ResizeStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 public class FrameUtils {
     private static final Timer timer = new Timer(60, null);
     private final static Logger log = LogManager.getLogger(Logging.getCurrentClassName());
+    public static final Dimension DEFAULT_DIMENSION = new Dimension(640, 480);
 
 
     /**
@@ -188,8 +191,15 @@ public class FrameUtils {
 
 
     public static void onShowImage(BufferedImage image, String title) {
+        final boolean using = ClientSettingsManager.getInstance().isNewImageViewerUsing();
+        if (using) {
+            showImageInNewViewer(image, title);
+        } else {
+            showImageInOldViewer(image, title);
+        }
+    }
 
-
+    private static void showImageInNewViewer(BufferedImage image, String title) {
         JFrame imageFrame = new JFrame();
         imageFrame.setTitle(title);
 
@@ -213,6 +223,38 @@ public class FrameUtils {
                     ClientSettingsManager.getInstance().setImagePreviewWindowLocation(imageFrame.getLocation());
                 } catch (IOException e1) {
                     log.warn("Could not save image preview location / dimension", e);
+                }
+            }
+        });
+
+        imageFrame.setVisible(true);
+    }
+
+    private static void showImageInOldViewer(BufferedImage image, String title) {
+        final ImageViewer imageViewer = new ImageViewer(image);
+        imageViewer.setPixelatedZoom(true);
+
+        final JFrame imageFrame = new JFrame();
+        imageFrame.setTitle(title);
+        imageFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(FrameUtils.class.getResource("/img/gui/picture64.png")));
+        imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        imageFrame.add(imageViewer.getComponent());
+
+        imageFrame.setSize(FrameUtils.DEFAULT_DIMENSION);
+        imageFrame.setMinimumSize(new Dimension(256, 256));
+
+        imageFrame.addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {//FIXME zooming not working correctly
+                if (e.isControlDown()) {
+                    if (e.getWheelRotation() < 0) {
+                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() + 0.1);
+                    } else {
+                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() - 0.1);
+                    }
                 }
             }
         });
