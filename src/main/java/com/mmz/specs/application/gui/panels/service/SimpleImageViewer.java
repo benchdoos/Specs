@@ -289,21 +289,15 @@ public class SimpleImageViewer extends JPanel {
         final float size = currentSize + ((float) rotation * .05f);
         currentSize = size;
         if (resizeThread == null) {
-            resizeThread = new Thread(() -> {
-                scaleImage(size);
-            });
+            resizeThread = new Thread(() -> scaleImage(size));
             resizeThread.start();
         } else {
             if (resizeThread.isAlive()) {
                 resizeThread.interrupt();
-                resizeThread = new Thread(() -> {
-                    scaleImage(size);
-                });
+                resizeThread = new Thread(() -> scaleImage(size));
                 resizeThread.start();
             } else {
-                resizeThread = new Thread(() -> {
-                    scaleImage(size);
-                });
+                resizeThread = new Thread(() -> scaleImage(size));
                 resizeThread.start();
             }
         }
