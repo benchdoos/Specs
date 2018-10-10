@@ -24,6 +24,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 public class SimpleImageViewer extends JPanel {
+    private Color BACKGROUND_COLOR = new JPanel().getBackground();
     private static final RESIZE_POLICY DEFAULT_RESIZE_POLICY = RESIZE_POLICY.FIT_TO_SCREEN;
     final private BufferedImage bufferedImage;
     private final int DEFAULT_UNIT_INCREMENT_SPEED = 16;
@@ -130,8 +131,10 @@ public class SimpleImageViewer extends JPanel {
         if (!Thread.currentThread().isInterrupted()) {
             bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2 = bufferedImage.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.setBackground(BACKGROUND_COLOR);
+            g2.clearRect(0, 0, width, height);
+            g2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
+                    RenderingHints.VALUE_ALPHA_INTERPOLATION_DEFAULT);
             g2.drawImage(image, 0, 0, width, height, null);
             g2.dispose();
         }
