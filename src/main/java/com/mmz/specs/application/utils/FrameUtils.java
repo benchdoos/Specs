@@ -19,7 +19,6 @@ import com.mmz.specs.application.gui.client.ClientMainWindow;
 import com.mmz.specs.application.gui.panels.service.SimpleImageViewer;
 import com.mmz.specs.application.managers.ClientSettingsManager;
 import hu.kazocsaba.imageviewer.ImageViewer;
-import hu.kazocsaba.imageviewer.ResizeStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -244,20 +243,37 @@ public class FrameUtils {
         imageFrame.setSize(FrameUtils.DEFAULT_DIMENSION);
         imageFrame.setMinimumSize(new Dimension(256, 256));
 
-        imageFrame.addMouseWheelListener(new MouseAdapter() {
+
+        /*imageViewer.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {//FIXME zooming not working correctly
-                if (e.isControlDown()) {
-                    if (e.getWheelRotation() < 0) {
-                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
-                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() + 0.1);
-                    } else {
-                        imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
-                        imageViewer.setZoomFactor(imageViewer.getZoomFactor() - 0.1);
+            public void mouseWheelMoved(MouseWheelEvent event) {//FIXME zooming not working correctly
+                System.out.println(">>> hello!");
+                if (event.isControlDown()) {
+                    lockScrollPane(0);
+                    System.out.println("Current zoom: " + imageViewer.getZoomFactor());
+                    double zoomNew = imageViewer.getZoomFactor() + event.getWheelRotation() * 0.1d;
+                    System.out.println("New zoom: " + zoomNew);
+                    imageViewer.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+                    imageViewer.setZoomFactor(zoomNew);
+                } else {
+                    lockScrollPane(16);
+                }
+            }
+
+            private void lockScrollPane(int i) {
+                final Component component = imageViewer.getComponent().getComponent(0);
+
+                if (component instanceof Container) {
+                    for (Component c : ((Container) component).getComponents()) {
+                        if (c instanceof JScrollPane) {
+                            JScrollPane scrollPane = (JScrollPane) component;
+                            scrollPane.getVerticalScrollBar().setUnitIncrement(i);
+                            scrollPane.getHorizontalScrollBar().setUnitIncrement(i);
+                        }
                     }
                 }
             }
-        });
+        });*/
 
         imageFrame.setVisible(true);
     }
