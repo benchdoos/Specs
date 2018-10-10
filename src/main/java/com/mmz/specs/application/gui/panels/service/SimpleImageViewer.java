@@ -134,7 +134,7 @@ public class SimpleImageViewer extends JPanel {
             g2.setBackground(BACKGROUND_COLOR);
             g2.clearRect(0, 0, width, height);
             g2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
-                    RenderingHints.VALUE_ALPHA_INTERPOLATION_DEFAULT);
+                    RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
             g2.drawImage(image, 0, 0, width, height, null);
             g2.dispose();
         }
