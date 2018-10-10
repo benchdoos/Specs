@@ -59,7 +59,7 @@ Source: "F:\Developer\JAVA\Specs\publish\Specs\icons.icl"; DestDir: "{app}"; Fla
 ; File association
 Root: HKCR; Subkey: ".spt"; ValueType: string; ValueName: ""; ValueData: "Specs"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "Specs"; ValueType: string; ValueName: ""; ValueData: "Specs Tree"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Specs\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppIconsFile},3"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "Specs\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppIconsFile},0"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "Specs\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
 

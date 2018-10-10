@@ -16,6 +16,7 @@
 package com.mmz.specs.io;
 
 import com.google.gson.*;
+import com.mmz.specs.application.core.ApplicationConstants;
 import com.mmz.specs.application.gui.common.utils.managers.ProgressManager;
 import com.mmz.specs.application.utils.CommonUtils;
 import com.mmz.specs.application.utils.Logging;
@@ -38,9 +39,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -68,21 +68,9 @@ public class SPTreeIOManager implements IOManager {
     }
 
     public static JsonObject loadJsonFromFile(File file) throws IOException {
-        String content = FileUtils.readFileToString(file, "utf-8");
-
-        /*GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
-        builder.registerTypeAdapter(DetailEntity.class, new DetailEntityDeserializer());
-        builder.registerTypeAdapter(DetailTitleEntity.class, new DetailTitleEntityDeserializer());
-        builder.registerTypeAdapter(MaterialEntity.class, new MaterialEntityDeserializer());
-        Gson gson = builder.create();
-        final JsonElement jsonElement = gson.toJsonTree(content);*/
-
-        JsonElement jelement = new JsonParser().parse(content);
-        JsonObject jobject = jelement.getAsJsonObject();
-
-
-        return jobject;
+        String content = FileUtils.readFileToString(file, ApplicationConstants.DEFAULT_FILE_ENCODING);
+        JsonElement element = new JsonParser().parse(content);
+        return element.getAsJsonObject();
 
     }
 
@@ -167,7 +155,13 @@ public class SPTreeIOManager implements IOManager {
     private File exportTree(File folder, JsonObject treeJSON) throws IOException {
         progressManager.setText("Экспорт дерева");
         final File jsonFile = new File(folder + File.separator + JSON_FILE_NAME);
-        try (FileWriter writer = new FileWriter(jsonFile)) {
+        /*try (FileWriter writer = new FileWriter(jsonFile)) {
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(treeJSON, writer);
+        }*/
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(jsonFile, true),
+                        StandardCharsets.UTF_8))) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(treeJSON, writer);
         }
