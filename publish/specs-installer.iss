@@ -64,7 +64,7 @@ Root: HKCR; Subkey: "Specs\shell\open\command"; ValueType: string; ValueName: ""
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Specs-server"; ValueData: """{app}\{#MyAppExeName}"" ""-server"""; Flags: uninsdeletevalue; Tasks: server
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppIconsFile}"; IconIndex: 1;
+Name: "{group}\{#MyAppNameRussian}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppIconsFile}"; IconIndex: 1;
 Name: "{group}\{#MyAppServerRusName}"; Filename: "{app}\{#MyAppExeName}";Parameters: "-server"; IconFilename: "{app}\{#MyAppIconsFile}"; IconIndex: 2; Tasks: server
 Name: "{group}\Руководство пользователя"; Filename: "{app}\Client User Guide.pdf"
 Name: "{group}\Руководство администратора"; Filename: "{app}\Server User Guide.pdf"; Tasks: server
