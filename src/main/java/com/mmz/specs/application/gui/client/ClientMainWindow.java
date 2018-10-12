@@ -1207,11 +1207,12 @@ public class ClientMainWindow extends JFrame {
 
                     processPanel.prepareToClose();
                     panel.setContent(sptFileViewPanel);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.warn("Could not import spt file: {}", file, e);
                     processPanel.prepareToClose();
                     closeTab(panel);
-                    JOptionPane.showMessageDialog(component, "Не удалось открыть файл " + file.getName(),
+                    JOptionPane.showMessageDialog(component, "Не удалось открыть файл " + file.getName() + "\n"
+                                    + e.getLocalizedMessage(),
                             "Ошибка открытия", JOptionPane.ERROR_MESSAGE);
                 }
             }

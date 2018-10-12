@@ -80,23 +80,15 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private File original;
 
 
-    public SptFileViewPanel(File original, File folder) {
+    public SptFileViewPanel(File original, File folder) throws Exception {
         $$$setupUI$$$();
         this.original = original;
         this.folder = folder;
 
         jsonFile = new File(folder.getAbsolutePath() + File.separator + SPTreeIOManager.JSON_FILE_NAME);
-
-        try {
-            initBusinessLogic();
-            printTreeInformation();
-            initGui();
-
-        } catch (Exception e) {
-            log.warn("Could not open SPT folder: {}", folder, e);
-            JOptionPane.showMessageDialog(this, "Не удалось открыть файл\n" +
-                    e.getLocalizedMessage(), "Ошибка открытия", JOptionPane.WARNING_MESSAGE);
-        }
+        initBusinessLogic();
+        printTreeInformation();
+        initGui();
     }
 
     /**
