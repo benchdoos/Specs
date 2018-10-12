@@ -80,7 +80,7 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     private File original;
 
 
-    public SptFileViewPanel(File original, File folder) throws Exception {
+    public SptFileViewPanel(File original, File folder) throws IOException {
         $$$setupUI$$$();
         this.original = original;
         this.folder = folder;
@@ -201,7 +201,6 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void fillDetailImage(DetailEntity entity) {
-        Component component = this;
         if (entity == null) {
             imageButton.setIcon(null);
             imageButton.setText("нет изображения");
@@ -405,13 +404,10 @@ public class SptFileViewPanel extends JPanel implements Cleanable {
     }
 
     private void initKeyListeners() {
-        Component c = this;
-        imageButton.addActionListener(e -> {
-            onImageButton(c);
-        });
+        imageButton.addActionListener(e -> onImageButton());
     }
 
-    private void onImageButton(Component c) {
+    private void onImageButton() {
         final TreeSPTRecord selectedTreeSptRecord = JTreeUtils.getSelectedTreeSptRecord(tree);
         if (selectedTreeSptRecord != null) {
             DetailEntity entity = selectedTreeSptRecord.getDetail();
